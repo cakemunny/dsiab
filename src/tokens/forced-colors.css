@@ -1,0 +1,209 @@
+/* =============================================================================
+   forced-colors.css: WINDOWS CONTRAST THEMES (forced colours)
+   -----------------------------------------------------------------------------
+   Under `forced-colors: active` the browser replaces every author colour with a
+   system colour, computes box-shadow and background-image to none, and forces
+   backgrounds to Canvas (CSS Color Adjust 1, section 3). Radix Themes draws every
+   control edge with an inset box-shadow and every checked mark as a white glyph
+   on an accent fill, so before this file every edge measured 1.00:1 and checked
+   radios and switches rendered pixel-identical to unchecked ones.
+
+   Only a colour that IS a system colour survives. So this file does three things,
+   all inside one media block and all at (0,2,0) or higher under .radix-themes, so
+   it beats Radix's :where() rules and, loaded last, the equal-specificity rules in
+   components.css. No !important.
+
+   1. ROLES. The edge, state and disabled roles re-point to system colours. Text and
+      surface roles are left to the browser, which already picks the right pair.
+   2. EDGES. A real 1px border wherever Radix draws the edge with box-shadow. A
+      border keeps `outline` free for the focus ring, which survives forcing.
+   3. MARKS. Checked, on and selected states paint Highlight with a HighlightText
+      mark. Disabled states paint GrayText.
+
+   Nothing here applies outside forced colours. The guard is
+   src/components/ui/_forced-colors.stories.tsx, which turns emulation on and
+   measures every edge and state against the canvas.
+   ============================================================================= */
+
+@media (forced-colors: active) {
+  /* ---- 1. Roles ------------------------------------------------------------ */
+  .radix-themes {
+    --ds-stroke-strong: ButtonBorder;
+    /* The focus ring ([[focus-ring]]): the base layer paints Highlight at 2px on each carrier's own outline,
+       and the stack paints nothing. components.css draws the two-layer ring only in
+       `forced-colors: none`, so here the outline is the whole ring. */
+    --ds-stroke-focus: Highlight;
+    --ds-stroke-focus-stack: var(--color-transparent);
+    --ds-stroke-selected: Highlight;
+    --ds-fill-selected: Highlight;
+    --ds-stroke-disabled: GrayText;
+    --ds-text-disabled: GrayText;
+    --ds-icon-disabled: GrayText;
+  }
+  /* The Overlay scrim re-declares the ring's stack on its own element, so the root remap above
+     cannot reach rings inside it. Same selectors, loaded later. */
+  .radix-themes .rt-ds-overlay-scrim,
+  .radix-themes .rt-ds-overlay-scrim[data-scrim="light"] {
+    --ds-stroke-focus-stack: var(--color-transparent);
+  }
+
+  /* ---- 2. Edges ------------------------------------------------------------ */
+  /* The boxed controls. Ghost variants stay edgeless, as they are by design.
+     The edge is an inset ::after, not a border on the control, because these
+     boxes size to their content: a 1px border widened every text Button by 2px,
+     moved the Select value 1px inward and made the Callout 2px taller (measured
+     under emulation). The inset pseudo draws where the box-shadow drew and moves
+     nothing. None of these hosts uses ::after in the system (the classic Button
+     and the inset IconButton do, and neither matches here). */
+  .radix-themes .rt-BaseButton:is(.rt-variant-solid, .rt-variant-surface),
+  .radix-themes .rt-SelectTrigger:not(.rt-variant-ghost),
+  .radix-themes .rt-CalloutRoot {
+    position: relative;
+  }
+  .radix-themes .rt-BaseButton:is(.rt-variant-solid, .rt-variant-surface)::after,
+  .radix-themes .rt-SelectTrigger:not(.rt-variant-ghost)::after,
+  .radix-themes .rt-CalloutRoot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--ds-stroke-strong);
+    border-radius: inherit;
+    pointer-events: none;
+  }
+  /* The field roots already reserve 1px of padding for the box-shadow edge
+     (--text-field-border-width, --text-area-border-width). A real border takes
+     that pixel over, so the field box and its text do not move. */
+  .radix-themes :is(.rt-TextFieldRoot, .rt-TextAreaRoot):is(.rt-variant-surface, .rt-variant-classic) {
+    border: 1px solid var(--ds-stroke-strong);
+    padding: 0;
+  }
+  .radix-themes .rt-BaseButton:is(.rt-variant-solid, .rt-variant-surface):is(:disabled, [data-disabled], [aria-disabled="true"])::after,
+  .radix-themes .rt-SelectTrigger:not(.rt-variant-ghost):is(:disabled, [data-disabled], [aria-disabled="true"])::after {
+    border-color: var(--ds-stroke-disabled);
+  }
+  .radix-themes :is(.rt-TextFieldRoot, .rt-TextAreaRoot):has(:disabled) {
+    border-color: var(--ds-stroke-disabled);
+  }
+
+  /* The toggles draw their box on ::before. border-box keeps the box its size. */
+  .radix-themes :is(.rt-BaseCheckboxRoot, .rt-BaseRadioRoot, .rt-SwitchRoot)::before {
+    box-sizing: border-box;
+    border: 1px solid var(--ds-stroke-strong);
+  }
+  .radix-themes :is(.rt-BaseCheckboxRoot, .rt-BaseRadioRoot, .rt-SwitchRoot):is(:disabled, [data-disabled])::before {
+    border-color: var(--ds-stroke-disabled);
+  }
+
+  /* The Pagination dots ([[neutral-part-stacks]]). Each draws its ring with box-shadow, and an inactive dot has a clear
+     centre, so under forcing the whole row painted Canvas on Canvas. Every dot takes a 1px border.
+     border-box keeps each dot its size, and the current dot keeps its pill shape. */
+  .radix-themes .rt-ds-pagination__dot {
+    border: 1px solid var(--ds-stroke-strong);
+  }
+  .radix-themes .rt-ds-pagination__dot:disabled {
+    border-color: var(--ds-stroke-disabled);
+  }
+
+  /* The Token toggles ([[token-pressed-state]]). A Token whose body carries `aria-pressed` draws its edge
+     with the surface box-shadow, so under forcing a toggle at rest painted Canvas on Canvas with no edge.
+     The chip sizes to its label, so the edge is the inset ::after of the boxed controls above and the
+     chip keeps its size. Under forcing nothing else draws on the Token container's ::after, since the
+     two-layer focus ring in components.css draws on it only in `forced-colors: none`. */
+  .radix-themes .rt-ds-token:has(> .rt-ds-token-body[aria-pressed]) {
+    position: relative;
+  }
+  .radix-themes .rt-ds-token:has(> .rt-ds-token-body[aria-pressed])::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--ds-stroke-strong);
+    border-radius: inherit;
+    pointer-events: none;
+  }
+  .radix-themes .rt-ds-token[data-disabled]:has(> .rt-ds-token-body[aria-pressed])::after {
+    border-color: var(--ds-stroke-disabled);
+  }
+
+  /* ---- 3. Marks ------------------------------------------------------------ */
+  .radix-themes :is(.rt-BaseCheckboxRoot, .rt-BaseRadioRoot, .rt-SwitchRoot):is([data-state="checked"], [data-state="indeterminate"])::before {
+    background-color: var(--ds-fill-selected);
+  }
+  .radix-themes .rt-BaseCheckboxRoot .rt-BaseCheckboxIndicator {
+    color: HighlightText;
+  }
+  .radix-themes .rt-BaseRadioRoot[data-state="checked"]::after {
+    background-color: HighlightText;
+  }
+  /* The thumb sits 2px in, so a 1px canvas gap separates it from the new edge. */
+  .radix-themes .rt-SwitchRoot {
+    --switch-thumb-inset: 2px;
+  }
+  .radix-themes .rt-SwitchThumb {
+    background-color: ButtonText;
+  }
+  .radix-themes .rt-SwitchThumb[data-state="checked"] {
+    background-color: HighlightText;
+  }
+
+  /* Disabled toggles: GrayText replaces Highlight, and the mark reads as canvas. */
+  .radix-themes :is(.rt-BaseCheckboxRoot, .rt-BaseRadioRoot, .rt-SwitchRoot):is([data-state="checked"], [data-state="indeterminate"]):is(:disabled, [data-disabled])::before {
+    background-color: var(--ds-stroke-disabled);
+  }
+  .radix-themes .rt-BaseCheckboxRoot:is(:disabled, [data-disabled]) .rt-BaseCheckboxIndicator {
+    color: Canvas;
+  }
+  .radix-themes .rt-BaseRadioRoot[data-state="checked"]:is(:disabled, [data-disabled])::after,
+  .radix-themes .rt-SwitchThumb[data-state="checked"][data-disabled] {
+    background-color: Canvas;
+  }
+  .radix-themes .rt-SwitchThumb[data-state="unchecked"][data-disabled] {
+    background-color: GrayText;
+  }
+
+  /* The selected tab's bar. */
+  .radix-themes .rt-BaseTabListTrigger:is([data-state="active"], [data-active])::before {
+    background-color: var(--ds-fill-selected);
+  }
+
+  /* The current Pagination dot: a Highlight pill among ButtonBorder rings. */
+  .radix-themes .rt-ds-pagination .rt-ds-pagination__dot[aria-current="page"] {
+    border-color: var(--ds-fill-selected);
+    background-color: var(--ds-fill-selected);
+  }
+  .radix-themes .rt-ds-pagination .rt-ds-pagination__dot[aria-current="page"]:disabled {
+    border-color: var(--ds-stroke-disabled);
+    background-color: var(--ds-stroke-disabled);
+  }
+
+  /* A pressed Token ([[token-pressed-state]]). The tint is forced to Canvas, so without this a pressed
+     chip differs from a chip at rest by its check and weight alone. The check takes the label's ink.
+     Gated on `[data-interactive]` as in components.css, which a disabled chip never carries.
+
+     This is the one label in the file that sits on a Highlight fill, and Chromium paints a Canvas
+     backplate behind any text whose `forced-color-adjust` is `auto`. Measured under emulation: the
+     HighlightText label sat on that backplate, white on white in the light palette, invisible. So the
+     chip opts out with `forced-color-adjust: none`, which the body and the check inherit, and every
+     colour it then paints is a system colour: Highlight, HighlightText, and no box-shadow, so the
+     ::after edge above is the only edge. */
+  .radix-themes .rt-ds-token[data-interactive]:has(> .rt-ds-token-body[aria-pressed="true"]) {
+    forced-color-adjust: none;
+    background-color: var(--ds-fill-selected);
+    color: HighlightText;
+    box-shadow: none;
+  }
+  /* The ✕ of a removable pressed Token would inherit the opt-out and paint Radix's accent ink on the
+     Highlight fill. It takes forcing back, since it holds no text and so no backplate, and the mark
+     and its inward focus ring paint HighlightText, the one colour that reads on that fill. */
+  .radix-themes .rt-ds-token[data-interactive]:has(> .rt-ds-token-body[aria-pressed="true"]) .rt-IconButton {
+    forced-color-adjust: auto;
+    color: HighlightText;
+  }
+  .radix-themes .rt-ds-token[data-interactive]:has(> .rt-ds-token-body[aria-pressed="true"]) .rt-IconButton:focus-visible {
+    outline-color: HighlightText;
+  }
+  /* A disabled pressed Token paints `--ds-text-disabled` (GrayText) on the chip as well as on its label,
+     so a leading icon outside the body reads disabled as the label does. */
+  .radix-themes .rt-ds-token[data-disabled]:has(> .rt-ds-token-body[aria-pressed="true"]) {
+    color: var(--ds-text-disabled);
+  }
+}

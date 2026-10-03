@@ -1,0 +1,46 @@
+/* =============================================================================
+   spacing.css — SPACING & RADIUS FOUNDATION
+   -----------------------------------------------------------------------------
+   Core spacing (4–64) maps 1:1 onto Radix's --space-1..9, so Radix components
+   and system components share one scale. Extension steps (0, 2, 20, 56, 80, 96,
+   128) are added and stay --scaling-aware. Tokens are value-named to match the
+   system's existing convention so any canvas can read them directly.
+
+   Imported AFTER @radix-ui/themes/styles.css. Scoped to .radix-themes.
+   ============================================================================= */
+
+.radix-themes {
+  /* --- Spacing (value-named; aliases Radix where the values coincide) ------ */
+  --ds-space-0:   0;
+  --ds-space-2:   calc(2px * var(--scaling));
+  --ds-space-4:   var(--space-1);   /*  4  */
+  --ds-space-8:   var(--space-2);   /*  8  */
+  --ds-space-12:  var(--space-3);   /* 12  */
+  --ds-space-16:  var(--space-4);   /* 16  */
+  --ds-space-20:  calc(20px * var(--scaling));
+  --ds-space-24:  var(--space-5);   /* 24  */
+  --ds-space-32:  var(--space-6);   /* 32  */
+  --ds-space-40:  var(--space-7);   /* 40  */
+  --ds-space-48:  var(--space-8);   /* 48  */
+  --ds-space-56:  calc(56px * var(--scaling));
+  --ds-space-64:  var(--space-9);   /* 64  */
+  --ds-space-80:  calc(80px * var(--scaling));
+  --ds-space-96:  calc(96px * var(--scaling));
+  --ds-space-128: calc(128px * var(--scaling));
+
+  /* --- Radius -------------------------------------------------------------- */
+  /* Named aliases over Radix's factor-based scale. The sharp-vs-rounded brand
+     distinction is the <Theme radius> prop, and these inherit that factor:
+       Workspaces (all-square) -> radius="none"
+       Plotly (rounded)        -> radius="medium" | "large"  */
+  --ds-radius-1:    var(--radius-1);
+  --ds-radius-2:    var(--radius-2);
+  --ds-radius-3:    var(--radius-3);
+  --ds-radius-4:    var(--radius-4);
+  --ds-radius-5:    var(--radius-5);
+  --ds-radius-6:    var(--radius-6);
+  /* "full" is a pill — maximally round, fixed (not the brand dial). Radix only
+     sets --radius-full to a pill value under <Theme radius="full">; under any
+     other radius it is 0, so alias a fixed value instead. */
+  --ds-radius-full: 9999px;
+}

@@ -1,0 +1,28 @@
+#!/bin/sh
+# post-merge — regenerate the Storybook changelog after a merge lands on main, and commit it if the
+# generated data actually changed. No-ops on every other branch (feature worktrees included), so
+# merging elsewhere never triggers this.
+#
+# Installed by scripts/install-git-hooks.mjs (runs automatically via `npm install`'s "prepare" step) —
+# edit the tracked source here, never .git/hooks/post-merge directly (that copy is untracked/local-only
+# and gets overwritten on the next install).
+set -e
+
+cd "$(git rev-parse --show-toplevel)"
+
+branch=$(git rev-parse --abbrev-ref HEAD)
+if [ "$branch" != "main" ]; then
+  exit 0
+fi
+
+npm run --silent changelog
+
+# BOTH outputs, or a merge leaves the tree dirty. The generator wrote only the typed module until
+# 2026-09-02, when CHANGELOG.md was added as the file a CONSUMER reads (it ships in the tarball).
+# This hook went on staging just the first, so a merge regenerated two files and committed one —
+# found exactly that way: a clean fast-forward that ended with `M CHANGELOG.md` in the tree.
+if ! git diff --quiet -- src/foundations/changelog.generated.ts CHANGELOG.md; then
+  git add src/foundations/changelog.generated.ts CHANGELOG.md
+  git commit -m "chore(changelog): regenerate after merge to main"
+  echo "post-merge: regenerated and committed the changelog (both outputs)"
+fi

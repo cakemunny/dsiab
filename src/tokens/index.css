@@ -1,0 +1,58 @@
+/* Token entry point. Order matters:
+   Radix Themes first (defines the accent and gray scales plus the default type,
+   space, and shadow tokens the overrides target), then fonts, then the token
+   layer. shadow.css must come after Radix (it references the Radix shadow
+   tokens); motion.css is standalone; icons.css must come after typography.css
+   (icon sizes reference text leadings). */
+@import "@radix-ui/themes/styles.css";
+/* The default face. */
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/400-italic.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/600-italic.css";
+@import "@fontsource/inter/700.css";
+@import "@fontsource/inter/700-italic.css";
+
+/* The vetted roster. Each face ships all six of the weight/slope combinations
+   [[type-and-target-density]](a) requires — verified against the installed packages, not their docs.
+   The system loads these because it vouches for them; an arbitrary stack passed
+   as `{ stack }` loads nothing, because the system cannot vouch for what it has
+   not measured.
+
+   THIS IS THE BUNDLING COST, AND IT IS REAL: every consumer downloads all four
+   families whether they use one or none. The same is already true of Inter
+   alone. Making the roster opt-in per face — the system vetting and typing them
+   while the app imports what it uses — would fix both at once and is the open
+   packaging question. */
+@import "@fontsource/schibsted-grotesk/400.css";
+@import "@fontsource/schibsted-grotesk/400-italic.css";
+@import "@fontsource/schibsted-grotesk/600.css";
+@import "@fontsource/schibsted-grotesk/600-italic.css";
+@import "@fontsource/schibsted-grotesk/700.css";
+@import "@fontsource/schibsted-grotesk/700-italic.css";
+@import "@fontsource/atkinson-hyperlegible-next/400.css";
+@import "@fontsource/atkinson-hyperlegible-next/400-italic.css";
+@import "@fontsource/atkinson-hyperlegible-next/600.css";
+@import "@fontsource/atkinson-hyperlegible-next/600-italic.css";
+@import "@fontsource/atkinson-hyperlegible-next/700.css";
+@import "@fontsource/atkinson-hyperlegible-next/700-italic.css";
+@import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/jetbrains-mono/400-italic.css";
+@import "@fontsource/jetbrains-mono/600.css";
+@import "@fontsource/jetbrains-mono/600-italic.css";
+@import "@fontsource/jetbrains-mono/700.css";
+@import "@fontsource/jetbrains-mono/700-italic.css";
+@import "./oxblood.css";
+@import "./custom-brand.css";
+@import "./theme.css";
+@import "./contrast.css";
+@import "./semantic.css";
+@import "./typography.css";
+@import "./spacing.css";
+@import "./icons.css";
+@import "./shadow.css";
+@import "./stacking.css";
+@import "./motion.css";
+@import "./components.css";
+/* Windows contrast themes. Last, so its equal-specificity rules win on source order. */
+@import "./forced-colors.css";

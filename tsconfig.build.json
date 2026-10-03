@@ -1,0 +1,23 @@
+{
+  "//": "Declaration emit for the consumable package. The root tsconfig.json is the TYPE GATE (`tsc --noEmit` over src + .storybook); it cannot emit, because with no `rootDir` set TypeScript infers the common source directory and fails with TS5011, and its `include` would drag 168 stories, 22 tests and 11 node-checks into dist/. This config fixes both: rootDir pins the tree at src/ so dist/ mirrors it 1:1, and the exclusions below keep the docs/test layer out of the shipped types.",
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "noEmit": false
+  },
+  "include": ["src"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src/**/*.stories.tsx",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/**/*.node-check.ts",
+    "src/**/*.type-check.tsx",
+    "src/components/ui/_storyKit.tsx",
+    "src/components/ui/_comparisons.tsx"
+  ]
+}

@@ -1,0 +1,134 @@
+/* =============================================================================
+   oxblood.css — 27TH PRESET SCALE (custom, non-Radix)
+   -----------------------------------------------------------------------------
+   A deep-red scale generated offline (OKLCH, seed #8a2119) so the red family
+   (red / ruby / crimson / tomato) gets a distinct error target — every named
+   red sits ~ΔE-OK 0.07 from the others; oxblood is ΔE-OK 0.21+ away. It is also
+   a first-class, selectable accent (see the [data-accent-color="oxblood"] map
+   below, on a theme root and on a part, [[part-colour-parity]]). White-on-oxblood-9 is 9.1:1 /
+   APCA Lc 94, text-11 is 12.3:1 light
+   / 9.7:1 dark — well above the floors, and white is best by BOTH metrics so no
+   contrast.css override is needed.
+
+   INTERIM: this is a hand-curated patch ahead of the full custom-palette
+   generator (DECISIONS [[oxblood-preset]]), which will regenerate it at
+   higher fidelity under the same token names. Alphas derived by the Radix
+   alpha-colour algorithm over white (light) / black (dark), Radix-style.
+   Imported before theme.css so the accent map + error aliases can reference it.
+
+   SCOPED TO :root AS WELL AS .radix-themes, and that is load-bearing. Radix
+   publishes its own scales at :root, so `var(--yellow-9)` resolves anywhere in
+   the document. Oxblood is the system's own preset and was the one scale in the
+   collision candidate set that did not — which broke the seeded-brand shift in a
+   way no type check or unit test could see: `Provider` writes the shift onto
+   `document.documentElement`, `var(--oxblood-9)` was undefined at that scope, and
+   the whole custom property became guaranteed-invalid. `--error-9` resolved to
+   nothing and the error colour silently vanished. Every other candidate scale
+   worked, which is exactly what made it hard to spot.
+   ============================================================================= */
+
+:root,
+.radix-themes {
+  --oxblood-1: #fef9f8;
+  --oxblood-2: #fef0ee;
+  --oxblood-3: #fde2df;
+  --oxblood-4: #fed4d0;
+  --oxblood-5: #fec2ba;
+  --oxblood-6: #fba89d;
+  --oxblood-7: #ee8e82;
+  --oxblood-8: #d76d5f;
+  --oxblood-9: #8a2119;
+  --oxblood-10: #79150f;
+  --oxblood-11: #66120f;
+  --oxblood-12: #3a0a0a;
+  --oxblood-a1: #db290507;
+  --oxblood-a2: #f01f0111;
+  --oxblood-a3: #ef190120;
+  --oxblood-a4: #fa17012f;
+  --oxblood-a5: #fb1e0045;
+  --oxblood-a6: #f51d0062;
+  --oxblood-a7: #dc19007d;
+  --oxblood-a8: #bf1700a0;
+  --oxblood-a9: #7d0900e6;
+  --oxblood-a10: #710700f0;
+  --oxblood-a11: #5d0300f0;
+  --oxblood-a12: #320000f5;
+  --oxblood-contrast: #fff;
+  --oxblood-surface: #fef1efcc;
+  --oxblood-indicator: var(--oxblood-9);
+  --oxblood-track: var(--oxblood-9);
+}
+
+/* BOTH selector shapes — Radix declares its own dark scales under each, and the
+   second is how `appearance="inherit"` (its DEFAULT) works: the class sits on
+   <html> and the theme root carries none. Shipping only the first meant our
+   layer stayed LIGHT while the vendor's scales went dark. See [[dark-override-selectors]]. */
+.radix-themes:where(.dark, .dark-theme),
+:is(.dark, .dark-theme) :where(.radix-themes:not(.light, .light-theme)) {
+  --oxblood-1: #180d0c;
+  --oxblood-2: #231210;
+  --oxblood-3: #361715;
+  --oxblood-4: #481e1b;
+  --oxblood-5: #5b2420;
+  --oxblood-6: #702c26;
+  --oxblood-7: #82322b;
+  --oxblood-8: #7e221a;
+  --oxblood-9: #8a2119;
+  --oxblood-10: #a43c31;
+  --oxblood-11: #fda296;
+  --oxblood-12: #fed4cf;
+  --oxblood-a1: #fd897e18;
+  --oxblood-a2: #fe827423;
+  --oxblood-a3: #ff6c6336;
+  --oxblood-a4: #fe6a5f48;
+  --oxblood-a5: #ff655a5b;
+  --oxblood-a6: #ff645670;
+  --oxblood-a7: #ff625482;
+  --oxblood-a8: #ff45357e;
+  --oxblood-a9: #ff3d2e8a;
+  --oxblood-a10: #ff5d4ca4;
+  --oxblood-a11: #ffa397fd;
+  --oxblood-a12: #ffd5d0fe;
+  --oxblood-contrast: #fff;
+  --oxblood-surface: #2c131080;
+  --oxblood-indicator: var(--oxblood-9);
+  --oxblood-track: var(--oxblood-9);
+}
+
+/* Selectable as a first-class accent. Map Radix's --accent-* onto oxblood, exactly as Radix maps
+   its 26 built-ins, on the theme root and on any part inside it that sets oxblood as its own colour
+   ([[part-colour-parity]]). Radix maps a part's colour with a bare [data-accent-color] rule, and a part given oxblood
+   takes the same map here, so it paints what the same part paints on an oxblood theme. Both arms
+   are (0,1,0). The --oxblood-* re-resolve per mode through the .dark block above, and a part
+   inherits them from its theme, so this one block covers light and dark. */
+.radix-themes:where([data-accent-color="oxblood"]),
+.radix-themes :where([data-accent-color="oxblood"]) {
+  --accent-1: var(--oxblood-1);
+  --accent-2: var(--oxblood-2);
+  --accent-3: var(--oxblood-3);
+  --accent-4: var(--oxblood-4);
+  --accent-5: var(--oxblood-5);
+  --accent-6: var(--oxblood-6);
+  --accent-7: var(--oxblood-7);
+  --accent-8: var(--oxblood-8);
+  --accent-9: var(--oxblood-9);
+  --accent-10: var(--oxblood-10);
+  --accent-11: var(--oxblood-11);
+  --accent-12: var(--oxblood-12);
+  --accent-a1: var(--oxblood-a1);
+  --accent-a2: var(--oxblood-a2);
+  --accent-a3: var(--oxblood-a3);
+  --accent-a4: var(--oxblood-a4);
+  --accent-a5: var(--oxblood-a5);
+  --accent-a6: var(--oxblood-a6);
+  --accent-a7: var(--oxblood-a7);
+  --accent-a8: var(--oxblood-a8);
+  --accent-a9: var(--oxblood-a9);
+  --accent-a10: var(--oxblood-a10);
+  --accent-a11: var(--oxblood-a11);
+  --accent-a12: var(--oxblood-a12);
+  --accent-contrast: var(--oxblood-contrast);
+  --accent-surface: var(--oxblood-surface);
+  --accent-indicator: var(--oxblood-indicator);
+  --accent-track: var(--oxblood-track);
+}

@@ -1,0 +1,1821 @@
+[
+  {
+    "name": "Button",
+    "module": "Button",
+    "exports": [
+      "ButtonPriority",
+      "ButtonTone",
+      "ButtonProps",
+      "Button"
+    ],
+    "status": "ported",
+    "wave": 0,
+    "tier": "full",
+    "controlBox": "row",
+    "buildingBlock": "Radix Button",
+    "storyPath": "src/components/ui/Button.stories.tsx"
+  },
+  {
+    "name": "ButtonGroup",
+    "astryxName": "Button Group",
+    "module": "ButtonGroup",
+    "exports": [
+      "ButtonGroupProps",
+      "ButtonGroup"
+    ],
+    "status": "ported",
+    "wave": 0,
+    "tier": "lite",
+    "controlBox": "composite",
+    "buildingBlock": "Radix Flex",
+    "storyPath": "src/components/ui/ButtonGroup.stories.tsx",
+    "note": "spacing + ordering wrapper for an action row; flat gap=2 (8px) at every uiSize; anchors the priority=\"primary\" child per the system buttonOrder and derives justify from it ([[button-cluster]]); no solid child \u2192 author's order untouched; resolves no size of its own"
+  },
+  {
+    "name": "IconButton",
+    "astryxName": "Icon Button",
+    "module": "IconButton",
+    "exports": [
+      "IconButtonPriority",
+      "IconButtonTone",
+      "IconButtonProps",
+      "IconButton"
+    ],
+    "status": "ported",
+    "wave": 0,
+    "tier": "full",
+    "controlBox": "row",
+    "buildingBlock": "Radix IconButton",
+    "storyPath": "src/components/ui/IconButton.stories.tsx"
+  },
+  {
+    "name": "Checkbox",
+    "astryxName": "Checkbox Input",
+    "module": "Checkbox",
+    "exports": [
+      "CheckboxProps",
+      "Checkbox"
+    ],
+    "status": "ported",
+    "wave": 0,
+    "tier": "full",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix Checkbox",
+    "storyPath": "src/components/ui/Checkbox.stories.tsx"
+  },
+  {
+    "name": "CheckboxGroup",
+    "module": "CheckboxGroup",
+    "exports": [
+      "CheckboxGroup"
+    ],
+    "status": "ported",
+    "wave": 0,
+    "tier": "full",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix CheckboxGroup",
+    "storyPath": "src/components/ui/CheckboxGroup.stories.tsx"
+  },
+  {
+    "name": "RadioGroup",
+    "astryxName": "Radio List",
+    "module": "RadioGroup",
+    "exports": [
+      "RadioGroup"
+    ],
+    "status": "ported",
+    "wave": 0,
+    "tier": "full",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix RadioGroup",
+    "storyPath": "src/components/ui/RadioGroup.stories.tsx"
+  },
+  {
+    "name": "Field",
+    "module": "Field",
+    "exports": [
+      "useOptionalFieldControl"
+    ],
+    "internalExports": [
+      "FieldSize",
+      "useFieldControl",
+      "useOptionalFieldLabelId",
+      "HelperLine",
+      "StatusLine",
+      "Field",
+      "useDisabledReason",
+      "DisabledReasonTooltip",
+      "DisabledReasonGlyph",
+      "useOptionalFieldGroup",
+      "useFieldGroupControl",
+      "useOptionalFieldGroupControl",
+      "useGroupItemDescribedBy",
+      "GroupItemBody",
+      "FieldGroup"
+    ],
+    "status": "ported",
+    "wave": 0,
+    "tier": "lite",
+    "controlBox": "composite",
+    "buildingBlock": "Radix Flex/Text/Box \u2014 the shared label \u00b7 control \u00b7 helper/status shell",
+    "note": "[[field-shell]] \u00b7 [[field-shell-adoption]] \u2014 the shell every input rides (label, description, validation message, disabled reason). [[field-shell]] and [[field-shell-adoption]] rule how the shell works and say nothing about publishing it, so the shell is UNPUBLISHED, and no ruling makes that permanent. It is documented at _internal/Field (src/components/ui/_field.stories.tsx), not System/*, and a consumer reaches it through the inputs that already ride it. This entry exists for ONE name. `useOptionalFieldControl` returns the field's id / aria-describedby / aria-invalid from a child rendered inside a Field.Root, or null when there is none. It is REQUIRED IN THIS REPO \u2014 every control that renders its own Field.Root (Select, MultiSelect, DateInput, TimeInput, NumberInput, Typeahead, \u2026) reaches its field's wiring through it and has no other route. It is PUBLISHED for a narrower reason, and the entry used to overstate it: a consumer cannot compose Field.Root, so the hook answers non-null only from a component rendered inside an input that ships its own Field.Root, and null everywhere else. It does NOT let a consumer give a hand-built control this shell's chrome \u2014 that needs Field.Root, which does not ship. A custom input is therefore not a supported extension point at all; the wrapped inputs are the surface, and their label / description / validation props are how a consumer reaches the shell. The other 15 names are listed in `internalExports` \u2014 accounted for, and deliberately not published. FieldGroup is one of them, and it is WITHHELD AS AN OPEN GAP, not by a ruling. That leaves group-level validation (the CheckboxGroup / RadioGroup error message) with no published route, because those two take no label or validation prop of their own. Publishing FieldGroup, or giving the two groups first-class label/description/validation props the way Checkbox has them, is a maintainer decision. [[internal-hooks]] rules the two group hooks, useFieldGroupControl and useGroupItemDescribedBy, internal, and ties them to FieldGroup not shipping. No storyPath: the _internal page carries no Anatomy/Usage spine, and tier records that this component has no docs page of its own."
+  },
+  {
+    "name": "TextField",
+    "astryxName": "Text Input",
+    "module": "TextField",
+    "exports": [
+      "TextFieldProps",
+      "TextField"
+    ],
+    "status": "ported",
+    "wave": 0,
+    "tier": "full",
+    "controlBox": "row",
+    "buildingBlock": "Radix TextField",
+    "storyPath": "src/components/ui/TextField.stories.tsx"
+  },
+  {
+    "name": "TextArea",
+    "astryxName": "Text Area",
+    "module": "TextArea",
+    "exports": [
+      "TextAreaProps",
+      "TextArea"
+    ],
+    "status": "ported",
+    "wave": 0,
+    "tier": "full",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix TextArea",
+    "storyPath": "src/components/ui/TextArea.stories.tsx"
+  },
+  {
+    "name": "Select",
+    "astryxName": "Selector",
+    "module": "Select",
+    "exports": [
+      "SelectRootProps",
+      "Select"
+    ],
+    "status": "ported",
+    "wave": 0,
+    "tier": "full",
+    "controlBox": "row",
+    "buildingBlock": "Radix Select",
+    "storyPath": "src/components/ui/Select.stories.tsx",
+    "priorArt": "Radix #3962 (https://github.com/radix-ui/primitives/issues/3962) and Radix #4110 (https://github.com/radix-ui/primitives/issues/4110): TOOK the finding that Radix Select options carry no aria-posinset or aria-setsize and that VoiceOver with Chrome then announces a wrong count or none. TOOK from the #4110 discussion writing the attributes to the DOM before paint rather than through a state round-trip, the timing it names as the cause of the silent first option. Radix PR #4109 (https://github.com/radix-ui/primitives/pull/4109): READ and NOT adopted in one respect, its count restarts inside each group, while the approved fix numbers the whole listbox in DOM order ([[select-option-numbering]])."
+  },
+  {
+    "name": "MultiSelect",
+    "astryxName": "Multi Selector",
+    "module": "MultiSelect",
+    "exports": [
+      "MultiSelectProps",
+      "MultiSelect"
+    ],
+    "status": "ported",
+    "wave": 0,
+    "tier": "full",
+    "controlBox": "row",
+    "buildingBlock": "@radix-ui/react-popover",
+    "storyPath": "src/components/ui/MultiSelect.stories.tsx"
+  },
+  {
+    "name": "Text",
+    "module": "Text",
+    "exports": [
+      "TextProps",
+      "Text"
+    ],
+    "status": "ported",
+    "wave": 0,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix Text"
+  },
+  {
+    "name": "Heading",
+    "module": "Heading",
+    "exports": [
+      "HeadingProps",
+      "Heading"
+    ],
+    "status": "ported",
+    "wave": 0,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix Heading"
+  },
+  {
+    "name": "Kbd",
+    "module": "Kbd",
+    "exports": [
+      "KbdProps",
+      "Kbd"
+    ],
+    "status": "ported",
+    "wave": 0,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix Kbd",
+    "storyPath": "src/components/ui/Kbd.stories.tsx"
+  },
+  {
+    "name": "Typeahead",
+    "module": "Typeahead",
+    "exports": [
+      "TypeaheadOption",
+      "TypeaheadSource",
+      "TypeaheadProps",
+      "createStaticSource",
+      "Typeahead"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "full",
+    "controlBox": "row",
+    "buildingBlock": "@radix-ui/react-popover + ARIA combobox",
+    "storyPath": "src/components/ui/Typeahead.stories.tsx",
+    "note": "Wave-1 flagship"
+  },
+  {
+    "name": "TypeaheadItem",
+    "astryxName": "Typeahead Item",
+    "module": "Typeahead",
+    "exports": [],
+    "status": "ported",
+    "wave": 1,
+    "tier": "full",
+    "controlBox": "exempt",
+    "buildingBlock": "Typeahead sub-part",
+    "note": "option-rendering contract \u2014 the TypeaheadOption type + renderOption/element prop; no standalone component export (drops Astryx's id-less fallback)"
+  },
+  {
+    "name": "Dialog",
+    "module": "Dialog",
+    "exports": [
+      "Dialog"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "full",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix Dialog",
+    "storyPath": "src/components/ui/Dialog.stories.tsx",
+    "note": "the standard title/description/body/footer modal; Content on the container size lane (small\u21922, [[standard-dialog]]); Dialog.Footer wires the global buttonOrder ([[standard-dialog]]); no tone (destructive confirms stay AlertDialog's job). [[standard-dialog]]: CommandPalette/Lightbox/MobileNav deliberately keep the raw Radix Dialog (specialized focus/skin/motion) \u2014 not swapped to System Dialog. Full spine.",
+    "priorArt": "Radix issue 3007 (https://github.com/radix-ui/primitives/issues/3007): TOOK the fix the issue asks for. aria-describedby is present only while a Description is mounted, through a registering Description and Radix's own aria-describedby={undefined} opt-out on Content ([[dialog-describedby]]). REJECTED the per-consumer workaround of passing aria-describedby={undefined} by hand, which the issue calls easy to miss."
+  },
+  {
+    "name": "AlertDialog",
+    "module": "AlertDialog",
+    "exports": [
+      "AlertDialog"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix AlertDialog",
+    "storyPath": "src/components/ui/AlertDialog.stories.tsx",
+    "note": "consumes tone=danger; no Astryx equivalent; lite spine (Wave-1 danger exemplar)",
+    "priorArt": "Radix issue 3007 (https://github.com/radix-ui/primitives/issues/3007): TOOK the same fix as Dialog. aria-describedby is present only while an AlertDialog.Description is mounted, through a registering Description and Radix's own aria-describedby={undefined} opt-out on Content ([[dialog-describedby]]). REJECTED the per-consumer workaround."
+  },
+  {
+    "name": "DropdownMenu",
+    "astryxName": "Dropdown Menu",
+    "module": "DropdownMenu",
+    "exports": [
+      "DropdownMenuItemProps",
+      "DropdownMenu"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix DropdownMenu",
+    "storyPath": "src/components/ui/DropdownMenu.stories.tsx",
+    "note": "danger menu items per [[destructive-tone]]; lite spine",
+    "priorArt": "Radix #1963 (https://github.com/radix-ui/primitives/issues/1963) and Radix #2700 (https://github.com/radix-ui/primitives/issues/2700): TOOK the finding that VoiceOver's VO+Space in Safari and Firefox and NVDA's browse-mode Enter reach the trigger as a click, and that Radix's Dialog trigger answers a click while its menu trigger does not. TOOK the suggestion in #2700 to answer the click itself. REJECTED the workaround posted on #1963 that synthesises a pointerdown from every click, because a pointer press would then reach Radix's toggle twice ([[dropdown-assistive-click]])."
+  },
+  {
+    "name": "ContextMenu",
+    "module": "ContextMenu",
+    "exports": [
+      "MenuSize",
+      "useClampedMenuSize",
+      "ContextMenuItemProps",
+      "ContextMenu"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix ContextMenu",
+    "storyPath": "src/components/ui/ContextMenu.stories.tsx",
+    "note": "right-click command menu; mirrors DropdownMenu (solid Content [[floating-surface-fill]], control lane, Item tone=danger via data-tone reusing the shared .rt-BaseMenuItem skin \u2014 [[floating-surface-wraps]], zero new CSS); MENU_SURFACES comparison; behavior play in _internal"
+  },
+  {
+    "name": "Tabs",
+    "astryxName": "Tab List",
+    "module": "Tabs",
+    "exports": [
+      "TabsSize",
+      "TabsNavLinkProps",
+      "Tabs"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix Tabs / TabNav",
+    "storyPath": "src/components/ui/Tabs.stories.tsx",
+    "note": "dual surface ([[floating-surface-wraps]]): Root/List/Trigger/Content = panel tabs; Nav={Root,Link} = link tabs via useLinkComponent + aria-current=page. BOX and TYPE are two knobs. BOX: the 2-size clamp ([[floating-surface-wraps]], mapping remapped 2026-07-31) small\u21921/medium\u21921/large\u21922 = 32/32/40px, so the tab row equals the control box at medium and large; an explicit size pins the box only. TYPE: ours, not the vendor's paired step \u2014 the wrap stamps the tier's TEXT step as rt-ds-tablist-N (a CLASS, because TabNav.Root forwards className to the inner .rt-BaseTabList and every other prop to the outer nav) and components.css restates font-size/line-height/letter-spacing = 12/14/16px at small/medium/large, so the row matches the control on BOTH axes at medium and large. Reciprocal do/don't vs SegmentedControl; behavior plays in _internal",
+    "priorArt": "WAI-ARIA Authoring Practices, Tabs with automatic activation (https://www.w3.org/WAI/ARIA/apg/patterns/tabs/examples/tabs-automatic/): TOOK its rule. The example script opens a tab in its keydown handler for ArrowLeft, ArrowRight, Home and End and in its click handler, and it listens for no focus event, so a focus that no key moved opens nothing ([[tabs-open-on-navigation]]). Radix #1047 (https://github.com/radix-ui/primitives/issues/1047): TOOK the finding that Radix's automatic mode opens a tab on every focus event, so a VoiceOver cursor that moves keyboard focus opens each tab it reads. REJECTED manual activation as the default, because it costs every sighted keyboard user an extra key per tab. React Aria Tabs (https://react-aria.adobe.com/Tabs) and Radix Themes Tabs (https://www.radix-ui.com/themes/docs/components/tabs): TOOK the space between the list and the panel from React Aria and REJECTED Radix's consumer-supplied padding ([[tab-panel-focus-clearance]])."
+  },
+  {
+    "name": "Switch",
+    "module": "Switch",
+    "exports": [
+      "SwitchProps",
+      "Switch"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix Switch",
+    "storyPath": "src/components/ui/Switch.stories.tsx",
+    "note": "control size lane; reuses Radix's accent-aware track skin (no --ds-* roles); labeled-row pattern; BOOLEAN_CHOICE comparison; behavior play in _internal"
+  },
+  {
+    "name": "Slider",
+    "module": "Slider",
+    "exports": [
+      "SliderMark",
+      "SliderProps",
+      "Slider"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "radix-ui Slider primitive + Radix Themes' rt-Slider* skin",
+    "storyPath": "src/components/ui/Slider.stories.tsx",
+    "note": "[[slider-composition]] \u2014 composes the RAW radix-ui Slider primitive while wearing Radix Themes' rt-Slider* classes (the CheckboxVisual skin-reuse precedent), because Radix Themes' own Slider accepts no children and so cannot carry marks/per-thumb ARIA. Adds: marks/detents (array shape) + step:null snap-to-marks (500-mark cap); an optional paired numeric input (showInput, flank/end) that reports AND edits \u2014 CLAMPS out-of-range + reverts unparseable, both announced assertively (a deliberate divergence from [[number-input]]'s reject-never-clamp, pending ratification); range with neighbour-constrained per-thumb aria-valuemin/max (APG, which Radix violates) and per-thumb names ('Minimum, Price'); aria-valuetext (Radix emits none). Control size lane; accent-aware range skin reuse (no --ds-* roles). Measured: 30x30px thumb hit area at size 1. Field.tsx gained labelId (htmlFor on a role=slider span is a silent no-op). Rich lite spine: History/Usage/ValueInput/Detents/Keyboard/Props + 7 behavior plays"
+  },
+  {
+    "name": "Badge",
+    "module": "Badge",
+    "exports": [
+      "BadgeTone",
+      "BadgeProps",
+      "Badge"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "full",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix Badge",
+    "storyPath": "src/components/ui/Badge.stories.tsx"
+  },
+  {
+    "name": "Callout",
+    "astryxName": "Banner",
+    "module": "Callout",
+    "exports": [
+      "CalloutUrgency",
+      "CalloutTone",
+      "CalloutActionPlacement",
+      "CalloutProps",
+      "Callout"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "full",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix Callout",
+    "storyPath": "src/components/ui/Callout.stories.tsx"
+  },
+  {
+    "name": "Card",
+    "module": "Card",
+    "exports": [
+      "CardVariant",
+      "CardProps",
+      "Card"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "full",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix Card",
+    "storyPath": "src/components/ui/Card.stories.tsx",
+    "note": "[[card-variants]] \u2014 variants restructured to outlined/elevated/filled (they differ by BOUNDARY: edge / edge+lift / opaque fill with the edge dropped); Radix's generic surface/classic/ghost are NOT exposed (surface\u2248classic differ only by border alpha + a faint drop; ghost is a zero-border negative-margin alignment device, not a card). elevated reuses the [[elevation-model]] Raised shadow (--ds-shadow-2); filled paints --ds-bg-subtle. Container size lane (small\u21922). Full spine: anatomy, when-NOT-to-use, elevation-is-meaning, + the CARD_SURFACES comparison across Card/ClickableCard/RadioCards/CheckboxCards"
+  },
+  {
+    "name": "ClickableCard",
+    "astryxName": "Clickable Card",
+    "module": "ClickableCard",
+    "exports": [
+      "interactiveLayer",
+      "ClickableCardProps",
+      "ClickableCard"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Card + overlay Link",
+    "storyPath": "src/components/ui/ClickableCard.stories.tsx",
+    "note": "stretched-link build on Card ([[surface-wraps]]): overlay link ::after over the whole box, single tab stop, name-from-content, routes through useLinkComponent ([[link-and-link-provider]]); hover=--ds-fill-hover, focus=[[focus-ring]] ring on the card box; nested interactives above the overlay; navigation-only (overlay eats selection); components.css .rt-ds-clickable-card; behavior play in _internal"
+  },
+  {
+    "name": "CheckboxCards",
+    "astryxName": "Selectable Card",
+    "module": "CheckboxCards",
+    "exports": [
+      "CheckboxCards"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix CheckboxCards",
+    "storyPath": "src/components/ui/CheckboxCards.stories.tsx",
+    "note": "multi-select card picker; control size lane; variant passed through (matches RadioCards); shares RadioCards' unified selected treatment \u2014 a --ds-fill-accent-weak wash under a 2px --ds-fill-accent outline, added in components.css because Radix 3.3 gives a checked CheckboxCards card no card-level treatment at all (only the inner checkbox fills); PICK_FROM_SET comparison; behavior play in _internal"
+  },
+  {
+    "name": "RadioCards",
+    "astryxName": "Selectable Card",
+    "module": "RadioCards",
+    "exports": [
+      "RadioCards"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix RadioCards",
+    "storyPath": "src/components/ui/RadioCards.stories.tsx",
+    "note": "single-select card picker; control size lane; unified selected treatment shared with CheckboxCards \u2014 a --ds-fill-accent-weak wash (added in components.css) under Radix's own accent-indicator outline; PICK_FROM_SET comparison (shares the 'RadioCards / CheckboxCards' column); behavior play in _internal"
+  },
+  {
+    "name": "Avatar",
+    "module": "Avatar",
+    "exports": [
+      "AvatarStatus",
+      "AvatarProps",
+      "Avatar"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "full",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix Avatar",
+    "storyPath": "src/components/ui/Avatar.stories.tsx"
+  },
+  {
+    "name": "Tooltip",
+    "module": "Tooltip",
+    "exports": [
+      "TooltipProps",
+      "Tooltip"
+    ],
+    "status": "ported",
+    "wave": 4,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix Tooltip",
+    "storyPath": "src/components/ui/Tooltip.stories.tsx"
+  },
+  {
+    "name": "Popover",
+    "module": "Popover",
+    "exports": [
+      "PopoverContentProps",
+      "Popover"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix Popover",
+    "storyPath": "src/components/ui/Popover.stories.tsx",
+    "note": "click-opened content panel (role=dialog); control size lane; motion inherited from the shared .rt-PopperContent base class (zero CSS); solid panel skin reuse; FLOATING_INFO comparison; behavior play in _internal"
+  },
+  {
+    "name": "HoverCard",
+    "astryxName": "Hover Card",
+    "module": "HoverCard",
+    "exports": [
+      "HoverCard"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix HoverCard",
+    "storyPath": "src/components/ui/HoverCard.stories.tsx",
+    "note": "hover/focus preview card ([[floating-surface-wraps]] stance: supplementary only, invisible on touch, trigger must navigate); control lane; motion inherited from .rt-PopperContent (zero CSS); FLOATING_INFO comparison"
+  },
+  {
+    "name": "Progress",
+    "astryxName": "Progress Bar",
+    "module": "Progress",
+    "exports": [
+      "ProgressProps",
+      "Progress"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix Progress",
+    "storyPath": "src/components/ui/Progress.stories.tsx",
+    "note": "determinate + indeterminate; control size lane; accent-aware fill skin reuse (no --ds-* roles); indeterminate sweep silenced under prefers-reduced-motion via a central override ([[feedback-set]]); tabular figures EXCLUDED, not deferred \u2014 the wrap ships no label slot, so the % readout is caller-authored and there is no element here to declare on"
+  },
+  {
+    "name": "Skeleton",
+    "module": "Skeleton",
+    "exports": [
+      "Skeleton",
+      "SkeletonProps"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix Skeleton",
+    "storyPath": "src/components/ui/Skeleton.stories.tsx",
+    "note": "documented re-export; loading wraps + sizes to children (no size lane); gray skin reuse; ambient pulse silenced under prefers-reduced-motion via the ONE sanctioned !important override (Radix ships the pulse as !important, unbeatable by specificity) \u2014 flagged for owner ratification"
+  },
+  {
+    "name": "Spinner",
+    "module": "Spinner",
+    "exports": [
+      "SpinnerProps",
+      "Spinner"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix Spinner",
+    "storyPath": "src/components/ui/Spinner.stories.tsx",
+    "note": "indeterminate loader; control size lane; leaf-ring skin reuse (Button's loading renders this same spinner \u2014 no fork); rotation silenced under prefers-reduced-motion via a central override ([[feedback-set]])"
+  },
+  {
+    "name": "SegmentedControl",
+    "astryxName": "Segmented Control",
+    "module": "SegmentedControl",
+    "exports": [
+      "SegmentedControlItemProps",
+      "SegmentedControl"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "lite",
+    "controlBox": "row",
+    "buildingBlock": "Radix SegmentedControl",
+    "storyPath": "src/components/ui/SegmentedControl.stories.tsx",
+    "note": "value-picker (distinct from Tabs = view-switcher, [[floating-surface-wraps]]); control size lane; neutral raised-tile selected skin (reused); PICK_FROM_SET comparison + Tabs cross-link do/don't; behavior play in _internal"
+  },
+  {
+    "name": "Link",
+    "module": "Link",
+    "exports": [
+      "LinkProps",
+      "Link",
+      "LinkComponent",
+      "LinkProvider",
+      "useLinkComponent"
+    ],
+    "status": "ported",
+    "wave": 4,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix Link",
+    "storyPath": "src/components/ui/Link.stories.tsx"
+  },
+  {
+    "name": "Code",
+    "module": "Code",
+    "exports": [
+      "CodeProps",
+      "Code"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix Code",
+    "storyPath": "src/components/ui/Code.stories.tsx",
+    "note": "inline code chip; text size lane; reuses Radix's accent-tinted soft skin (--ds-fill-accent-weak, no --ds-* roles); comparison tables neutralize chips to gray (storyKit exception), default keeps the tint"
+  },
+  {
+    "name": "Blockquote",
+    "module": "Blockquote",
+    "exports": [
+      "BlockquoteProps",
+      "Blockquote"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix Blockquote",
+    "storyPath": "src/components/ui/Blockquote.stories.tsx",
+    "note": "typographic quote (accent-a6 left rule = --ds-stroke-accent-weak, skin reuse); size passed through untouched (prose, not the type lane); do/don't vs Callout. NOT a re-export \u2014 this wraps Radix's Blockquote with its own BlockquoteProps"
+  },
+  {
+    "name": "Separator",
+    "astryxName": "Divider",
+    "module": "Separator",
+    "exports": [
+      "SeparatorProps",
+      "Separator"
+    ],
+    "status": "ported",
+    "wave": 4,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix Separator",
+    "storyPath": "src/components/ui/Separator.stories.tsx"
+  },
+  {
+    "name": "DataList",
+    "astryxName": "Metadata List",
+    "module": "DataList",
+    "exports": [
+      "SpaceStep",
+      "DataListOverflow",
+      "DataListRootProps",
+      "DataListValueProps",
+      "DataList"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix DataList",
+    "storyPath": "src/components/ui/DataList.stories.tsx",
+    "note": "metadata pairs (<dl>), one entity \u2014 not a Table; control size lane; skin reuse (no --ds-* roles); do/don't cross-links Table; [[data-list-overflow]] overflow policy declared per list (`overflow` on Root, `truncate` per Value, derived title on a truncated value) + the root is a container so the label column and the stacked pair answer the panel, not the viewport; tabular figures DEFERRED pending a ruling \u2014 a <dd> holds anything, so the mechanism is a `numeric` prop mirroring Table's data-numeric, i.e. net-new API on a lite wrap, and queued for a later ruling"
+  },
+  {
+    "name": "ScrollArea",
+    "module": "ScrollArea",
+    "exports": [
+      "ScrollAreaProps",
+      "ScrollArea"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix ScrollArea",
+    "storyPath": "src/components/ui/ScrollArea.stories.tsx",
+    "note": "custom-scrollbar bounded region; scrollbar rides the CONTROL lane (range 1-3 can't take the container lane's large\u21924, and an out-of-range size falls back to Radix's own default of 1 \u2014 the thinnest bar \u2014 so the deviation is documented); gray-alpha scrollbar skin reuse (no --ds-* roles)",
+    "priorArt": "Chrome, keyboard-focusable scrollers (https://developer.chrome.com/blog/keyboard-focusable-scrollers): TOOK the finding that Chromium 130 and later make a scroller with no focusable children keyboard-focusable on their own, and that engines without it give such a scroller no stop. axe, scrollable-region-focusable (https://dequeuniversity.com/rules/axe/4.12/scrollable-region-focusable): TOOK its pass condition, a scrollable region that is focusable or holds focusable content, as the test for when the system adds a stop. In-house precedent: [[chat-log-scroller]], the tab stop, role and name on the ChatMessageList viewport ([[scroll-area-keyboard-stop]])."
+  },
+  {
+    "name": "AspectRatio",
+    "astryxName": "Aspect Ratio",
+    "module": "AspectRatio",
+    "exports": [
+      "AspectRatio",
+      "AspectRatioProps"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix AspectRatio",
+    "storyPath": "src/components/ui/AspectRatio.stories.tsx",
+    "note": "documented re-export ([[surface-wraps]]) \u2014 layout only, no paint/roles/size lane; lite stub"
+  },
+  {
+    "name": "VisuallyHidden",
+    "module": "VisuallyHidden",
+    "exports": [
+      "VisuallyHidden",
+      "VisuallyHiddenProps"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix VisuallyHidden",
+    "storyPath": "src/components/ui/VisuallyHidden.stories.tsx",
+    "note": "documented re-export ([[surface-wraps]]); the announce-only pattern (clipped 1px, kept in the a11y tree); no paint/roles/size lane; passive play asserts present-but-clipped"
+  },
+  {
+    "name": "Grid",
+    "module": "Grid",
+    "exports": [
+      "Grid",
+      "GridProps"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix Grid",
+    "storyPath": "src/components/ui/Grid.stories.tsx",
+    "note": "documented re-export ([[surface-wraps]]) \u2014 pure layout, no paint/roles/size lane; gap on the --space scale; lite stub"
+  },
+  {
+    "name": "Section",
+    "module": "Section",
+    "exports": [
+      "Section",
+      "SectionProps"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix Section",
+    "storyPath": "src/components/ui/Section.stories.tsx",
+    "note": "documented re-export ([[surface-wraps]]) \u2014 vertical-padding scale passed through untouched, not a type lane; no paint; lite stub"
+  },
+  {
+    "name": "MoreMenu",
+    "astryxName": "More Menu",
+    "module": "MoreMenu",
+    "exports": [
+      "MoreMenuProps",
+      "MoreMenu"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "lite",
+    "controlBox": "composite",
+    "buildingBlock": "IconButton + DropdownMenu",
+    "storyPath": "src/components/ui/MoreMenu.stories.tsx",
+    "note": "overflow \u22ef composition ([[floating-surface-wraps]]): ghost IconButton (three-dots, REQUIRED aria-label) + DropdownMenu passthrough; secondary actions only; appears as a do/don't on the DropdownMenu page (not a comparison column)",
+    "priorArt": "Inherits the DropdownMenu fix for Radix #1963 (https://github.com/radix-ui/primitives/issues/1963) and #2700 (https://github.com/radix-ui/primitives/issues/2700) with no code of its own ([[dropdown-assistive-click]])."
+  },
+  {
+    "name": "EmptyState",
+    "astryxName": "Empty State",
+    "module": "EmptyState",
+    "exports": [
+      "EmptyStateProps",
+      "EmptyState"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Icon + Heading + Text + ButtonGroup composition",
+    "storyPath": "src/components/ui/EmptyState.stories.tsx",
+    "note": "net-new lite composition ([[feedback-set]]); centered + max-width capped; icon regular-weight --ds-icon-neutral; actions via ButtonGroup (buttonOrder, \u22641 solid primary [[button-priority]]); no blame copy"
+  },
+  {
+    "name": "Table",
+    "module": "Table",
+    "exports": [
+      "Table"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix Table",
+    "storyPath": "src/components/ui/Table.stories.tsx",
+    "note": "styling wrap for simple/static tables ONLY ([[static-table]]): surface variant, control-lane cell text, body-row hover, weight-600 non-interactive header, numeric-column right-align AND tabular figures via the `numeric` prop (data-numeric \u2014 both SHIPPED at the [[static-table]] amendment, painted-width parity asserted in the Usage play); NAMING: Radix puts consumer props on the scroll wrapper so the <table> was anonymous \u2014 Root now intercepts `aria-label` into a VISUALLY HIDDEN <caption> (zero layout cost) and takes `caption` + `captionSide` for a visible one (CSS caption-side, --ds-text-weak, inset to the cell text edge per size step), while `aria-labelledby` is refused IN THE TYPE (the refusal sentence IS the declared type) + dev console.warn for JS callers, since a <caption> cannot reference an id; no new exports; NO sorting/selection/virtualization \u2014 data grid is external \u2192 a dedicated grid library; components.css .rt-Table*"
+  },
+  {
+    "name": "ToggleButton",
+    "astryxName": "Toggle Button",
+    "module": "ToggleButton",
+    "exports": [
+      "ToggleButtonProps",
+      "ToggleButton"
+    ],
+    "status": "ported",
+    "wave": 2,
+    "tier": "lite",
+    "controlBox": "row",
+    "buildingBlock": "@radix-ui/react-toggle",
+    "storyPath": "src/components/ui/ToggleButton.stories.tsx"
+  },
+  {
+    "name": "ToggleButtonGroup",
+    "astryxName": "Toggle Button Group",
+    "module": "ToggleButtonGroup",
+    "exports": [
+      "ToggleButtonGroupRootProps",
+      "ToggleButtonGroupItemProps",
+      "ToggleButtonGroup"
+    ],
+    "status": "ported",
+    "wave": 2,
+    "tier": "lite",
+    "controlBox": "row",
+    "buildingBlock": "@radix-ui/react-toggle-group",
+    "storyPath": "src/components/ui/ToggleButtonGroup.stories.tsx"
+  },
+  {
+    "name": "Toolbar",
+    "module": "Toolbar",
+    "exports": [
+      "ToolbarProps",
+      "ToolbarRoot",
+      "ToolbarSeparatorProps",
+      "ToolbarSeparator",
+      "Toolbar"
+    ],
+    "status": "ported",
+    "wave": 2,
+    "tier": "lite",
+    "controlBox": "composite",
+    "buildingBlock": "@radix-ui/react-toolbar",
+    "storyPath": "src/components/ui/Toolbar.stories.tsx",
+    "note": "start/center/end slot layout ([[toolbar-slots]]); constrained System children via Toolbar.Button asChild; dividers; History carries the SegmentedControl-vs-ToggleButtonGroup boundary (value picker vs tool state)"
+  },
+  {
+    "name": "DragHandle",
+    "module": "DragHandle",
+    "exports": [
+      "DragHandleOrientation",
+      "DragHandleProps",
+      "DragHandle"
+    ],
+    "status": "ported",
+    "wave": 5,
+    "tier": "full",
+    "controlBox": "composite",
+    "buildingBlock": "ghost System IconButton + the DotsSix / DotsSixVertical sparse glyph at weight=bold",
+    "storyPath": "src/components/ui/DragHandle.stories.tsx",
+    "note": "[[reorder-capability]] - the grip a reorderable item is moved by, and the only net-new surface the reorder capability needed. controlBox:\"composite\" for the same reason MoreMenu carries it: the box is IconButton's, and the row ladder is measured where IconButton is. A COMPOSITION, not a new control: a tertiary (ghost) IconButton, so the [[control-box-per-step]] control box (24x24 at every tier, which [[checkbox-target-size]] shows is not free), the control size lane, the [[focus-ring]] focus ring and a real <button> with free Space/Enter activation all arrive settled. Its own CSS is four declarations: grab cursor, touch-action none for the pointer capture, the GUIDELINES 4 neutral glyph colour over Radix's accent ghost, and the held state on --ds-fill-press. The glyph declares weight=bold because both DotsSixVertical and DotsSix are in the sparse-glyph register ([[optical-icon-weight]], guarded). Behaviour comes entirely from useReorder: spread getHandleProps(id) and the handle is wired for the keyboard route, the single-pointer click route (WCAG 2.5.7, [[reorder-single-pointer-path]]) and the pointer drag.",
+    "priorArt": "Atlassian Pragmatic drag and drop design guidelines (https://atlassian.design/components/pragmatic-drag-and-drop/design-guidelines): TOOK the finding that a handle exists for AFFORDANCE and for conflict resolution when an item holds other interactive parts, not for precision, plus the 24x24 target floor when the handle is the only draggable region; TOOK the always-visible versus visible-on-hover split by whether dragging is a primary or secondary action. dnd-kit setActivatorNodeRef and KeyboardSensor (https://github.com/clauderic/dnd-kit/blob/master/packages/core/src/sensors/keyboard/KeyboardSensor.ts): TOOK the rule that once an activator node is registered, a keypress elsewhere on the item must NOT lift it. React Aria drag affordance (https://react-aria.adobe.com/dnd): TOOK the framing that an explicit affordance resolves conflicting interactions such as selection and improves discoverability. Carbon (https://github.com/carbon-design-system/tanstack-carbon/issues/85) is handle-first but is an open design proposal rather than a shipped component, so it is noted and not treated as precedent; Fluent and Polaris ship no reorder pattern at all and are therefore not prior art here. Pencil & Paper, Drag & drop UX design best practices (https://www.pencilandpaper.io/articles/ux-pattern-drag-and-drop): TOOK the two-part cursor affordance for a draggable, \u201cwe typically see a pointer appear initially, then a grabbing hand once the mouse is being pressed\u201d \u2014 which is why the grip reads grab at rest while the GRABBING half was moved off the grip and onto the document, since a captured pointer spends a drag over everything except the thing it is holding. react-beautiful-dnd preset styles (https://github.com/atlassian/react-beautiful-dnd/blob/master/docs/guides/preset-styles.md): TOOK that split verbatim, because they publish exactly these two rules \u2014 \u201ccursor: grab\u201d on the drag handle in the resting phase, and \u201ccursor: grabbing\u201d applied to the BODY element in the dragging phase \u2014 and REJECTED their pointer-events: none on the handle during a drag, which this capability does not need because capture lives on the group rather than on the moving node."
+  },
+  {
+    "name": "Collapsible",
+    "module": "Collapsible",
+    "exports": [
+      "CollapsibleProps",
+      "Collapsible",
+      "CollapsibleGroupRootProps",
+      "CollapsibleGroupItemProps",
+      "CollapsibleGroup"
+    ],
+    "status": "ported",
+    "wave": 2,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "@radix-ui/react-collapsible",
+    "storyPath": "src/components/ui/Collapsible.stories.tsx",
+    "note": "default-closed ([[collapsible-and-accordion]], diverges from Astryx open) + disabled + aria wiring (aria-expanded/aria-controls, a gap Astryx omits); animated height on the motion ladder ([[collapsible-and-accordion]]); CollapsibleGroup rides @radix-ui/react-accordion with collapsible=true always + dividers CSS ([[collapsible-and-accordion]])"
+  },
+  {
+    "name": "Toast",
+    "module": "Toast",
+    "exports": [
+      "ToastTone",
+      "ToastPosition",
+      "CollisionBehavior",
+      "DismissFn",
+      "ToastAction",
+      "ToastOptions",
+      "useToast",
+      "ToastProviderProps",
+      "ToastProvider",
+      "ToastViewportProps",
+      "ToastViewport"
+    ],
+    "status": "ported",
+    "wave": 2,
+    "tier": "full",
+    "controlBox": "exempt",
+    "buildingBlock": "@radix-ui/react-toast",
+    "storyPath": "src/components/ui/Toast.stories.tsx",
+    "note": "wave-2 flagship; four accent-aware tones ([[toast-feedback-tier]]), windowed queue + dedup + pause-aware timer + focus handoff manager lifted from Astryx ([[toast-feedback-tier]]), action+dismiss via ButtonGroup + F8 hotkey ([[toast-feedback-tier]]); consumer-mounts ToastProvider+ToastViewport",
+    "priorArt": "Radix issue 4115 (https://github.com/radix-ui/primitives/issues/4115) and Radix PR 4127 (https://github.com/radix-ui/primitives/pull/4127): TOOK aria-live=\"off\" on the viewport, so a modal layer's hideOthers leaves the toast rail readable ([[toast-under-modal]]). The PR sets it on the region wrapper, and ours sits on the ol, which the aria-hidden ancestor rule treats the same. The pointer half, a body portal so --ds-z-toast clears the modal overlay, landed with a container prop ([[toast-under-modal]]). A toast raised before the modal opened still takes no pointer input."
+  },
+  {
+    "name": "Overlay",
+    "module": "Overlay",
+    "exports": [
+      "OverlayShowOn",
+      "OverlayPosition",
+      "OverlayScrim",
+      "OverlayProps",
+      "Overlay"
+    ],
+    "status": "ported",
+    "wave": 2,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "absolute-inset scrim pattern (no primitive)",
+    "storyPath": "src/components/ui/Overlay.stories.tsx",
+    "note": "RECLASSIFIED ([[overlay-hover-scrim]]): NOT a portal layer (was 'Portal + Dialog.Overlay') \u2014 a media hover-scrim widget. position:relative container + absolute-inset scrim from --ds-scrim (+ --ds-scrim-light for dark media), content slots fill/bottom/top, showOn hover/focus/always/hover-or-focus with tap-to-toggle on (hover:none). Opacity + :focus-within reveal keeps inner actions keyboard-reachable (never display:none/visibility:hidden)"
+  },
+  {
+    "name": "Calendar",
+    "module": "Calendar",
+    "exports": [
+      "CalendarSingleProps",
+      "CalendarRangeProps",
+      "CalendarProps",
+      "Calendar"
+    ],
+    "status": "ported",
+    "wave": 3,
+    "tier": "full",
+    "controlBox": "exempt",
+    "buildingBlock": "custom date grid on lifted Astryx date math (src/dates/* + useGridFocus)",
+    "storyPath": "src/components/ui/Calendar.stories.tsx",
+    "note": "single + range on the lifted Astryx date math (DECISIONS [[catalog-as-specification]] @ 88c95e4); UI from scratch on --ds-* \u2014 selected = accent-9 fill ([[select-selected-row]]), today = a 2px accent bar (third channel), range = an a3->a5->a9 intensity ramp painted flush with selective logical-corner rounding, inset focus hairline ([[calendar-grid]] divergence from the [[input-focus-ring-offset]] +2px outset ring). [[calendar-grid]] a11y: aria-current ADDED on today + RTL arrow-nav WIRED into the pre-existing useGridFocus isRtl swap; aria-selected on the gridcell is a faithful port. isDateDisabled polarity/arg flipped at the useCalendarConstraints boundary (ISO-in/true=disabled)"
+  },
+  {
+    "name": "DateInput",
+    "astryxName": "Date Input",
+    "module": "DateInput",
+    "exports": [
+      "DateInputProps",
+      "DateInput"
+    ],
+    "status": "ported",
+    "wave": 3,
+    "tier": "full",
+    "controlBox": "row",
+    "buildingBlock": "Field + Calendar-dialog popover on the lifted date parsers",
+    "storyPath": "src/components/ui/DateInput.stories.tsx",
+    "note": "free-text date field + calendar-dialog popover, a Typeahead sibling on the shared Field shell ([[date-input]]). Input rides Radix TextField.Root (validation paint + neutral focus ring + affixes reused, [[field-shell]]/[[field-shell-adoption]]/[[validation-focus-paint]]); parsing reuses the lifted parseDateInput ([[catalog-as-specification]] @ 88c95e4) \u2014 no re-implementation. TWO feedback channels that never cross: ephemeral parse failure \u2192 assertive announce + aria-invalid-while-pending + silent-revert-on-blur (never the validation channel); STANDING problem (committed value out of min/max, or caller validation) \u2192 Field.validation. Popover KEEPS Radix role=dialog named 'Choose date' ([[date-input]] \u2014 the opposite of Typeahead's listbox override); ArrowDown/Alt+ArrowDown opens without moving focus (skipAutoFocus). The trailing calendar IconButton is a REAL tab stop (divergence from the Select/Typeahead tabIndex=-1 clear \u2715). API: value?: ISODateString + required onValueChange(v|undefined), null-free, ISO on the wire. The disabledReason soft-disable ([[disabled-reason]]). Deferred: changeAction/isLoading optimistic layer, InputGroup composition"
+  },
+  {
+    "name": "DateRangeInput",
+    "astryxName": "Date Range Input",
+    "module": "DateRangeInput",
+    "exports": [
+      "DateRangePreset",
+      "DateRangeInputProps",
+      "isRangeEqual",
+      "DateRangeInput"
+    ],
+    "status": "ported",
+    "wave": 3,
+    "tier": "full",
+    "controlBox": "row",
+    "buildingBlock": "MultiSelect-trigger chrome + DateInput popover mechanism hosting a range Calendar + a preset sidebar",
+    "storyPath": "src/components/ui/DateRangeInput.stories.tsx",
+    "note": "a range date picker \u2014 one button trigger opening a DIALOG that hosts a preset sidebar beside a two-month range Calendar ([[date-range-input]]). The range sibling of DateInput ([[date-input]]) but a DIFFERENT shape at both ends. TRIGGER reuses the MultiSelect/Select .rt-SelectTrigger chrome (surface fill + border + [[validation-focus-paint]] neutral focus ring + the .rt-ds-select-affix/-lead/-clear scaffolding for free) \u2014 NOT a free-text field (a range is entered by picking; the keyboard-first exact-entry alternative is two DateInputs in a FieldGroup, a named deferral); a leading CalendarBlank glyph, aria-haspopup='dialog' (NOT listbox), and deliberately NO caret (a caret signals a dropdown; this opens a dialog). POPOVER reuses DateInput's mechanism verbatim: <Theme>-wrapped Popover.Content asChild, COMPOUND .radix-themes.rt-ds-daterange-panel selector on the pre-bundled @radix-ui/react-popover, Radix role='dialog' KEPT (named 'Choose date range'), onOpenAutoFocus moving focus INTO the grid's roving day so the range calendar is keyboard-operable (WCAG 2.1.1), onInteractOutside exempting the anchor. PRESET SIDEBAR: a role='group' of ghost Buttons in normal Tab order (NOT a listbox \u2014 presets are shortcuts, not the selection surface); the ACTIVE preset (getRange()==value via isRangeEqual) carries aria-current='true' (the string, not 'date') and paints from --ds-fill-selected-subtle (a5, the [[calendar-grid]] committed-BAND tier) + --ds-text-strong \u2014 deliberately NOT --ds-fill-selected (a9), which would fight the calendar's own a9 endpoints in the same dialog; hover stays --ds-fill-accent-weak (a3). Clicking a preset drives the Calendar's controlled value + focusDate (grid SHOWS the range) and KEEPS THE DIALOG OPEN (confirm/refine \u2014 a divergence from DateInput's day-select-closes; Done/Escape/outside-click close it). Display: Intl.DateTimeFormat.formatRange (locale-correct part-dropping \u2014 same-year drops year, cross-year keeps it, start==end collapses to a single date, spaced en dash U+2013) with a VisuallyHidden 'July 3 to July 10, 2026' full form so the dash is never mis-announced; no partial state flickered into the trigger (the Calendar commits {start,end} atomically; in-progress lives in the grid preview, [[calendar-grid]]). API: value?: DateRange {start,end} + required onValueChange(v|undefined), null\u2192undefined normalized at this boundary, ISO on the wire; presets/numberOfMonths(default 2)/hasClear(default true)/min/max/isDateDisabled. The disabledReason soft-disable ([[disabled-reason]]) on the button trigger (aria-disabled keeps it focusable; Radix's own disabled skin re-applied via the [data-disabled-reason] hook). Reuses Calendar (range, [[calendar-grid]])/MultiSelect-trigger/DateInput-popover/Button/IconButton/Field/[[disabled-reason]]/the lifted plainDate formatters \u2014 net-new = the panel + preset-column + active-preset + no-caret-clear + soft-disable-trigger CSS, isRangeEqual, and the Intl formatter; zero net-new tokens. Deferred: changeAction/isLoading optimistic layer, a live-partial-range in the trigger, InputGroup, and the two-DateInput FieldGroup reuse-alternative for keyboard-first exact-date range entry"
+  },
+  {
+    "name": "DateTimeInput",
+    "astryxName": "Date Time Input",
+    "module": "DateTimeInput",
+    "exports": [
+      "ISODateTimeString",
+      "splitDateTime",
+      "combineDateTime",
+      "DateTimeInputProps",
+      "DateTimeInput"
+    ],
+    "status": "ported",
+    "wave": 3,
+    "tier": "full",
+    "controlBox": "row",
+    "buildingBlock": "FieldGroup composite: bare DateInput + bare TimeInput",
+    "storyPath": "src/components/ui/DateTimeInput.stories.tsx",
+    "note": "a date AND a time under one group label ([[date-time-input]]). A COMPOSITE (a GROUP of two sub-controls), NOT a single Field: it EMBEDS the shipped DateInput ([[date-input]]) + TimeInput ([[time-input]]) in their BARE mode inside a FieldGroup.Root \u2014 the name is a group LABEL (FieldGroup.Label -> aria-labelledby on role=group), each bare child carries its OWN aria-label (Date / timeLabel) so the two inner inputs have DISTINCT ids + names, and useOptionalFieldControl returns null under a FieldGroupCtx (no FieldCtx) so the children never collide on a shared field id. Combined ISODateTime value split/combined at the T (splitDateTime/combineDateTime); a T-less string = a bare date. Conditional time-clamp: the embedded TimeInput's min/max bite ONLY on the matching boundary date (timeMin=minTime iff selectedDate===minDate); on a date change the time SNAPS UP/DOWN into the new window (silent, not an error), and picking a date onto an empty time auto-seeds the current wall-clock time so a date pick always combines with a time. TWO-TIER feedback: each sub-field keeps its OWN local ephemeral channel (assertive revert + aria-invalid-while-pending), the COMPOSITE STANDING problem (combined out of range, or caller validation) surfaces ONCE via FieldGroup.Message (role=alert) + the group's composite aria-invalid, and the proactive time-window HINT rides FieldGroup.Description as guidance-not-error ([[disabled-reason]]). The disabledReason prop soft-disables BOTH sub-fields. Reuses DateInput/TimeInput/FieldGroup/[[disabled-reason]]/the lifted plainDate+timeParser math wholesale \u2014 zero re-implemented date/time math (only the split/combine at T is new). The only net-new CSS is the role=group flex-row + container-query stack (geometric); zero net-new tokens. Deferred: changeAction/isLoading optimistic layer, InputGroup, the fuller FieldGroup-describedby-into-subfields wiring"
+  },
+  {
+    "name": "TimeInput",
+    "astryxName": "Time Input",
+    "module": "TimeInput",
+    "exports": [
+      "TimeInputProps",
+      "TimeInput"
+    ],
+    "status": "ported",
+    "wave": 3,
+    "tier": "full",
+    "controlBox": "row",
+    "buildingBlock": "Field + free-text time parse on the lifted timeParser (adjustTime increment)",
+    "storyPath": "src/components/ui/TimeInput.stories.tsx",
+    "note": "free-text time field + keyboard (\u2191/\u2193) increment, a DateInput sibling MINUS the popover on the shared Field shell ([[time-input]]). Input rides Radix TextField.Root (validation paint + neutral focus ring + affixes reused, [[field-shell]]/[[field-shell-adoption]]/[[validation-focus-paint]]); parsing reuses the lifted parseTimeInput and the increment is the lifted adjustTime (O(1) midnight wrap, non-finite-guarded \u2014 [[catalog-as-specification]] @ 88c95e4) \u2014 no re-implementation. TWO feedback channels that never cross (shared with DateInput, [[date-input]]): ephemeral parse failure \u2192 assertive announce + aria-invalid-while-pending + silent-revert-on-blur (never the validation channel); STANDING problem (committed value out of min/max, or caller validation) \u2192 Field.validation. ArrowUp/ArrowDown increment in place by `increment` minutes (midnight wrap), empty field seeds base from the current wall-clock time (new Date() read in the component, never in adjustTime), clamped by min/max; each step announced POLITELY. Stays a PLAIN text input \u2014 deliberately NOT role=spinbutton (free-text-first); NO visible +/- stepper buttons (same call as NumberInput, [[number-input]] \u2014 shared stepper is a named deferral). PARITY UPGRADE over Astryx (which only greys invalid text): the assertive announce + aria-invalid. API: value?: ISOTimeString + required onValueChange(v|undefined), null-free, ISO HH:MM[:SS] on the wire; hasSeconds/hourFormat(12h|24h)/increment; hasAutoFocus documented (undocumented upstream). The disabledReason soft-disable ([[disabled-reason]]). Deferred: touch-friendly/shared stepper primitive, changeAction/isLoading optimistic layer, InputGroup composition"
+  },
+  {
+    "name": "NumberInput",
+    "astryxName": "Number Input",
+    "module": "NumberInput",
+    "exports": [
+      "NumberInputProps",
+      "NumberInput"
+    ],
+    "status": "ported",
+    "wave": 3,
+    "tier": "full",
+    "controlBox": "row",
+    "buildingBlock": "Field + native type=number field, parse/validate on the lifted parseNumberInput (native spinner increment)",
+    "storyPath": "src/components/ui/NumberInput.stories.tsx",
+    "note": "native numeric field (type=number) on the shared Field shell \u2014 TimeInput's TWIN ([[number-input]]): the SAME two-channel parse/commit/revert model, only the increment differs (browser's native type=number spinner instead of the lifted adjustTime). Input rides Radix TextField.Root (validation paint + neutral focus ring + affixes reused, [[field-shell]]/[[field-shell-adoption]]/[[validation-focus-paint]]); the body renders INSIDE its self-owned Field.Root (reads field aria via useOptionalFieldControl). Parsing reuses the lifted parseNumberInput (src/utils/parseNumberInput.ts \u2014 extracted from Astryx's inline helper @ 88c95e4, [[catalog-as-specification]], with net-new node-lane logic coverage) which REJECTS (never clamps) out-of-range/malformed input: typing 99 with max 10 reverts to the last value, it never becomes 10. TWO feedback channels that never cross (shared with DateInput/TimeInput, [[date-input]]): ephemeral parse/range failure \u2192 assertive announce + aria-invalid-while-pending + silent-revert-on-blur (never the validation channel); STANDING problem (a CONTROLLED value the parent forces out of min/max, or caller validation) \u2192 Field.validation (the user can't cause it \u2014 reject-revert governs typing). We parse the RAW pending string, NOT input.valueAsNumber (native type=number reports NaN/'' for intermediate '-'/'1.'/'1e'). Native type=number + min/max/step attrs give role=spinbutton + aria-valuemin/max/now for free; inputMode numeric, or decimal when step is fractional; NO custom stepper and NO Intl formatting ([[number-input]], reuse gate \u2014 a shared touch stepper is a named deferral). units renders as a decorative aria-hidden trailing suffix AND is folded into aria-describedby via a persistent VisuallyHidden node (the [[disabled-reason]] reasonId mechanism), so AT announces it without caller duplication; the label stays the accessible name ([[field-shell]]). PARITY UPGRADE over Astryx (which shows a local generic 'Invalid number'): honest, range-aware copy routed through the SHARED assertive announcer. API: value?: number + required onValueChange, discriminated on clearable (clearable \u2192 number|undefined + trailing \u2715; else number-only, empty reverts), null-free. The disabledReason soft-disable ([[disabled-reason]]). Deferred: custom +/- stepper + Intl.NumberFormat display, a separately-spoken unitsLabel, changeAction/isLoading optimistic layer, InputGroup composition, the scroll-wheel-mutate guard (known native wart). Zero net-new tokens; reuses TextField chrome (no new CSS)"
+  },
+  {
+    "name": "FileInput",
+    "astryxName": "File Input",
+    "module": "FileInput",
+    "exports": [
+      "FileInputProps",
+      "FileInput"
+    ],
+    "status": "ported",
+    "wave": 3,
+    "tier": "full",
+    "controlBox": "row",
+    "buildingBlock": "Field + native <input type=file> + a net-new dropzone surface",
+    "storyPath": "src/components/ui/FileInput.stories.tsx",
+    "note": "a file picker with a default dropzone ([[file-input]]) \u2014 the ONE wave-3 component earning genuinely net-new UI (a visual drop surface); the net-new is confined to that surface (dashed target + accent-preview drag-over + :focus-within ring), everything else assembled from shipped parts. THE NATIVE <input type=file> IS THE OPERABLE CONTROL AND THE TAB STOP (dropzone mode) \u2014 a divergence from Astryx's hand-rolled role=button div; the native input ships Enter/Space/focus/disabled/label-association for free (React Aria FileTrigger + GOV.UK progressive enhancement), is CLIP-hidden (never display:none \u2014 that drops it from the tab order + a11y tree), takes its id/aria-describedby/aria-invalid from the Field (the Field label's htmlFor NAMES it; the dropzone's visible content is aria-hidden so the wrapping <label> never pollutes the name). mode='dropzone' is the DEFAULT (stated divergence from Astryx's 'input' default \u2014 aligns with Astryx's OWN doc guidance pushing the dropzone); mode='input' is a compact Button row where the Button is the tab stop + the input is tabIndex=-1 (stated focus-mechanism delta). Drag-and-drop is a POINTER-ONLY enhancement (dragenter/over/leave/drop toggling data-drop-target); keyboard is served by the same input, so no second tab stop (WCAG 2.1.1). THREE feedback surfaces that never cross (a UX review ruling): (1) clean-selection confirmation \u2192 shared POLITE useAnnounce ('Added report.pdf, 2.4 MB' / 'N files selected'); (2) rejections + PARTIAL acceptance \u2192 a component-local role=status that is ALSO visible text below the control (status NOT alert \u2014 partial acceptance isn't blocking; the user must SEE which files were dropped; colour-not-alone icon+text, warning family), leading with the win on a partial ('Added 2 files. cat.gif wasn't added \u2014 PNG or JPG only.'); (3) STANDING whole-field invalid \u2192 Field.validation (role=alert) for a caller validation (a form owns submit-time required-empty; no error painted at rest). On a partial accept COMMIT the accepted subset AND surface the rejection on (2) \u2014 NEVER double-announce (the local region self-announces; useAnnounce owns only clean-success + clear-all). REPLACE-NEVER-APPEND (native input .value reset after each pick so re-selecting the same file re-fires); a SINGLE clear-all \u2715 (per-file remove is a named deferral), NEUTRAL not tone=danger (clearing an un-uploaded selection is trivially reversible), a REAL tab stop (the only way to clear \u2014 unlike the [[field-family-anatomy]] date/time \u2715 it earns the tab order, the same logic [[date-input]] applies to DateInput's calendar button). validateFiles + formatFileSize LIFTED to src/utils/* ([[catalog-as-specification]] @ 88c95e4) with net-new node-lane logic coverage incl. the MIXED partial-acceptance case upstream never tests. API: value?: File | File[] + required onValueChange(File|File[]|undefined), null-free, controlled. The disabledReason soft-disable ([[disabled-reason]]): the operable control + drag handlers early-return while soft. The earned net-new is the drop surface + accent-preview drag-over + :focus-within ring ([[field-shell-adoption]]/TextArea pattern) + the visible status region; zero net-new tokens (reuses --ds-stroke-weak / --ds-bg-subtle / --ds-fill-hover / --ds-fill-accent-weak (a3 preview tier, [[calendar-grid]]) / --ds-stroke-accent / --ds-stroke-focus-hairline / --ds-text-warning). Deferred: per-file removable rows + per-file progress, changeAction/isLoading optimistic layer, InputGroup, scroll/spoken-form niceties"
+  },
+  {
+    "name": "Tokenizer",
+    "astryxName": "Tokenizer",
+    "module": "Tokenizer",
+    "exports": [
+      "TokenizerChange",
+      "TokenizerProps",
+      "Tokenizer"
+    ],
+    "status": "ported",
+    "wave": 3,
+    "tier": "full",
+    "controlBox": "row",
+    "buildingBlock": "Typeahead engine (embedded/transient) + Token chips + OverflowList + Field",
+    "storyPath": "src/components/ui/Tokenizer.stories.tsx",
+    "note": "The dropdown-only multi-token input ([[tokenizer-input]]). Tokens are created ONLY through the dropdown \u2014 pick a match, or (creatable, default false) pick a synthesized `Create \"X\"` row; NO free-text Enter/comma/paste/blur commit (named deferrals; the Jakob's-Law tradeoff is paid for real/deduped/validatable tokens). Reuses the Typeahead engine via an additive EMBEDDED/transient mode (chrome-less input, select resets the query, popover anchors to the whole surface) \u2014 behavior-preserving for standalone Typeahead (plays stayed 100% green). Token chips + OverflowList collapse (unfocusedInline: collapse-on-blur/expand-on-focus; unfocusedLayer deferred \u2014 no Layer primitive). The one earned net-new is the wrapping chip-row surface + the :has(input:focus-visible) ring hoist (reuses the TextField skin; zero net-new tokens). Chip roving owned by Tokenizer (Tab-redirect to the input, Shift+Tab+arrows to chips, post-removal focus next\u2192prev\u2192input). Three-layer dedupe; maxEntries collapse-but-focusable + calm description hint (guidance not error); Backspace-on-empty removes the last chip; htmlName form participation (disabled excluded); soft-disable ([[disabled-reason]]); parity announce (adds/removes/cap, polite). Dropped upstream's phantom 'reorder' change type. Deferred: free-text/comma/paste/blur commit, the token-chip EDIT mode (a maintainer flag, [[tokenizer-input]]), unfocusedLayer, changeAction/InputGroup, drag-to-reorder."
+  },
+  {
+    "name": "CommandPalette",
+    "astryxName": "Command Palette",
+    "module": "CommandPalette",
+    "exports": [
+      "CommandPaletteProps",
+      "CommandPalette"
+    ],
+    "status": "ported",
+    "wave": 3,
+    "tier": "full",
+    "controlBox": "row",
+    "buildingBlock": "raw Radix Themes Dialog ([[component-registry]] agent-gap) + a grouped filter listbox on the shared combobox engine",
+    "storyPath": "src/components/ui/CommandPalette.stories.tsx",
+    "note": "[[command-palette]] \u2014 the \u2318K search-to-act/pick surface. RIDES the shared combobox engine (src/components/ui/useComboboxEngine.ts \u2014 useAsyncSearch + useListboxNavigation), EXTRACTED behavior-preservingly from the Typeahead flagship so both share ONE combobox brain (Typeahead passes neither delta \u2192 its full play suite + Tokenizer's embedded suite stayed green). CommandPalette turns ON two opt-in engine deltas: optimisticNarrow (client-filter shown rows while the async source resolves) + commitQueryWithResults (the 'No commands match X' empty line echoes the COMMITTED query, stable while a no-result search is pending). NO letter-jump path (removed in extraction \u2192 the upstream hasSearch wart is gone by construction). SHELL = the RAW Radix Themes Dialog. System Dialog now SHIPS ([[standard-dialog]]), but CommandPalette deliberately keeps the raw primitive \u2014 the [[standard-dialog]] non-swap: a palette steers its own focus, skins its own top-anchored content, and reuses the shared modal motion; System Dialog serves the standard title/description/body/footer modal, not this specialized surface. (Composed thinly like AlertDialog wraps raw AlertDialog.) Top-anchored ~12vh (align='start' + a :has() scroll-padding override \u2014 net-new, justified: Radix centers vertically, wrong for a palette), fixed max-width min(640px, 100vw-2rem), opaque overlay surface ([[floating-surface-fill]]: --ds-bg-overlay/--ds-shadow-overlay/--ds-radius-3), internal-scroll results. Modal enter/exit motion INHERITED from the .rt-BaseDialogContent/.rt-BaseDialogOverlay [[motion-retiming]] bindings \u2014 NO per-component override (would double-animate); the Dialog's own overlay scrim is the backdrop (not --ds-scrim/Overlay). Grouped via the ONE lifted groupItems util (src/components/ui/groupItems.ts, [[catalog-as-specification]]) \u2014 BOTH the flat activedescendant order AND the render tree derive from ONE call (kills upstream's dual-invariant); group headings are role=group+aria-labelledby, visual-only (NOT options) so arrows flow continuously across boundaries; active row paints --ds-fill-hover via data-highlighted (the Select/MultiSelect vocabulary). LAUNCHER (no value) = no aria-selected; optional PICKER (value?:string + onValueChange) = matching option aria-selected + a muted --ds-fill-selected-subtle paint. 150ms delayed-spinner grace (busy flag immediate for logic, visible spinner MOUNTED only after 150ms, cancelled on resolve \u2014 a fast resolve never flashes). Two _internal polish plays: group-header-scroll-on-cross + pointer-vs-keyboard guard (ignore mouseenter unless the pointer moved since the last keydown). isInline docs mode = a plain bounded div (no dialog/backdrop/trap/Escape/scroll-lock, no autofocus, no mount-scroll). Escape closes via the Dialog's own onOpenChange (no duplicate handler). Zero net-new tokens. Deferred: global \u2318K hotkey (opening stays consumer-controlled via open/onOpenChange), frecency ranking, nested/sub-command pages."
+  },
+  {
+    "name": "PowerSearch",
+    "astryxName": "Power Search",
+    "module": "PowerSearch",
+    "exports": [
+      "PowerSearchProps",
+      "PowerSearch"
+    ],
+    "status": "ported",
+    "wave": 3,
+    "tier": "full",
+    "controlBox": "row",
+    "buildingBlock": "the .rt-ds-tokenizer chip-row surface (reused) + Token chips + an embedded Typeahead field picker + a non-dialog Radix Popover edit popover + the src/powersearch/* model layer",
+    "storyPath": "src/components/ui/PowerSearch.stories.tsx",
+    "note": "[[power-search]] \u2014 the wave-3 capstone. Structured filter bar: a field pick opens a NON-DIALOG edit popover (Popover.Content role=none + auto-focus prevented + anchor exempt from outside-dismiss \u2014 the Typeahead pattern), each committed filter is a clickable+removable Token chip (field \u00b7 operator \u00b7 bold value). MODEL LAYER (src/powersearch/, tested, 107 logic tests): flat-AND-only, the 14-member OperatorValue union, createPowerSearchConfig/applyFilters/InferData, and the ONE fixed formatFilterValue (collapsed from 2 hand-synced upstream renderers; fixes the literal 'date range' stub \u2192 real 'Jan 25, 2026 \u2013 Feb 10, 2026', and the raw '7d_ago' \u2192 '7 days ago'). RENDER LAYER: PowerSearchValueEditor routes the 14 types to OUR inputs (TextField/NumberInput/DateInput/TimeInput/DateRangeInput/Select/MultiSelect/Tokenizer/Typeahead); enum/date_relative auto-commit on select; date_absolute marshals unixSeconds\u21c4ISO; date_range marshals ABSOLUTE\u21c4ISO. Two-level Escape rests on Radix's DismissableLayer stack (upstream's hand-rolled escapeStack DELETED \u2014 nested dropdown = inner layer, editor = outer). The chip row REUSES .rt-ds-tokenizer (zero net-new tokens; the only net-new CSS is the .rt-ds-powersearch-popover panel + its 3-cell layout). Documents all live props incl. the 7 doc-omitted (components override map, startIcon, onFocus, onBlur, tokenOverflowBehavior); disabledMessage\u2192disabledReason ([[disabled-reason]]), status\u2192validation; menuWidth + maxOperatorMenuItems were DEAD upstream and dropped. nested is deferred (flat-AND-only)."
+  },
+  {
+    "name": "Pagination",
+    "module": "Pagination",
+    "exports": [
+      "PaginationVariantMap",
+      "PaginationVariant",
+      "PaginationSize",
+      "PaginationProps",
+      "Pagination"
+    ],
+    "status": "ported",
+    "wave": 3,
+    "tier": "full",
+    "controlBox": "row",
+    "buildingBlock": "IconButton + Button + ellipsis logic",
+    "storyPath": "src/components/ui/Pagination.stories.tsx",
+    "note": "[[pagination-control]] \u2014 controlled-only page nav. Five variants (pages/count/compact/dots/none) on prev/next IconButtons; pages = ghost Buttons with aria-current + \u2026 ellipsis spans; dots = a role=group of buttons with selection-follows-focus (APG radiogroup) on the thin useListFocus 1D-roving hook (the dots-focus decision \u2014 useGridFocus is 2D/no-wrap/imperative-tabindex). generatePageRange + the pageSize coercion guard LIFTED to src/utils/generatePageRange.ts ([[catalog-as-specification]] @ 88c95e4) with a node-lane suite (fixed the upstream JSDoc's under-counted near-start example; source wins). pageSize picker = our compound Select; polite Page N of M announce via useAnnounce. Dropped Astryx's useOptimistic/useTransition/changeAction optimistic layer (named deferral). Zero net-new tokens."
+  },
+  {
+    "name": "Breadcrumbs",
+    "module": "Breadcrumbs",
+    "exports": [
+      "BreadcrumbsVariantMap",
+      "BreadcrumbsVariant",
+      "BreadcrumbContextValue",
+      "BreadcrumbContext",
+      "BreadcrumbsProps",
+      "Breadcrumbs",
+      "BreadcrumbItemProps",
+      "BreadcrumbItem"
+    ],
+    "status": "ported",
+    "wave": 3,
+    "tier": "full",
+    "controlBox": "exempt",
+    "buildingBlock": "nav > ol > li + plain <a> / span",
+    "storyPath": "src/components/ui/Breadcrumbs.stories.tsx",
+    "note": "[[breadcrumb-trail]] \u2014 Breadcrumbs + BreadcrumbItem + BreadcrumbContext in one file. <nav aria-label='Breadcrumb'> > <ol> > <li> with a LEADING aria-hidden separator per item (hidden on :first-child via CSS). AUTO-CURRENT lifts the DOM-scan useEffect ([[catalog-as-specification]] @ 88c95e4): with no explicit isCurrent, the LAST item's CONTENT element (link/button/span via contentRef \u2014 NOT the <li>) gets aria-current='page' \u2014 the navigation-11 a11y fix, polarity preserved (diverges from the plan's early children-introspection guess; the DOM-scan lands it on the interactive element even for a linked last crumb). Explicit isCurrent \u2192 a <span aria-current> (no link). Two variants (default/supporting) size text off the Radix scale. Links = plain <a> styled from --ds-* (System Link planned \u2192 [[component-registry]] agent-gap) or a caller `as` component; separators decorative. No collapse mechanism (upstream has none \u2014 flatten hierarchy instead). Zero net-new tokens."
+  },
+  {
+    "name": "AvatarGroup",
+    "astryxName": "Avatar Group",
+    "module": "AvatarGroup",
+    "exports": [
+      "AvatarGroupProps",
+      "AvatarGroup"
+    ],
+    "status": "ported",
+    "wave": 3,
+    "tier": "full",
+    "controlBox": "exempt",
+    "buildingBlock": "stacked Avatar + overflow count",
+    "storyPath": "src/components/ui/AvatarGroup.stories.tsx"
+  },
+  {
+    "name": "StatusDot",
+    "astryxName": "Status Dot",
+    "module": "StatusDot",
+    "exports": [
+      "StatusDotVariant",
+      "StatusDotProps",
+      "StatusDot"
+    ],
+    "status": "ported",
+    "wave": 3,
+    "tier": "full",
+    "controlBox": "exempt",
+    "buildingBlock": "accent-aware --ds-fill-* span (role=img) + reduced-motion pulse",
+    "storyPath": "src/components/ui/StatusDot.stories.tsx"
+  },
+  {
+    "name": "Timestamp",
+    "module": "Timestamp",
+    "exports": [
+      "TimestampFormat",
+      "TimestampProps",
+      "Timestamp"
+    ],
+    "status": "ported",
+    "wave": 3,
+    "tier": "full",
+    "controlBox": "exempt",
+    "buildingBlock": "<time> via Radix Text (asChild) + Intl.RelativeTimeFormat + lifted skew/interval math",
+    "storyPath": "src/components/ui/Timestamp.stories.tsx"
+  },
+  {
+    "name": "Token",
+    "module": "Token",
+    "exports": [
+      "TokenRemoveEvent",
+      "TokenProps",
+      "Token"
+    ],
+    "status": "ported",
+    "wave": 3,
+    "tier": "full",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix Badge surface skin + an all:unset invisible-button body + sibling remove \u2715",
+    "storyPath": "src/components/ui/Token.stories.tsx",
+    "note": "the interactive sibling of Badge ([[token-chip]] boundary: body-does-something \u2192 Token, else Badge). REUSES Badge's chip skin + [data-interactive] paint + inset-\u2715 + Remove {label} naming VERBATIM (the container IS a .rt-Badge surface); the ONLY net-new is the sibling invisible-button body \u2014 a container span + an all:unset <a>/<button>/<span> body + a SIBLING remove \u2715 (never nested \u2192 valid HTML in every mode) + the :has(.rt-ds-token-body:focus-visible) ring hoist + stopPropagation. Three modes by prop (href\u2192link / onClick\u2192clickable / else\u2192static); NO visual link/clickable split, NO underline (the bounded surface + hover-deepen IS the affordance). The sibling-remove-for-ALL-modes fixes Astryx's href+onRemove button-in-anchor bug. Backspace/Delete on the focused body removes (Primer). NO tone ([[destructive-tone]] intact \u2014 semantics ride categorical color); roving single-tab-stop is a Tokenizer/container concern, out of scope. disabled reuses Radix's own button-disabled skin to dim. Zero net-new tokens. Drops isLabelHidden/endContent/description/InteractiveRoleContext/polymorphic-Link (named deferrals)",
+    "priorArt": "Material Web filter chip source (https://github.com/material-components/material-web/blob/main/chips/internal/filter-chip.ts) and docs (https://github.com/material-components/material-web/blob/main/docs/components/chip.md): TOOK aria-pressed on the body button with the remove button beside it. REJECTED the leading check mark on a selected chip, because it widens the chip and moves the row, and the toolbar with roving focus and the checkbox role ([[token-pressed-state]]); Astryx ToggleButton (https://github.com/facebook/astryx/blob/main/packages/core/src/ToggleButton/ToggleButton.tsx), the precedent the system ToggleButton already follows: TOOK a hidden aria-hidden bold duplicate of the label stacked with the visible label, so a toggle Token keeps one width in both states. REJECTED the zero-height block, for one grid cell that centres the label ([[token-pressed-state]]); React Aria ToggleButton (https://react-aria.adobe.com/ToggleButton) and TagGroup (https://react-aria.adobe.com/TagGroup): TOOK a button with aria-pressed for one toggle, and the Highlight and HighlightText pair under forced colours. REJECTED the grid selection model, since aria-selected is not valid on a button, and a selected fill as the only cue; WAI-ARIA APG Button pattern (https://www.w3.org/WAI/ARIA/apg/patterns/button/): TOOK aria-pressed rendered only when pressed is given, on a label that never changes. REJECTED the mixed state, because a filter has no partial state; Carbon SelectableTag (https://raw.githubusercontent.com/carbon-design-system/carbon/main/packages/react/src/components/Tag/SelectableTag.tsx) and tag usage (https://carbondesignsystem.com/components/tag/usage/): TOOK a pressed fill that does not change on hover, each tag as its own tab stop, and the caution against two functions on one tag. REJECTED the inverse fill and the loss of category colour; Astryx Token (https://github.com/facebook/astryx/blob/main/packages/core/src/Token/Token.tsx): the original body modes and the sibling remove button ([[token-chip]])."
+  },
+  {
+    "name": "Thumbnail",
+    "module": "Thumbnail",
+    "exports": [
+      "ThumbnailProps",
+      "Thumbnail"
+    ],
+    "status": "ported",
+    "wave": 3,
+    "tier": "full",
+    "controlBox": "exempt",
+    "buildingBlock": "fixed 64px frame + prop-driven image/skeleton/placeholder states + scrim-backed remove \u2715",
+    "storyPath": "src/components/ui/Thumbnail.stories.tsx",
+    "note": "[[thumbnail-preview]] \u2014 a 64px square image preview: a prop-driven state machine (skeleton / <img> / upload spinner / placeholder). BUILDS the load-error fix upstream promised but never shipped: the <img> gets an onError \u2192 fall back to the placeholder (a broken src reads as 'no image', not the browser's broken-image glyph), with the errored flag reset on every src change. Normalized OFF Astryx's useImageMode (APCA luminance sampling) + MediaTheme (adaptive remove-button contrast): the remove \u2715 sits on a --ds-scrim disc inside a permanently-dark <Theme appearance='dark'> so its glyph stays light in BOTH app modes via the dark-scale --ds-* tokens (no per-image sampling, no hardcoded white). Reuses IconButton + Phosphor X (remove), Radix Skeleton/Spinner (loading), raw Radix Tooltip for the label (System Tooltip planned \u2192 [[component-registry]] agent-gap). role=group named by label/alt; the remove \u2715 + open trigger are SIBLINGS (never nested \u2192 valid HTML), the frame hoists the [[focus-ring]] focus ring via :has(:focus-visible), onRemove stopPropagation. A fixed 64px box (the square is a constant \u2014 no AspectRatio math). Zero net-new tokens; scoped .radix-themes; no !important. Deferred: APCA background sampling for button contrast (the scrim proves sufficient)."
+  },
+  {
+    "name": "Citation",
+    "module": "Citation",
+    "exports": [
+      "CitationSource",
+      "CitationProps",
+      "Citation"
+    ],
+    "status": "ported",
+    "wave": 3,
+    "tier": "full",
+    "controlBox": "exempt",
+    "buildingBlock": "inline <a>/<span> leaf \u2014 doc-noteref on links only; label pill + superscript accent badge",
+    "storyPath": "src/components/ui/Citation.stories.tsx"
+  },
+  {
+    "name": "Carousel",
+    "module": "Carousel",
+    "exports": [
+      "CarouselSpace",
+      "CarouselProps",
+      "Carousel"
+    ],
+    "status": "ported",
+    "wave": 3,
+    "tier": "full",
+    "controlBox": "exempt",
+    "buildingBlock": "horizontal scroll track + edge-fade masks + absolute prev/next pills on the lifted useScrollOverflow",
+    "storyPath": "src/components/ui/Carousel.stories.tsx",
+    "note": "[[carousel-scroller]] \u2014 a horizontal SCROLL CONTAINER, not a slide widget (no index/dots/autoplay upstream \u2014 not invented). A role=region + aria-roledescription='carousel' + aria-label wrapping a tabIndex=0 scroll track (overflow-x:auto, scrollbar hidden) that Children.maps each child into a shrink-proof snap slot; props gap/hasButtons(default true)/hasEdgeFade(default true)/hasSnap(default false)/padding. useScrollOverflow LIFTED to src/hooks/useScrollOverflow.ts ([[catalog-as-specification]] @ 88c95e4) \u2014 REUSES our src/utils/sharedResizeObserver.ts (observeResize/unobserveResize) singleton, the exact primitive upstream imports, so N carousels share ONE observer; the pure overflow math (computeOverflow) extracted to the node lane (useScrollOverflow.logic.test.ts), and scrollByViewport (~one-viewport scroll with a half-item peek) is reduced-motion-aware (matchMedia \u2192 behavior:'auto', the JS mirror of the CSS scroll-behavior override). A per-side gradient edge-fade MASK (alpha-only, paints nothing) appears on whichever side overflows. NORMALIZED off upstream's useLayer/Layer top-layer machinery + CSS anchor-positioning (positionArea/anchor-size()) \u2192 plain absolutely-positioned nav pills inside the position:relative region (region overflow:visible; the track owns horizontal clipping). Prev/next stay MOUNTED but disabled + opacity-hidden at the range ends (never unmounted \u2014 that would drop focus to <body>); the pill wrapper IS the floating surface (--ds-bg-overlay opaque [[floating-surface-fill]] + --ds-shadow-overlay), the ghost IconButton holds the Phosphor caret. gap/padding accept integer spacing steps mapping to --ds-space-* (a divergence from Astryx's fractional 0.5/1.5 steps \u2014 our scaling-aware scale has no half-steps). Zero net-new tokens; scoped .radix-themes; no !important."
+  },
+  {
+    "name": "OverflowList",
+    "astryxName": "Overflow List",
+    "module": "OverflowList",
+    "exports": [
+      "OverflowGap",
+      "OverflowItem",
+      "OverflowListProps",
+      "OverflowList"
+    ],
+    "status": "ported",
+    "wave": 3,
+    "tier": "full",
+    "controlBox": "exempt",
+    "buildingBlock": "sharedResizeObserver singleton + useOverflow + dual-render measurement + pure computeVisibleCount reducer; default neutral Badge +N",
+    "storyPath": "src/components/ui/OverflowList.stories.tsx",
+    "note": "[[overflow-list]] \u2014 measurement engine, not an indicator: lifted useOverflow + shared ResizeObserver + dual-render copy, computeVisibleCount extracted for the node lane. Indicator identified by POSITION (data-overflow-indicator is fictional upstream). Default overflowRenderer = non-interactive Badge +N (hidden 'N more' name); reveal is the consumer's job. Collapsed items LEAVE the a11y tree (NOT [[overlay-hover-scrim]]); measurement copy inert+aria-hidden; visible set is a named role=group. collapseFrom='end' default (divergence from Blueprint's 'start'). Callback-ref cleanup (no useEffect-return). Zero net-new tokens."
+  },
+  {
+    "name": "TreeList",
+    "astryxName": "Tree List",
+    "module": "TreeList",
+    "exports": [
+      "TreeListDensity",
+      "TreeListItemData",
+      "TreeListProps",
+      "TreeList"
+    ],
+    "status": "ported",
+    "wave": 3,
+    "tier": "full",
+    "controlBox": "exempt",
+    "buildingBlock": "Item rows (li role=treeitem) + the lifted useTreeFocus APG/roving hook",
+    "storyPath": "src/components/ui/TreeList.stories.tsx",
+    "note": "[[tree-list]] \u2014 a data-driven WAI-ARIA tree. Rows COMPOSE the _internal Item primitive ([[item-row-primitive]]) as='li' role='treeitem' for anatomy (chevron marker \u00b7 start \u00b7 label(+description) \u00b7 end) + the no-nested-interactives guard; TreeList adds the full APG wiring (aria-level/-posinset/-setsize/-expanded, roving tabIndex) + the keyboard model via the LIFTED useTreeFocus hook (src/hooks/useTreeFocus.ts, [[catalog-as-specification]] @ 88c95e4 \u2014 the tree analogue of useGridFocus): linear ArrowUp/Down/Home/End over the VISIBLE items (collapsed subtrees unrendered \u2192 naturally excluded; disabled skipped), ArrowRight (collapsed\u2192expand, expanded\u2192first child, leaf\u2192no-op), ArrowLeft (expanded\u2192collapse, else\u2192parent by level-scan), Enter/Space (activate inner action, else expand-toggle), 500ms typeahead buffer, roving-tabindex ownership (single tab stop repaired on mount + item add/remove/disable via useIsomorphicLayoutEffect, preserving a seeded tabindex=0). Pure decision logic (collectExpandedKeys/findInitialTabbableId/level-scan-to-parent/typeahead matcher) EXTRACTED to exported helpers, node-lane tested in useTreeFocus.logic.test.ts; DOM behaviors as _internal plays. VISIBLE rows render FLAT (each treeitem a direct child of the tree ul; depth via aria-level + absolute per-row indent \u2014 no accumulation, row-scoped tint/focus). TWO upgrades over Astryx: CONTROLLED expansion (expanded/onExpandedChange; upstream uncontrolled-only) + aria-selected='false' on unselected SELECTABLE rows (upstream emits only when selected) via the additive Item.ariaSelected tri-state (isSelected present = selectable; absent = pure-navigation, no attribute). Item extended additively (the [[item-row-primitive]] tests stayed green): ariaSelected tri-state + bodyTabIndex (a real inner <a>/<button> under a parent role for href/onClick activation + link semantics, row owns the stop) + root tabIndex. Normalized: StyleX *Vars\u2192--ds-*, getIcon('chevronRight')\u2192Phosphor CaretRight, StyleX when.ancestor(:focus-visible)\u2192an inset :focus-visible scoped ring, TreeListBranches guide-lines DEFERRED as pure decoration (indent + aria-level carry hierarchy). Chevron rotates on the [[collapsible-and-accordion]] fast+standard in-place tier; child-row reveal on the [[collapsible-and-accordion]] moderate+entry expand tier; collapse is instant (rows unmount so collapsed items leave the tab order + a11y tree). Zero net-new tokens, no !important, .radix-themes-scoped."
+  },
+  {
+    "name": "List",
+    "module": "List",
+    "exports": [
+      "ListDensity",
+      "ListStyle",
+      "ListProps",
+      "List",
+      "ListItemProps",
+      "ListItem"
+    ],
+    "status": "ported",
+    "wave": 3,
+    "tier": "full",
+    "controlBox": "exempt",
+    "buildingBlock": "ul/ol of the _internal Item row primitive (List.tsx + ListItem)",
+    "storyPath": "src/components/ui/List.stories.tsx",
+    "note": "[[item-row-primitive]] \u2014 the passive semantic list. List = a passive <ul> (or <ol> for listStyle='decimal') that pushes {density, hasDividers, listStyle} through a ListContext; ListItem delegates the row anatomy to the net-new _internal Item primitive (src/components/ui/Item.tsx \u2014 like Field, a shared building block, NOT a registry System component) and only builds the custom marker (disc/hollow-circle spans; a CSS-counter ::before for decimal, seeded from start-1). Item is the shared marker/startContent/label(+description)/endContent row consumed by List and (wave-3) TreeList: interactivity dual-model \u2014 interactive (onClick/href) with NO parent role wraps content in an invisible all:unset <button>/<a> (one keyboard-operable control, focus ring hoisted via :has(.rt-ds-item-body:focus-visible) \u2192 --ds-stroke-focus-hairline, Token's [[token-chip]] idiom) with an extended-hit-area root handler that ignores clicks on nested button/a/input/select/textarea (no double-fire); with a parent role (menuitem/treeitem) onClick rides the root through the SAME guard and no invisible body is rendered (the parent owns keyboard). density (~4/8/12px block padding \u2192 --ds-space-4/8/12), highlight/selected/hover paint from the Select-menu vocabulary (--ds-fill-hover / --ds-fill-selected-subtle / --ds-fill-press), dividers via --ds-stroke-weak (gap collapses + rows square), labelLines/descriptionLines truncation. Safari fix KEPT: a marker-less <ul> re-adds role='list' (list-style:none strips list semantics in Safari); header wired via aria-labelledby; <ol start> emitted only when start!=null && start!==1. Normalized from Astryx Item/List/ListItem/ListContext ([[catalog-as-specification]] @ 88c95e4): StyleX *Vars \u2192 --ds-*, useLinkComponent \u2192 plain <a>, mergeProps/themeProps dropped, counter renamed ds-list. Zero net-new tokens, no !important, .radix-themes-scoped."
+  },
+  {
+    "name": "Lightbox",
+    "module": "Lightbox",
+    "exports": [
+      "LightboxMediaType",
+      "LightboxMedia",
+      "LightboxProps",
+      "Lightbox"
+    ],
+    "status": "ported",
+    "wave": 3,
+    "tier": "full",
+    "controlBox": "exempt",
+    "buildingBlock": "raw Radix Themes Dialog ([[component-registry]] agent-gap) + gallery + zoom/pan + useLightbox companion hook",
+    "storyPath": "src/components/ui/Lightbox.stories.tsx",
+    "note": "[[lightbox-viewer]] \u2014 a fullscreen media viewer (single image or a gallery with prev/next + counter + captions + optional zoom/pan). SWAPS the native <dialog>+showModal() \u2192 the RAW Radix Themes Dialog. System Dialog now ships ([[standard-dialog]]), but Lightbox deliberately keeps the raw primitive (the [[standard-dialog]] non-swap \u2014 a full-viewport chrome-less media stage with its own dark Theme + zoom/pan, not the standard modal): Radix owns focus-trap + scroll-lock + Escape + backdrop-dismiss, so upstream's useScrollLock is DROPPED. CLOSE-focus is NOT free: Radix returns it to a registered Dialog.Trigger and this viewer registers none, so useReturnFocus supplies it ([[focus-return-on-close]]). Full-viewport chrome-less Dialog.Content (compound .radix-themes .rt-ds-lightbox beats .rt-BaseDialogContent; position:fixed inset:0); backdrop repainted to --ds-scrim + blur via .rt-BaseDialogOverlay:has(.rt-ds-lightbox); modal enter/exit motion INHERITED from the [[motion-retiming]] .rt-BaseDialogContent/.rt-BaseDialogOverlay bindings (NO per-component override). The viewer content lives in a permanently-dark <Theme> so controls/counter/caption read light on the dark stage in both app modes (the scrim-surface idiom, shared with Thumbnail [[thumbnail-preview]]). It ADDS keyboard zoom (+/=/-/0 \u2014 upstream zoom was double-click-only, an a11y gap); zoom/pan disabled for video, reset on index/src change; double-click toggles 1\u21942\u00d7, drag pans (scale\u00b7translate). It DOCUMENTS the doc-omitted defaultIndex (uncontrolled start) + hasAutoPlay (video). Gallery: clamped index (controlled index OR uncontrolled defaultIndex), prev/next DISABLED-not-unmounted at the ends (unmounting the focused control drops focus to <body>), and the disabled arm PAINTS via .rt-ds-lightbox-control[data-disabled] -> --ds-icon-disabled ([[disabled-paint-arm]]: our (0,2,0) rule outranks Radix's disabled skin, so without the arm cursor was the only difference), 'N / M' counter (aria-hidden \u2014 the announcer speaks it). Announce via OUR useAnnounce (polite '{alt}, N of M' / 'Image N of M') fired ONLY on an in-session index change (not on mount/open/close). Clicking the empty stage closes (Radix's overlay is fully covered by the full-viewport content, so the backdrop-dismiss is reproduced in JS). Ships the useLightbox companion hook (open(i)/close/isOpen/index/element/triggerProps/getTriggerProps with role=button + aria-haspopup=dialog + Enter/Space). Reuses IconButton + Phosphor X/CaretLeft/CaretRight; StyleX *Vars \u2192 --ds-*; --color-on-dark \u2192 the dark-Theme --ds-text-strong. Zero net-new tokens; scoped .radix-themes; no !important."
+  },
+  {
+    "name": "useLightbox",
+    "module": "useLightbox",
+    "exports": [
+      "UseLightboxOptions",
+      "UseLightboxReturn",
+      "useLightbox"
+    ],
+    "status": "ported",
+    "wave": 3,
+    "tier": "full",
+    "controlBox": "exempt",
+    "buildingBlock": "Lightbox companion hook (React state + a11y trigger props)",
+    "note": "[[lightbox-viewer]] \u2014 documented-in-sibling (see Lightbox's story, src/components/ui/Lightbox.stories.tsx, which imports the hook, demonstrates it under \"A gallery, via useLightbox\" and describes its return in the props reference). The companion hook that removes the isOpen/index boilerplate: call open(i) to launch at a gallery index, render the returned `element`, and spread getTriggerProps(i) on each trigger for the a11y wiring (role=\"button\" + tabIndex 0 + aria-haspopup=\"dialog\" + Enter/Space activation). Presents no box of its own \u2014 it renders the System Lightbox. Registered on its own because it is the form the docs teach, and an entry is what publishes a name."
+  },
+  {
+    "name": "AppShell",
+    "astryxName": "App Shell",
+    "module": "AppShell",
+    "exports": [
+      "AppShellVariant",
+      "MobileNavConfig",
+      "AppShellProps",
+      "AppShell"
+    ],
+    "status": "ported",
+    "wave": 4,
+    "tier": "full",
+    "controlBox": "exempt",
+    "buildingBlock": "Layout composition + appShellContext providers + useMediaQuery + shared ResizeObserver + MobileNav",
+    "storyPath": "src/components/ui/AppShell.stories.tsx",
+    "note": "[[app-shell]] \u2014 the top-level page shell (full-tier capstone). COMPOSES Layout (topNav\u2192header, sideNav\u2192panel, children\u2192the guaranteed main, footer\u2192footer) and PROVIDES the app-shell contexts (AppShellMobileProvider for the drawer state; SideNavRenderProvider/TopNavRenderProvider for the render modes). The responsive change is a JS MODE-SWAP, not a CSS collapse: below the breakpoint the sidenav/topnav RE-RENDER into the MobileNav drawer via the render-mode contexts (default/mobile-bar/drawer). Breakpoint rides the committed SSR-safe useMediaQuery engine (matchMedia inside useSyncExternalStore); breakpoint accepts a named nav step (sm/md/lg/none) OR a custom min-width px; defaultIsMobile seeds the server snapshot so a mobile client doesn't layout-flash desktop\u2192drawer after hydration. Guarantees the single main landmark (the ONLY landmark AppShell auto-emits \u2014 banner/contentinfo/complementary stay opt-in on Layout's slots) + a skip-to-content link targeting main WITH tabIndex=-1 added (upstream relies on fragment nav alone). The off-screen desktop rail is kept MOUNTED via the hidden attribute (+display:none), NOT React.Activity. Header height published as the runtime var --ds-appshell-header-height via the SHARED ResizeObserver (reuse, no new observer); consumers read var(--ds-appshell-header-height, 0px). mobileNav is TRI-MODAL (false disables | MobileNavConfig tunes | ReactNode = custom drawer content); the six-knob MobileNavConfig (breakpoint/side/width/label/header/includeTopNav) is entirely undocumented upstream and documented here. variant surface ladder from --ds-bg-base/-subtle/-raised. Zero net-new design tokens; scoped .radix-themes; no !important."
+  },
+  {
+    "name": "Layout",
+    "module": "Layout",
+    "exports": [
+      "LayoutPadding",
+      "LayoutHeaderProps",
+      "LayoutHeader",
+      "LayoutFooterProps",
+      "LayoutFooter",
+      "LayoutContentProps",
+      "LayoutContent",
+      "LayoutPanelProps",
+      "LayoutResizableOptions",
+      "LayoutPanel",
+      "LayoutProps",
+      "Layout"
+    ],
+    "status": "ported",
+    "wave": 4,
+    "tier": "full",
+    "controlBox": "exempt",
+    "buildingBlock": "page shell with header/footer/panel/content slots",
+    "storyPath": "src/components/ui/Layout.stories.tsx",
+    "note": "[[layout-primitive]] \u2014 the page-shell composition primitive (Layout + LayoutHeader/Footer/Panel/Content, documented-in-sibling, no own registry entries). A structured slot grid (header / [panel \u00b7 content] / footer), NOT the 'flex wrapping' upstream's docs describe. Children scanned synchronously into slots via a static slot marker + one shared LayoutContext (the SSR-safe replacement for upstream's mount-time registration effect, which races divider placement); the root resolves which hairline rules to draw between adjacent areas from defaultHasDividers + per-slot hasDivider overrides. FIXES over Astryx: contentWidth/padding/defaultHasDividers are real-but-doc-hidden API (ours DOCUMENTS them); Layout FORWARDS ...rest + data-testid on the root (upstream silently drops them). Landmark roles stay OPT-IN on the slots (LayoutHeader\u2192banner, LayoutFooter\u2192contentinfo, LayoutPanel\u2192complementary; never auto-emitted \u2014 a nested Layout must not stamp two of the same landmark; main is AppShell's). Dividers REUSE the System Separator (decorative, already --ds-stroke-weak); a resizable LayoutPanel REUSES the shared useResizable engine + ResizeHandle ([[resize-handle]] \u2014 the handle IS the seam, suppresses the auto-divider) with the hook split into a subcomponent so it's never called in a .map(). Paints from --ds-* surfaces (--ds-bg-base/-raised/-subtle) + slot-aware padding on one --ds-space-scale var; zero net-new tokens; scoped .radix-themes; no !important."
+  },
+  {
+    "name": "FormLayout",
+    "astryxName": "Form Layout",
+    "module": "FormLayout",
+    "exports": [
+      "FormLayoutDirection",
+      "useFormLayoutDirection",
+      "FormLayoutProps",
+      "FormLayout"
+    ],
+    "status": "ported",
+    "wave": 4,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Grid/Flex + Field",
+    "storyPath": "src/components/ui/FormLayout.stories.tsx"
+  },
+  {
+    "name": "TopNav",
+    "astryxName": "Top Nav",
+    "module": "TopNav",
+    "exports": [
+      "TopNavProps",
+      "TopNav"
+    ],
+    "status": "ported",
+    "wave": 4,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "nav bar (Flex/Grid slots) + Item + @radix-ui/react-popover flyouts",
+    "storyPath": "src/components/ui/TopNav.stories.tsx",
+    "note": "[[top-nav]] \u2014 the top application bar. SUB-PARTS documented-in-sibling (each carries its own registry entry, no storyPath): TopNavItem (a bar link, composes Item [[item-row-primitive]]), TopNavHeading (the brand \u2014 the interaction-boundary decision tree: href\u2192link / onClick\u2192button / else static), TopNavMegaMenuItem (a mega grid cell, composes Item). SLOT layout: a leading cluster (children) + optional center + end; flex by default, a `1fr auto 1fr` grid when a center slot is present (the Toolbar [[toolbar-slots]] precedent). Reads useTopNavRenderMode() and branches via data-mode (default bar / mobile-bar / drawer vertical stack). SEMANTICS: a labelled `nav` landmark of LINKS with aria-current=\"page\" (NOT role=menu). Bar dividers reuse the System Separator; paints --ds-bg-raised (bar) + --ds-stroke-weak (bottom hairline) + the Item hover/selected vocabulary. Menus/mega ride the @radix-ui/react-popover recipe (the navigation-menu primitive was REJECTED) with hover-intent from useMenuHover (150/200ms show/hide, (hover:hover)-gated, click-latch) + arrow roving from useListFocus. Single-open coordination is deliberately NOT added (menus open independently \u2014 a named deferral); the docs' \"More menu overflow\" is upstream vaporware, NOT built (useOverflow is the engine if ever wanted \u2014 a named deferral). Zero net-new tokens; scoped .radix-themes; no !important; SSR-safe."
+  },
+  {
+    "name": "TopNavHeading",
+    "module": "TopNav",
+    "exports": [
+      "TopNavHeadingProps",
+      "TopNavHeading"
+    ],
+    "status": "ported",
+    "wave": 4,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "TopNav sub-part \u2014 routed link / button / static span",
+    "note": "[[top-nav]] \u2014 documented-in-sibling (see TopNav's story, src/components/ui/TopNav.stories.tsx). The brand slot. The interaction boundary is lifted as logic, not left to the caller: an `href` renders a routed link (through the ambient LinkProvider or an explicit `linkComponent`), else an `onClick` renders a <button>, else static text \u2014 the page owns its own <h1>, so the brand is a landmark label and never a heading. Optional `logo` slot before the title."
+  },
+  {
+    "name": "TopNavItem",
+    "module": "TopNav",
+    "exports": [
+      "TopNavItemProps",
+      "TopNavItem"
+    ],
+    "status": "ported",
+    "wave": 4,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Item ([[item-row-primitive]])",
+    "note": "[[top-nav]] \u2014 documented-in-sibling (see TopNav's story, src/components/ui/TopNav.stories.tsx). A top-level nav link in the bar \u2014 composes the Item primitive rather than re-anatomizing a row ([[item-row-primitive]]). The current destination paints selected and emits aria-current=\"page\" (nav + links, never role=\"menu\"). Routes through Item's pluggable link."
+  },
+  {
+    "name": "TopNavMegaMenu",
+    "astryxName": "Top Nav Mega Menu",
+    "module": "TopNav",
+    "exports": [
+      "TopNavMegaMenuProps",
+      "TopNavMegaMenu"
+    ],
+    "status": "ported",
+    "wave": 4,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "@radix-ui/react-popover + useMenuHover",
+    "note": "[[top-nav]] \u2014 documented-in-sibling (see TopNav's story, src/components/ui/TopNav.stories.tsx). A FULL-WIDTH mega panel anchored to the nav BAR (not the trigger): a fixed Popover.Anchor is measured to the bar's rect (via the shared ResizeObserver published on TopNavContext), so var(--radix-popover-trigger-width) equals the bar width and the panel left-aligns to the bar \u2014 JS measurement, since CSS anchor-positioning is a named deferral. A grid of TopNavMegaMenuItem cells + an optional presentational FeaturedCard. Same popover recipe + hover-intent + roving + nav-semantics as TopNavMenu; the mega trigger gains aria-controls (upstream omits) and the panel roving INCLUDES keyboard nav (Astryx's mega has none). buildingBlock corrected off @radix-ui/react-navigation-menu."
+  },
+  {
+    "name": "TopNavMegaMenuFeaturedCard",
+    "astryxName": "Top Nav Mega Menu Featured Card",
+    "module": "TopNav",
+    "exports": [
+      "TopNavMegaMenuFeaturedCardProps",
+      "TopNavMegaMenuFeaturedCard"
+    ],
+    "status": "ported",
+    "wave": 4,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "presentational card (Item-adjacent) / optional routed link",
+    "note": "[[top-nav]] \u2014 documented-in-sibling (see TopNav's story). A presentational promo card in the mega panel (or a routed link card when given an href). The hard-appended \"\u2192\" glyph Astryx used is replaced with a proper Phosphor ArrowRight. Painted from --ds-bg-subtle / --ds-stroke-weak / --ds-text-link; zero net-new tokens."
+  },
+  {
+    "name": "TopNavMegaMenuItem",
+    "module": "TopNav",
+    "exports": [
+      "TopNavMegaMenuItemProps",
+      "TopNavMegaMenuItem"
+    ],
+    "status": "ported",
+    "wave": 4,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Item ([[item-row-primitive]])",
+    "note": "[[top-nav]] \u2014 documented-in-sibling (see TopNav's story, src/components/ui/TopNav.stories.tsx). A cell in the mega panel's grid \u2014 composes Item (icon \u00b7 title \u00b7 description). Routes and carries aria-current=\"page\" like every other nav row."
+  },
+  {
+    "name": "TopNavMenu",
+    "astryxName": "Top Nav Menu",
+    "module": "TopNav",
+    "exports": [
+      "TopNavMenuProps",
+      "TopNavMenu"
+    ],
+    "status": "ported",
+    "wave": 4,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "@radix-ui/react-popover + useMenuHover",
+    "note": "[[top-nav]] \u2014 documented-in-sibling (see TopNav's story, src/components/ui/TopNav.stories.tsx). A trigger + a popover flyout (the MultiSelect/SideNav recipe \u2014 <Popover.Content asChild> + <Theme> on the same node \u2192 COMPOUND .radix-themes.rt-ds-topnav-menu-panel; the panel is OPAQUE --ds-bg-overlay) of nav LINKS. Hover-intent via useMenuHover (150ms show / 200ms hide, (hover:hover)-gated, click-latch); the trigger is a Popover.Anchor (NOT a Trigger \u2014 which would auto-toggle and fight the latch) so click owns opening + the Content exempts the trigger from outside-dismiss (the DateRangeInput anchor-exempt pattern). Focus = the Radix popover's own, minus the hover-steal (onOpenAutoFocus prevented; ArrowDown from the trigger lands focus in \u2014 NO hand focus trap); arrow roving via useListFocus; nav+links semantics (a labelled `nav` region, aria-current=\"page\", NOT role=menu). The trigger carries aria-expanded + aria-controls. buildingBlock corrected off @radix-ui/react-navigation-menu."
+  },
+  {
+    "name": "SideNav",
+    "astryxName": "Side Nav",
+    "module": "SideNav",
+    "exports": [
+      "SideNavItemProps",
+      "SideNavItem",
+      "SideNavSectionProps",
+      "SideNavSection",
+      "SideNavHeadingProps",
+      "SideNavHeading",
+      "SideNavCollapseButtonProps",
+      "SideNavCollapseButton",
+      "SideNavProps",
+      "SideNav"
+    ],
+    "status": "ported",
+    "wave": 4,
+    "tier": "lite",
+    "controlBox": "nav",
+    "buildingBlock": "Flex + Item + popover flyout",
+    "storyPath": "src/components/ui/SideNav.stories.tsx",
+    "note": "[[side-nav]] \u2014 a collapsible primary-navigation rail with three item regimes. SUB-PARTS documented-in-sibling, no own entries: SideNavItem (the row, composes Item [[item-row-primitive]]), SideNavSection + SideNavHeading (grouping + section label), SideNavCollapseButton (the imperative collapse toggle). SEMANTICS upgraded from Astryx's role=menu link-lists to a labelled `nav` of LINKS with aria-current=\"page\" for the current destination (NOT role=menu). Collapse is USER/STATE-driven (an icon rail), never breakpoint-driven \u2014 a narrow viewport instead swaps the whole rail into the MobileNav drawer via useSideNavRenderMode() (default vs drawer render modes; both stated in docs). THREE regimes (collapsed-state \u00d7 has-children): expanded leaf = an Item link row (icon+label+optional Badge) with aria-current when active; expanded parent = a disclosure <button aria-expanded aria-controls> toggling a nested role=group subtree that is INERT while collapsed (kept mounted \u2192 non-focusable) and animates through the [[collapsible-and-accordion]] collapsible keyframes (ds-collapsible-open/close; the measured height is self-published as --radix-collapsible-content-height via the reused sharedResizeObserver, gated off first paint so docs don't flash); collapsed-rail leaf = an icon-only Item link + a System Tooltip for the label; collapsed-rail parent = an icon trigger opening a popover FLYOUT (the MultiSelect @radix-ui/react-popover recipe \u2014 Popover.Content asChild + <Theme> on the same node \u2192 COMPOUND .radix-themes.rt-ds-sidenav-flyout-panel; onOpenAutoFocus steers focus in; the panel is OPAQUE --ds-bg-overlay) re-providing the EXPANDED context. KEYBOARD: ArrowUp/Down/Home/End rove focus among the visible rows (an imperative roving tabindex \u2014 one active row is the sole tab stop \u2014 over useListFocus's pure nextFocusIndex, skipping the inert subtrees); a parent discloses on Enter/Space (a native button). RESIZABLE mode reads the [[resize-handle]] useResizable engine + renders ResizeHandle at the rail edge. A11y UPGRADE (stated in History): SideNavCollapseButton gains aria-expanded={!collapsed} (upstream has none); the dead collapsible.buttonLabel sub-prop is dropped. DEVIATION from the reference's split-action chevron: a parent is a SINGLE disclosure control (aria-expanded on the row button \u2014 the honest a11y; Item's inner body can't carry aria-expanded), not a split navigate+toggle row \u2014 leaves navigate, parents disclose. THE NAV LADDER ([[nav-row-ladder]]) \u2014 controlBox:\"nav\", not the row ladder: navigation carries more prominence than a standard control, so a rail row is an Item-family row at 32 / 36 / 40px (small / medium / large) where the control box names 24 / 32 / 40, and the number is a DERIVATION (the row's line box + 2 x --ds-space-8, so it carries --scaling) rather than a token. The COLLAPSED rail rides the same rung as the expanded rows it replaces, and its width derives from that rung + the scroll body's padding + the hairline. Measured by _internal/SideNav behavior -> NavLadderTracksBothStates (both regimes, three tiers, and scaling 90%), which the [[box-law-scope]] registration guard's rule D binds to this classification. Zero net-new tokens; scoped .radix-themes; no !important; SSR-safe."
+  },
+  {
+    "name": "MobileNav",
+    "astryxName": "Mobile Nav",
+    "module": "MobileNav",
+    "exports": [
+      "MobileNavSide",
+      "MobileNavProps",
+      "MobileNav",
+      "MobileNavToggleProps",
+      "MobileNavToggle"
+    ],
+    "status": "ported",
+    "wave": 4,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "raw Radix Dialog + slide drawer",
+    "storyPath": "src/components/ui/MobileNav.stories.tsx",
+    "note": "[[mobile-nav]] \u2014 a slide-in navigation drawer + its hamburger MobileNavToggle (documented-in-sibling, no own entry). SCOPE: a modal slide-in drawer \u2014 not a persistent bottom tab bar; native-app tab chrome is out of scope. SHELL = the RAW Radix Themes Dialog (the CommandPalette/Lightbox precedent). System Dialog now ships, but MobileNav deliberately keeps the raw primitive \u2014 an edge-pinned slide-in drawer with its own motion tier, not the standard centered modal; Radix owns focus-trap/Escape/scroll-lock/backdrop-dismiss. Unlike the centered CommandPalette/Lightbox, the drawer PINS to a viewport edge at full height and SLIDES in: the components.css override repositions .rt-BaseDialogContent (position:fixed, edge left/right by data-side) and swaps the inherited scale+fade for an edge-slide keyframe \u2014 still on the modal/emphasis motion tier (enter --ds-duration-moderate/--ds-ease-entry, exit the slower --ds-duration-expressive/--ds-ease-standard \u2014 faster in, slower out), reduced-motion collapses free through the duration tokens. Panel surface = opaque [[floating-surface-fill]] --ds-bg-overlay/--ds-shadow-overlay; backdrop repaints to --ds-scrim (::before). side=start/end pin the edge; side=auto (default) reads document.activeElement's rect at open (in onOpenAutoFocus, before focus is stolen to the panel) and opens from the edge nearest the trigger \u2014 no Radix analog, lifted. Width is honestly min(100vw, width) (their docs' '85vw cap' is fiction). STATE: AppShell owns the open machine and publishes it via useAppShellMobile() (open/setOpen/drawerId/toggleId \u2014 the panel carries id={drawerId}); standalone, MobileNav is controlled (open/onOpenChange) or uncontrolled. A11y upgrades over Astryx (stated in History): MobileNavToggle gains aria-expanded + aria-controls (upstream has neither); initial focus lands on the drawer panel (onOpenAutoFocus + preventDefault); the drawer is a named dialog. Toggle reuses the System IconButton; nav rows compose Item. Zero net-new tokens; scoped .radix-themes; no !important."
+  },
+  {
+    "name": "ResizeHandle",
+    "astryxName": "Resize Handle",
+    "module": "ResizeHandle",
+    "exports": [
+      "ResizeHandleProps",
+      "ResizeHandle"
+    ],
+    "status": "ported",
+    "wave": 4,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "useResizable engine + pointer-drag handle",
+    "storyPath": "src/components/ui/ResizeHandle.stories.tsx"
+  },
+  {
+    "name": "Outline",
+    "module": "Outline",
+    "exports": [
+      "OutlineItem",
+      "OutlineProps",
+      "Outline"
+    ],
+    "status": "ported",
+    "wave": 4,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "useScrollSpy + useOutlineFromDOM + Link",
+    "storyPath": "src/components/ui/Outline.stories.tsx",
+    "note": "[[outline-scrollspy]] \u2014 a scroll-spy table of contents: a labelled <nav> \u203a <ul> of in-page links, one per heading, with a JS-measured indicator bar that slides to the active entry. Two entry sources: EXPLICIT items={{id,text,level}} OR DOM-DRIVEN (containerRef \u2192 useOutlineFromDOM scans h1\u2013h6/[data-outline-heading], assigns slug ids, re-scans on a MutationObserver). Active entry driven by useScrollSpy (a passive scroll listener + rAF \u2014 active = the LAST heading whose top passed its activation line (own scroll-margin-top + 1px), with atBottom + top-edge guards; NOT IntersectionObserver); clicking an entry pins it via lockActiveId until scrollend/1200ms so the spy doesn't fight the smooth-scroll; a controlled activeId (incl null) DISABLES the spy. A11y upgrade (stated in History): the active entry carries aria-current=\"location\" (the ARIA value for the current location within a set), NOT the nonstandard \"true\". The sliding indicator is JS-MEASURED (an effect reads the active link's box relative to the track and positions an absolute bar) \u2014 CSS anchor positioning is a named deferral; the bar's slide rides --ds-duration-moderate/--ds-ease-standard, clamped to snap under prefers-reduced-motion. Flat list, level = indentation only (--ds-outline-depth, no nested <ul>). Links route through useLinkComponent (LinkProvider retro-adoption) \u2014 plain in-page #anchors with no provider. Paints --ds-text-weak (idle) / --ds-text-link (active) / --ds-fill-accent (indicator) / --ds-stroke-weak (rail); zero net-new tokens; scoped .radix-themes; no !important; SSR-safe (scan + measure in effects)."
+  },
+  {
+    "name": "ChatLayout",
+    "astryxName": "Chat Layout",
+    "module": "ChatLayout",
+    "exports": [
+      "ChatLayoutHandle",
+      "ChatLayoutProps",
+      "ChatLayoutScrollButtonProps",
+      "ChatLayoutScrollButton",
+      "ChatLayout"
+    ],
+    "status": "ported",
+    "wave": 5,
+    "tier": "full",
+    "controlBox": "exempt",
+    "buildingBlock": "scroll-anchored list + docked composer; SUB-PART documented-in-sibling, no own entry: ChatLayoutScrollButton",
+    "storyPath": "src/components/ui/ChatLayout.stories.tsx",
+    "note": "The assembly, and the flagship page for the family. Three things can go wrong around a composer and each has its own destination: the session's condition rides sessionStatus above the dock, a sent message's failure rides the metadata row on that message, and whatever is wrong with the draft rides the composer's own status under the dock. Its handle exposes scrollToBottom only, and that call scrolls AND re-takes the lock even when the reader had scrolled away, because a control that silently does nothing is a control that lies. The scroll affordance is two separate elements with one mounted at a time, so there is one tab stop and no width or height is ever animated. The dock is held by the layout rather than by sticky positioning: the scroller is the log's own viewport, so a dock inside it would sit inside the log region and announce typing as conversation. The root tag is swappable through a closed as union of div, main and section: a dedicated chat page with no AppShell over it takes main so the skip link and the landmark are right, and a chat that is one named region of a wider page takes section plus an aria-label. Nothing else moves with the tag, and as=\"main\" inside an AppShell is a second main that axe reports three violations for."
+  },
+  {
+    "name": "ChatMessageList",
+    "astryxName": "Chat Message List",
+    "module": "ChatMessageList",
+    "exports": [
+      "ChatListContextValue",
+      "useOptionalChatList",
+      "ChatMessageListProps",
+      "ChatMessageList"
+    ],
+    "status": "ported",
+    "wave": 5,
+    "tier": "full",
+    "controlBox": "exempt",
+    "buildingBlock": "ScrollArea \u2014 one node is both the scroller and the labelled log region; owns the streaming aria-busy state and the list context",
+    "storyPath": "src/components/ui/ChatMessageList.stories.tsx",
+    "note": "The accessible name is required, not optional: the region is focusable, and a focusable region without a name is a WCAG 4.1.2 failure. Rest props and the ref land on the scrolling viewport while className and style land on the root, so the log and the scroller are genuinely one node. While streaming it sets aria-busy so the transcript is announced once on release rather than per token."
+  },
+  {
+    "name": "ChatComposer",
+    "astryxName": "Chat Composer",
+    "module": "ChatComposer",
+    "exports": [
+      "ChatComposerStatusTone",
+      "ChatComposerStatus",
+      "ChatComposerProps",
+      "ChatComposer"
+    ],
+    "status": "ported",
+    "wave": 5,
+    "tier": "full",
+    "controlBox": "composite",
+    "buildingBlock": "TextArea on the shared Field shell, with autogrow driven through the forwarded textarea ref; SUB-PART documented-in-sibling, no own entry: ChatSendButton",
+    "storyPath": "src/components/ui/ChatComposer.stories.tsx",
+    "note": "A real textarea rather than a contenteditable, so it carries native textbox semantics and a native placeholder. Autogrow measures the rendered line-height and caps at eight lines, then scrolls; it re-measures on a lane change, on fonts settling and on width, never on a window resize. The focus ring hoists to the dock because the dock is one bordered surface \u2014 the field inside is de-skinned so there is no second border. The status line sits under the dock, where every other input puts its message: colour and a glyph, never a panel."
+  },
+  {
+    "name": "ChatMessage",
+    "astryxName": "Chat Message",
+    "module": "ChatMessage",
+    "exports": [
+      "ChatMessageSender",
+      "ChatMessageVariant",
+      "ChatMessageGroup",
+      "ChatMessageContextValue",
+      "useOptionalChatMessage",
+      "ChatMessageProps",
+      "ChatMessage"
+    ],
+    "status": "ported",
+    "wave": 5,
+    "tier": "full",
+    "controlBox": "exempt",
+    "buildingBlock": "Avatar + the bubble, folded in as variant/group props rather than a separate component; the log region itself belongs to ChatMessageList",
+    "storyPath": "src/components/ui/ChatMessage.stories.tsx",
+    "note": "An article whose accessible name is the sender's name when there is one, and an overridable humanised fallback otherwise \u2014 never the raw sender enum. Authorship is carried by filled-vs-ghost plus side, not by tint alone: user defaults to filled, assistant to ghost. The filled skin paints the accent-weak step, measured across every accent in both appearances."
+  },
+  {
+    "name": "ChatMessageMetadata",
+    "astryxName": "Chat Message Metadata",
+    "module": "ChatMessageMetadata",
+    "exports": [
+      "ChatMessageStatus",
+      "ChatMessageMetadataProps",
+      "ChatMessageMetadata"
+    ],
+    "status": "ported",
+    "wave": 5,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Text \u2014 a single presentational row of timestamp, footer slot and delivery status",
+    "storyPath": "src/components/ui/ChatMessageMetadata.stories.tsx",
+    "note": "All five delivery states ship, including the failed send. Each state reads as a glyph plus its own word, so delivered and read are told apart by the word rather than by a shared double tick. Carries no title and no aria-label: an accessible name that restates the visible text can only disagree with it. The retry affordance belongs to the consumer and lands in the footer slot."
+  },
+  {
+    "name": "ChatSystemMessage",
+    "astryxName": "Chat System Message",
+    "module": "ChatSystemMessage",
+    "exports": [
+      "ChatSystemMessageVariant",
+      "ChatSystemMessageProps",
+      "ChatSystemMessage"
+    ],
+    "status": "ported",
+    "wave": 5,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "a centred supporting-size line, deliberately NOT a Callout \u2014 no surface, tint or severity",
+    "storyPath": "src/components/ui/ChatSystemMessage.stories.tsx",
+    "note": "Its live-region role depends on where it sits: inside a message list the log already announces it, so it takes no role; standalone it takes role=status. The text wraps rather than truncating, because the long notices this is for are exactly what truncation destroys. The divider variant composes Separator with a centred label."
+  },
+  {
+    "name": "ChatToolCalls",
+    "astryxName": "Chat Tool Calls",
+    "module": "ChatToolCalls",
+    "exports": [
+      "ChatToolCallStatus",
+      "ChatToolCallItem",
+      "ChatToolCallsProps",
+      "ChatToolCalls"
+    ],
+    "status": "ported",
+    "wave": 5,
+    "tier": "full",
+    "controlBox": "exempt",
+    "buildingBlock": "Item rows at compact density inside a Collapsible group; Badge, Spinner and Code for the row parts",
+    "storyPath": "src/components/ui/ChatToolCalls.stories.tsx",
+    "note": "Pending and running are visually distinct: pending is a clock plus a visible Queued label, running is the spinner. errorMessage renders as visible text, not a title attribute. The group defaults closed and its content unmounts, so a collapsed group holds no focusable descendants."
+  },
+  {
+    "name": "Markdown",
+    "module": null,
+    "exports": [],
+    "status": "out-of-scope",
+    "wave": 3,
+    "tier": "lite",
+    "buildingBlock": "needs react-markdown",
+    "note": "parked pending parser-dependency approval (spec section 8)"
+  },
+  {
+    "name": "CodeBlock",
+    "astryxName": "Code Block",
+    "module": null,
+    "exports": [],
+    "status": "out-of-scope",
+    "wave": 3,
+    "tier": "lite",
+    "buildingBlock": "needs shiki",
+    "note": "parked pending parser-dependency approval (spec section 8)"
+  },
+  {
+    "name": "Icon",
+    "module": null,
+    "exports": [],
+    "status": "out-of-scope",
+    "wave": 0,
+    "tier": "lite",
+    "buildingBlock": "direct Phosphor imports",
+    "note": "not ported by ruling \u2014 direct imports are the convention ([[one-scoped-stylesheet]])"
+  },
+  {
+    "name": "useAnnounce",
+    "module": "useAnnounce",
+    "exports": [
+      "AnnouncePoliteness",
+      "useAnnounce"
+    ],
+    "status": "ported",
+    "wave": 3,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "One shared pair of document-level live regions (polite + assertive), created lazily and reused by every component that speaks",
+    "note": "[[registry-module-paths]] \u2014 published because adding an export later is safe and removing one is breaking. Documented-in-sibling: Calendar's story is where the announcement behaviour is demonstrated, since a view change moves no focus and would otherwise be silent. Returns `announce(message, politeness?)`; an EMPTY message clears a lingering status rather than announcing nothing. There is exactly one region pair per document, which is the point \u2014 a component that mints its own competes with every other live region on the page. `AnnouncePoliteness` ships with it because it appears in the returned function's signature, and a type withheld from a public signature is a wart."
+  },
+  {
+    "name": "useMediaQuery",
+    "module": "hooks/useMediaQuery",
+    "exports": [
+      "useMediaQuery"
+    ],
+    "internalExports": [
+      "NavBreakpoint",
+      "NAV_BREAKPOINTS",
+      "useIsMobile"
+    ],
+    "status": "ported",
+    "wave": 4,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "matchMedia, subscribed through useSyncExternalStore so a server render has a declared answer instead of a flash",
+    "note": "[[registry-module-paths]]. THE FIRST ENTRY WHOSE `module` IS A PATH: it lives at src/hooks/useMediaQuery.ts, and the barrel resolves a slashed `module` relative to src/ rather than src/components/ui/. Before that a hook had no supported route to the public surface. `serverDefault` is the second argument because the honest answer during SSR is whatever the app declares, not `false` by accident. The system's own nav ladder (`useIsMobile`, `NAV_BREAKPOINTS`, `NavBreakpoint`) is WITHHELD: those encode where this system's navigation collapses, which is a ruling a consumer should not inherit by importing a media-query helper. Publish them the day a consumer needs the same ladder, not before."
+  },
+  {
+    "name": "useSizeLane",
+    "module": "theme/SizeContext",
+    "exports": [
+      "SizeLane",
+      "useSizeLane",
+      "useUISize"
+    ],
+    "tier": "lite",
+    "status": "ported",
+    "note": "the global size lanes, made public ([[size-lane-hook]]). A consumer building a composition on top of the system had no way to participate in uiSize: every sized component resolves a lane internally, but the resolution itself was private, so anything hand-composed was stuck on a literal step and went tier-inert. Publishes the read-only half only - the lane resolver and the active tier - never the context setter, which belongs to Provider.",
+    "internalExports": [
+      "SizeContext",
+      "useResolvedSize",
+      "useResolvedAvatarSize",
+      "AvatarSize",
+      "AvatarRamp",
+      "AVATAR_TIER_TABLE",
+      "AVATAR_PORTRAIT_TIER_TABLE",
+      "CONTROL_MEMBER_STEP",
+      "CONTROL_STEP_TO_UISIZE",
+      "LANE_STEPS_TABLE",
+      "UISize"
+    ],
+    "wave": 4,
+    "controlBox": "exempt",
+    "buildingBlock": "the LANE_STEPS policy table, read through SizeContext"
+  },
+  {
+    "name": "AccentColor",
+    "module": "theme/Provider",
+    "exports": [
+      "AccentColor"
+    ],
+    "tier": "lite",
+    "status": "ported",
+    "note": "the one named colour type ([[part-colour-parity]]): Radix's 26 accent colours plus the oxblood preset. Provider's named accentColor and the color prop of every wrapper that takes one read it, so a part takes every colour a page takes. The two helpers stay internal: accentColorProps and useAccentColorRef write data-accent-color=\"oxblood\" on the element Radix writes the other 26 on, because Radix's extractProps drops a colour outside its own list. Provider, ProviderProps and ContrastMode ship by hand in section 1 of src/index.ts.",
+    "internalExports": [
+      "Provider",
+      "ProviderProps",
+      "ContrastMode",
+      "accentColorProps",
+      "useAccentColorRef"
+    ],
+    "wave": 4,
+    "controlBox": "exempt",
+    "buildingBlock": "Radix Themes' accentColor union, widened by the oxblood preset",
+    "priorArt": "Radix Themes color.prop (https://github.com/radix-ui/themes/blob/main/packages/radix-ui-themes/src/props/color.prop.ts): TOOK the 26-colour accentColors union as the base of the type, and the data-accent-color attribute as the one hook every part's colour rides; Radix Themes extract-props (https://github.com/radix-ui/themes/blob/main/packages/radix-ui-themes/src/helpers/extract-props.ts): REJECTED widening Radix's own colour list at runtime so extractProps would keep oxblood, because the list is not exported by the package and a global mutation of a vendor module is invisible at the call site. The helper writes the attribute Radix writes for the other 26 instead ([[part-colour-parity]])."
+  },
+  {
+    "name": "useReorder",
+    "module": "hooks/useReorder",
+    "exports": [
+      "ReorderGroup",
+      "ReorderPosition",
+      "ReorderChange",
+      "ReorderGroupProps",
+      "ReorderItemProps",
+      "ReorderHandleProps",
+      "ReorderInstructionsProps",
+      "UseReorderOptions",
+      "UseReorderReturn",
+      "useReorder"
+    ],
+    "internalExports": [
+      "LiftState"
+    ],
+    "status": "ported",
+    "wave": 5,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "one state machine over items grouped by container id, React state plus prop getters, with the pure index math in src/utils/reorderMath.ts",
+    "note": "[[reorder-capability]] - the reorder capability, registered on its own because the hook IS the shipped thing and an entry is what publishes a name ([[registry-module-paths]], the path-module ruling). Documented-in-sibling: DragHandle's story is where the machine is demonstrated, driving a plain list and a three-column board from ONE hook with no special-casing. Reordering within a group and moving between groups are the same call, so a settings list uses the vertical axis and a board uses both. The committed order is untouched until the drop, which is why Escape restores by construction. Three input routes reach the same machine and that is the [[reorder-single-pointer-path]] contract: keyboard (2.1.1), a single-pointer click path with no drag at all (2.5.7, which [[dragging-movement-gaps]] records a keyboard path never discharges), and a Pointer Events drag, never the HTML5 drag-and-drop API. Three files, none published beyond this entry: the pure model and index math in src/utils/reorderMath.ts (the useResizable/resizableMath split, unit tested in src/hooks/useReorder.logic.test.ts), the DOM adapters and prop getters in src/hooks/useReorderProps.ts, and the React state here. The model TYPES are re-exported because they appear in this hook's signatures; the math FUNCTIONS are withheld, since a consumer gets the resulting order from onReorder and [[registry-module-paths]]'s asymmetry says add an export later rather than remove one.",
+    "priorArt": "Atlassian Pragmatic drag and drop design and accessibility guidelines (https://atlassian.design/components/pragmatic-drag-and-drop/design-guidelines): TOOK its ruling that a draggable entity is dragged whole and a handle is for entities containing other interactive parts, and its 24x24 floor when the handle is the only draggable region; REJECTED its advice against arrow-key dragging, because dnd-kit, react-beautiful-dnd, Carbon and React Aria all still move with arrows and the menu route is shipped alongside rather than instead. react-beautiful-dnd (https://github.com/atlassian/react-beautiful-dnd/blob/master/docs/guides/screen-reader.md): TOOK the Space/arrows/Space/Escape key map, the 5px sloppyClickThreshold with click suppression on drop, and the rule that announcements state a POSITION rather than an index. dnd-kit (https://dndkit.com/legacy/guides/accessibility): TOOK the headless prop-getter shape and the activator split that lets a handle claim the drag without the item losing it. React Aria (https://react-aria.adobe.com/dnd): READ its Enter-plus-Tab-between-targets model and REJECTED it, because Tab as a drop key conflicts with the tab order a board already depends on. WCAG 2.2 SC 2.5.7 (https://www.w3.org/WAI/WCAG22/Understanding/dragging-movements.html): the normative reason the single-pointer click route exists, and the source of the rule that a keyboard equivalent does NOT discharge 2.5.7. WAI-ARIA has no drag-and-drop pattern and aria-grabbed is deprecated with no replacement (https://www.w3.org/TR/html-aria/), which is why state is carried by live regions. Pencil & Paper, Drag & drop UX design best practices (https://www.pencilandpaper.io/articles/ux-pattern-drag-and-drop): TOOK the MINIMAL reorder pattern over the maximal one \u2014 a ghost list item that \u201cshows the list item as \u2018still there\u2019 which can be reassuring to the user that the item is not truly displaced\u201d, plus \u201ca minimal drop indicator \u2026 it slots the item into the list cleanly\u201d \u2014 and REJECTED the maximal pattern on its own stated disadvantage, \u201cit\u2019s not clear how to abort the operation without changing anything\u201d, which would undercut the Escape route [[reorder-single-pointer-path]] publishes; TOOK its ruling that a reorder\u2019s drop target is dynamic and \u201cwill show the precise position the item will end up in once the drag is released\u201d, which is why the indicator is not optional and why it is painted for the keyboard route too; TOOK its requirement that the SOURCE container carries a state of its own, discharged here by the ghost rather than by closing the gap. Atlassian pragmatic-drag-and-drop react-drop-indicator (https://atlassian.design/components/pragmatic-drag-and-drop/optional-packages/react-drop-indicator/): TOOK the edge-line model \u2014 a line drawn on the top or bottom Edge of the item adjacent to the slot \u2014 and its \u201cno-terminal\u201d full-width variant; REJECTED the absolutely positioned ELEMENT it ships, because their own docs require a position:relative wrapper around any item that has a border, and a reorder item here is consumer markup whose two pseudo-elements a Radix Card has already spent, so the line is painted from an attribute with an outer box-shadow instead and needs no wrapper, no ref and no measurement. react-beautiful-dnd preset styles (https://github.com/atlassian/react-beautiful-dnd/blob/master/docs/guides/preset-styles.md): TOOK cursor: grabbing on the BODY for the whole dragging phase, which is the published fix for a grabbing cursor that is invisible the moment the pointer leaves the item it captured from. dnd-kit DragOverlay (https://github.com/clauderic/dnd-kit/blob/master/packages/core/src/components/DragOverlay/DragOverlay.tsx): READ the follow-the-pointer clone and REJECTED it \u2014 a keyboard lift has no pointer to follow, and one visual language that serves all three input routes is worth more than a second one that serves only the pointer. SECOND PASS, on the drop indicator's PRESENTATION after the maintainer rejected the first build because its drop indicator sat in the wrong place and read as a merge of the dragged item into another object. Atlassian pragmatic-drag-and-drop react-drop-indicator (https://atlassian.design/components/pragmatic-drag-and-drop/optional-packages/react-drop-indicator/), re-read in full: REVERSED the previous entry's rejection of its architecture. Their indicator is an absolutely positioned ELEMENT inside a position:relative ancestor, and the reason given here for refusing it \u2014 that a reorder item's pseudo-elements are already spent by a Radix Card \u2014 was true but incomplete. Measured in this repo: .rt-BaseCard also carries `overflow: hidden` AND `contain: paint`, so an item that is a Card can paint NOTHING outside its own box by any technique, pseudo-element or otherwise, and the box-shadow that replaced it is clipped by spec to the outside of the border box and can therefore only ever start at the item's edge \u2014 the one place an insertion mark must not be. TOOK their positioning model but moved it up one level: the GROUP is the positioned ancestor, because it is the only element in this capability's contract guaranteed to be a plain container and it is also the element that owns the gaps. TOOK their `gap` concept, which renders the line in the MIDDLE of the space between two drop targets rather than against one target's edge; here the gap is measured between the two item rects that bound it rather than read off `row-gap`, so a list spacing itself with margins and a list of unequal rows both work. TOOK their terminus as first preference over a bare rule ('no-terminal' is their third preference), because a full-bleed rule against a card edge reads as that card's border, which is exactly the defect reported. REJECTED their bleeding terminal in favour of a fully-inside one, for the reason they give for shipping 'terminal-no-bleed' at all \u2014 a scroll container with no padding clips the bleed \u2014 and made it solid rather than a ring, because a ring whose hole the full-width line runs through reads as a struck-through dot rather than as a cap. REJECTED their `combine`/`border` drop-indicator variant for this capability entirely: a border drawn around an item means 'drop INTO this', and the first build's accent ring on the ghost at its own origin slot was accidentally that same signal, saying the one thing a reorder never means. READ their GroupDropIndicator, which treats a whole group as the target, and REJECTED it for the empty-container case in favour of a card-shaped placeholder, because an empty container must show the SHAPE OF THE OUTCOME, and a whole-container wash says which column but not what will be there. Pencil & Paper reorder section (https://www.pencilandpaper.io/articles/ux-pattern-drag-and-drop), re-read: its 'minimal drop indicator' is a LINE, and the maintainer's finding is that this holds only where there are neighbours for the line to be relative to, because a line with no neighbours marks no position, so the empty container is a second mark rather than the same mark at different coordinates, which no surveyed system states. Also second pass on the HIT TEST, after the maintainer ruled that the hit test carries a tolerance band at each boundary: Atlassian's attachClosestEdge/closest-edge hitbox (https://atlassian.design/components/pragmatic-drag-and-drop/core-package/adapters/element/about) \u2014 READ its edge-based resolution and TOOK the principle that a hit resolves to an EDGE by geometry rather than to whichever element is under the cursor, which is what stops a pointer in the gutter between two cards resolving to nothing and falling through to the end of the list. REJECTED adding a second tuned constant for the boundary hysteresis: the band is DERIVED from this capability's existing 5px drag threshold, which is already its one statement of how far a hand moves without meaning to."
+  }
+]

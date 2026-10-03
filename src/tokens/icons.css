@@ -1,0 +1,34 @@
+/* =============================================================================
+   icons.css — ICON FOUNDATION (Phosphor)
+   -----------------------------------------------------------------------------
+   Colour roles live in semantic.css (Icon roles + the Inverse section). This
+   file defines icon SIZE and the WEIGHT axis.
+
+   Load AFTER typography.css — sizes reference the text line-heights.
+
+   Phosphor defaults to size="1em" and color="currentColor", so an icon placed
+   inline with text already matches that text's size and colour. These tokens
+   are for standalone icons (icon buttons, nav, status) or when an icon should
+   match a specific text role deliberately.
+   ============================================================================= */
+
+.radix-themes {
+  /* --- Size = the paired text role's HEIGHT (line-height) ------------------
+     Matching the text line box (not the font-size) means the icon drops in
+     without spacing/padding micro-adjustments. Functional range is the UI
+     sizes; the header sizes cover dialog titles and similar. */
+  --ds-icon-xs: var(--ds-text-xs-leading);  /* pairs with XS     — 16 */
+  --ds-icon-sm: var(--ds-text-sm-leading);  /* pairs with Small  — 20 */
+  --ds-icon-md: var(--ds-text-md-leading);  /* pairs with Medium — 24 */
+  --ds-icon-h5: var(--ds-text-h5-leading);  /* header            — 22 */
+  --ds-icon-h4: var(--ds-text-h4-leading);  /* header            — 26 */
+  --ds-icon-h3: var(--ds-text-h3-leading);  /* header            — 30 */
+
+  /* --- Weight (Phosphor `weight` prop values) -----------------------------
+     Base = regular. Emphasis / selected = fill. An emphasised icon takes its
+     COLOUR from the parent component's state (currentColor) — e.g. a selected
+     tab fills its icon and shares the tab's colour — so there is no separate
+     icon-emphasis colour token. */
+  --ds-icon-weight-base: "regular";
+  --ds-icon-weight-emphasis: "fill";
+}

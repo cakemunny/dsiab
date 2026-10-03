@@ -1,0 +1,16 @@
+node_modules
+dist
+storybook-static
+*.tgz
+*.log
+.DS_Store
+.worktree-port
+.screenshots/
+
+# agent files that `npm run agents` generates from skills/, plus each tool's local state
+/.agents/
+/.claude/
+
+# throwaway probe directories used when measuring component behaviour
+.tmp-*/
+.probe

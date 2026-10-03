@@ -1,0 +1,82 @@
+/* =============================================================================
+   typography.css — TYPOGRAPHY FOUNDATION
+   -----------------------------------------------------------------------------
+   Uses Radix Themes' default type ramp as-is — no scale overrides. The named
+   roles map onto native Radix size steps, so they're reachable through both
+   Radix's <Heading size> / <Text size weight> props and the --ds-text-* tokens,
+   and inherit Radix's --scaling and per-size letter-spacing for free.
+
+   FIVE things are customised, and nothing else ([[type-ramp]]): the 600 "Strong" weight
+   Radix does not ship; the typeface indirection; the serif Em/Quote pair ([[serif-em-and-quote]]);
+   the 65ch reading measure; and the root body size, which follows the global UI
+   tier and is the only one that changes what an unstyled paragraph looks like.
+
+   MUST be imported AFTER @radix-ui/themes/styles.css. Load Inter before this
+   (e.g. @fontsource/inter).
+
+   Role ↔ Radix size step (native values):
+     H1 = size 8  (35 / 40)   |  H4 = size 5 (20 / 26)
+     H2 = size 7  (28 / 36)   |  H5 = size 3 (16 / 22)
+     H3 = size 6  (24 / 30)   |  Medium = size 3 (16 / 24, text leading)
+     Small = size 2 (14 / 20) |  XS = size 1 (12 / 16)
+   (Headings use the tighter heading line-heights; Medium uses text leading.)
+   ============================================================================= */
+
+.radix-themes {
+  /* --- Families ----------------------------------------------------------- */
+  /* ONE indirection, so a consumer can swap the face without redeclaring these.
+     `Provider` writes --ds-typeface-* onto document.documentElement, which inherits
+     to <body> and therefore to PORTALED content — a portal is rendered into <body>
+     and is not a descendant of the theme root at all, so an inline style on the
+     theme root would never reach it.
+
+     Unset means nothing is set: with no `typefaces` prop, Provider writes no
+     property, every var() falls through to the default below, and rendering is
+     byte-identical to before this indirection existed.
+
+     NOT an injected <style> element: source order is a bundler property (Vite HMR
+     re-appends sheets on module update), a stack string concatenated into CSS text
+     is arbitrary CSS if it contains `;` or `}`, and there is no SSR expression.
+     setProperty parses rather than concatenates, and the consuming app can put the
+     same properties on <html style> server-side. */
+  --default-font-family: var(--ds-typeface-body,
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif);
+  --heading-font-family: var(--ds-typeface-heading, var(--default-font-family));
+  --code-font-family: var(--ds-typeface-code,
+    "Menlo", "Consolas", "Bitstream Vera Sans Mono", monospace);
+  /* Em/Quote: deliberate serif-italic contrast against the sans UI (consumed by
+     the Typography story and Phase-2 <Em>/<Quote> via font-family + font-style:italic). */
+  --ds-font-em:    "Times New Roman", "Times", serif;
+  --ds-font-quote: "Times New Roman", "Times", serif;
+
+  /* --- Weights ------------------------------------------------------------ */
+  /* Radix ships 300 / 400 / 500 / 700; the system needs 600 for "Strong" ([[type-and-target-density]], [[type-ramp]]). */
+  --ds-font-weight-base:      var(--font-weight-regular); /* 400 — Base      */
+  --ds-font-weight-strong:    600;                        /* Semibold — Strong, Headings */
+  --ds-font-weight-strongest: var(--font-weight-bold);    /* 700 — Strongest */
+  /* "Emphasis" = italic (font-style: italic). "Code" = --code-font-family.   */
+
+  /* --- Portable role tokens (size + leading) ------------------------------ */
+  /* Reference native Radix steps; nothing is overridden. */
+  --ds-text-h1-size: var(--font-size-8); --ds-text-h1-leading: var(--heading-line-height-8);
+  --ds-text-h2-size: var(--font-size-7); --ds-text-h2-leading: var(--heading-line-height-7);
+  --ds-text-h3-size: var(--font-size-6); --ds-text-h3-leading: var(--heading-line-height-6);
+  --ds-text-h4-size: var(--font-size-5); --ds-text-h4-leading: var(--heading-line-height-5);
+  --ds-text-h5-size: var(--font-size-3); --ds-text-h5-leading: var(--heading-line-height-3);
+  --ds-text-md-size: var(--font-size-3); --ds-text-md-leading: var(--line-height-3); /* 16/24 */
+  --ds-text-sm-size: var(--font-size-2); --ds-text-sm-leading: var(--line-height-2); /* 14/20 */
+  --ds-text-xs-size: var(--font-size-1); --ds-text-xs-leading: var(--line-height-1); /* 12/16 */
+
+  /* --- Reading measure (max line length for prose) ----------------------- */
+  /* 65-char target (Bringhurst §2.1.2; comfortable range 45-80) — the line length
+     where eye-saccade rhythm settles and return-sweep errors are minimal. ch scales
+     with the body size and self-documents intent. Prose only: visual / data content
+     is scanned, not read, so it goes full width. See GUIDELINES §3. */
+  --ds-text-measure: 65ch;
+}
+
+/* Body-copy default follows the global UI size (Provider sets data-ui-size). */
+.radix-themes[data-ui-size="small"]  { --ds-ui-body-size: var(--font-size-2); }
+.radix-themes[data-ui-size="medium"] { --ds-ui-body-size: var(--font-size-3); }
+.radix-themes[data-ui-size="large"]  { --ds-ui-body-size: var(--font-size-4); }
+.radix-themes { font-size: var(--ds-ui-body-size, var(--font-size-2)); }

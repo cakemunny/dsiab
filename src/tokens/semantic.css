@@ -1,0 +1,234 @@
+/* =============================================================================
+   semantic.css — ROLE LAYER
+   -----------------------------------------------------------------------------
+   The contract a designer / agent touches. Every UI element reaches for these
+   --ds-* roles, never raw scale steps. Brand-agnostic: it consumes --gray-*,
+   --accent-*, and the --error/-warning/-success/-info families from theme.css,
+   so swapping the brand never touches this file.
+
+   Mapping logic: Radix's 1-12 scale is already a use-case ramp, so each role
+   maps to the step designed for its job, NOT to an old numeric stop:
+     1-2 backgrounds · 3-5 component bg (normal/hover/active) ·
+     6-8 borders (subtle/border+ring/hover) · 9-10 solid · 11-12 text.
+
+   Light/dark: declared on .radix-themes (same element the appearance class
+   lands on), so the auto-inverting majority resolves correctly in both modes
+   from a single block. Only genuinely mode-dependent tokens — elevated
+   surfaces and the scrim — are overridden in the .dark block at the bottom.
+   ============================================================================= */
+
+/* The roles that read the accent scale sit in their own block after this one, which also
+   resolves on a part given its own colour ([[part-colour-parity]]). Four accent roles stay here, on the theme
+   root alone: the focus ring and its stack, --ds-fill-selected and --ds-stroke-selected. */
+.radix-themes {
+
+  /* === BACKGROUND ========================================================= */
+  --ds-bg-base:          var(--gray-1);   /* app background                  */
+  --ds-bg-subtle:        var(--gray-2);   /* striped rows, sunken, alternate */
+  --ds-bg-sunken:        var(--gray-2);
+  --ds-bg-raised:        #fff;            /* card — mutable, see .dark        */
+  --ds-bg-overlay:       #fff;            /* popover/menu surface — mutable   */
+  --ds-bg-inverse:       var(--gray-12);
+
+  /* === TEXT =============================================================== */
+  --ds-text-strong:    var(--gray-12);
+  --ds-text-weak:      var(--gray-11);
+  --ds-text-disabled:  var(--gray-a8);    /* low-contrast by design (exempt)  */
+  --ds-text-error:     var(--error-11);
+  --ds-text-warning:   var(--warning-11);
+  --ds-text-success:   var(--success-11);
+  --ds-text-info:      var(--info-11);
+  /* Inverse / on-contrast content has its own section below.
+     For a single foreground on a solid fill, use the on-* tokens (theme.css). */
+
+  /* === ICON ============================================================== */
+  --ds-icon-neutral:     var(--gray-11);
+  --ds-icon-disabled:    var(--gray-a8);
+  --ds-icon-error:       var(--error-11);
+  --ds-icon-warning:     var(--warning-11);
+  --ds-icon-success:     var(--success-11);
+  --ds-icon-info:        var(--info-11);
+
+  /* === FILL ============================================================== */
+  /* Neutral surfaces use alpha so they stack on tinted backgrounds cleanly.  */
+  --ds-fill-weaker:      var(--gray-a2);  /* subtlest neutral fill (below weak)*/
+  --ds-fill-weak:        var(--gray-a3);  /* component bg (normal)            */
+  --ds-fill-hover:       var(--gray-a4);
+  --ds-fill-press:       var(--gray-a5);  /* pressed / active                 */
+  --ds-fill-medium:      var(--gray-a9);
+  --ds-fill-strong:      var(--gray-12);  /* solid neutral fill               */
+  --ds-fill-disabled:    var(--gray-a3);
+
+  /* The accent and error solids are the fills that carry TEXT ([[text-on-solid-fill-contrast]]): a label on one reaches
+     WCAG 4.5:1 and APCA Lc 60 against --on-accent / --on-error, at rest and on hover, in both
+     appearances. They resolve to step 9 wherever it passes, and to a pinned deeper light-scale
+     step where it does not (theme.css, per accent and per error family). Put text on a solid
+     colour by painting from these, never from a raw step 9.
+
+     PARTS WITHOUT TEXT DO NOT PAINT THESE ([[textless-part-fills]]). A checkbox or radio fill, a switch track, a
+     slider range, a progress bar, a tab underline, a status dot and a selected outline paint
+     Radix's --accent-indicator, the role Radix's own controls read. theme.css points it at this
+     same fill in light on the colours it deepens, and leaves Radix's step 9 in dark, where step 9
+     clears the page by more. So a deepened colour is one shade across its parts and its buttons
+     in light, and those parts clear WCAG 3:1 in both appearances.
+
+     THE HOVER IS AN OVERLAY, NOT A SECOND FILL. The -hover roles are an alpha from Radix's own
+     black and white scales, painted over the rest fill as a background-image layer, so a hover
+     is always its own rest colour one small step on and can never jump to a different shade.
+     Hover, press and an open menu trigger all take it. Never paint a -hover role on its own:
+     alone it is a faint veil, and only over its rest fill is it the hover colour.
+
+     THE POLARITY FOLLOWS THE INK. Under a white label the overlay is black, so the fill darkens
+     and the label's contrast rises. Under a dark label it is white, so the fill lightens and the
+     dark label's contrast rises (the accent block after this one).
+
+     THE STEP IS MEASURED, NOT PICKED. Radix's own hover, step 9 to step 10, moves the fill by a
+     median ΔE-OK of 0.036 across the 27 accents in both appearances. The chosen step is the
+     one whose median change on the rest fills lands closest to that: black-a2 (0.043, against
+     0.021 for a1 and 0.065 for a3) and white-a4 (0.031, against 0.022 for a3 and 0.047 for a5).
+     Every label then passes both floors on hover, and ON_FILL asserts it on the composite.
+     The accent fill and its hover sit in the accent block after this one ([[part-colour-parity]]). */
+  --ds-fill-selected:      var(--accent-9);   /* solid selected — incl. the Select menu's selected row ([[select-selected-row]]) */
+
+  --ds-fill-error:       var(--error-solid);  --ds-fill-error-weak:   var(--error-a3);
+  --ds-fill-error-hover: var(--black-a2);   /* overlay on --ds-fill-error, danger solid ([[error-hover-fill]]/[[destructive-tone]]/[[text-on-solid-fill-contrast]]) */
+  --ds-fill-warning:     var(--warning-9);  --ds-fill-warning-weak: var(--warning-a3);
+  --ds-fill-success:     var(--success-9);  --ds-fill-success-weak: var(--success-a3);
+  --ds-fill-info:        var(--info-9);     --ds-fill-info-weak:    var(--info-a3);
+
+  --ds-scrim:            var(--black-a8);   /* modal/overlay dim — mutable     */
+  --ds-scrim-light:      var(--white-a8);   /* light scrim for DARK media (Overlay, D10): a white alpha
+                                               for when the dark scrim would vanish on a dark image. A pure
+                                               white-alpha, so it's appearance-independent — no .dark override. */
+  /* The foregrounds for content drawn ON a scrim ([[scrim-foreground-tokens]]). Every other solid fill has had a paired
+     --on-* since 2026-06; the scrim was the one that did not, so text on a scrim had no system
+     answer and the Overlay docs hardcoded `color: "white"`.
+
+     THE VALUES ARE DERIVED, NOT PICKED. A scrim is a monotone alpha at 0.6 or darker, which clamps
+     the composite to one side no matter what image is beneath — so a worst-case bound exists even
+     though the media is unknown. Worst case for --ds-scrim is the light appearance over pure white
+     media (composite #666666): white reads 5.74:1. Worst case for --ds-scrim-light is over pure
+     black media (composite #999999): #21201c reads 5.72:1. Both clear AA normal text at 4.5.
+
+     TWO TOKENS, NOT ONE, because the scrims are opposites — a black veil and a white one, both
+     appearance-independent. White on --ds-scrim-light measures 1.00:1, which is the exact failure a
+     real consuming application hit.
+
+     THE CONTRACT, AND ITS LIMIT: these hold only while the scrim alpha stays at or above 0.6.
+     Below roughly 0.53 both fall under 4.5. --ds-scrim is marked mutable above; soften it and this
+     guarantee goes with it.
+
+     #21201c is written as a literal rather than aliased to --warning-contrast, which happens to
+     carry the same value: the collision blocks in theme.css re-pin that per accent, so aliasing
+     would couple the scrim to the warning family. Both are appearance-independent, for the same
+     reason --ds-scrim-light is — no .dark override.
+
+     THE FOCUS RING ON A SCRIM does not take these inks since [[focus-ring]]. The ring is the accent on
+     every surface, and Overlay's scrim re-points only its stack layer, --ds-stroke-focus-stack,
+     to the step measured for that veil (theme.css). See --ds-stroke-focus below, and
+     GUIDELINES §9. A control BORDER on a scrim is still not certified by these inks. */
+  --ds-on-scrim:         #fff;
+  --ds-on-scrim-light:   #21201c;
+
+  /* === STROKE ============================================================ */
+  --ds-stroke-weak:        var(--gray-a6);  /* subtle separator                */
+  --ds-stroke-strong:      var(--gray-a8);  /* component border                */
+  /* THE FOCUS RING ([[focus-ring]]). One ring everywhere, in two layers: the accent fill underneath and a
+     Radix black or white alpha stacked on it ([[interaction-state-alphas]]), painted 2px wide by components.css on every
+     focused control, every menu row edge and both scrims. The stack is the lightest step that
+     clears WCAG 3:1 and APCA Lc 30 on every surface a ring sits on (theme.css). The base is the
+     button's own fill ([[text-on-solid-fill-contrast]]), so a focused primary button wears its own colour one gap outside
+     its edge. Never paint either layer alone, and never paint the stack without the base under
+     it. Forced colours re-point the base to Highlight and the stack to nothing. Both layers
+     resolve on the theme root alone, so a part given its own colour rings in the page's
+     accent, the one focus colour the ruling sets for every part ([[part-colour-parity]]). */
+  --ds-stroke-focus:       var(--ds-fill-accent);
+  --ds-stroke-focus-stack: var(--accent-ring-stack);
+  --ds-stroke-selected:    var(--accent-8);
+  --ds-stroke-disabled:    var(--gray-a6);
+
+  --ds-stroke-error:     var(--error-8);    --ds-stroke-error-weak:   var(--error-a6);
+  --ds-stroke-warning:   var(--warning-8);  --ds-stroke-warning-weak: var(--warning-a6);
+  --ds-stroke-success:   var(--success-8);  --ds-stroke-success-weak: var(--success-a6);
+  --ds-stroke-info:      var(--info-8);     --ds-stroke-info-weak:    var(--info-a6);
+
+  /* === CONTENT ON CONTRAST SURFACES ====================================== */
+  /* No fixed inverse colour set — two mode-correct mechanisms instead:
+     1. Inverted NEUTRAL section: a region whose appearance is the OPPOSITE of
+        the system mode (dark in light mode, light in dark mode). Implement with
+        the <Contrast> appearance-flip wrapper and use the DEFAULT --ds-* roles
+        inside — they re-resolve to the inverted mode and flip when the system
+        mode switches.  (--ds-bg-inverse below is a shortcut for a single inverse
+        element, e.g. an inverse tooltip; sections should use <Contrast>.)
+     2. Solid colour fill (accent/state buttons, badges, accent heroes): content
+        — text, icon, AND stroke — uses the --on-* tokens from theme.css, which
+        carry the correct contrast for light vs dark scales. */
+}
+
+/* === THE ACCENT ROLES, ON A THEME AND ON A PART ([[part-colour-parity]]) ======================
+   Every role in this block reads the accent scale. Radix's `color` prop writes
+   data-accent-color on a part and maps that colour's scale onto the part, but a
+   role declared on the theme root alone resolves there, and a part inherits the
+   root's value. So this block names the theme root and every part inside it that
+   sets its own colour, and a part given a colour paints the link, the icon, the
+   fill that carries text, its hover, the tints and the accent strokes of a theme
+   of that colour. A part whose data-accent-color is empty, the value Radix writes
+   on a part given no colour, keeps its theme's values. The roles alias Radix's own
+   steps and the theme.css text fill, which resolve on the part in each appearance,
+   so the block needs no dark arm.
+
+   Four accent roles stay in the block above, on the theme root alone. The focus
+   ring, --ds-stroke-focus and its stack, is the page's accent on every part
+   ([[part-colour-parity]]). --ds-fill-selected and --ds-stroke-selected paint
+   nothing outside forced colours, where forced-colors.css re-points them to
+   Highlight on the theme root, and a part that declared them here would paint its
+   own step there in place of Highlight. */
+.radix-themes,
+.radix-themes :where([data-accent-color]:not([data-accent-color=""])) {
+  --ds-bg-high-contrast: var(--accent-9); /* solid attention background       */
+  --ds-text-link:        var(--accent-11);
+  --ds-icon-interactive: var(--accent-11);
+  --ds-fill-accent:        var(--accent-solid);        /* primary button   */
+  --ds-fill-accent-hover:  var(--black-a2);            /* overlay on --ds-fill-accent */
+  --ds-fill-accent-med:    var(--accent-a4);
+  --ds-fill-accent-weak:   var(--accent-a3);
+  --ds-fill-selected-subtle: var(--accent-a5);/* tinted selected row (faint)  */
+  --ds-stroke-accent:      var(--accent-7);
+  --ds-stroke-accent-weak: var(--accent-a6);
+}
+
+/* The hover overlay under a DARK ink ([[text-on-solid-fill-contrast]]). Radix pairs five accents' step 9 with a near-black
+   label: amber, lime, mint, sky and yellow. A black overlay would darken the fill toward that
+   label, so these take the white one, which lightens the fill and raises the label's contrast.
+   The error ink is white in every fixed collision block, so --ds-fill-error-hover keeps the
+   black overlay everywhere. Same specificity as the accent block above and later in the file,
+   so this wins with no !important. The first arm names a part given one of the five colours
+   ([[part-colour-parity]]), and the theme root arm comes last. */
+.radix-themes :where([data-accent-color="amber"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"], [data-accent-color="yellow"]),
+.radix-themes:where([data-accent-color="amber"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"], [data-accent-color="yellow"]) {
+  --ds-fill-accent-hover: var(--white-a4);
+}
+
+/* === MUTABLE: only what must differ by mode ============================== */
+/* Light leans on shadow for elevation; dark raises surfaces with lighter bg. */
+/* BOTH selector shapes — see [[dark-override-selectors]]. The second covers `appearance="inherit"`,
+   Radix's default, where the class is on <html> and not on the theme root. With
+   only the first, --ds-bg-raised stayed #fff on a #111113 page. */
+.radix-themes:where(.dark, .dark-theme),
+:is(.dark, .dark-theme) :where(.radix-themes:not(.light, .light-theme)) {
+  --ds-bg-raised:  var(--gray-2);
+  --ds-bg-overlay: var(--gray-3);
+  /* Sunken recesses BELOW base: light comes from above, so a recess sits in shadow
+     and reads darker — in BOTH modes. Base is already the darkest gray here, so
+     darken with a black alpha (black is black in both modes), not gray-a (which is a
+     white alpha in dark and would lighten). Light keeps gray-2 (a hair below base).  */
+  --ds-bg-sunken:  var(--black-a6);
+  /* --ds-scrim is NOT overridden here any more ([[scrim-value]]). It used to darken to `--black-a11` (0.90)
+     against light's `--black-a8` (0.60). Both are BLACK alphas, which are identical in either
+     appearance, so this was a choice rather than a compensation — and it bought contrast nobody
+     needed while erasing the media underneath. Measured: white text on the scrim over worst-case
+     white media reads 5.74:1 at 0.60 and 17.49:1 at 0.90, against a 4.5 floor. The report on the
+     social feed was that the dark hover reveal was WAY TOO STRONG, and it was: a 90%
+     black veil over a photograph leaves no photograph. One value now serves both appearances,
+     which is also what the contrast analysis above was written against. */
+}

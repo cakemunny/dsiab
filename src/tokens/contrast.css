@@ -1,0 +1,55 @@
+/* =============================================================================
+   contrast.css — APCA CONTRAST MODE (foreground overrides)
+   -----------------------------------------------------------------------------
+   WCAG 2.x is the always-on compliance gate (default). data-contrast="apca" on
+   .radix-themes opts a subtree into APCA — a more perceptually accurate contrast
+   model — which re-chooses on-solid foregrounds by APCA Lc instead of the WCAG
+   ratio. DECISIONS [[brand-status-collision-gate]] records the shifted-warning flip below.
+
+   These overrides are COMPUTED, not hand-picked: the Colors story's APCA play
+   asserts, for every accent, that the active-mode --accent-contrast matches
+   apcaBestForeground() (src/foundations/apca.ts) — so this table and the live
+   APCA computation cannot drift, exactly like the COLLISION_TABLE / theme.css
+   pairing.
+
+   Scope (Phase 1): the on-SOLID accent foreground, LIGHT mode. APCA and the
+   current WCAG-driven choice agree on every accent EXCEPT orange — so orange is
+   the sole override. Radix only pins dark foregrounds for amber/lime/mint/sky/
+   yellow (all light fills, which APCA also wants dark), and the semantic fills
+   already use white (= APCA's pick). Dark-mode foregrounds and the shifted-
+   semantic targets (warning->orange etc. under a collision) follow the same rule
+   and are Phase 2.
+
+   Specificity: (0,3,0) — beats theme.css's per-accent (0,2,0) pin with no
+   !important (DECISIONS [[brand-collision-shift-table]]). Imported after theme.css in index.css.
+   ============================================================================= */
+
+/* orange-9: the system pins --accent-contrast dark because white-on-orange-9 is
+   2.97:1 — below the AA-3.0 on-solid floor (theme.css). But APCA rates white
+   higher (Lc 61) than near-black (Lc 51): the eye reads white better on a
+   saturated mid-tone. In APCA mode, restore white.
+
+   Two selectors, both gated by the apca-mode + light root:
+   1. the root IS the orange theme (the common case);
+   2. an orange theme nested UNDER the apca-light root — e.g. DoDont re-asserts
+      the brand via <Theme accentColor> to escape the green/red Callout context;
+      that nested theme carries data-accent-color but not data-contrast, so it
+      must inherit the mode from its ancestor.
+   Light is scoped on the ROOT (:not(.dark)) so it holds regardless of whether a
+   nested theme re-declares appearance. Dark-mode foreground is Phase 2. */
+.radix-themes[data-contrast="apca"]:not(.dark)[data-accent-color="orange"],
+.radix-themes[data-contrast="apca"]:not(.dark) .radix-themes[data-accent-color="orange"] {
+  --accent-contrast: #fff;
+}
+
+/* warning → orange: gold / yellow / amber / lime brands shift warning to orange-9
+   (collision-avoidance) — the SAME orange-9 as the accent case above, so APCA
+   prefers white on it too. The system pins --warning-contrast dark (white-on-
+   orange-9 is 2.97:1, below the AA-3.0 on-solid floor); in APCA mode restore
+   white so the shifted warning matches the orange-accent flip and the on-solid
+   foreground stays internally consistent (the Colors APCA play guards all five
+   on-solid foregrounds, so this can't drift). */
+.radix-themes[data-contrast="apca"]:not(.dark):is([data-accent-color="gold"], [data-accent-color="yellow"], [data-accent-color="amber"], [data-accent-color="lime"]),
+.radix-themes[data-contrast="apca"]:not(.dark) .radix-themes:is([data-accent-color="gold"], [data-accent-color="yellow"], [data-accent-color="amber"], [data-accent-color="lime"]) {
+  --warning-contrast: #fff;
+}

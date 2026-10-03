@@ -1,0 +1,4 @@
+# `git archive`, and GitHub's "Download ZIP", leave these paths out. `.screenshots/` holds local
+# verification images and is gitignored as well, so this pair is a backstop.
+.screenshots/   export-ignore
+.screenshots/** export-ignore

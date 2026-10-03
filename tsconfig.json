@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "jsx": "react-jsx",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "dist",
+    "types": ["vite/client"]
+  },
+  "include": ["src", ".storybook"],
+  "//": "*.node-check.ts are Node tooling (fs scans) run by vitest.node.config.ts, not app code — kept out of the type gate like the root vite/vitest config files, since they need @types/node which the app deliberately doesn't ship.",
+  "exclude": ["node_modules", "dist", "src/**/*.node-check.ts"]
+}

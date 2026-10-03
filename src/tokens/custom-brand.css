@@ -1,0 +1,152 @@
+/* =============================================================================
+   custom-brand.css — THE SEAM FOR A GENERATED BRAND
+   -----------------------------------------------------------------------------
+   Static. Shipped once. Nothing here is generated, and no stylesheet is ever
+   injected at runtime: `Provider` supplies the VALUES as custom properties on
+   `document.documentElement`, and this file is the plumbing that routes them
+   into Radix's `--accent-*` contract.
+
+   Why properties on the document root rather than an injected <style>:
+     - source order is a BUNDLER property, and Vite HMR re-appends style elements
+       on module update, so an injected rule wins on one reload and loses on the
+       next;
+     - a colour string concatenated into CSS text is arbitrary CSS if it contains
+       `;` or `}`, whereas setProperty PARSES and rejects;
+     - a `style-src` CSP blocks a style element and does not block this;
+     - the consuming app can set the same properties on `<html style>` on the
+       SERVER, which is the only way this has an SSR story at all.
+
+   THE STRUCTURE MIRRORS oxblood.css, AND THAT MEANS SOMETHING SPECIFIC.
+   oxblood two-arms its SCALE (light at `:19`, dark at `:50`) and one-arms its
+   MAP onto `--accent-*` (`:84`) — which is also exactly what the vendor does,
+   since its 26 `[data-accent-color='…']` blocks are mode-independent. An earlier
+   version of this file did the opposite: two arms on the map, no scale. Both
+   render correctly, but they are structurally opposite, and the comment claiming
+   a mirror was a claim the file did not support.
+
+   Doing it oxblood's way is not conformity for its own sake. It separates WHICH
+   RAMP IS LIVE (appearance-keyed, in one place) from THIS BRAND IS THE ACCENT
+   (one arm), so the appearance question is answered once rather than twice — and
+   a later third axis (P3) adds one scale arm instead of doubling the map.
+
+   THE APPEARANCE ARM HAS TWO SELECTORS, AND THE SECOND IS NOT OPTIONAL.
+   Radix declares its dark scales under BOTH `.dark, .dark-theme` AND
+   `:is(.dark, .dark-theme) :where(.radix-themes:not(.light, .light-theme))`.
+   The second is how `appearance="inherit"` works — Radix's DEFAULT — where the
+   class sits on <html> and the theme root carries none. Measured on this repo:
+   in that state the vendor's `--gray-1` correctly reads `#111113` while our
+   `--ds-bg-raised` stays `#fff`, i.e. near-white text on a white card. Every
+   appearance-keyed rule in `src/tokens/` currently ships only the first shape,
+   so this file carries both rather than reproduce a known defect in new code.
+
+   The attribute and this block are an invariant pair. `--accent-9` is declared
+   in 26 vendor rules and NONE outside a `[data-accent-color=…]` block, so an
+   attribute whose block is absent renders nothing — and only PARTLY visibly, as
+   an invalid custom property makes the using declaration invalid-at-computed-
+   value-time, which resolves to `unset`: `background-color` becomes transparent
+   while `color` becomes INHERITED. Verified with a probe. That is why `Provider`
+   writes the properties BEFORE it sets the attribute.
+   ============================================================================= */
+
+/* --- the live ramp: which appearance's values are in play ------------------ */
+
+.radix-themes {
+  --ds-custom-1: var(--ds-brand-1);
+  --ds-custom-2: var(--ds-brand-2);
+  --ds-custom-3: var(--ds-brand-3);
+  --ds-custom-4: var(--ds-brand-4);
+  --ds-custom-5: var(--ds-brand-5);
+  --ds-custom-6: var(--ds-brand-6);
+  --ds-custom-7: var(--ds-brand-7);
+  --ds-custom-8: var(--ds-brand-8);
+  --ds-custom-9: var(--ds-brand-9);
+  --ds-custom-10: var(--ds-brand-10);
+  --ds-custom-11: var(--ds-brand-11);
+  --ds-custom-12: var(--ds-brand-12);
+  --ds-custom-a1: var(--ds-brand-a1);
+  --ds-custom-a2: var(--ds-brand-a2);
+  --ds-custom-a3: var(--ds-brand-a3);
+  --ds-custom-a4: var(--ds-brand-a4);
+  --ds-custom-a5: var(--ds-brand-a5);
+  --ds-custom-a6: var(--ds-brand-a6);
+  --ds-custom-a7: var(--ds-brand-a7);
+  --ds-custom-a8: var(--ds-brand-a8);
+  --ds-custom-a9: var(--ds-brand-a9);
+  --ds-custom-a10: var(--ds-brand-a10);
+  --ds-custom-a11: var(--ds-brand-a11);
+  --ds-custom-a12: var(--ds-brand-a12);
+  --ds-custom-contrast: var(--ds-brand-contrast);
+  --ds-custom-surface: var(--ds-brand-surface);
+  --ds-custom-indicator: var(--ds-brand-indicator);
+  --ds-custom-track: var(--ds-brand-track);
+}
+
+/* Both selector shapes — see the header. The first covers an explicit
+   `appearance="dark"` (class on the theme root); the second covers
+   `appearance="inherit"` (class on <html>, none on the root), which is the
+   default and which the first shape silently misses. */
+.radix-themes:where(.dark, .dark-theme),
+:is(.dark, .dark-theme) :where(.radix-themes:not(.light, .light-theme)) {
+  --ds-custom-1: var(--ds-brand-dark-1);
+  --ds-custom-2: var(--ds-brand-dark-2);
+  --ds-custom-3: var(--ds-brand-dark-3);
+  --ds-custom-4: var(--ds-brand-dark-4);
+  --ds-custom-5: var(--ds-brand-dark-5);
+  --ds-custom-6: var(--ds-brand-dark-6);
+  --ds-custom-7: var(--ds-brand-dark-7);
+  --ds-custom-8: var(--ds-brand-dark-8);
+  --ds-custom-9: var(--ds-brand-dark-9);
+  --ds-custom-10: var(--ds-brand-dark-10);
+  --ds-custom-11: var(--ds-brand-dark-11);
+  --ds-custom-12: var(--ds-brand-dark-12);
+  --ds-custom-a1: var(--ds-brand-dark-a1);
+  --ds-custom-a2: var(--ds-brand-dark-a2);
+  --ds-custom-a3: var(--ds-brand-dark-a3);
+  --ds-custom-a4: var(--ds-brand-dark-a4);
+  --ds-custom-a5: var(--ds-brand-dark-a5);
+  --ds-custom-a6: var(--ds-brand-dark-a6);
+  --ds-custom-a7: var(--ds-brand-dark-a7);
+  --ds-custom-a8: var(--ds-brand-dark-a8);
+  --ds-custom-a9: var(--ds-brand-dark-a9);
+  --ds-custom-a10: var(--ds-brand-dark-a10);
+  --ds-custom-a11: var(--ds-brand-dark-a11);
+  --ds-custom-a12: var(--ds-brand-dark-a12);
+  --ds-custom-contrast: var(--ds-brand-dark-contrast);
+  --ds-custom-surface: var(--ds-brand-dark-surface);
+  --ds-custom-indicator: var(--ds-brand-dark-indicator);
+  --ds-custom-track: var(--ds-brand-dark-track);
+}
+
+/* --- the map: this brand is the accent. Mode-independent, one arm, exactly as
+       oxblood.css:84 and the vendor's 26 blocks. --------------------------- */
+
+.radix-themes:where([data-accent-color="ds-custom"]) {
+  --accent-1: var(--ds-custom-1);
+  --accent-2: var(--ds-custom-2);
+  --accent-3: var(--ds-custom-3);
+  --accent-4: var(--ds-custom-4);
+  --accent-5: var(--ds-custom-5);
+  --accent-6: var(--ds-custom-6);
+  --accent-7: var(--ds-custom-7);
+  --accent-8: var(--ds-custom-8);
+  --accent-9: var(--ds-custom-9);
+  --accent-10: var(--ds-custom-10);
+  --accent-11: var(--ds-custom-11);
+  --accent-12: var(--ds-custom-12);
+  --accent-a1: var(--ds-custom-a1);
+  --accent-a2: var(--ds-custom-a2);
+  --accent-a3: var(--ds-custom-a3);
+  --accent-a4: var(--ds-custom-a4);
+  --accent-a5: var(--ds-custom-a5);
+  --accent-a6: var(--ds-custom-a6);
+  --accent-a7: var(--ds-custom-a7);
+  --accent-a8: var(--ds-custom-a8);
+  --accent-a9: var(--ds-custom-a9);
+  --accent-a10: var(--ds-custom-a10);
+  --accent-a11: var(--ds-custom-a11);
+  --accent-a12: var(--ds-custom-a12);
+  --accent-contrast: var(--ds-custom-contrast);
+  --accent-surface: var(--ds-custom-surface);
+  --accent-indicator: var(--ds-custom-indicator);
+  --accent-track: var(--ds-custom-track);
+}

@@ -1,0 +1,65 @@
+/* =============================================================================
+   motion.css — MOTION FOUNDATION
+   -----------------------------------------------------------------------------
+   Subdued by default — no bounce, spring overshoot, or parallax. Motion
+   communicates state change; it never decorates. An intent-named duration
+   ladder (micro -> advanced) plus a set of easing curves. Two rules decide
+   which step a thing takes:
+
+     1. Direct manipulation is INSTANT. A control the user is operating right
+        now (button, checkbox, text field, select trigger, slider thumb) has no
+        transition at all — lag under the finger reads as broken, not smooth.
+        Switch and SegmentedControl are the earned exceptions: the thumb's
+        travel is the affordance, so it rides the micro step.
+     2. Ambient surfaces are FASTER IN, SLOWER OUT. A tooltip, menu, panel,
+        dialog, or toast arrives quickly (it is the thing you asked for) and
+        leaves unhurriedly (it is already read — a lingering exit settles
+        instead of yanking the eye back). Exits therefore run LONGER than their
+        enter and take the decelerating standard curve. The accelerating exit
+        curve stays for the places a snap is still right — swipe dismissal and
+        plain in-place fades.
+
+   Scoped to .radix-themes; imported after the other token files. Reduced motion
+   is honored here, not left to consumers: under prefers-reduced-motion the
+   durations collapse to ~0 (0.01ms, not 0, so Radix's animationend-driven
+   unmount still fires).
+   ============================================================================= */
+
+.radix-themes {
+  /* Duration ladder — intent-named, shortest to longest. Enters take a lower
+     step than the matching exit; that gap IS the convention.                   */
+  --ds-duration-instant:    40ms;   /* press / active feedback                 */
+  --ds-duration-micro:      80ms;   /* switch + segmented thumb travel, hover  */
+  --ds-duration-fast:       120ms;  /* colour / in-place changes, tooltip IN   */
+  --ds-duration-overlay:    150ms;  /* popper tier IN — menu, popover, flyout  */
+  --ds-duration-moderate:   180ms;  /* modal tier IN, tooltip OUT              */
+  --ds-duration-emphasis:   260ms;  /* popper tier OUT                         */
+  --ds-duration-expressive: 320ms;  /* modal tier OUT — dialog, drawer, toast  */
+  --ds-duration-advanced:   400ms;  /* complex multi-element orchestration     */
+
+  /* Easing — standard decelerates (in-place changes AND every slower exit);
+     entry decelerates harder on open / state-change, never on mount; exit is
+     the snap, and ships on exactly three sites — the toast swipe-out and its
+     swipe snap-back, plus the Overlay scrim's in-place hide fade.              */
+  --ds-ease-standard: cubic-bezier(0.2, 0, 0, 1);     /* in-place + slow exits  */
+  --ds-ease-entry:    cubic-bezier(0.10, 0, 0, 1);    /* decelerate-in (enter)  */
+  --ds-ease-exit:     cubic-bezier(0.30, 0, 1, 0.80); /* accelerate-out (snaps) */
+  --ds-ease-linear:   cubic-bezier(0, 0, 1, 1);       /* opacity / colour only  */
+
+  /* Stagger step for list entrances (24ms — subtle, ~20-30ms reads as a cascade). */
+  --ds-stagger-step: 24ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .radix-themes {
+    --ds-duration-instant:    0.01ms;
+    --ds-duration-micro:      0.01ms;
+    --ds-duration-fast:       0.01ms;
+    --ds-duration-overlay:    0.01ms;
+    --ds-duration-moderate:   0.01ms;
+    --ds-duration-emphasis:   0.01ms;
+    --ds-duration-expressive: 0.01ms;
+    --ds-duration-advanced:   0.01ms;
+    --ds-stagger-step:        0ms;
+  }
+}

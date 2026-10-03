@@ -1,0 +1,1184 @@
+/* =============================================================================
+   theme.css — FAMILY LAYER
+   -----------------------------------------------------------------------------
+   The brand (accent) and neutral (gray) are NOT set here. They come from
+   <Theme accentColor="…" grayColor="auto|gray|…" radius="…">, which Radix Themes
+   compiles into --accent-1..12 / --accent-a* / --accent-contrast and
+   --gray-1..12 / --gray-a*, already correct for light and dark.
+
+   This file only does what Radix Themes does NOT do for you:
+     1. Map the four semantic families onto Radix scales.
+     2. Define the on-solid foreground tokens (step-9 fills).
+     3. Pin the solid fill that carries TEXT, per accent and per error family
+        ([[text-on-solid-fill-contrast]]), so a label on it reaches WCAG 4.5:1 and APCA Lc 60.
+
+   Brand collision: if a client's brand hue equals a semantic hue, shift the
+   semantic family to an adjacent scale here (e.g. red brand -> error: ruby).
+   Radix Themes' stylesheet already ships every scale + alpha + dark variants,
+   so no extra @imports are needed.
+
+   Scope note: declared on .radix-themes (the element that also carries the
+   appearance class), so each alias re-resolves to the dark scale value in dark
+   mode without duplicating the block. See semantic.css for the same pattern.
+   ============================================================================= */
+
+/* =============================================================================
+   THE INK AND THE FILL THAT CARRY TEXT ([[text-on-solid-fill-contrast]]), ON A THEME AND ON A PART ([[part-colour-parity]])
+   -----------------------------------------------------------------------------
+   A label on a solid fill owes WCAG 4.5:1 and APCA Lc 60 (APCA_LC.largeUi)
+   against its ink, at rest and on hover, in both appearances. Radix's step 9 is
+   a component background and makes no text promise: white on it measures 3.0 to
+   3.9:1 on most scales. So the fill a label sits on is its own role,
+   --accent-solid, read by --ds-fill-accent in semantic.css, and --on-accent is
+   its ink. --accent-contrast stays Radix's ink for the glyphs it draws on
+   --accent-indicator. The two agree on every colour but orange in dark, where
+   the [[textless-part-fills]] arm pins the glyph ink dark for orange-9. The weaker tiers mix from
+   --on-accent, so they invert with it.
+
+   THE RULE, per colour. Where the ink passes both floors on step 9, the fill
+   stays step 9. Otherwise the ink is white and the fill is the colour's own
+   LIGHT-scale step 11, pinned as a literal, so the value is the SAME in both
+   appearances. Dark step 11 is a pale text tint, and white fails on it. Of the
+   colours that fail on step 9, only pink passes on step 10, by 0.001, so pink
+   takes step 11 as well, for the margin. The gray accent paints the neutral
+   scale, so its pin is the light step 11 of the neutral data-gray-color names.
+   The hover is the rest fill under an alpha from Radix's black or white scale
+   (semantic.css), so it needs no pin here. The literals are sRGB hex. A P3
+   display paints the hex too, so the colour on screen is the colour measured
+   ([[srgb-contrast-checks]]).
+
+   A PART GIVEN ITS OWN COLOUR ([[part-colour-parity]]). Radix's `color` prop writes
+   data-accent-color on the part, below a theme root of another colour, and
+   every rule here names that part beside the theme root. A part takes its own
+   ink and its own fill, the values the same part takes on a theme of its
+   colour, so a solid Button given `color` paints what its twin paints. The base
+   arm skips a part whose data-accent-color is empty, the value Radix writes on
+   a part given no colour, and that part inherits its theme's values. No rule
+   needs a dark arm, because each pin is the same literal in both appearances
+   and the base reads Radix's own scale on the part. The gray arm on a part
+   skips a part inside a theme of another neutral that sits within the first,
+   so the nearer neutral decides. A part below two such nested themes takes the
+   base value.
+
+   The error fill that carries text, --error-solid, belongs to the error family.
+   It stays in the family block below and resolves on the theme root alone,
+   because the collision layer keys on the brand and never on a part ([[destructive-tone]]).
+   ============================================================================= */
+.radix-themes :where([data-accent-color]:not([data-accent-color=""])),
+.radix-themes {
+  --on-accent:          var(--accent-contrast);
+  --on-accent-weak:     color-mix(in oklab, var(--on-accent), transparent 30%);
+  --on-accent-disabled: color-mix(in oklab, var(--on-accent), transparent 60%);
+  --accent-solid: var(--accent-9);
+}
+.radix-themes[data-accent-color="gold"],
+.radix-themes [data-accent-color="gold"]    { --accent-solid: #71624b; }
+.radix-themes[data-accent-color="bronze"],
+.radix-themes [data-accent-color="bronze"]  { --accent-solid: #7d5e54; }
+.radix-themes[data-accent-color="brown"],
+.radix-themes [data-accent-color="brown"]   { --accent-solid: #815e46; }
+/* The dark ink serves raw orange-9 (5.49:1) but reads APCA Lc 45.8 there, under 60,
+   so the text fill takes white on orange light-11 instead. */
+.radix-themes[data-accent-color="orange"],
+.radix-themes [data-accent-color="orange"]  { --on-accent: #fff; --accent-solid: #cc4e00; }
+.radix-themes[data-accent-color="tomato"],
+.radix-themes [data-accent-color="tomato"]  { --accent-solid: #d13415; }
+.radix-themes[data-accent-color="red"],
+.radix-themes [data-accent-color="red"]     { --accent-solid: #ce2c31; }
+.radix-themes[data-accent-color="ruby"],
+.radix-themes [data-accent-color="ruby"]    { --accent-solid: #ca244d; }
+.radix-themes[data-accent-color="crimson"],
+.radix-themes [data-accent-color="crimson"] { --accent-solid: #cb1d63; }
+.radix-themes[data-accent-color="pink"],
+.radix-themes [data-accent-color="pink"]    { --accent-solid: #c2298a; }
+.radix-themes[data-accent-color="blue"],
+.radix-themes [data-accent-color="blue"]    { --accent-solid: #0d74ce; }
+.radix-themes[data-accent-color="cyan"],
+.radix-themes [data-accent-color="cyan"]    { --accent-solid: #107d98; }
+.radix-themes[data-accent-color="teal"],
+.radix-themes [data-accent-color="teal"]    { --accent-solid: #008573; }
+.radix-themes[data-accent-color="jade"],
+.radix-themes [data-accent-color="jade"]    { --accent-solid: #208368; }
+.radix-themes[data-accent-color="green"],
+.radix-themes [data-accent-color="green"]   { --accent-solid: #218358; }
+.radix-themes[data-accent-color="grass"],
+.radix-themes [data-accent-color="grass"]   { --accent-solid: #2a7e3b; }
+.radix-themes[data-accent-color="gray"][data-gray-color="gray"],
+.radix-themes[data-gray-color="gray"] [data-accent-color="gray"]:where(:not(.radix-themes[data-gray-color="gray"] [data-gray-color]:not([data-gray-color="gray"]) *))    { --accent-solid: #646464; }
+.radix-themes[data-accent-color="gray"][data-gray-color="mauve"],
+.radix-themes[data-gray-color="mauve"] [data-accent-color="gray"]:where(:not(.radix-themes[data-gray-color="mauve"] [data-gray-color]:not([data-gray-color="mauve"]) *)) { --accent-solid: #65636d; }
+.radix-themes[data-accent-color="gray"][data-gray-color="slate"],
+.radix-themes[data-gray-color="slate"] [data-accent-color="gray"]:where(:not(.radix-themes[data-gray-color="slate"] [data-gray-color]:not([data-gray-color="slate"]) *)) { --accent-solid: #60646c; }
+.radix-themes[data-accent-color="gray"][data-gray-color="sage"],
+.radix-themes[data-gray-color="sage"] [data-accent-color="gray"]:where(:not(.radix-themes[data-gray-color="sage"] [data-gray-color]:not([data-gray-color="sage"]) *))    { --accent-solid: #5f6563; }
+.radix-themes[data-accent-color="gray"][data-gray-color="olive"],
+.radix-themes[data-gray-color="olive"] [data-accent-color="gray"]:where(:not(.radix-themes[data-gray-color="olive"] [data-gray-color]:not([data-gray-color="olive"]) *)) { --accent-solid: #60655f; }
+.radix-themes[data-accent-color="gray"][data-gray-color="sand"],
+.radix-themes[data-gray-color="sand"] [data-accent-color="gray"]:where(:not(.radix-themes[data-gray-color="sand"] [data-gray-color]:not([data-gray-color="sand"]) *))    { --accent-solid: #63635e; }
+
+.radix-themes {
+  /* --- Error -> red ------------------------------------------------------- */
+  --error-1: var(--red-1);   --error-2: var(--red-2);   --error-3: var(--red-3);
+  --error-4: var(--red-4);   --error-5: var(--red-5);   --error-6: var(--red-6);
+  --error-7: var(--red-7);   --error-8: var(--red-8);   --error-9: var(--red-9);
+  --error-10: var(--red-10); --error-11: var(--red-11); --error-12: var(--red-12);
+  --error-a1: var(--red-a1);   --error-a2: var(--red-a2);   --error-a3: var(--red-a3);
+  --error-a4: var(--red-a4);   --error-a5: var(--red-a5);   --error-a6: var(--red-a6);
+  --error-a7: var(--red-a7);   --error-a8: var(--red-a8);   --error-a9: var(--red-a9);
+  --error-a10: var(--red-a10); --error-a11: var(--red-a11); --error-a12: var(--red-a12);
+
+  /* --- Warning -> amber --------------------------------------------------- */
+  --warning-1: var(--amber-1);   --warning-2: var(--amber-2);   --warning-3: var(--amber-3);
+  --warning-4: var(--amber-4);   --warning-5: var(--amber-5);   --warning-6: var(--amber-6);
+  --warning-7: var(--amber-7);   --warning-8: var(--amber-8);   --warning-9: var(--amber-9);
+  --warning-10: var(--amber-10); --warning-11: var(--amber-11); --warning-12: var(--amber-12);
+  --warning-a1: var(--amber-a1);   --warning-a2: var(--amber-a2);   --warning-a3: var(--amber-a3);
+  --warning-a4: var(--amber-a4);   --warning-a5: var(--amber-a5);   --warning-a6: var(--amber-a6);
+  --warning-a7: var(--amber-a7);   --warning-a8: var(--amber-a8);   --warning-a9: var(--amber-a9);
+  --warning-a10: var(--amber-a10); --warning-a11: var(--amber-a11); --warning-a12: var(--amber-a12);
+
+  /* --- Success -> green --------------------------------------------------- */
+  --success-1: var(--green-1);   --success-2: var(--green-2);   --success-3: var(--green-3);
+  --success-4: var(--green-4);   --success-5: var(--green-5);   --success-6: var(--green-6);
+  --success-7: var(--green-7);   --success-8: var(--green-8);   --success-9: var(--green-9);
+  --success-10: var(--green-10); --success-11: var(--green-11); --success-12: var(--green-12);
+  --success-a1: var(--green-a1);   --success-a2: var(--green-a2);   --success-a3: var(--green-a3);
+  --success-a4: var(--green-a4);   --success-a5: var(--green-a5);   --success-a6: var(--green-a6);
+  --success-a7: var(--green-a7);   --success-a8: var(--green-a8);   --success-a9: var(--green-a9);
+  --success-a10: var(--green-a10); --success-a11: var(--green-a11); --success-a12: var(--green-a12);
+
+  /* --- Info -> cyan ------------------------------------------------------- */
+  --info-1: var(--cyan-1);   --info-2: var(--cyan-2);   --info-3: var(--cyan-3);
+  --info-4: var(--cyan-4);   --info-5: var(--cyan-5);   --info-6: var(--cyan-6);
+  --info-7: var(--cyan-7);   --info-8: var(--cyan-8);   --info-9: var(--cyan-9);
+  --info-10: var(--cyan-10); --info-11: var(--cyan-11); --info-12: var(--cyan-12);
+  --info-a1: var(--cyan-a1);   --info-a2: var(--cyan-a2);   --info-a3: var(--cyan-a3);
+  --info-a4: var(--cyan-a4);   --info-a5: var(--cyan-a5);   --info-a6: var(--cyan-a6);
+  --info-a7: var(--cyan-a7);   --info-a8: var(--cyan-a8);   --info-a9: var(--cyan-a9);
+  --info-a10: var(--cyan-a10); --info-a11: var(--cyan-a11); --info-a12: var(--cyan-a12);
+
+  /* --- Foreground for content on SOLID (step 9/10) fills ----------------- */
+  /* The foreground for text, icon, AND stroke sitting on a status fill. Each is
+     the fill's contrast, so a light-scale fill gets dark content and a dark fill
+     gets light content. The accent ink, --on-accent, sits in the text-fill table
+     above this block, beside the fill it serves ([[text-on-solid-fill-contrast]], [[part-colour-parity]]). */
+
+  --error-contrast:   #fff;            /* red-9   -> light */
+  --success-contrast: #fff;            /* green-9 -> light */
+  --info-contrast:    #fff;            /* cyan-9  -> light */
+  /* amber-9 is a LIGHT solid in BOTH modes, but --amber-12 FLIPS to light in dark
+     mode (-> 1.30:1 on amber-9). Pin a fixed near-black so on-warning stays dark and
+     readable in light AND dark (~10:1). Decision 2026-06-18. */
+  --warning-contrast: #21201c;
+  --on-error:   var(--error-contrast);
+  --on-success: var(--success-contrast);
+  --on-info:    var(--info-contrast);
+  --on-warning: var(--warning-contrast);
+  /* Need weak/disabled on a state fill? mix from its --*-contrast, as above.
+     If a brand swap moves a family to a light scale, flip that --*-contrast. */
+
+  /* --- The error fill that carries TEXT ([[text-on-solid-fill-contrast]]) ---------------------------- */
+  /* The accent rule and its reasoning sit in the text-fill table above. Error
+     defaults to red, and white on red-9 is 3.91, so the base pin is red step 11.
+     Every collision block that moves error re-pins it beside its
+     --error-contrast. */
+  --error-solid:  #ce2c31;   /* red light-11 */
+}
+
+/* =============================================================================
+   BRAND -> SEMANTIC COLLISION AVOIDANCE  (the headline feature, on by default)
+   -----------------------------------------------------------------------------
+   The four semantic families above default to fixed hues (error red, warning
+   amber, success green, info cyan). When the client's BRAND accent is close in
+   hue to one of them they read as the same colour — an amber brand makes the
+   accent indistinguishable from the amber warning, a red brand from the error.
+
+   Radix Themes writes data-accent-color="<name>" on .radix-themes and remaps
+   --accent-1..12 per that attribute. We piggy-back on the SAME attribute: for
+   each accent that collides, a block below re-aliases ONLY the colliding family
+   to a non-colliding Radix scale (derived by OKLCH hue-distance optimisation —
+   the table is in _assert.ts: COLLISION_TABLE, and the cross-accent story test
+   derives its expectations from it, so CSS and test cannot drift). Accents not
+   listed already clear >= 30deg and need no block.
+
+   Two residuals can't fully separate inside their own family: a red brand
+   (error -> crimson, ~22deg) and a ruby brand (error -> tomato, ~20deg). Both
+   clear the 18deg floor and are reinforced by the committed colour-not-alone
+   rule (status = colour + icon/text, WCAG 1.4.1), so the icon disambiguates.
+
+   Specificity: .radix-themes[data-accent-color="x"] is (0,2,0) and beats the
+   base .radix-themes (0,1,0) with NO !important. To OVERRIDE for one family,
+   layer your own --<family>-* declarations AFTER this sheet at >= (0,2,0)
+   specificity (e.g. .radix-themes[data-accent-color="amber"] { --warning-9: ... }
+   loaded later, or any selector that matches AND out-specifies). Pull in only
+   the family you want; the rest keep the auto-shift.
+
+   --<family>-contrast is the on-step-9 foreground: white on vivid chromatic
+   solids; near-black (#21201c) on LIGHT scales (yellow, lime — and orange,
+   where white on step 9 is 2.97:1). The status solids (warning, success, info)
+   carry glyphs, not text, and are asserted >= 3.0 per accent (ON_STATUS_FILL).
+
+   --error-solid is the error fill that carries text ([[text-on-solid-fill-contrast]]). Every block that
+   moves error re-pins it to the new family. The accent fill that carries text,
+   --accent-solid, sits in its own table at the top of this file, which also
+   names a part given its own colour ([[part-colour-parity]]). Each text pairing is asserted
+   >= 4.5:1 and >= APCA Lc 60, at rest and on hover (the rest fill under its
+   overlay), per accent and per appearance (ON_FILL).
+   ============================================================================= */
+
+.radix-themes[data-accent-color="gold"] {
+  /* --- Error -> oxblood ----------------------------------------------- */
+  --error-1: var(--oxblood-1);   --error-2: var(--oxblood-2);   --error-3: var(--oxblood-3);
+  --error-4: var(--oxblood-4);   --error-5: var(--oxblood-5);   --error-6: var(--oxblood-6);
+  --error-7: var(--oxblood-7);   --error-8: var(--oxblood-8);   --error-9: var(--oxblood-9);
+  --error-10: var(--oxblood-10);   --error-11: var(--oxblood-11);   --error-12: var(--oxblood-12);
+  --error-a1: var(--oxblood-a1);   --error-a2: var(--oxblood-a2);   --error-a3: var(--oxblood-a3);
+  --error-a4: var(--oxblood-a4);   --error-a5: var(--oxblood-a5);   --error-a6: var(--oxblood-a6);
+  --error-a7: var(--oxblood-a7);   --error-a8: var(--oxblood-a8);   --error-a9: var(--oxblood-a9);
+  --error-a10: var(--oxblood-a10);   --error-a11: var(--oxblood-a11);   --error-a12: var(--oxblood-a12);
+  --error-contrast: #fff;
+  --error-solid: var(--error-9);   /* oxblood-9 passes */
+
+  /* --- Warning -> orange ------------------------------------------- */
+  --warning-1: var(--orange-1);   --warning-2: var(--orange-2);   --warning-3: var(--orange-3);
+  --warning-4: var(--orange-4);   --warning-5: var(--orange-5);   --warning-6: var(--orange-6);
+  --warning-7: var(--orange-7);   --warning-8: var(--orange-8);   --warning-9: var(--orange-9);
+  --warning-10: var(--orange-10);   --warning-11: var(--orange-11);   --warning-12: var(--orange-12);
+  --warning-a1: var(--orange-a1);   --warning-a2: var(--orange-a2);   --warning-a3: var(--orange-a3);
+  --warning-a4: var(--orange-a4);   --warning-a5: var(--orange-a5);   --warning-a6: var(--orange-a6);
+  --warning-a7: var(--orange-a7);   --warning-a8: var(--orange-a8);   --warning-a9: var(--orange-a9);
+  --warning-a10: var(--orange-a10);   --warning-a11: var(--orange-a11);   --warning-a12: var(--orange-a12);
+  --warning-contrast: #21201c;
+}
+
+.radix-themes[data-accent-color="bronze"] {
+  /* --- Error -> ruby ----------------------------------------------- */
+  --error-1: var(--ruby-1);   --error-2: var(--ruby-2);   --error-3: var(--ruby-3);
+  --error-4: var(--ruby-4);   --error-5: var(--ruby-5);   --error-6: var(--ruby-6);
+  --error-7: var(--ruby-7);   --error-8: var(--ruby-8);   --error-9: var(--ruby-9);
+  --error-10: var(--ruby-10);   --error-11: var(--ruby-11);   --error-12: var(--ruby-12);
+  --error-a1: var(--ruby-a1);   --error-a2: var(--ruby-a2);   --error-a3: var(--ruby-a3);
+  --error-a4: var(--ruby-a4);   --error-a5: var(--ruby-a5);   --error-a6: var(--ruby-a6);
+  --error-a7: var(--ruby-a7);   --error-a8: var(--ruby-a8);   --error-a9: var(--ruby-a9);
+  --error-a10: var(--ruby-a10);   --error-a11: var(--ruby-a11);   --error-a12: var(--ruby-a12);
+  --error-contrast: #fff;
+  --error-solid: #ca244d;   /* ruby light-11 */
+}
+
+.radix-themes[data-accent-color="brown"] {
+  /* --- Warning -> yellow ------------------------------------------- */
+  --warning-1: var(--yellow-1);   --warning-2: var(--yellow-2);   --warning-3: var(--yellow-3);
+  --warning-4: var(--yellow-4);   --warning-5: var(--yellow-5);   --warning-6: var(--yellow-6);
+  --warning-7: var(--yellow-7);   --warning-8: var(--yellow-8);   --warning-9: var(--yellow-9);
+  --warning-10: var(--yellow-10);   --warning-11: var(--yellow-11);   --warning-12: var(--yellow-12);
+  --warning-a1: var(--yellow-a1);   --warning-a2: var(--yellow-a2);   --warning-a3: var(--yellow-a3);
+  --warning-a4: var(--yellow-a4);   --warning-a5: var(--yellow-a5);   --warning-a6: var(--yellow-a6);
+  --warning-a7: var(--yellow-a7);   --warning-a8: var(--yellow-a8);   --warning-a9: var(--yellow-a9);
+  --warning-a10: var(--yellow-a10);   --warning-a11: var(--yellow-a11);   --warning-a12: var(--yellow-a12);
+  --warning-contrast: #21201c;
+}
+
+.radix-themes[data-accent-color="yellow"] {
+  /* --- Error -> oxblood ----------------------------------------------- */
+  --error-1: var(--oxblood-1);   --error-2: var(--oxblood-2);   --error-3: var(--oxblood-3);
+  --error-4: var(--oxblood-4);   --error-5: var(--oxblood-5);   --error-6: var(--oxblood-6);
+  --error-7: var(--oxblood-7);   --error-8: var(--oxblood-8);   --error-9: var(--oxblood-9);
+  --error-10: var(--oxblood-10);   --error-11: var(--oxblood-11);   --error-12: var(--oxblood-12);
+  --error-a1: var(--oxblood-a1);   --error-a2: var(--oxblood-a2);   --error-a3: var(--oxblood-a3);
+  --error-a4: var(--oxblood-a4);   --error-a5: var(--oxblood-a5);   --error-a6: var(--oxblood-a6);
+  --error-a7: var(--oxblood-a7);   --error-a8: var(--oxblood-a8);   --error-a9: var(--oxblood-a9);
+  --error-a10: var(--oxblood-a10);   --error-a11: var(--oxblood-a11);   --error-a12: var(--oxblood-a12);
+  --error-contrast: #fff;
+  --error-solid: var(--error-9);   /* oxblood-9 passes */
+
+  /* --- Warning -> orange ------------------------------------------- */
+  --warning-1: var(--orange-1);   --warning-2: var(--orange-2);   --warning-3: var(--orange-3);
+  --warning-4: var(--orange-4);   --warning-5: var(--orange-5);   --warning-6: var(--orange-6);
+  --warning-7: var(--orange-7);   --warning-8: var(--orange-8);   --warning-9: var(--orange-9);
+  --warning-10: var(--orange-10);   --warning-11: var(--orange-11);   --warning-12: var(--orange-12);
+  --warning-a1: var(--orange-a1);   --warning-a2: var(--orange-a2);   --warning-a3: var(--orange-a3);
+  --warning-a4: var(--orange-a4);   --warning-a5: var(--orange-a5);   --warning-a6: var(--orange-a6);
+  --warning-a7: var(--orange-a7);   --warning-a8: var(--orange-a8);   --warning-a9: var(--orange-a9);
+  --warning-a10: var(--orange-a10);   --warning-a11: var(--orange-a11);   --warning-a12: var(--orange-a12);
+  --warning-contrast: #21201c;
+}
+
+.radix-themes[data-accent-color="amber"] {
+  /* --- Error -> oxblood ----------------------------------------------- */
+  --error-1: var(--oxblood-1);   --error-2: var(--oxblood-2);   --error-3: var(--oxblood-3);
+  --error-4: var(--oxblood-4);   --error-5: var(--oxblood-5);   --error-6: var(--oxblood-6);
+  --error-7: var(--oxblood-7);   --error-8: var(--oxblood-8);   --error-9: var(--oxblood-9);
+  --error-10: var(--oxblood-10);   --error-11: var(--oxblood-11);   --error-12: var(--oxblood-12);
+  --error-a1: var(--oxblood-a1);   --error-a2: var(--oxblood-a2);   --error-a3: var(--oxblood-a3);
+  --error-a4: var(--oxblood-a4);   --error-a5: var(--oxblood-a5);   --error-a6: var(--oxblood-a6);
+  --error-a7: var(--oxblood-a7);   --error-a8: var(--oxblood-a8);   --error-a9: var(--oxblood-a9);
+  --error-a10: var(--oxblood-a10);   --error-a11: var(--oxblood-a11);   --error-a12: var(--oxblood-a12);
+  --error-contrast: #fff;
+  --error-solid: var(--error-9);   /* oxblood-9 passes */
+
+  /* --- Warning -> orange ------------------------------------------- */
+  --warning-1: var(--orange-1);   --warning-2: var(--orange-2);   --warning-3: var(--orange-3);
+  --warning-4: var(--orange-4);   --warning-5: var(--orange-5);   --warning-6: var(--orange-6);
+  --warning-7: var(--orange-7);   --warning-8: var(--orange-8);   --warning-9: var(--orange-9);
+  --warning-10: var(--orange-10);   --warning-11: var(--orange-11);   --warning-12: var(--orange-12);
+  --warning-a1: var(--orange-a1);   --warning-a2: var(--orange-a2);   --warning-a3: var(--orange-a3);
+  --warning-a4: var(--orange-a4);   --warning-a5: var(--orange-a5);   --warning-a6: var(--orange-a6);
+  --warning-a7: var(--orange-a7);   --warning-a8: var(--orange-a8);   --warning-a9: var(--orange-a9);
+  --warning-a10: var(--orange-a10);   --warning-a11: var(--orange-a11);   --warning-a12: var(--orange-a12);
+  --warning-contrast: #21201c;
+}
+
+.radix-themes[data-accent-color="orange"] {
+  /* Orange-9 takes white at only 2.97:1, below the 3.0 gate (the same case [[brand-collision-shift-table]] fixed
+     for warning->orange). Text does not sit on orange-9 any more ([[text-on-solid-fill-contrast]]): the text fill
+     and its ink sit in the text-fill table at the top of this file. The glyphs Radix
+     draws on the indicator keep Radix's own white in light, where the indicator is
+     orange light-11 (4.51:1, [[textless-part-fills]]), and take the dark ink on orange-9 in dark, in the
+     [[textless-part-fills]] arm at the end of this file. */
+  /* --- Error -> oxblood ----------------------------------------------- */
+  --error-1: var(--oxblood-1);   --error-2: var(--oxblood-2);   --error-3: var(--oxblood-3);
+  --error-4: var(--oxblood-4);   --error-5: var(--oxblood-5);   --error-6: var(--oxblood-6);
+  --error-7: var(--oxblood-7);   --error-8: var(--oxblood-8);   --error-9: var(--oxblood-9);
+  --error-10: var(--oxblood-10);   --error-11: var(--oxblood-11);   --error-12: var(--oxblood-12);
+  --error-a1: var(--oxblood-a1);   --error-a2: var(--oxblood-a2);   --error-a3: var(--oxblood-a3);
+  --error-a4: var(--oxblood-a4);   --error-a5: var(--oxblood-a5);   --error-a6: var(--oxblood-a6);
+  --error-a7: var(--oxblood-a7);   --error-a8: var(--oxblood-a8);   --error-a9: var(--oxblood-a9);
+  --error-a10: var(--oxblood-a10);   --error-a11: var(--oxblood-a11);   --error-a12: var(--oxblood-a12);
+  --error-contrast: #fff;
+  --error-solid: var(--error-9);   /* oxblood-9 passes */
+}
+
+.radix-themes[data-accent-color="tomato"] {
+  /* --- Error -> oxblood (deep-red preset) -------------------------------------------- */
+  --error-1: var(--oxblood-1);   --error-2: var(--oxblood-2);   --error-3: var(--oxblood-3);
+  --error-4: var(--oxblood-4);   --error-5: var(--oxblood-5);   --error-6: var(--oxblood-6);
+  --error-7: var(--oxblood-7);   --error-8: var(--oxblood-8);   --error-9: var(--oxblood-9);
+  --error-10: var(--oxblood-10);   --error-11: var(--oxblood-11);   --error-12: var(--oxblood-12);
+  --error-a1: var(--oxblood-a1);   --error-a2: var(--oxblood-a2);   --error-a3: var(--oxblood-a3);
+  --error-a4: var(--oxblood-a4);   --error-a5: var(--oxblood-a5);   --error-a6: var(--oxblood-a6);
+  --error-a7: var(--oxblood-a7);   --error-a8: var(--oxblood-a8);   --error-a9: var(--oxblood-a9);
+  --error-a10: var(--oxblood-a10);   --error-a11: var(--oxblood-a11);   --error-a12: var(--oxblood-a12);
+  --error-contrast: #fff;
+  --error-solid: var(--error-9);   /* oxblood-9 passes */
+}
+
+.radix-themes[data-accent-color="red"] {
+  /* --- Error -> oxblood (deep-red preset, ΔE-OK 0.21) ---------------------------- */
+  --error-1: var(--oxblood-1);   --error-2: var(--oxblood-2);   --error-3: var(--oxblood-3);
+  --error-4: var(--oxblood-4);   --error-5: var(--oxblood-5);   --error-6: var(--oxblood-6);
+  --error-7: var(--oxblood-7);   --error-8: var(--oxblood-8);   --error-9: var(--oxblood-9);
+  --error-10: var(--oxblood-10);   --error-11: var(--oxblood-11);   --error-12: var(--oxblood-12);
+  --error-a1: var(--oxblood-a1);   --error-a2: var(--oxblood-a2);   --error-a3: var(--oxblood-a3);
+  --error-a4: var(--oxblood-a4);   --error-a5: var(--oxblood-a5);   --error-a6: var(--oxblood-a6);
+  --error-a7: var(--oxblood-a7);   --error-a8: var(--oxblood-a8);   --error-a9: var(--oxblood-a9);
+  --error-a10: var(--oxblood-a10);   --error-a11: var(--oxblood-a11);   --error-a12: var(--oxblood-a12);
+  --error-contrast: #fff;
+  --error-solid: var(--error-9);   /* oxblood-9 passes */
+}
+
+.radix-themes[data-accent-color="ruby"] {
+  /* --- Error -> oxblood (deep-red preset, ΔE-OK 0.21) ----------------------------- */
+  --error-1: var(--oxblood-1);   --error-2: var(--oxblood-2);   --error-3: var(--oxblood-3);
+  --error-4: var(--oxblood-4);   --error-5: var(--oxblood-5);   --error-6: var(--oxblood-6);
+  --error-7: var(--oxblood-7);   --error-8: var(--oxblood-8);   --error-9: var(--oxblood-9);
+  --error-10: var(--oxblood-10);   --error-11: var(--oxblood-11);   --error-12: var(--oxblood-12);
+  --error-a1: var(--oxblood-a1);   --error-a2: var(--oxblood-a2);   --error-a3: var(--oxblood-a3);
+  --error-a4: var(--oxblood-a4);   --error-a5: var(--oxblood-a5);   --error-a6: var(--oxblood-a6);
+  --error-a7: var(--oxblood-a7);   --error-a8: var(--oxblood-a8);   --error-a9: var(--oxblood-a9);
+  --error-a10: var(--oxblood-a10);   --error-a11: var(--oxblood-a11);   --error-a12: var(--oxblood-a12);
+  --error-contrast: #fff;
+  --error-solid: var(--error-9);   /* oxblood-9 passes */
+}
+
+.radix-themes[data-accent-color="crimson"] {
+  /* --- Error -> oxblood (deep-red preset) --------------------------------------------- */
+  --error-1: var(--oxblood-1);   --error-2: var(--oxblood-2);   --error-3: var(--oxblood-3);
+  --error-4: var(--oxblood-4);   --error-5: var(--oxblood-5);   --error-6: var(--oxblood-6);
+  --error-7: var(--oxblood-7);   --error-8: var(--oxblood-8);   --error-9: var(--oxblood-9);
+  --error-10: var(--oxblood-10);   --error-11: var(--oxblood-11);   --error-12: var(--oxblood-12);
+  --error-a1: var(--oxblood-a1);   --error-a2: var(--oxblood-a2);   --error-a3: var(--oxblood-a3);
+  --error-a4: var(--oxblood-a4);   --error-a5: var(--oxblood-a5);   --error-a6: var(--oxblood-a6);
+  --error-a7: var(--oxblood-a7);   --error-a8: var(--oxblood-a8);   --error-a9: var(--oxblood-a9);
+  --error-a10: var(--oxblood-a10);   --error-a11: var(--oxblood-a11);   --error-a12: var(--oxblood-a12);
+  --error-contrast: #fff;
+  --error-solid: var(--error-9);   /* oxblood-9 passes */
+}
+
+.radix-themes[data-accent-color="cyan"] {
+  /* --- Info -> indigo ------------------------------------------------ */
+  --info-1: var(--indigo-1);   --info-2: var(--indigo-2);   --info-3: var(--indigo-3);
+  --info-4: var(--indigo-4);   --info-5: var(--indigo-5);   --info-6: var(--indigo-6);
+  --info-7: var(--indigo-7);   --info-8: var(--indigo-8);   --info-9: var(--indigo-9);
+  --info-10: var(--indigo-10);   --info-11: var(--indigo-11);   --info-12: var(--indigo-12);
+  --info-a1: var(--indigo-a1);   --info-a2: var(--indigo-a2);   --info-a3: var(--indigo-a3);
+  --info-a4: var(--indigo-a4);   --info-a5: var(--indigo-a5);   --info-a6: var(--indigo-a6);
+  --info-a7: var(--indigo-a7);   --info-a8: var(--indigo-a8);   --info-a9: var(--indigo-a9);
+  --info-a10: var(--indigo-a10);   --info-a11: var(--indigo-a11);   --info-a12: var(--indigo-a12);
+  --info-contrast: #fff;
+}
+
+.radix-themes[data-accent-color="sky"] {
+  /* --- Info -> blue ------------------------------------------------ */
+  --info-1: var(--blue-1);   --info-2: var(--blue-2);   --info-3: var(--blue-3);
+  --info-4: var(--blue-4);   --info-5: var(--blue-5);   --info-6: var(--blue-6);
+  --info-7: var(--blue-7);   --info-8: var(--blue-8);   --info-9: var(--blue-9);
+  --info-10: var(--blue-10);   --info-11: var(--blue-11);   --info-12: var(--blue-12);
+  --info-a1: var(--blue-a1);   --info-a2: var(--blue-a2);   --info-a3: var(--blue-a3);
+  --info-a4: var(--blue-a4);   --info-a5: var(--blue-a5);   --info-a6: var(--blue-a6);
+  --info-a7: var(--blue-a7);   --info-a8: var(--blue-a8);   --info-a9: var(--blue-a9);
+  --info-a10: var(--blue-a10);   --info-a11: var(--blue-a11);   --info-a12: var(--blue-a12);
+  --info-contrast: #fff;
+}
+
+.radix-themes[data-accent-color="teal"] {
+  /* --- Success -> lime; Info -> indigo (teal collides on both: ΔE-OK 0.245 / 0.238) -- */
+  --success-1: var(--lime-1);   --success-2: var(--lime-2);   --success-3: var(--lime-3);
+  --success-4: var(--lime-4);   --success-5: var(--lime-5);   --success-6: var(--lime-6);
+  --success-7: var(--lime-7);   --success-8: var(--lime-8);   --success-9: var(--lime-9);
+  --success-10: var(--lime-10);   --success-11: var(--lime-11);   --success-12: var(--lime-12);
+  --success-a1: var(--lime-a1);   --success-a2: var(--lime-a2);   --success-a3: var(--lime-a3);
+  --success-a4: var(--lime-a4);   --success-a5: var(--lime-a5);   --success-a6: var(--lime-a6);
+  --success-a7: var(--lime-a7);   --success-a8: var(--lime-a8);   --success-a9: var(--lime-a9);
+  --success-a10: var(--lime-a10);   --success-a11: var(--lime-a11);   --success-a12: var(--lime-a12);
+  --success-contrast: #21201c;
+  --info-1: var(--indigo-1);   --info-2: var(--indigo-2);   --info-3: var(--indigo-3);
+  --info-4: var(--indigo-4);   --info-5: var(--indigo-5);   --info-6: var(--indigo-6);
+  --info-7: var(--indigo-7);   --info-8: var(--indigo-8);   --info-9: var(--indigo-9);
+  --info-10: var(--indigo-10);   --info-11: var(--indigo-11);   --info-12: var(--indigo-12);
+  --info-a1: var(--indigo-a1);   --info-a2: var(--indigo-a2);   --info-a3: var(--indigo-a3);
+  --info-a4: var(--indigo-a4);   --info-a5: var(--indigo-a5);   --info-a6: var(--indigo-a6);
+  --info-a7: var(--indigo-a7);   --info-a8: var(--indigo-a8);   --info-a9: var(--indigo-a9);
+  --info-a10: var(--indigo-a10);   --info-a11: var(--indigo-a11);   --info-a12: var(--indigo-a12);
+  --info-contrast: #fff;
+}
+
+.radix-themes[data-accent-color="jade"] {
+  /* --- Success -> lime --------------------------------------------- */
+  --success-1: var(--lime-1);   --success-2: var(--lime-2);   --success-3: var(--lime-3);
+  --success-4: var(--lime-4);   --success-5: var(--lime-5);   --success-6: var(--lime-6);
+  --success-7: var(--lime-7);   --success-8: var(--lime-8);   --success-9: var(--lime-9);
+  --success-10: var(--lime-10);   --success-11: var(--lime-11);   --success-12: var(--lime-12);
+  --success-a1: var(--lime-a1);   --success-a2: var(--lime-a2);   --success-a3: var(--lime-a3);
+  --success-a4: var(--lime-a4);   --success-a5: var(--lime-a5);   --success-a6: var(--lime-a6);
+  --success-a7: var(--lime-a7);   --success-a8: var(--lime-a8);   --success-a9: var(--lime-a9);
+  --success-a10: var(--lime-a10);   --success-a11: var(--lime-a11);   --success-a12: var(--lime-a12);
+  --success-contrast: #21201c;
+}
+
+.radix-themes[data-accent-color="green"] {
+  /* --- Success -> lime --------------------------------------------- */
+  --success-1: var(--lime-1);   --success-2: var(--lime-2);   --success-3: var(--lime-3);
+  --success-4: var(--lime-4);   --success-5: var(--lime-5);   --success-6: var(--lime-6);
+  --success-7: var(--lime-7);   --success-8: var(--lime-8);   --success-9: var(--lime-9);
+  --success-10: var(--lime-10);   --success-11: var(--lime-11);   --success-12: var(--lime-12);
+  --success-a1: var(--lime-a1);   --success-a2: var(--lime-a2);   --success-a3: var(--lime-a3);
+  --success-a4: var(--lime-a4);   --success-a5: var(--lime-a5);   --success-a6: var(--lime-a6);
+  --success-a7: var(--lime-a7);   --success-a8: var(--lime-a8);   --success-a9: var(--lime-a9);
+  --success-a10: var(--lime-a10);   --success-a11: var(--lime-a11);   --success-a12: var(--lime-a12);
+  --success-contrast: #21201c;
+}
+
+.radix-themes[data-accent-color="grass"] {
+  /* --- Success -> lime --------------------------------------------- */
+  --success-1: var(--lime-1);   --success-2: var(--lime-2);   --success-3: var(--lime-3);
+  --success-4: var(--lime-4);   --success-5: var(--lime-5);   --success-6: var(--lime-6);
+  --success-7: var(--lime-7);   --success-8: var(--lime-8);   --success-9: var(--lime-9);
+  --success-10: var(--lime-10);   --success-11: var(--lime-11);   --success-12: var(--lime-12);
+  --success-a1: var(--lime-a1);   --success-a2: var(--lime-a2);   --success-a3: var(--lime-a3);
+  --success-a4: var(--lime-a4);   --success-a5: var(--lime-a5);   --success-a6: var(--lime-a6);
+  --success-a7: var(--lime-a7);   --success-a8: var(--lime-a8);   --success-a9: var(--lime-a9);
+  --success-a10: var(--lime-a10);   --success-a11: var(--lime-a11);   --success-a12: var(--lime-a12);
+  --success-contrast: #21201c;
+}
+
+.radix-themes[data-accent-color="mint"] {
+  /* --- Success -> grass -------------------------------------------- */
+  --success-1: var(--grass-1);   --success-2: var(--grass-2);   --success-3: var(--grass-3);
+  --success-4: var(--grass-4);   --success-5: var(--grass-5);   --success-6: var(--grass-6);
+  --success-7: var(--grass-7);   --success-8: var(--grass-8);   --success-9: var(--grass-9);
+  --success-10: var(--grass-10);   --success-11: var(--grass-11);   --success-12: var(--grass-12);
+  --success-a1: var(--grass-a1);   --success-a2: var(--grass-a2);   --success-a3: var(--grass-a3);
+  --success-a4: var(--grass-a4);   --success-a5: var(--grass-a5);   --success-a6: var(--grass-a6);
+  --success-a7: var(--grass-a7);   --success-a8: var(--grass-a8);   --success-a9: var(--grass-a9);
+  --success-a10: var(--grass-a10);   --success-a11: var(--grass-a11);   --success-a12: var(--grass-a12);
+  --success-contrast: #fff;
+}
+
+.radix-themes[data-accent-color="pink"] {
+  /* --- Error -> oxblood (magenta brand; bright red read too close, ΔE-OK 0.13 -> 0.24) - */
+  --error-1: var(--oxblood-1);   --error-2: var(--oxblood-2);   --error-3: var(--oxblood-3);
+  --error-4: var(--oxblood-4);   --error-5: var(--oxblood-5);   --error-6: var(--oxblood-6);
+  --error-7: var(--oxblood-7);   --error-8: var(--oxblood-8);   --error-9: var(--oxblood-9);
+  --error-10: var(--oxblood-10);   --error-11: var(--oxblood-11);   --error-12: var(--oxblood-12);
+  --error-a1: var(--oxblood-a1);   --error-a2: var(--oxblood-a2);   --error-a3: var(--oxblood-a3);
+  --error-a4: var(--oxblood-a4);   --error-a5: var(--oxblood-a5);   --error-a6: var(--oxblood-a6);
+  --error-a7: var(--oxblood-a7);   --error-a8: var(--oxblood-a8);   --error-a9: var(--oxblood-a9);
+  --error-a10: var(--oxblood-a10);   --error-a11: var(--oxblood-a11);   --error-a12: var(--oxblood-a12);
+  --error-contrast: #fff;
+  --error-solid: var(--error-9);   /* oxblood-9 passes */
+}
+
+.radix-themes[data-accent-color="blue"] {
+  /* --- Info -> iris (blue brand IS the info hue; iris the only clear option, ΔE-OK 0.14) - */
+  --info-1: var(--iris-1);   --info-2: var(--iris-2);   --info-3: var(--iris-3);
+  --info-4: var(--iris-4);   --info-5: var(--iris-5);   --info-6: var(--iris-6);
+  --info-7: var(--iris-7);   --info-8: var(--iris-8);   --info-9: var(--iris-9);
+  --info-10: var(--iris-10);   --info-11: var(--iris-11);   --info-12: var(--iris-12);
+  --info-a1: var(--iris-a1);   --info-a2: var(--iris-a2);   --info-a3: var(--iris-a3);
+  --info-a4: var(--iris-a4);   --info-a5: var(--iris-a5);   --info-a6: var(--iris-a6);
+  --info-a7: var(--iris-a7);   --info-a8: var(--iris-a8);   --info-a9: var(--iris-a9);
+  --info-a10: var(--iris-a10);   --info-a11: var(--iris-a11);   --info-a12: var(--iris-a12);
+  --info-contrast: #fff;
+}
+
+.radix-themes[data-accent-color="lime"] {
+  /* --- Error -> oxblood (keeps the error clear of the orange warning below) --------- */
+  --error-1: var(--oxblood-1);   --error-2: var(--oxblood-2);   --error-3: var(--oxblood-3);
+  --error-4: var(--oxblood-4);   --error-5: var(--oxblood-5);   --error-6: var(--oxblood-6);
+  --error-7: var(--oxblood-7);   --error-8: var(--oxblood-8);   --error-9: var(--oxblood-9);
+  --error-10: var(--oxblood-10);   --error-11: var(--oxblood-11);   --error-12: var(--oxblood-12);
+  --error-a1: var(--oxblood-a1);   --error-a2: var(--oxblood-a2);   --error-a3: var(--oxblood-a3);
+  --error-a4: var(--oxblood-a4);   --error-a5: var(--oxblood-a5);   --error-a6: var(--oxblood-a6);
+  --error-a7: var(--oxblood-a7);   --error-a8: var(--oxblood-a8);   --error-a9: var(--oxblood-a9);
+  --error-a10: var(--oxblood-a10);   --error-a11: var(--oxblood-a11);   --error-a12: var(--oxblood-a12);
+  --error-contrast: #fff;
+  --error-solid: var(--error-9);   /* oxblood-9 passes */
+
+  /* --- Warning -> orange (lime brand; amber read too close, ΔE-OK 0.13 -> 0.31). Orange-9
+     white is 2.97:1 so on-solid is dark; contrast.css flips it to white in APCA. ------- */
+  --warning-1: var(--orange-1);   --warning-2: var(--orange-2);   --warning-3: var(--orange-3);
+  --warning-4: var(--orange-4);   --warning-5: var(--orange-5);   --warning-6: var(--orange-6);
+  --warning-7: var(--orange-7);   --warning-8: var(--orange-8);   --warning-9: var(--orange-9);
+  --warning-10: var(--orange-10);   --warning-11: var(--orange-11);   --warning-12: var(--orange-12);
+  --warning-a1: var(--orange-a1);   --warning-a2: var(--orange-a2);   --warning-a3: var(--orange-a3);
+  --warning-a4: var(--orange-a4);   --warning-a5: var(--orange-a5);   --warning-a6: var(--orange-a6);
+  --warning-a7: var(--orange-a7);   --warning-a8: var(--orange-a8);   --warning-a9: var(--orange-a9);
+  --warning-a10: var(--orange-a10);   --warning-a11: var(--orange-a11);   --warning-a12: var(--orange-a12);
+  --warning-contrast: #21201c;
+}
+
+/* -------------------------------------------------------------------------------------
+   SEEDED BRAND — the 21st block, and the only one that is not a fixed mapping.
+
+   The twenty blocks above key on an accent NAME, so each can name its target
+   outright: a red brand always routes error to oxblood. A brand supplied as
+   `{ seed: "#..." }` has no name, and the seed space is the whole hue circle
+   rather than an enum, so no fixed mapping can serve it. Before this block a
+   seeded brand got its accent ramp and NO shift at all — brand red beside error
+   red, a destructive button the same colour as a primary one, silently.
+
+   The choice is made at runtime by `palette/collision.ts` and written onto the
+   root by `theme/customBrand.ts` as `--ds-brand-<family>-*`. This block only
+   ROUTES: it is the same shape as its twenty siblings, one indirection deeper.
+
+   WHY THE BLOCK LIVES HERE AND NOT IN `custom-brand.css`. `custom-brand.css`
+   loads FIRST (`index.css:46`, ahead of this file at `:47`) and wraps its
+   selector in `:where()`, which contributes zero specificity. `--error-9` is
+   declared on bare `.radix-themes` in this file at (0,1,0) and loads later, so a
+   `:where()`-wrapped family block would be outranked by source order and do
+   nothing at all — a silent no-op that a class-level check would pass. This
+   selector is unwrapped, (0,2,0), exactly like the twenty above it.
+
+   The values are `var()` references, so light and dark resolve from the vendor
+   scales themselves and this block needs no appearance arm.
+   ------------------------------------------------------------------------------------- */
+.radix-themes[data-accent-color="ds-custom"] {
+  --error-1: var(--ds-brand-error-1);   --error-2: var(--ds-brand-error-2);   --error-3: var(--ds-brand-error-3);
+  --error-4: var(--ds-brand-error-4);   --error-5: var(--ds-brand-error-5);   --error-6: var(--ds-brand-error-6);
+  --error-7: var(--ds-brand-error-7);   --error-8: var(--ds-brand-error-8);   --error-9: var(--ds-brand-error-9);
+  --error-10: var(--ds-brand-error-10);   --error-11: var(--ds-brand-error-11);   --error-12: var(--ds-brand-error-12);
+  --error-a1: var(--ds-brand-error-a1);   --error-a2: var(--ds-brand-error-a2);   --error-a3: var(--ds-brand-error-a3);
+  --error-a4: var(--ds-brand-error-a4);   --error-a5: var(--ds-brand-error-a5);   --error-a6: var(--ds-brand-error-a6);
+  --error-a7: var(--ds-brand-error-a7);   --error-a8: var(--ds-brand-error-a8);   --error-a9: var(--ds-brand-error-a9);
+  --error-a10: var(--ds-brand-error-a10);   --error-a11: var(--ds-brand-error-a11);   --error-a12: var(--ds-brand-error-a12);
+  --error-contrast: var(--ds-brand-error-contrast);
+  /* A seeded brand's error scale is chosen at runtime and carries no pin yet, so
+     the fill stays its own step 9 and follows the shift rather than the red pin. */
+  --error-solid: var(--error-9);
+
+  --warning-1: var(--ds-brand-warning-1);   --warning-2: var(--ds-brand-warning-2);   --warning-3: var(--ds-brand-warning-3);
+  --warning-4: var(--ds-brand-warning-4);   --warning-5: var(--ds-brand-warning-5);   --warning-6: var(--ds-brand-warning-6);
+  --warning-7: var(--ds-brand-warning-7);   --warning-8: var(--ds-brand-warning-8);   --warning-9: var(--ds-brand-warning-9);
+  --warning-10: var(--ds-brand-warning-10);   --warning-11: var(--ds-brand-warning-11);   --warning-12: var(--ds-brand-warning-12);
+  --warning-a1: var(--ds-brand-warning-a1);   --warning-a2: var(--ds-brand-warning-a2);   --warning-a3: var(--ds-brand-warning-a3);
+  --warning-a4: var(--ds-brand-warning-a4);   --warning-a5: var(--ds-brand-warning-a5);   --warning-a6: var(--ds-brand-warning-a6);
+  --warning-a7: var(--ds-brand-warning-a7);   --warning-a8: var(--ds-brand-warning-a8);   --warning-a9: var(--ds-brand-warning-a9);
+  --warning-a10: var(--ds-brand-warning-a10);   --warning-a11: var(--ds-brand-warning-a11);   --warning-a12: var(--ds-brand-warning-a12);
+  --warning-contrast: var(--ds-brand-warning-contrast);
+
+  --success-1: var(--ds-brand-success-1);   --success-2: var(--ds-brand-success-2);   --success-3: var(--ds-brand-success-3);
+  --success-4: var(--ds-brand-success-4);   --success-5: var(--ds-brand-success-5);   --success-6: var(--ds-brand-success-6);
+  --success-7: var(--ds-brand-success-7);   --success-8: var(--ds-brand-success-8);   --success-9: var(--ds-brand-success-9);
+  --success-10: var(--ds-brand-success-10);   --success-11: var(--ds-brand-success-11);   --success-12: var(--ds-brand-success-12);
+  --success-a1: var(--ds-brand-success-a1);   --success-a2: var(--ds-brand-success-a2);   --success-a3: var(--ds-brand-success-a3);
+  --success-a4: var(--ds-brand-success-a4);   --success-a5: var(--ds-brand-success-a5);   --success-a6: var(--ds-brand-success-a6);
+  --success-a7: var(--ds-brand-success-a7);   --success-a8: var(--ds-brand-success-a8);   --success-a9: var(--ds-brand-success-a9);
+  --success-a10: var(--ds-brand-success-a10);   --success-a11: var(--ds-brand-success-a11);   --success-a12: var(--ds-brand-success-a12);
+  --success-contrast: var(--ds-brand-success-contrast);
+
+  --info-1: var(--ds-brand-info-1);   --info-2: var(--ds-brand-info-2);   --info-3: var(--ds-brand-info-3);
+  --info-4: var(--ds-brand-info-4);   --info-5: var(--ds-brand-info-5);   --info-6: var(--ds-brand-info-6);
+  --info-7: var(--ds-brand-info-7);   --info-8: var(--ds-brand-info-8);   --info-9: var(--ds-brand-info-9);
+  --info-10: var(--ds-brand-info-10);   --info-11: var(--ds-brand-info-11);   --info-12: var(--ds-brand-info-12);
+  --info-a1: var(--ds-brand-info-a1);   --info-a2: var(--ds-brand-info-a2);   --info-a3: var(--ds-brand-info-a3);
+  --info-a4: var(--ds-brand-info-a4);   --info-a5: var(--ds-brand-info-a5);   --info-a6: var(--ds-brand-info-a6);
+  --info-a7: var(--ds-brand-info-a7);   --info-a8: var(--ds-brand-info-a8);   --info-a9: var(--ds-brand-info-a9);
+  --info-a10: var(--ds-brand-info-a10);   --info-a11: var(--ds-brand-info-a11);   --info-a12: var(--ds-brand-info-a12);
+  --info-contrast: var(--ds-brand-info-contrast);
+}
+
+/* -------------------------------------------------------------------------------------
+   A PART GIVEN ITS OWN COLOUR ([[colour-prop-and-high-contrast]], [[part-colour-parity]])
+   Radix's `color` prop writes data-accent-color on the part itself, below a theme root
+   of another colour, and Radix maps that colour's scale onto the part. The tables below
+   key on the theme root, and a part would inherit the root's values. So every arm of
+   each table also names a part that sets its own colour:
+     LIGHT  .radix-themes [data-accent-color="X"]
+     DARK   both of Radix's dark shapes ([[dark-override-selectors]]), then the part, which the arm skips where a
+            light theme sits between the two:
+            :where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *))
+     BASE   .radix-themes :where([data-accent-color]:not([data-accent-color=""]))
+            so a part of a colour outside a table takes the base value, not the theme's.
+   The light arm is (0,2,0) and beats Radix's (0,1,0) [data-accent-color] rule. Each dark
+   arm is (0,2,0) or (0,3,0) and comes later, so it wins over the light arm on a part. A
+   light theme inside a dark page keeps the light values on its parts, and a dark theme
+   inside a light page takes the dark ones. A dark theme inside a light theme inside a
+   dark page reads the light arm, the one nesting the skip cannot distinguish.
+   [[colour-prop-and-high-contrast]] named the part in four tables: the [[textless-part-fills]] indicator and track, the [[textless-part-fills]] thumb stroke,
+   the [[part-fill-edge]] part edge and the [[neutral-part-stacks]] Slider thumb stack. [[part-colour-parity]] names it in the rest: the text
+   fill and its ink at the top of this file, the dark orange glyph ink, the [[mark-on-tint-edge]] mark
+   edge and the [[drop-target-dash]] dash stack. [[part-colour-parity]] also adds oxblood to every base arm and to the dark
+   oxblood arms, because oxblood.css now maps its scale onto a part. The three focus ring
+   stacks stay on the theme root, because the ring is the page's accent on every part
+   ([[part-colour-parity]]).
+   ------------------------------------------------------------------------------------- */
+
+/* -------------------------------------------------------------------------------------
+   PARTS WITHOUT TEXT FOLLOW THE TEXT FILL IN LIGHT ([[textless-part-fills]])
+   A checkbox or radio fill, a switch track, a slider range, a progress bar and a tab
+   underline carry no text. They owe WCAG 3:1 against the colour beside them (1.4.11).
+   Radix paints them from --accent-indicator and --accent-track, and the system's own
+   marks paint --accent-indicator too (components.css: the CheckboxCards outline, the
+   accent StatusDot, the Pagination dot, the Calendar today bar, the Outline bar and the
+   reorder marker).
+
+   LIGHT. The 16 colours whose text fill is pinned above point both roles at that fill,
+   so every part of one colour is one shade, the same shade as its buttons. Radix's
+   step 9 sat under 3:1 against the light page on cyan (2.93), teal (3.00), orange
+   (2.90) and grass (2.96), and the light step 11 pin clears it on all 16.
+   DARK. The same 16 keep Radix's step 9, which clears the dark page by more than step
+   11 does. Every other colour keeps Radix's own values in both appearances, so yellow
+   keeps its light step 10.
+
+   Orange's glyph ink follows the fill under it: Radix's own white on light step 11
+   (4.51:1), and the dark ink on orange-9 in dark (5.47:1), where white reads 2.97.
+
+   The dark arm takes both of Radix's dark selector shapes ([[dark-override-selectors]]), so a nested theme and
+   appearance="inherit" resolve too. The light rule is (0,2,0) and beats Radix's (0,1,0)
+   [data-accent-color] rule. The dark arm is (0,2,0) or (0,3,0) and comes later.
+   A part that sets one of the 16 colours reads its own text fill, which the text-fill
+   table at the top of this file resolves on the part ([[part-colour-parity]]), and the dark arm names the
+   part too.
+   ------------------------------------------------------------------------------------- */
+.radix-themes:is([data-accent-color="gold"], [data-accent-color="bronze"], [data-accent-color="brown"], [data-accent-color="orange"], [data-accent-color="tomato"], [data-accent-color="red"], [data-accent-color="ruby"], [data-accent-color="crimson"], [data-accent-color="pink"], [data-accent-color="blue"], [data-accent-color="cyan"], [data-accent-color="teal"], [data-accent-color="jade"], [data-accent-color="green"], [data-accent-color="grass"], [data-accent-color="gray"]),
+.radix-themes :is([data-accent-color="gold"], [data-accent-color="bronze"], [data-accent-color="brown"], [data-accent-color="orange"], [data-accent-color="tomato"], [data-accent-color="red"], [data-accent-color="ruby"], [data-accent-color="crimson"], [data-accent-color="pink"], [data-accent-color="blue"], [data-accent-color="cyan"], [data-accent-color="teal"], [data-accent-color="jade"], [data-accent-color="green"], [data-accent-color="grass"], [data-accent-color="gray"]) {
+  --accent-indicator: var(--accent-solid);
+  --accent-track:     var(--accent-solid);
+}
+.radix-themes:where(.dark, .dark-theme):is([data-accent-color="gold"], [data-accent-color="bronze"], [data-accent-color="brown"], [data-accent-color="orange"], [data-accent-color="tomato"], [data-accent-color="red"], [data-accent-color="ruby"], [data-accent-color="crimson"], [data-accent-color="pink"], [data-accent-color="blue"], [data-accent-color="cyan"], [data-accent-color="teal"], [data-accent-color="jade"], [data-accent-color="green"], [data-accent-color="grass"], [data-accent-color="gray"]),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)):is([data-accent-color="gold"], [data-accent-color="bronze"], [data-accent-color="brown"], [data-accent-color="orange"], [data-accent-color="tomato"], [data-accent-color="red"], [data-accent-color="ruby"], [data-accent-color="crimson"], [data-accent-color="pink"], [data-accent-color="blue"], [data-accent-color="cyan"], [data-accent-color="teal"], [data-accent-color="jade"], [data-accent-color="green"], [data-accent-color="grass"], [data-accent-color="gray"]),
+.radix-themes:where(.dark, .dark-theme) :is([data-accent-color="gold"], [data-accent-color="bronze"], [data-accent-color="brown"], [data-accent-color="orange"], [data-accent-color="tomato"], [data-accent-color="red"], [data-accent-color="ruby"], [data-accent-color="crimson"], [data-accent-color="pink"], [data-accent-color="blue"], [data-accent-color="cyan"], [data-accent-color="teal"], [data-accent-color="jade"], [data-accent-color="green"], [data-accent-color="grass"], [data-accent-color="gray"]):where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)) :is([data-accent-color="gold"], [data-accent-color="bronze"], [data-accent-color="brown"], [data-accent-color="orange"], [data-accent-color="tomato"], [data-accent-color="red"], [data-accent-color="ruby"], [data-accent-color="crimson"], [data-accent-color="pink"], [data-accent-color="blue"], [data-accent-color="cyan"], [data-accent-color="teal"], [data-accent-color="jade"], [data-accent-color="green"], [data-accent-color="grass"], [data-accent-color="gray"]):where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)) {
+  --accent-indicator: var(--accent-9);
+  --accent-track:     var(--accent-9);
+}
+.radix-themes:where(.dark, .dark-theme)[data-accent-color="orange"],
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme))[data-accent-color="orange"],
+.radix-themes:where(.dark, .dark-theme) [data-accent-color="orange"]:where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)) [data-accent-color="orange"]:where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)) {
+  --accent-contrast: #21201c;
+}
+
+/* -------------------------------------------------------------------------------------
+   THE SWITCH THUMB'S STROKE ([[textless-part-fills]])
+   The thumb is white on every colour and never changes colour. Radix rings it with a
+   1px --accent-a4 hairline under a 1px --black-a1 one. Where the white thumb falls under
+   WCAG 3:1 against its track, the thumb's position (the switch's state) is hard to see,
+   so that hairline takes the lightest step of the same colour whose composite, as
+   painted under Radix's --black-a1 hairline over the track, clears 3:1.
+   components.css paints --accent-thumb-stroke where Radix painted --accent-a4.
+
+   LIGHT: amber, lime, mint, sky and yellow take --accent-a11. Orange left the set when
+   its light track moved to step 11 above, where the white thumb reads 4.51.
+   DARK: no step of the alpha scale clears it. Dark alphas are light colours, so a8 to
+   a12 read 2.11:1 at best over a light track. The stroke takes the same colour's solid
+   scale instead, the lightest step that clears: step 7 on amber, lime, mint, sky and
+   yellow, and step 6 on orange.
+   Every other colour keeps Radix's own --accent-a4.
+   Every arm also names a part that sets its own colour ([[colour-prop-and-high-contrast]], [[part-colour-parity]], above).
+   ------------------------------------------------------------------------------------- */
+.radix-themes,
+.radix-themes :where([data-accent-color]:not([data-accent-color=""])) {
+  --accent-thumb-stroke: var(--accent-a4);
+}
+.radix-themes:is([data-accent-color="amber"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"], [data-accent-color="yellow"]),
+.radix-themes :is([data-accent-color="amber"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"], [data-accent-color="yellow"]) {
+  --accent-thumb-stroke: var(--accent-a11);
+}
+.radix-themes:where(.dark, .dark-theme):is([data-accent-color="amber"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"], [data-accent-color="yellow"]),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)):is([data-accent-color="amber"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"], [data-accent-color="yellow"]),
+.radix-themes:where(.dark, .dark-theme) :is([data-accent-color="amber"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"], [data-accent-color="yellow"]):where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)) :is([data-accent-color="amber"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"], [data-accent-color="yellow"]):where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)) {
+  --accent-thumb-stroke: var(--accent-7);
+}
+.radix-themes:where(.dark, .dark-theme)[data-accent-color="orange"],
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme))[data-accent-color="orange"],
+.radix-themes:where(.dark, .dark-theme) [data-accent-color="orange"]:where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)) [data-accent-color="orange"]:where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)) {
+  --accent-thumb-stroke: var(--accent-6);
+}
+
+/* -------------------------------------------------------------------------------------
+   THE EDGE ON PARTS WITHOUT TEXT ([[part-fill-edge]], [[status-dot-edges]])
+   Six colours kept a part fill under WCAG 3:1 against the page after [[textless-part-fills]]: light amber
+   (1.54), lime (1.31), mint (1.39), sky (1.45) and yellow (1.32), and dark oxblood (2.06).
+   Their ink passes as text on step 9, so [[text-on-solid-fill-contrast]] did not deepen them. Each part keeps its
+   fill and stacks a 1px edge on it ([[interaction-state-alphas]]), the way a hover stacks an alpha on a button.
+   components.css paints --accent-part-edge on the checked checkbox, radio and switch
+   track, the slider range, the progress bar, the active tab line, the accent status
+   dot and the selected CheckboxCards outline.
+
+   [[status-dot-edges]] holds the edge at WCAG 3:1 AND APCA Lc 30 against the page, the subtle recess, a
+   card and a panel, and holds the progress bar and the slider range against their track
+   on each of the four, on all six neutrals. Each colour takes the lightest step of
+   Radix's black or white alpha scale that clears. Lowest reading at the step, then the
+   step one lighter:
+   LIGHT. Yellow, amber, lime, mint and sky take --black-a6 (3.07:1 and Lc 52.1 on lime
+   against its track on the subtle recess, --black-a5 reads 2.32 to 2.68). The other 22
+   clear on the fill alone (3.76 on orange).
+   DARK. The track on a panel sets every dark step. Pink takes --white-a1 (3.27 and Lc
+   30.5, the fill alone reads Lc 28.7). Gray and plum take --white-a3 (Lc 30.1 on gray,
+   --white-a2 reads Lc 26.9 to 28.8). Purple, violet, iris and indigo take --white-a4 (Lc
+   31.8 on violet, --white-a3 reads Lc 28.4 to 29.3). Oxblood takes --white-a6 (3.65 and
+   Lc 33.7, --white-a5 reads Lc 25.3). The other 19 clear on the fill alone (3.25:1 and
+   Lc 30.5 on red), and the dark arm returns the base value to the five light colours.
+   Every other colour and appearance keeps the base value, which paints nothing.
+   Every arm also names a part that sets its own colour ([[colour-prop-and-high-contrast]], and [[part-colour-parity]] for the oxblood
+   arm, above).
+   ------------------------------------------------------------------------------------- */
+.radix-themes,
+.radix-themes :where([data-accent-color]:not([data-accent-color=""])) {
+  --accent-part-edge: var(--color-transparent);
+}
+.radix-themes:is([data-accent-color="amber"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"], [data-accent-color="yellow"]),
+.radix-themes :is([data-accent-color="amber"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"], [data-accent-color="yellow"]) {
+  --accent-part-edge: var(--black-a6);
+}
+.radix-themes:where(.dark, .dark-theme):is([data-accent-color="amber"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"], [data-accent-color="yellow"]),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)):is([data-accent-color="amber"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"], [data-accent-color="yellow"]),
+.radix-themes:where(.dark, .dark-theme) :is([data-accent-color="amber"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"], [data-accent-color="yellow"]):where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)) :is([data-accent-color="amber"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"], [data-accent-color="yellow"]):where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)) {
+  --accent-part-edge: var(--color-transparent);
+}
+.radix-themes:where(.dark, .dark-theme)[data-accent-color="pink"],
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme))[data-accent-color="pink"],
+.radix-themes:where(.dark, .dark-theme) [data-accent-color="pink"]:where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)) [data-accent-color="pink"]:where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)) {
+  --accent-part-edge: var(--white-a1);
+}
+.radix-themes:where(.dark, .dark-theme):is([data-accent-color="gray"], [data-accent-color="plum"]),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)):is([data-accent-color="gray"], [data-accent-color="plum"]),
+.radix-themes:where(.dark, .dark-theme) :is([data-accent-color="gray"], [data-accent-color="plum"]):where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)) :is([data-accent-color="gray"], [data-accent-color="plum"]):where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)) {
+  --accent-part-edge: var(--white-a3);
+}
+.radix-themes:where(.dark, .dark-theme):is([data-accent-color="purple"], [data-accent-color="violet"], [data-accent-color="iris"], [data-accent-color="indigo"]),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)):is([data-accent-color="purple"], [data-accent-color="violet"], [data-accent-color="iris"], [data-accent-color="indigo"]),
+.radix-themes:where(.dark, .dark-theme) :is([data-accent-color="purple"], [data-accent-color="violet"], [data-accent-color="iris"], [data-accent-color="indigo"]):where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)) :is([data-accent-color="purple"], [data-accent-color="violet"], [data-accent-color="iris"], [data-accent-color="indigo"]):where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)) {
+  --accent-part-edge: var(--white-a4);
+}
+.radix-themes:where(.dark, .dark-theme)[data-accent-color="oxblood"],
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme))[data-accent-color="oxblood"],
+.radix-themes:where(.dark, .dark-theme) [data-accent-color="oxblood"]:where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)) [data-accent-color="oxblood"]:where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)) {
+  --accent-part-edge: var(--white-a6);
+}
+
+/* -------------------------------------------------------------------------------------
+   THE FOCUS RING ([[focus-ring]], supersedes [[light-scrim-focus-ring]] here)
+   Every focus ring is the button's own fill, --ds-fill-accent, with one Radix black or
+   white alpha stacked on it ([[interaction-state-alphas]]). semantic.css names the two layers --ds-stroke-focus
+   and --ds-stroke-focus-stack, and components.css paints the fill underneath and the
+   alpha on top, 2px wide, on every ring in the system.
+
+   Each colour and appearance takes the lightest step whose stack on the fill clears
+   WCAG 3:1 AND APCA Lc 30 against every surface a ring sits on, on all six neutrals:
+   the page, the subtle and sunken recesses, a card, a menu panel, a track on the page
+   and on a card, a highlighted menu row, the four validation tints, the accent tint on
+   the page and on a card, and the selected tint. The FocusRingContrast play in
+   _focus.stories.tsx sweeps the same set. The fill does not change with the appearance
+   ([[text-on-solid-fill-contrast]] pins it in both), so the step moves only because the surfaces flip.
+
+   LIGHT. The black scale. 22 colours clear on the fill alone, the lowest orange at 3.14:1
+   and Lc 47.2 on the selected tint. Amber takes --black-a6 (3.29, --black-a5 reads 2.51).
+   Yellow, lime, mint and sky take --black-a7 (3.74 on lime, --black-a6 reads 2.72 to 2.99).
+   The selected tint is the limiting surface for every light colour.
+   DARK. The white scale. Yellow, amber, lime, mint and sky clear on the fill alone (6.86 on
+   sky). Orange takes --white-a3 (3.20, Lc 30.9). Plum, purple, blue, cyan, teal, jade and
+   green take --white-a4 (3.07 on blue, Lc 30.3). Gray, gold, bronze, brown, tomato, red,
+   ruby, crimson, pink, violet, iris, indigo and grass take --white-a5 (3.38 on crimson).
+   Oxblood takes --white-a7 (3.85, --white-a6 reads 3.02 at Lc 29.6). The one step lighter
+   fails on the highlighted menu row or the selected tint in every case.
+
+   ON A SCRIM the surface is a veil over unknown media, so Overlay re-points the stack
+   (components.css) to the table for that veil. Both veils keep their colour in either
+   appearance and so does the fill, so neither scrim table has a dark arm. Measured the
+   way ScrimRingContrast measures it, over grey media 0 to 255.
+   THE DARK SCRIM (--ds-scrim), --accent-ring-stack-scrim. The ring must read light over
+   the lightest composite, rgb(102, 102, 102). --white-a8 on gray, gold, bronze, brown,
+   orange, tomato, plum, purple, violet, iris, indigo, blue, cyan, teal, jade, green and
+   grass (3.03 on tomato, --white-a7 reads 2.56 to 2.85). --white-a9 on red, ruby,
+   crimson, pink and oxblood (3.26 on oxblood, --white-a8 reads 2.63 to 2.99). Yellow,
+   amber, lime, mint and sky clear on the fill alone (3.64 on amber).
+   THE LIGHT SCRIM (--ds-scrim-light), --accent-ring-stack-scrim-light. The ring must
+   read dark over the darkest composite, rgb(153, 153, 153). --black-a5 on gray, gold,
+   bronze, brown, red, ruby, crimson, pink, violet, iris and indigo (3.00 on indigo,
+   --black-a4 reads 2.52 to 2.80). --black-a6 on orange, tomato, plum, purple, blue, cyan,
+   teal, jade, green and grass (3.25 on orange, --black-a5 reads 2.70 to 2.99). --black-a9
+   on yellow, amber, lime, mint and sky (3.38 on yellow, --black-a8 reads 2.35 to 2.71).
+   Oxblood clears on its fill alone (3.15, Lc 32.5). [[light-scrim-focus-ring]] held purple at --black-a5, which
+   reads 2.99 once APCA and the six neutrals are held too, so purple moves to --black-a6.
+
+   A seeded brand (ds-custom) is chosen at runtime and keeps the base value, which paints
+   nothing, the same limit [[part-fill-edge]] records for the part edge.
+   ------------------------------------------------------------------------------------- */
+.radix-themes {
+  --accent-ring-stack: var(--color-transparent);
+  --accent-ring-stack-scrim: var(--color-transparent);
+  --accent-ring-stack-scrim-light: var(--color-transparent);
+}
+
+/* The page stack, light. */
+.radix-themes[data-accent-color="amber"] {
+  --accent-ring-stack: var(--black-a6);
+}
+.radix-themes:is([data-accent-color="yellow"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"]) {
+  --accent-ring-stack: var(--black-a7);
+}
+
+/* The page stack, dark. Every colour is named, so the light values above never leak into
+   the dark appearance. Both of Radix's dark selector shapes ([[dark-override-selectors]]), later in the file and
+   (0,2,0) or higher, so they win over the light blocks. */
+.radix-themes:where(.dark, .dark-theme):is([data-accent-color="yellow"], [data-accent-color="amber"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"]),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)):is([data-accent-color="yellow"], [data-accent-color="amber"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"]) {
+  --accent-ring-stack: var(--color-transparent);
+}
+.radix-themes:where(.dark, .dark-theme)[data-accent-color="orange"],
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme))[data-accent-color="orange"] {
+  --accent-ring-stack: var(--white-a3);
+}
+.radix-themes:where(.dark, .dark-theme):is([data-accent-color="plum"], [data-accent-color="purple"], [data-accent-color="blue"], [data-accent-color="cyan"], [data-accent-color="teal"], [data-accent-color="jade"], [data-accent-color="green"]),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)):is([data-accent-color="plum"], [data-accent-color="purple"], [data-accent-color="blue"], [data-accent-color="cyan"], [data-accent-color="teal"], [data-accent-color="jade"], [data-accent-color="green"]) {
+  --accent-ring-stack: var(--white-a4);
+}
+.radix-themes:where(.dark, .dark-theme):is([data-accent-color="gray"], [data-accent-color="gold"], [data-accent-color="bronze"], [data-accent-color="brown"], [data-accent-color="tomato"], [data-accent-color="red"], [data-accent-color="ruby"], [data-accent-color="crimson"], [data-accent-color="pink"], [data-accent-color="violet"], [data-accent-color="iris"], [data-accent-color="indigo"], [data-accent-color="grass"]),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)):is([data-accent-color="gray"], [data-accent-color="gold"], [data-accent-color="bronze"], [data-accent-color="brown"], [data-accent-color="tomato"], [data-accent-color="red"], [data-accent-color="ruby"], [data-accent-color="crimson"], [data-accent-color="pink"], [data-accent-color="violet"], [data-accent-color="iris"], [data-accent-color="indigo"], [data-accent-color="grass"]) {
+  --accent-ring-stack: var(--white-a5);
+}
+.radix-themes:where(.dark, .dark-theme)[data-accent-color="oxblood"],
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme))[data-accent-color="oxblood"] {
+  --accent-ring-stack: var(--white-a7);
+}
+
+/* The dark scrim stack. */
+.radix-themes:is([data-accent-color="gray"], [data-accent-color="gold"], [data-accent-color="bronze"], [data-accent-color="brown"], [data-accent-color="orange"], [data-accent-color="tomato"], [data-accent-color="plum"], [data-accent-color="purple"], [data-accent-color="violet"], [data-accent-color="iris"], [data-accent-color="indigo"], [data-accent-color="blue"], [data-accent-color="cyan"], [data-accent-color="teal"], [data-accent-color="jade"], [data-accent-color="green"], [data-accent-color="grass"]) {
+  --accent-ring-stack-scrim: var(--white-a8);
+}
+.radix-themes:is([data-accent-color="red"], [data-accent-color="ruby"], [data-accent-color="crimson"], [data-accent-color="pink"], [data-accent-color="oxblood"]) {
+  --accent-ring-stack-scrim: var(--white-a9);
+}
+
+/* The light scrim stack. */
+.radix-themes:is([data-accent-color="gray"], [data-accent-color="gold"], [data-accent-color="bronze"], [data-accent-color="brown"], [data-accent-color="red"], [data-accent-color="ruby"], [data-accent-color="crimson"], [data-accent-color="pink"], [data-accent-color="violet"], [data-accent-color="iris"], [data-accent-color="indigo"]) {
+  --accent-ring-stack-scrim-light: var(--black-a5);
+}
+.radix-themes:is([data-accent-color="orange"], [data-accent-color="tomato"], [data-accent-color="plum"], [data-accent-color="purple"], [data-accent-color="blue"], [data-accent-color="cyan"], [data-accent-color="teal"], [data-accent-color="jade"], [data-accent-color="green"], [data-accent-color="grass"]) {
+  --accent-ring-stack-scrim-light: var(--black-a6);
+}
+.radix-themes:is([data-accent-color="yellow"], [data-accent-color="amber"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"]) {
+  --accent-ring-stack-scrim-light: var(--black-a9);
+}
+
+/* -------------------------------------------------------------------------------------
+   THE EDGE ON A MARK THAT SITS ON A TINT ([[mark-on-tint-edge]])
+   Three marks paint --accent-indicator on a tint: the Calendar today bar inside a range
+   (the range band, --ds-fill-selected-subtle), the Outline bar on its rail
+   (--ds-stroke-weak) and the Analytics dashboard chart line on its area
+   (--ds-fill-accent-weak). With the [[indicator-mark-edges]] edge on them they read as low as 1.82, 1.95 and
+   2.18:1 against that tint, on dark oxblood. components.css paints --accent-mark-edge as
+   the 1px inset ring on the today bar in a range and on the Outline bar, and the chart
+   draws its line a second time in it. It replaces --accent-part-edge on these three
+   marks. [[neutral-part-stacks]] paints it on the current Pagination dot too, as that ruling chose, where it
+   reads up to three steps heavier than a step held on the surfaces alone would need.
+   Every other [[indicator-mark-edges]] mark keeps --accent-part-edge.
+
+   Each colour and appearance takes the lightest step of Radix's black or white alpha
+   scale whose stack on the fill clears WCAG 3:1 AND APCA Lc 30 against the tint and the
+   surface around the mark, on all six neutrals. The today bar is held on the page and on
+   the popover panel (--ds-bg-overlay), where DateInput and DateRangeInput pick a range.
+   The Outline bar is held on the page, and the chart line on its card. Lowest reading
+   at the step, then the step one lighter:
+   LIGHT. Yellow, amber, lime, mint and sky take --black-a7 (3.50:1 and Lc 51.2 on lime,
+   --black-a6 reads 2.55 to 2.91 on the Outline rail). The other 22 clear on the fill
+   alone, the lowest orange at 3.12:1 and Lc 46.6.
+   DARK. Yellow, amber, orange, lime, mint and sky clear alone (3.45 on orange). Brown
+   and cyan take --white-a1 (3.04 on cyan). Gold, bronze, tomato, red, ruby, crimson,
+   blue, teal, jade, green and grass take --white-a2 (3.00 on jade). Pink takes
+   --white-a3 (3.11). Gray, plum, purple, violet, iris and indigo take --white-a5 (3.14
+   on indigo). Oxblood takes --white-a7 (3.27, --white-a6 reads 2.56). The step one
+   lighter fails on the today bar on the popover panel in every dark case.
+
+   A seeded brand (ds-custom) is chosen at runtime and keeps the base value, which paints
+   nothing, the same limit [[part-fill-edge]] records for the part edge. Every arm also names a part
+   that sets its own colour ([[part-colour-parity]], above), so a mark inside a part given a colour takes
+   that colour's step.
+   ------------------------------------------------------------------------------------- */
+.radix-themes,
+.radix-themes :where([data-accent-color]:not([data-accent-color=""])) {
+  --accent-mark-edge: var(--color-transparent);
+}
+.radix-themes:is([data-accent-color="yellow"], [data-accent-color="amber"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"]),
+.radix-themes :is([data-accent-color="yellow"], [data-accent-color="amber"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"]) {
+  --accent-mark-edge: var(--black-a7);
+}
+
+/* The dark arm names every colour that takes a step, and hands the light five back the
+   base value. Both of Radix's dark selector shapes ([[dark-override-selectors]]), later in the file and (0,2,0) or
+   higher, so they win over the light block. */
+.radix-themes:where(.dark, .dark-theme):is([data-accent-color="yellow"], [data-accent-color="amber"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"]),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)):is([data-accent-color="yellow"], [data-accent-color="amber"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"]),
+.radix-themes:where(.dark, .dark-theme) :is([data-accent-color="yellow"], [data-accent-color="amber"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"]):where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)) :is([data-accent-color="yellow"], [data-accent-color="amber"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"]):where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)) {
+  --accent-mark-edge: var(--color-transparent);
+}
+.radix-themes:where(.dark, .dark-theme):is([data-accent-color="brown"], [data-accent-color="cyan"]),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)):is([data-accent-color="brown"], [data-accent-color="cyan"]),
+.radix-themes:where(.dark, .dark-theme) :is([data-accent-color="brown"], [data-accent-color="cyan"]):where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)) :is([data-accent-color="brown"], [data-accent-color="cyan"]):where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)) {
+  --accent-mark-edge: var(--white-a1);
+}
+.radix-themes:where(.dark, .dark-theme):is([data-accent-color="gold"], [data-accent-color="bronze"], [data-accent-color="tomato"], [data-accent-color="red"], [data-accent-color="ruby"], [data-accent-color="crimson"], [data-accent-color="blue"], [data-accent-color="teal"], [data-accent-color="jade"], [data-accent-color="green"], [data-accent-color="grass"]),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)):is([data-accent-color="gold"], [data-accent-color="bronze"], [data-accent-color="tomato"], [data-accent-color="red"], [data-accent-color="ruby"], [data-accent-color="crimson"], [data-accent-color="blue"], [data-accent-color="teal"], [data-accent-color="jade"], [data-accent-color="green"], [data-accent-color="grass"]),
+.radix-themes:where(.dark, .dark-theme) :is([data-accent-color="gold"], [data-accent-color="bronze"], [data-accent-color="tomato"], [data-accent-color="red"], [data-accent-color="ruby"], [data-accent-color="crimson"], [data-accent-color="blue"], [data-accent-color="teal"], [data-accent-color="jade"], [data-accent-color="green"], [data-accent-color="grass"]):where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)) :is([data-accent-color="gold"], [data-accent-color="bronze"], [data-accent-color="tomato"], [data-accent-color="red"], [data-accent-color="ruby"], [data-accent-color="crimson"], [data-accent-color="blue"], [data-accent-color="teal"], [data-accent-color="jade"], [data-accent-color="green"], [data-accent-color="grass"]):where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)) {
+  --accent-mark-edge: var(--white-a2);
+}
+.radix-themes:where(.dark, .dark-theme)[data-accent-color="pink"],
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme))[data-accent-color="pink"],
+.radix-themes:where(.dark, .dark-theme) [data-accent-color="pink"]:where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)) [data-accent-color="pink"]:where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)) {
+  --accent-mark-edge: var(--white-a3);
+}
+.radix-themes:where(.dark, .dark-theme):is([data-accent-color="gray"], [data-accent-color="plum"], [data-accent-color="purple"], [data-accent-color="violet"], [data-accent-color="iris"], [data-accent-color="indigo"]),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)):is([data-accent-color="gray"], [data-accent-color="plum"], [data-accent-color="purple"], [data-accent-color="violet"], [data-accent-color="iris"], [data-accent-color="indigo"]),
+.radix-themes:where(.dark, .dark-theme) :is([data-accent-color="gray"], [data-accent-color="plum"], [data-accent-color="purple"], [data-accent-color="violet"], [data-accent-color="iris"], [data-accent-color="indigo"]):where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)) :is([data-accent-color="gray"], [data-accent-color="plum"], [data-accent-color="purple"], [data-accent-color="violet"], [data-accent-color="iris"], [data-accent-color="indigo"]):where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)) {
+  --accent-mark-edge: var(--white-a5);
+}
+.radix-themes:where(.dark, .dark-theme)[data-accent-color="oxblood"],
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme))[data-accent-color="oxblood"],
+.radix-themes:where(.dark, .dark-theme) [data-accent-color="oxblood"]:where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)) [data-accent-color="oxblood"]:where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)) {
+  --accent-mark-edge: var(--white-a7);
+}
+
+/* -------------------------------------------------------------------------------------
+   THE DASHED EDGE ON A DROP TARGET ([[drop-target-dash]])
+   While a card or a file is dragged over it, the DragHandle's empty drop slot and the
+   FileInput drop target paint a 1px dashed edge in accent step 7 (--ds-stroke-accent)
+   around a tint of the same colour (--ds-fill-accent-weak). Step 7 reads 1.31 to 2.41:1
+   against that tint and the surface on every colour. components.css lays a second dash
+   in --accent-dash-stack on each dash, on the same box, so every dash reads in the
+   stacked shade.
+
+   Each colour and appearance takes the lightest step of Radix's black or white alpha
+   scale whose stack on step 7 clears WCAG 3:1 AND APCA Lc 30 against the tint and the
+   surface, where the surface is the page, the subtle recess, a card and a panel, on all
+   six neutrals. No colour clears on step 7 alone. Lowest reading at the step, then the
+   step one lighter:
+   LIGHT. Gray, gold, bronze and brown take --black-a6 (3.50:1 on gray, --black-a5 reads
+   under 3:1 on all four, 2.67 on gray). The other 23 take --black-a5 (3.01 on yellow,
+   --black-a4 reads 2.33 to 2.80). The tint is the limiting surface in every light case.
+   DARK. Gray and oxblood take --white-a6 (3.50 and Lc 34.0 on oxblood, --white-a5 reads
+   Lc 28.4 on gray and 2.77 on oxblood). The other 25 take --white-a5 (3.33 and Lc 30.4
+   on bronze, --white-a4 reads Lc 22.1 to 27.6).
+
+   A seeded brand (ds-custom) keeps the base value, which paints nothing, as [[part-fill-edge]] records.
+   Every arm also names a part that sets its own colour ([[part-colour-parity]], above), so a DragHandle
+   given a colour dashes in that colour's stack.
+   ------------------------------------------------------------------------------------- */
+.radix-themes,
+.radix-themes :where([data-accent-color]:not([data-accent-color=""])) {
+  --accent-dash-stack: var(--color-transparent);
+}
+.radix-themes:is([data-accent-color="gray"], [data-accent-color="gold"], [data-accent-color="bronze"], [data-accent-color="brown"]),
+.radix-themes :is([data-accent-color="gray"], [data-accent-color="gold"], [data-accent-color="bronze"], [data-accent-color="brown"]) {
+  --accent-dash-stack: var(--black-a6);
+}
+.radix-themes:is([data-accent-color="yellow"], [data-accent-color="amber"], [data-accent-color="orange"], [data-accent-color="tomato"], [data-accent-color="red"], [data-accent-color="ruby"], [data-accent-color="crimson"], [data-accent-color="pink"], [data-accent-color="plum"], [data-accent-color="purple"], [data-accent-color="violet"], [data-accent-color="iris"], [data-accent-color="indigo"], [data-accent-color="blue"], [data-accent-color="cyan"], [data-accent-color="teal"], [data-accent-color="jade"], [data-accent-color="green"], [data-accent-color="grass"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"], [data-accent-color="oxblood"]),
+.radix-themes :is([data-accent-color="yellow"], [data-accent-color="amber"], [data-accent-color="orange"], [data-accent-color="tomato"], [data-accent-color="red"], [data-accent-color="ruby"], [data-accent-color="crimson"], [data-accent-color="pink"], [data-accent-color="plum"], [data-accent-color="purple"], [data-accent-color="violet"], [data-accent-color="iris"], [data-accent-color="indigo"], [data-accent-color="blue"], [data-accent-color="cyan"], [data-accent-color="teal"], [data-accent-color="jade"], [data-accent-color="green"], [data-accent-color="grass"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"], [data-accent-color="oxblood"]) {
+  --accent-dash-stack: var(--black-a5);
+}
+/* The dark arm names every colour, so no light value leaks into the dark appearance ([[dark-override-selectors]]). */
+.radix-themes:where(.dark, .dark-theme):is([data-accent-color="gray"], [data-accent-color="oxblood"]),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)):is([data-accent-color="gray"], [data-accent-color="oxblood"]),
+.radix-themes:where(.dark, .dark-theme) :is([data-accent-color="gray"], [data-accent-color="oxblood"]):where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)) :is([data-accent-color="gray"], [data-accent-color="oxblood"]):where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)) {
+  --accent-dash-stack: var(--white-a6);
+}
+.radix-themes:where(.dark, .dark-theme):is([data-accent-color="gold"], [data-accent-color="bronze"], [data-accent-color="brown"], [data-accent-color="yellow"], [data-accent-color="amber"], [data-accent-color="orange"], [data-accent-color="tomato"], [data-accent-color="red"], [data-accent-color="ruby"], [data-accent-color="crimson"], [data-accent-color="pink"], [data-accent-color="plum"], [data-accent-color="purple"], [data-accent-color="violet"], [data-accent-color="iris"], [data-accent-color="indigo"], [data-accent-color="blue"], [data-accent-color="cyan"], [data-accent-color="teal"], [data-accent-color="jade"], [data-accent-color="green"], [data-accent-color="grass"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"]),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)):is([data-accent-color="gold"], [data-accent-color="bronze"], [data-accent-color="brown"], [data-accent-color="yellow"], [data-accent-color="amber"], [data-accent-color="orange"], [data-accent-color="tomato"], [data-accent-color="red"], [data-accent-color="ruby"], [data-accent-color="crimson"], [data-accent-color="pink"], [data-accent-color="plum"], [data-accent-color="purple"], [data-accent-color="violet"], [data-accent-color="iris"], [data-accent-color="indigo"], [data-accent-color="blue"], [data-accent-color="cyan"], [data-accent-color="teal"], [data-accent-color="jade"], [data-accent-color="green"], [data-accent-color="grass"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"]),
+.radix-themes:where(.dark, .dark-theme) :is([data-accent-color="gold"], [data-accent-color="bronze"], [data-accent-color="brown"], [data-accent-color="yellow"], [data-accent-color="amber"], [data-accent-color="orange"], [data-accent-color="tomato"], [data-accent-color="red"], [data-accent-color="ruby"], [data-accent-color="crimson"], [data-accent-color="pink"], [data-accent-color="plum"], [data-accent-color="purple"], [data-accent-color="violet"], [data-accent-color="iris"], [data-accent-color="indigo"], [data-accent-color="blue"], [data-accent-color="cyan"], [data-accent-color="teal"], [data-accent-color="jade"], [data-accent-color="green"], [data-accent-color="grass"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"]):where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)) :is([data-accent-color="gold"], [data-accent-color="bronze"], [data-accent-color="brown"], [data-accent-color="yellow"], [data-accent-color="amber"], [data-accent-color="orange"], [data-accent-color="tomato"], [data-accent-color="red"], [data-accent-color="ruby"], [data-accent-color="crimson"], [data-accent-color="pink"], [data-accent-color="plum"], [data-accent-color="purple"], [data-accent-color="violet"], [data-accent-color="iris"], [data-accent-color="indigo"], [data-accent-color="blue"], [data-accent-color="cyan"], [data-accent-color="teal"], [data-accent-color="jade"], [data-accent-color="green"], [data-accent-color="grass"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"]):where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)) {
+  --accent-dash-stack: var(--white-a5);
+}
+
+/* -------------------------------------------------------------------------------------
+   THE STACK ON THE GREY AND WHITE PARTS ([[neutral-part-stacks]])
+   Four parts paint a grey or a white that reads under WCAG 3:1 against what sits
+   beside it, across the six neutrals and the four surfaces below. An inactive
+   Pagination dot (--ds-fill-press) reads as low as 1.29:1 in light and 1.41:1 in dark,
+   the Slider thumb (white with Radix's --black-a4 ring) 1.57:1 in light and 1.50:1 in
+   dark, the selected SegmentedControl segment (its fill with Radix's --gray-a4 ring)
+   1.21:1 in light and 1.34:1 in dark, and the ScrollArea thumb (--gray-a8) 1.87:1 in
+   light and Lc 22.6 in dark. components.css stacks one Radix alpha on each: on the
+   dot's 1px ring, on the Slider thumb's ring, on the segment's ring and on the
+   ScrollArea thumb's fill.
+
+   Each part takes the lightest step of Radix's black or white alpha scale whose stack
+   clears WCAG 3:1 AND APCA Lc 30 against every surface it sits on (the page, the subtle
+   recess, a card and a panel) and against its neighbours, on all six neutrals. The
+   Slider thumb is held against its range, its track and the surface, the segment
+   against the control's track, and the ScrollArea thumb against its lane and the
+   surface. A white thumb or a white segment counts as clear where its own fill clears
+   both floors. Lowest reading at the step, then the step one lighter:
+   RING. The dot ring and the segment ring take --black-a6 in light (3.29:1 on the
+   segment on sage over the subtle recess, --black-a5 reads 2.49) and --white-a6 in
+   dark (Lc 35.0 on the page, --white-a5 reads Lc 25.6). Both parts are neutral, so the
+   step is the same on every colour.
+   SCROLL THUMB. --black-a5 in light (3.64:1 on sand against its lane on the subtle
+   recess, --black-a4 reads 2.86) and --white-a3 in dark (Lc 32.4 against its lane on
+   the page, --white-a2 reads Lc 29.1). The same step on every colour.
+   SLIDER THUMB. LIGHT. Every colour takes --black-a5 (3.02:1 on amber against its
+   range, --black-a4 reads 2.38). DARK. The white thumb clears on its own on 21
+   colours. Yellow, amber, orange, lime, mint and sky paint a light range that no white
+   step separates from a white thumb, so they take --black-a6 (3.12:1 and Lc 33.4 on
+   orange, --black-a5 reads 2.59 and Lc 28.7).
+
+   A seeded brand (ds-custom) keeps the base value of the thumb stack, as [[part-fill-edge]] records.
+   The Slider thumb stack sits in its own rules, apart from the two neutral stacks,
+   because every arm of it also names a part that sets its own colour ([[colour-prop-and-high-contrast]], above).
+   The neutral stacks take no colour, so a part inherits them from its theme.
+   ------------------------------------------------------------------------------------- */
+.radix-themes {
+  --neutral-ring-stack: var(--black-a6);
+  --neutral-thumb-stack: var(--black-a5);
+}
+/* Both of Radix's dark selector shapes ([[dark-override-selectors]]), later in the file than the light block. */
+.radix-themes:where(.dark, .dark-theme),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)) {
+  --neutral-ring-stack: var(--white-a6);
+  --neutral-thumb-stack: var(--white-a3);
+}
+.radix-themes,
+.radix-themes :where([data-accent-color]:not([data-accent-color=""])) {
+  --accent-slider-thumb-stack: var(--black-a5);
+}
+.radix-themes:where(.dark, .dark-theme),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)),
+.radix-themes:where(.dark, .dark-theme) :where([data-accent-color]:not([data-accent-color=""])):where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)) :where([data-accent-color]:not([data-accent-color=""])):where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)) {
+  --accent-slider-thumb-stack: var(--color-transparent);
+}
+.radix-themes:where(.dark, .dark-theme):is([data-accent-color="yellow"], [data-accent-color="amber"], [data-accent-color="orange"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"]),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)):is([data-accent-color="yellow"], [data-accent-color="amber"], [data-accent-color="orange"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"]),
+.radix-themes:where(.dark, .dark-theme) :is([data-accent-color="yellow"], [data-accent-color="amber"], [data-accent-color="orange"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"]):where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)) :is([data-accent-color="yellow"], [data-accent-color="amber"], [data-accent-color="orange"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"]):where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)) {
+  --accent-slider-thumb-stack: var(--black-a6);
+}
+
+/* -------------------------------------------------------------------------------------
+   THE EDGE ON A STATUS DOT ([[status-dot-edges]])
+   A StatusDot and the Avatar status dot paint the solid status fill, --ds-fill-warning,
+   --ds-fill-success or --ds-fill-error. On the four surfaces below, the warning and
+   success dots read as low as 1.20:1 and 1.27:1 in light, and the error dot 1.74:1 and
+   Lc 10.1 in dark. components.css stacks a 1px inset edge on each dot's own fill ([[contrast-by-alpha-stacking]]):
+   --warning-dot-edge, --success-dot-edge and --error-dot-edge. The code editor change
+   bar in CodeEditor.stories.tsx paints the same fills and stacks the same edges.
+
+   Each brand and appearance takes the lightest step of Radix's black or white alpha
+   scale whose stack on the fill clears WCAG 3:1 AND APCA Lc 30 against the page, the
+   subtle recess, a card and a panel, on all six neutrals. The subtle recess limits
+   every light step and a panel every dark one. Lowest reading at the step, then the
+   step one lighter:
+   LIGHT WARNING. Gold, yellow, amber and lime move warning to orange ([[brand-status-collision-gate]]) and take
+   --black-a1 (3.10:1, the fill alone reads 2.81). Brown moves it to yellow and takes
+   --black-a6 (3.31, --black-a5 reads 2.49). The other 22 keep amber and take
+   --black-a5 (3.04, --black-a4 reads 2.34).
+   LIGHT SUCCESS. Teal, jade, green and grass move success to lime and take --black-a6
+   (3.49, --black-a5 reads 2.63). The other 23 take --black-a1 (3.16 on mint, the fill
+   alone reads 2.87 to 2.99).
+   DARK ERROR. Gold, yellow, amber, orange, tomato, red, ruby, crimson, pink and lime
+   move error to oxblood and take --white-a6 (4.53:1 and Lc 36.9, --white-a5 reads Lc
+   28.5). Bronze moves it to ruby and takes --white-a4 (Lc 32.1, --white-a3 reads Lc
+   29.5). The other 16 take --white-a3 (Lc 30.7, --white-a2 reads Lc 28.6).
+   Light error and dark warning and success clear on the fill alone (4.93:1 and Lc 70.3,
+   5.31:1 and Lc 43.8, 5.00:1 and Lc 40.9), so they keep the base value.
+
+   The status families key on the brand and never on a part ([[destructive-tone]], [[part-colour-parity]]), so each table
+   names the theme root alone, and a part given its own colour inherits the edge of the
+   brand whose fill it paints. The dark arms name every colour in both of Radix's dark
+   selector shapes ([[dark-override-selectors]]), later in the file than the light arms, so no light step
+   reaches the dark appearance. A seeded brand (ds-custom) keeps the base value, which
+   paints nothing, as [[part-fill-edge]] records. The neutral dot, --ds-icon-neutral, reads 5.56:1 or
+   more in light and 7.57:1 or more in dark and takes no edge. The accent dot stacks
+   --accent-part-edge ([[part-fill-edge]], above).
+   ------------------------------------------------------------------------------------- */
+.radix-themes {
+  --warning-dot-edge: var(--color-transparent);
+  --success-dot-edge: var(--color-transparent);
+  --error-dot-edge: var(--color-transparent);
+}
+.radix-themes:is([data-accent-color="gold"], [data-accent-color="yellow"], [data-accent-color="amber"], [data-accent-color="lime"]) {
+  --warning-dot-edge: var(--black-a1);
+}
+.radix-themes:is([data-accent-color="gray"], [data-accent-color="bronze"], [data-accent-color="orange"], [data-accent-color="tomato"], [data-accent-color="red"], [data-accent-color="ruby"], [data-accent-color="crimson"], [data-accent-color="pink"], [data-accent-color="plum"], [data-accent-color="purple"], [data-accent-color="violet"], [data-accent-color="iris"], [data-accent-color="indigo"], [data-accent-color="blue"], [data-accent-color="cyan"], [data-accent-color="teal"], [data-accent-color="jade"], [data-accent-color="green"], [data-accent-color="grass"], [data-accent-color="mint"], [data-accent-color="sky"], [data-accent-color="oxblood"]) {
+  --warning-dot-edge: var(--black-a5);
+}
+.radix-themes[data-accent-color="brown"] {
+  --warning-dot-edge: var(--black-a6);
+}
+.radix-themes:is([data-accent-color="gray"], [data-accent-color="gold"], [data-accent-color="bronze"], [data-accent-color="brown"], [data-accent-color="yellow"], [data-accent-color="amber"], [data-accent-color="orange"], [data-accent-color="tomato"], [data-accent-color="red"], [data-accent-color="ruby"], [data-accent-color="crimson"], [data-accent-color="pink"], [data-accent-color="plum"], [data-accent-color="purple"], [data-accent-color="violet"], [data-accent-color="iris"], [data-accent-color="indigo"], [data-accent-color="blue"], [data-accent-color="cyan"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"], [data-accent-color="oxblood"]) {
+  --success-dot-edge: var(--black-a1);
+}
+.radix-themes:is([data-accent-color="teal"], [data-accent-color="jade"], [data-accent-color="green"], [data-accent-color="grass"]) {
+  --success-dot-edge: var(--black-a6);
+}
+.radix-themes:where(.dark, .dark-theme):is([data-accent-color="gray"], [data-accent-color="gold"], [data-accent-color="bronze"], [data-accent-color="brown"], [data-accent-color="yellow"], [data-accent-color="amber"], [data-accent-color="orange"], [data-accent-color="tomato"], [data-accent-color="red"], [data-accent-color="ruby"], [data-accent-color="crimson"], [data-accent-color="pink"], [data-accent-color="plum"], [data-accent-color="purple"], [data-accent-color="violet"], [data-accent-color="iris"], [data-accent-color="indigo"], [data-accent-color="blue"], [data-accent-color="cyan"], [data-accent-color="teal"], [data-accent-color="jade"], [data-accent-color="green"], [data-accent-color="grass"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"], [data-accent-color="oxblood"]),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)):is([data-accent-color="gray"], [data-accent-color="gold"], [data-accent-color="bronze"], [data-accent-color="brown"], [data-accent-color="yellow"], [data-accent-color="amber"], [data-accent-color="orange"], [data-accent-color="tomato"], [data-accent-color="red"], [data-accent-color="ruby"], [data-accent-color="crimson"], [data-accent-color="pink"], [data-accent-color="plum"], [data-accent-color="purple"], [data-accent-color="violet"], [data-accent-color="iris"], [data-accent-color="indigo"], [data-accent-color="blue"], [data-accent-color="cyan"], [data-accent-color="teal"], [data-accent-color="jade"], [data-accent-color="green"], [data-accent-color="grass"], [data-accent-color="lime"], [data-accent-color="mint"], [data-accent-color="sky"], [data-accent-color="oxblood"]) {
+  --warning-dot-edge: var(--color-transparent);
+  --success-dot-edge: var(--color-transparent);
+}
+.radix-themes:where(.dark, .dark-theme):is([data-accent-color="gray"], [data-accent-color="brown"], [data-accent-color="plum"], [data-accent-color="purple"], [data-accent-color="violet"], [data-accent-color="iris"], [data-accent-color="indigo"], [data-accent-color="blue"], [data-accent-color="cyan"], [data-accent-color="teal"], [data-accent-color="jade"], [data-accent-color="green"], [data-accent-color="grass"], [data-accent-color="mint"], [data-accent-color="sky"], [data-accent-color="oxblood"]),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)):is([data-accent-color="gray"], [data-accent-color="brown"], [data-accent-color="plum"], [data-accent-color="purple"], [data-accent-color="violet"], [data-accent-color="iris"], [data-accent-color="indigo"], [data-accent-color="blue"], [data-accent-color="cyan"], [data-accent-color="teal"], [data-accent-color="jade"], [data-accent-color="green"], [data-accent-color="grass"], [data-accent-color="mint"], [data-accent-color="sky"], [data-accent-color="oxblood"]) {
+  --error-dot-edge: var(--white-a3);
+}
+.radix-themes:where(.dark, .dark-theme)[data-accent-color="bronze"],
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme))[data-accent-color="bronze"] {
+  --error-dot-edge: var(--white-a4);
+}
+.radix-themes:where(.dark, .dark-theme):is([data-accent-color="gold"], [data-accent-color="yellow"], [data-accent-color="amber"], [data-accent-color="orange"], [data-accent-color="tomato"], [data-accent-color="red"], [data-accent-color="ruby"], [data-accent-color="crimson"], [data-accent-color="pink"], [data-accent-color="lime"]),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)):is([data-accent-color="gold"], [data-accent-color="yellow"], [data-accent-color="amber"], [data-accent-color="orange"], [data-accent-color="tomato"], [data-accent-color="red"], [data-accent-color="ruby"], [data-accent-color="crimson"], [data-accent-color="pink"], [data-accent-color="lime"]) {
+  --error-dot-edge: var(--white-a6);
+}

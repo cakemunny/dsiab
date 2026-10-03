@@ -1,0 +1,40 @@
+/* =============================================================================
+   shadow.css — ELEVATION FOUNDATION
+   -----------------------------------------------------------------------------
+   Etched, not floaty. Aliases Radix Themes' composite --shadow-1..6 (each ships a
+   1px alpha-gray ring + layered alpha drops; --shadow-1 is an inset ring). Imported
+   AFTER @radix-ui/themes/styles.css so the referenced tokens exist. Scoped to
+   .radix-themes so dark-mode shadow variants re-resolve from a single declaration.
+   ============================================================================= */
+
+.radix-themes {
+  --ds-shadow-1: var(--shadow-1);
+  --ds-shadow-2: var(--shadow-2);
+  --ds-shadow-3: var(--shadow-3);
+  --ds-shadow-4: var(--shadow-4);
+  --ds-shadow-5: var(--shadow-5);
+  --ds-shadow-6: var(--shadow-6);
+  --ds-shadow-overlay: var(--shadow-5);   /* floating surfaces (popover/menu) */
+
+  /* Inset bevel for recessed (sunken) surfaces — shadowed top + a light-catching
+     bottom edge, the inverse of a raised drop (light from above: a recess is in
+     shadow at the top, lit at the bottom). Custom, not a Radix alias, so the dark
+     variant can carve harder — the recess is subtlest on a dark UI. */
+  --ds-shadow-inset:
+    rgba(0, 0, 0, 0.1) 0 0 0 1px inset,
+    rgba(0, 0, 0, 0.16) 0 2.5px 3px 0 inset,
+    rgba(255, 255, 255, 1) 0 -1.5px 0.5px 0 inset;
+}
+
+/* Dark: shadows deepen rather than vanish; the inset carve goes stronger. The rim
+   is an identifiable hairline (a dark-on-dark edge would vanish), the top inner wall
+   is shadowed, and the bottom edge is the brightest — light pooling at the floor. */
+/* BOTH selector shapes — see [[dark-override-selectors]]. Under `appearance="inherit"` the first shape
+   alone left the LIGHT inset recipe painting on a dark surface. */
+.radix-themes:where(.dark, .dark-theme),
+:is(.dark, .dark-theme) :where(.radix-themes:not(.light, .light-theme)) {
+  --ds-shadow-inset:
+    rgba(221, 234, 248, 0.22) 0 0 0 1px inset,
+    rgba(0, 0, 0, 0.7) 0 3px 6px 0 inset,
+    rgba(221, 234, 248, 0.36) 0 -1.5px 1px 0 inset;
+}

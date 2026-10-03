@@ -1,0 +1,60 @@
+/* =============================================================================
+   stacking.css — CROSS-COMPONENT STACKING ORDER
+   -----------------------------------------------------------------------------
+   The z-axis relationship shadow.css does not express. Elevation (shadow) and
+   stacking (paint order) are different axes: a skip-link at rung 10 casts no
+   shadow and has no elevation relationship to anything — it simply must not be
+   painted under the page it exists to let you escape. Kept out of shadow.css for
+   that reason; [[shadow-tokens]] rules that file as the shadow aliases.
+
+   Scoped to .radix-themes. Imported before components.css, which consumes these.
+   ============================================================================= */
+
+.radix-themes {
+  /* --- The CROSS-COMPONENT ladder ----------------------------------------
+     Three rungs, for surfaces that must order against OTHER components. These
+     are the values already shipping; nothing was renumbered, so no stacking
+     relationship changed when the seven sites moved onto them.
+
+     Intra-component z-index (0/1/2/auto inside one component's own stacking
+     context) is deliberately NOT tokenised. Those numbers order siblings
+     within a single component and mean nothing outside it; giving them token
+     names would advertise a global relationship that does not exist.
+
+     THE >= 10 THRESHOLD IS A CHOSEN LINE, not a law: 10 is simply the lowest
+     cross-component value shipping today. It is what stacking.node-check.ts
+     keys on, so it needs an escape hatch, and this is it — a component that
+     genuinely needs a high z-index INSIDE its own stacking context keeps it
+     and registers the selector in INTRA_COMPONENT_ALLOW with a reason. Adding
+     a global rung to solve a local problem is the failure mode; the allow-list
+     exists so nobody is forced into it.
+
+     THE GAPS ARE THE PUBLISHED INTERFACE. A consuming app orders its own
+     chrome against these:
+       below 10 .... app content
+       11-49 ....... app chrome (sticky headers, rails)
+       51-59 ....... app surfaces that must clear our panels
+       above 60 .... nothing of ours; yours wins */
+  --ds-z-skip-link: 10;  /* the AppShell escape hatch, above app chrome     */
+  --ds-z-panel:     50;  /* portaled floating surfaces — menus and pickers  */
+  --ds-z-toast:     60;  /* transient notices, above an open panel          */
+
+  /* ALL THREE RUNGS ARE EFFECTIVE, but --ds-z-panel gets there by an unobvious
+     route worth knowing before you "fix" it. Its five panel elements compute
+     `position: static`, where a z-index would normally be inert. It works
+     because @radix-ui/react-popper reads getComputedStyle(content).zIndex at
+     mount and copies it onto the floating wrapper it positions — and
+     getComputedStyle reports the declared value whatever `position` says. So
+     the token IS what lands on the wrapper.
+
+     Verified in Chrome: at the default the wrapper carries 50 and an open panel
+     paints over a consumer plane at 20; with --ds-z-panel set to 5 before the
+     panel opens, the wrapper carries 5 and the same panel paints under it.
+
+     Consequence: the value is captured AT MOUNT. Changing the token while a
+     panel is open does not restyle that panel; the next open picks it up.
+
+     DO NOT add `position: relative` to those panels to "make z-index work". It
+     is unnecessary and nests a redundant stacking context inside a wrapper
+     already sitting at the same rung. See [[stacking-ladder]]. */
+}

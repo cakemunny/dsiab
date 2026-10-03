@@ -1,0 +1,35 @@
+#!/bin/sh
+# post-commit: keep the changelog current with every commit on main, the sibling of post-merge.
+#
+# post-merge covers work that arrives by merge. Most work here lands as direct commits on main,
+# which post-merge never sees, so CHANGELOG.md fell 21 feat/fix commits behind between 2026-09-17
+# and 2026-09-24. This hook closes that path: after a commit on main it regenerates both outputs and,
+# if either changed, commits them as a separate chore commit.
+#
+# It cannot loop. The generator keeps only feat, fix and breaking commits and reads nothing else that
+# a chore commit changes, so the second pass finds no difference and stops.
+#
+# It commits ONLY the two generated files, with a pathspec, so anything else sitting in the index
+# stays staged and untouched.
+#
+# Skipped: off main, during a rebase, and when DS_CHANGELOG_HOOK=off is set.
+#
+# Installed by scripts/install-git-hooks.mjs (runs through npm's "prepare" step). Edit this tracked
+# source, never .git/hooks/post-commit, which is a local copy the next install overwrites.
+set -e
+
+[ "$DS_CHANGELOG_HOOK" = "off" ] && exit 0
+
+cd "$(git rev-parse --show-toplevel)"
+
+[ "$(git rev-parse --abbrev-ref HEAD)" = "main" ] || exit 0
+[ -d "$(git rev-parse --git-path rebase-merge)" ] && exit 0
+[ -d "$(git rev-parse --git-path rebase-apply)" ] && exit 0
+
+node scripts/gen-changelog.mjs >/dev/null
+
+if ! git diff --quiet -- src/foundations/changelog.generated.ts CHANGELOG.md; then
+  git commit --quiet --no-verify -m "chore(changelog): regenerate after $(git rev-parse --short HEAD)" \
+    -- src/foundations/changelog.generated.ts CHANGELOG.md
+  echo "post-commit: regenerated and committed the changelog (both outputs)"
+fi

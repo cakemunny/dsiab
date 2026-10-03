@@ -1,0 +1,109 @@
+# Builds the Storybook and deploys it to the Cloudflare Pages project `dsiab` ([[docs-hosting]]).
+#
+# Two deploys from one build:
+#   1. branch v<version, hyphenated>  the permanent per-release URL that `dsiab docs` opens,
+#                                     for example https://v0-9-0.dsiab.pages.dev
+#   2. branch main                    production, https://dsiab.pages.dev, the latest stable release
+#
+# Step 2 runs for a stable version only, because a release candidate is published to the npm `next`
+# tag and must not replace the docs a `latest` install reads. A manual run can promote a release
+# candidate with the `latest` input, which is the way to fill https://dsiab.pages.dev before 0.9.0.
+#
+# The branch name comes from bin/docs-url.mjs, the same module `dsiab docs` uses, so the URL the CLI
+# prints and the alias this creates cannot disagree. Nothing here drives a browser.
+#
+# Cloudflare's guide for this setup:
+#   https://developers.cloudflare.com/pages/how-to/use-direct-upload-with-continuous-integration/
+# Branch aliases and how Pages derives them:
+#   https://developers.cloudflare.com/pages/configuration/preview-deployments/#preview-aliases
+
+name: docs
+
+on:
+  push:
+    tags:
+      # Bare semver, no "v": 0.9.0 and 0.9.0-rc.1.
+      - "[0-9]+.[0-9]+.[0-9]+"
+      - "[0-9]+.[0-9]+.[0-9]+-*"
+  workflow_dispatch:
+    inputs:
+      latest:
+        description: "Also deploy to main (https://dsiab.pages.dev) when the version is a release candidate"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      # The Storybook build needs no browser. These keep npm ci from downloading one.
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+      PUPPETEER_SKIP_DOWNLOAD: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Resolve the version and its docs branch
+        id: release
+        env:
+          LATEST_INPUT: ${{ inputs.latest }}
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          if [ "$GITHUB_REF_TYPE" = "tag" ] && [ "$GITHUB_REF_NAME" != "$version" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package.json version $version."
+            exit 1
+          fi
+          node --input-type=module -e '
+            import { docsBranchFor, docsUrlFor } from "./bin/docs-url.mjs";
+            const version = process.argv[1];
+            const stable = /^\d+\.\d+\.\d+(\+[0-9A-Za-z.-]+)?$/.test(version);
+            const latest = stable || process.env.LATEST_INPUT === "true";
+            process.stdout.write(
+              `version=${version}\nbranch=${docsBranchFor(version)}\nurl=${docsUrlFor(version)}\nlatest=${latest}\n`,
+            );
+          ' "$version" >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
+
+      - name: Install
+        run: npm ci
+
+      - name: Build the Storybook
+        run: npm run build-storybook
+
+      - name: Deploy the per-release URL
+        uses: cloudflare/wrangler-action@953926a2e2182532811c01a25e53647d93bf07c0 # v4.1.3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4.139.0"
+          command: pages deploy storybook-static --project-name=dsiab --branch=${{ steps.release.outputs.branch }}
+
+      - name: Deploy latest
+        if: steps.release.outputs.latest == 'true'
+        uses: cloudflare/wrangler-action@953926a2e2182532811c01a25e53647d93bf07c0 # v4.1.3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4.139.0"
+          command: pages deploy storybook-static --project-name=dsiab --branch=main
+
+      - name: Summary
+        run: |
+          {
+            echo "Docs for ${{ steps.release.outputs.version }}: ${{ steps.release.outputs.url }}"
+            if [ "${{ steps.release.outputs.latest }}" = "true" ]; then echo "Latest: https://dsiab.pages.dev"; fi
+          } >> "$GITHUB_STEP_SUMMARY"
