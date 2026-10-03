@@ -12,7 +12,7 @@ A name in double square brackets is a ruling in `DECISIONS.md`, which records wh
 
 ### Added
 
-- dsiab, a brand-themeable design system on Radix Themes — `cd19600`
+- dsiab, a brand-themeable design system on Radix Themes — `e80593e`
 
 ---
 

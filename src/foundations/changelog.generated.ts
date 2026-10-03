@@ -15,11 +15,11 @@ export const CHANGELOG: { generatedFrom: string; kept: number; entries: Changelo
   "kept": 1,
   "entries": [
     {
-      "date": "2026-09-30",
+      "date": "2026-10-03",
       "type": "feat",
       "scope": null,
       "summary": "dsiab, a brand-themeable design system on Radix Themes",
-      "hash": "cd19600",
+      "hash": "e80593e",
       "refs": []
     }
   ]
