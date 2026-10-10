@@ -209,13 +209,16 @@ under roughly 1,000 lines excluding tests, and stack instead of growing past tha
 
 ## What enforces this, and what does not
 
-This repository runs no CI check and no pre-commit gate. Four commands hold, and all four work in any
-harness: `npx ds-check` over the code, the type check, `npm run test:tokens` for the source-scanning
-guards, and `npm test` for the story suite. Anyone can run them, a person, a script or an agent of any
-kind, and they are the only enforcement this project guarantees. The one workflow,
-`.github/workflows/docs.yml`, runs on a release tag or by hand: it builds the Storybook, scans the
-built pages for terms that must not ship, and deploys them to the docs site. It runs none of the four
-commands.
+Four commands hold, and all four work in any harness: `npx ds-check` over the code, the type check,
+`npm run test:tokens` for the source-scanning guards, and `npm test` for the story suite. Anyone can run
+them, a person, a script or an agent of any kind, and they are the only enforcement this project
+guarantees. The repository has no pre-commit gate.
+
+Two workflows run on GitHub. `.github/workflows/ci.yml` runs the four commands on every push to `main`
+and on every pull request, on a Linux runner with Playwright's own Chromium, so a failing commit shows
+red. It builds the package before the source-scanning guards, because one guard reads the built
+package. `.github/workflows/docs.yml` runs on a release tag or by hand: it builds the Storybook, scans
+the built pages for terms that must not ship, and deploys them to the docs site.
 
 The package ships no agent gate, and `dsiab init` installs none. It writes the consumer rules, the
 `dsiab` skill and the `design-system-steward` reviewer, and it edits no tool settings.
