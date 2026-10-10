@@ -7,7 +7,6 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useLayoutEffect,
   useRef,
   useState,
   type ComponentType,
@@ -22,6 +21,7 @@ import { ButtonGroup } from "./ButtonGroup";
 import { Button } from "./Button";
 import { IconButton } from "./IconButton";
 import { useUISize } from "../../theme/SizeContext";
+import { useIsomorphicLayoutEffect } from "../../hooks/useIsomorphicLayoutEffect";
 
 /**
  * Toast — transient feedback that floats over content, built on the raw
@@ -326,7 +326,7 @@ export function ToastViewport({ position = "bottom-end", maxVisible = 5, hotkey,
     focusedId != null &&
     entries.some((e) => e.id === focusedId && e.open) &&
     !visible.some((e) => e.id === focusedId);
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (!evictedFocus.current) return;
     evictedFocus.current = false;
     if (document.activeElement == null || document.activeElement === document.body) focusToast(liveToastEls()[0]);
