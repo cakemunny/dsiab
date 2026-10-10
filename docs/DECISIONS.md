@@ -3396,14 +3396,14 @@ A numeric `value` under `1e12` reads as Unix seconds, and a larger one as millis
 
 **Element forms.**
 
-- `href`: a link, a plain `<a>` or the component passed in `as`, such as a router link.
+- `href`: a link. It renders the component passed in `as`, such as a router link, else the app's `LinkProvider` link, else a native `<a>` ([link-and-link-provider](#link-and-link-provider)).
 - `onClick` alone: a reset `<button type="button">` in the link's skin.
 - `isCurrent`: a non-interactive `<span aria-current="page">`.
 - Neither: a plain `<span>`, still a candidate for the current page.
 
 **Separators.** Each item renders its own leading separator span, `aria-hidden`, which takes any React node and defaults to `/`, and CSS hides it on the first item. Screen readers skip the separators, and the crumbs carry the meaning.
 
-**Skin.** A linked crumb is a plain `<a>` styled from `--ds-*` in `--ds-text-weak`, underlined on hover and ringed by the system focus ring, not the Radix `Link`, whose accent skin clashes with the muted trail. The current crumb is set in `--ds-text-strong` in the `default` variant and `--ds-text-weak` in `supporting`, the two variants sit one step apart on the Radix type scale, `--font-size-2` and `--font-size-1` at the default size, and the trail has no collapse, after the reference catalogue's advice to flatten a hierarchy rather than truncate it.
+**Skin.** A linked crumb is styled from `--ds-*` in `--ds-text-weak`, underlined on hover and ringed by the system focus ring, not the Radix `Link`, whose accent skin clashes with the muted trail. The current crumb is set in `--ds-text-strong` in the `default` variant and `--ds-text-weak` in `supporting`, the two variants sit one step apart on the Radix type scale, `--font-size-2` and `--font-size-1` at the default size, and the trail has no collapse, after the reference catalogue's advice to flatten a hierarchy rather than truncate it.
 
 **Changed from.** The system had no breadcrumb trail. This one ports the reference catalogue's component under [catalog-as-specification](#catalog-as-specification).
 
@@ -3653,7 +3653,7 @@ Double-click toggles between 1x and 2x, and a drag pans. Zoom and pan are off fo
 
 **Item.** This ruling amends [item-row-primitive](#item-row-primitive). An `Item` with `href` renders `linkComponent ?? useLinkComponent()`, so a nav row routes through a framework `<Link>` and still composes `Item`. With no provider the output is identical to the old output, so List, TreeList and Token do not change.
 
-**Not covered.** The ruling left the adoption by Breadcrumbs and Outline to a named later change.
+**Breadcrumbs and Outline.** Both route their links through `useLinkComponent()`. Outline renders the provided component directly. A linked `BreadcrumbItem` renders `as ?? useLinkComponent()`, so an explicit `as` still wins over the provider. With no provider both render a native `<a>`, and the output is unchanged. The Breadcrumbs adoption landed 2026-10-09, guarded by the play of the Breadcrumbs Routing page.
 
 **Changed from.** `Item` rendered its `href` body as a plain `<a>`, and the system offered no link wrapper and no router seam.
 

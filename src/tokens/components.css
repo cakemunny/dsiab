@@ -2365,6 +2365,14 @@
   margin-inline-start: var(--space-3); /* gap from the text */
 }
 
+/* Body measure: the body rides --ds-text-measure (65ch) so long copy stays legible in a page column.
+   A class, not an inline style, so the rule below can release it without !important.
+   Inside a resizable pane ([data-resizable]: Layout.Panel, a resizable SideNav) the reader sets the
+   width by dragging the handle, so the body fills the pane instead of stopping at 65ch. (0,4,0) beats
+   the (0,2,0) cap on specificity. */
+.radix-themes .rt-ds-callout-body { max-width: var(--ds-text-measure); }
+.radix-themes [data-resizable] .rt-CalloutText.rt-ds-callout-body { max-width: none; }
+
 /* ============================================================================
    === Avatar === (coordination banner; Badge/Callout append their own blocks)
    Line-height size ladder + presence dot + overlapped group. Scoped .radix-themes,
@@ -4229,9 +4237,9 @@
    (--ds-text-weak) that underlines on hover (the bounded row is the affordance, the Token/Citation
    idiom) with the system accent focus ring ([[focus-ring]]); the current crumb (and any plain-span crumb) is
    --ds-text-strong (default) / --ds-text-weak (supporting), no link. Text sizes off the Radix scale by
-   variant (the [[inline-citation]] component-layer precedent). System Link is `planned`, so linked crumbs render as a
-   plain <a> styled here ([[component-registry]] agent-gap) — not the raw Radix Link whose accent skin would fight the muted
-   trail. Scoped .radix-themes, no !important, zero net-new tokens. */
+   variant (the [[inline-citation]] component-layer precedent). Linked crumbs render a caller `as`, else the app's
+   LinkProvider link, else a native <a> ([[link-and-link-provider]]), styled here, never the raw Radix Link, whose accent
+   skin would fight the muted trail. Scoped .radix-themes, no !important, zero net-new tokens. */
 .radix-themes .rt-ds-breadcrumbs-nav { display: block; }
 .radix-themes .rt-ds-breadcrumbs {
   display: flex;
