@@ -76,7 +76,8 @@ const UNNAMED_TABLE_MESSAGE =
 /* A TABLE THAT OVERFLOWS IS ONE NAMED KEYBOARD STOP ([[scroll-area-keyboard-stop]], applied to Table). Radix renders
  * its own ScrollArea inside the root and puts no ref on the viewport, so the root finds the viewport after
  * mount. While the columns outrun the container and the table holds nothing focusable, the viewport takes
- * tabindex="0", role="region" and aria-labelledby pointing at the caption. A table that fits and a table
+ * tabindex="0", and a named table's viewport also takes role="region" and aria-labelledby pointing at the
+ * caption. An unnamed one warns once in development. A table that fits and a table
  * that holds a link or a button are left alone. A caller's tabIndex lands on the root, not on the viewport
  * that scrolls, and focus on the root cannot scroll the table, so the root keeps it and the viewport still
  * takes its own stop. */

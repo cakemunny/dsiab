@@ -8,8 +8,9 @@ import { Table } from "./Table";
    What this guards: A TABLE THAT OVERFLOWS IS ONE NAMED KEYBOARD STOP ([[scroll-area-keyboard-stop]], applied to
    Table). Radix renders its own ScrollArea inside the table root and puts no tab stop on the viewport, so
    a table whose columns outrun the container cannot be scrolled by keyboard in a browser that gives a
-   scroller no stop of its own. The system gives that viewport tabindex="0", role="region" and an
-   aria-labelledby that points at the caption. A table that fits and a table that holds a link take no
+   scroller no stop of its own. The system gives that viewport tabindex="0", and a named table's viewport
+   also takes role="region" and an aria-labelledby that points at the caption. An unnamed table gets the
+   stop with no role, as an unnamed ScrollArea does. A table that fits and a table that holds a link take no
    stop. A caller's tabIndex stays on the root, and the viewport still takes its stop, because focus on
    the root cannot scroll the table. */
 
@@ -61,6 +62,9 @@ export const OverflowStop: Story = {
         <Table.Root data-testid="with-link" aria-label="Quarterly results with a link"><Rows link /></Table.Root>
       </Box>
       <Box style={WIDE}>
+        <Table.Root data-testid="unnamed"><Rows /></Table.Root>
+      </Box>
+      <Box style={WIDE}>
         <Table.Root data-testid="caller-tabindex" aria-label="Quarterly results, caller stop" tabIndex={0}><Rows /></Table.Root>
       </Box>
     </Flex>
@@ -86,6 +90,12 @@ export const OverflowStop: Story = {
     // Holding a link: the link is the way in, so the viewport takes no stop.
     const linked = viewportOf(canvasElement, "with-link");
     if (linked.hasAttribute("tabindex")) throw new Error("a table that holds a link must take no stop of its own");
+
+    // Unnamed: the stop, with no region role and no aria-labelledby, because a region with no name is noise.
+    const unnamed = viewportOf(canvasElement, "unnamed");
+    if (unnamed.getAttribute("tabindex") !== "0") throw new Error("an unnamed overflowing table must still be a keyboard stop");
+    if (unnamed.hasAttribute("role") || unnamed.hasAttribute("aria-labelledby"))
+      throw new Error(`an unnamed table's stop must carry no region role and no aria-labelledby; got role=${unnamed.getAttribute("role")} aria-labelledby=${unnamed.getAttribute("aria-labelledby")}`);
 
     // A caller's tabIndex lands on the root, which cannot scroll the table. The root keeps it, and the viewport
     // that scrolls still takes its own stop.

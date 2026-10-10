@@ -209,7 +209,8 @@ export const Usage: Story = {
   //  NOTE — the visible table takes NO tabIndex, because it never overflows at any width measured, and a
   //  tabIndex on a region that cannot scroll puts an empty stop in the tab order. A table whose columns
   //  outrun their container gets its stop from the component: Table.Root gives the scrolling viewport
-  //  tabindex="0", role="region" and the caption as its name while it overflows (_internal/Table behavior).)
+  //  tabindex="0" while it overflows, and a named table's viewport also takes role="region" with the
+  //  caption as its name (_internal/Table behavior).)
   parameters: {
     a11y: {
       context: { exclude: [DODONT_LABEL, ".rt-Badge[data-tone]"] },
