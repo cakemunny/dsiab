@@ -88,8 +88,11 @@ function useTableOverflowStop(root: { current: HTMLDivElement | null }, captionI
     const node = viewport();
     if (!node || !applies) return;
     node.setAttribute("tabindex", "0");
-    node.setAttribute("role", "region");
-    if (named) node.setAttribute("aria-labelledby", captionId);
+    // A region with no name is noise, so the role comes with the name, as on ScrollArea.
+    if (named) {
+      node.setAttribute("role", "region");
+      node.setAttribute("aria-labelledby", captionId);
+    }
     return () => {
       node.removeAttribute("tabindex");
       node.removeAttribute("role");

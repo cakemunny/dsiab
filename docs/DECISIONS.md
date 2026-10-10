@@ -6923,7 +6923,7 @@ On a scrim only the stack changes, to `--accent-ring-stack-scrim` on the dark sc
 3. The Tabs entry in `registry.json` carried no `priorArt`, so the React Aria and Radix Tabs sources reached it only through [tab-panel-focus-clearance](#tab-panel-focus-clearance). Closed, see Status.
 4. A comment in `DragHandle.tsx` and one in `PowerSearch.tsx` describe a neutral focus ring, which [focus-ring](#focus-ring) replaced with the accent.
 5. Two tables on the Table Usage page have no accessible name.
-6. `MultiSelect` options carry no `aria-posinset` or `aria-setsize`, which [select-option-numbering](#select-option-numbering) added to `Select` only.
+6. `MultiSelect` options carried no `aria-posinset` or `aria-setsize`, which [select-option-numbering](#select-option-numbering) added to `Select` only. Closed, see Status.
 
 **Correction.** One [part-colour-parity](#part-colour-parity) limit no longer holds. The Colors page alias reader reads every block for a colour, so it names oxblood-9 as the error fill of gold, orange, tomato, red, ruby, crimson and pink again.
 
