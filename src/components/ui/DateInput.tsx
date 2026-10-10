@@ -19,6 +19,7 @@ import { useResolvedSize } from "../../theme/SizeContext";
 import {
   Field,
   useOptionalFieldControl,
+  useGroupItemDescribedBy,
   useDisabledReason,
   DisabledReasonTooltip,
   DisabledReasonGlyph,
@@ -351,9 +352,11 @@ function DateInputBody({
     [value, onValueChange, emitOpen],
   );
 
-  // aria-describedby MERGES the field-level id (validation / description) with the D8 reason id.
-  const describedBy =
-    [aria?.["aria-describedby"], soft ? dr.reasonId : undefined].filter(Boolean).join(" ") || undefined;
+  // aria-describedby MERGES the field-level id (validation / description) with the D8 reason id. Inside a
+  // FieldGroup with validation (DateTimeInput) it also carries the group message id, so a screen reader on
+  // this input hears why the composite is invalid. Outside a group the hook returns the field id unchanged.
+  const fieldDescribedBy = useGroupItemDescribedBy(aria?.["aria-describedby"], undefined);
+  const describedBy = [fieldDescribedBy, soft ? dr.reasonId : undefined].filter(Boolean).join(" ") || undefined;
   // aria-invalid is the UNION of the standing field error and the ephemeral pending-invalid — but NEVER
   // set while soft-disabled (a reason is guidance, not an error, [[disabled-reason]]).
   const ariaInvalid = soft ? undefined : aria?.["aria-invalid"] || pendingInvalid || undefined;

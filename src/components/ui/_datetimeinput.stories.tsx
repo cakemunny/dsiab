@@ -260,6 +260,18 @@ export const CompositeStandingError: Story = {
       throw new Error("the single validation marker must be the composite group root (wrapping both sub-fields)");
     if (dateField(scope)!.getAttribute("aria-invalid") === "true" || timeField(scope)!.getAttribute("aria-invalid") === "true")
       throw new Error("the sub-inputs must not carry aria-invalid (the composite owns the standing signal)");
+
+    // Each sub-input points at the composite message through aria-describedby, so a screen reader that lands on
+    // the date or the time hears the reason, not only the alert on appearance.
+    const msgId = alerts[0].id;
+    if (!msgId) throw new Error("the composite message must carry an id for aria-describedby to reference");
+    for (const [name, input] of [["date", dateField(scope)!], ["time", timeField(scope)!]] as const) {
+      const ids = (input.getAttribute("aria-describedby") ?? "").split(/\s+/);
+      if (!ids.includes(msgId))
+        throw new Error(`the ${name} input's aria-describedby must include the composite message id "${msgId}"; got "${input.getAttribute("aria-describedby")}"`);
+      for (const id of ids.filter(Boolean))
+        if (!document.getElementById(id)) throw new Error(`the ${name} input's aria-describedby names "${id}", which no element carries`);
+    }
   },
 };
 

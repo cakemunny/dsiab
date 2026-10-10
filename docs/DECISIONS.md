@@ -2874,11 +2874,12 @@ The field otherwise rests in its neutral state. A red border on a field that rev
 
 - Each embedded input keeps its own local ephemeral channel. The composite error never reaches a child as a `validation` prop, which would render it twice.
 - A standing problem of the composite, a caller `validation` or a combined value out of range, shows once in `FieldGroup.Message` with `role="alert"`, and the group carries `aria-invalid`. Two fields are few enough for one group-level signal, unlike the many items of CheckboxGroup and RadioGroup.
+- Each subfield's `aria-describedby` carries the id of `FieldGroup.Message` through `useGroupItemDescribedBy`, so a screen reader on either input hears the composite error. Added 2026-10-09.
 - On a boundary date, a hint of the available times shows in `FieldGroup.Description` as guidance, and never sets `aria-invalid`.
 
 **Layout.** The row is a flex row under `rt-ds-datetimeinput-*` with a `--space-3` gap. The date grows, the time keeps its own width, and a container query stacks the two below 22rem of group width. No token is new.
 
-**Not covered.** The group message wired into the `aria-describedby` of each subfield, an asynchronous optimistic layer of `changeAction` and `isLoading`, and InputGroup composition.
+**Not covered.** An asynchronous optimistic layer of `changeAction` and `isLoading`, and InputGroup composition.
 
 **Changed from.** No earlier ruling covered this.
 
