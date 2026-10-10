@@ -13,6 +13,13 @@ import { useCallback, useRef } from "react";
  * render. So this hook ONLY moves focus; the tab stop and selection stay declarative in the
  * component. Kept minimal: the index math is the pure `nextFocusIndex` (node-lane tested), the DOM
  * wiring is this hook (exercised by the _internal dots play).
+ *
+ * RIGHT-TO-LEFT. Under `dir="rtl"` a horizontal row runs from right to left, so the next item sits to
+ * the LEFT and ArrowLeft moves to it (APG: the arrow keys follow the reading direction). The hook reads
+ * the direction only for a horizontal ArrowLeft or ArrowRight, at the moment of the key press. An
+ * explicit `dir` option wins. Without it, the hook reads the computed `direction` of the list
+ * container, the same read Calendar makes. A vertical list ignores direction, because ArrowUp and
+ * ArrowDown do not depend on it.
  */
 
 export type ListOrientation = "horizontal" | "vertical";
@@ -22,6 +29,8 @@ export interface NextFocusOptions {
   orientation?: ListOrientation;
   /** Whether moving past an edge wraps to the other end. @default true */
   wrap?: boolean;
+  /** Swaps ArrowLeft and ArrowRight for a horizontal list that runs right to left. @default false */
+  rtl?: boolean;
 }
 
 /**
@@ -36,11 +45,12 @@ export function nextFocusIndex(
   key: string,
   opts: NextFocusOptions = {},
 ): number | null {
-  const { orientation = "horizontal", wrap = true } = opts;
+  const { orientation = "horizontal", wrap = true, rtl = false } = opts;
   if (count <= 0) return null;
 
-  const nextKey = orientation === "horizontal" ? "ArrowRight" : "ArrowDown";
-  const prevKey = orientation === "horizontal" ? "ArrowLeft" : "ArrowUp";
+  const horizontal = orientation === "horizontal";
+  const nextKey = horizontal ? (rtl ? "ArrowLeft" : "ArrowRight") : "ArrowDown";
+  const prevKey = horizontal ? (rtl ? "ArrowRight" : "ArrowLeft") : "ArrowUp";
 
   switch (key) {
     case nextKey: {
@@ -60,9 +70,20 @@ export function nextFocusIndex(
   }
 }
 
-export interface UseListFocusOptions extends NextFocusOptions {
+export interface UseListFocusOptions extends Omit<NextFocusOptions, "rtl"> {
   /** CSS selector matching the focusable items inside the list container. @default 'button' */
   itemSelector?: string;
+  /** The reading direction. When unset, the hook reads the computed `direction` of the list container. */
+  dir?: "ltr" | "rtl";
+}
+
+const HORIZONTAL_ARROWS = new Set(["ArrowLeft", "ArrowRight"]);
+
+/** True when the list runs right to left. An explicit `dir` wins over the computed style. */
+function isRightToLeft(list: HTMLElement, dir: "ltr" | "rtl" | undefined): boolean {
+  if (dir) return dir === "rtl";
+  if (typeof window === "undefined") return false;
+  return window.getComputedStyle(list).direction === "rtl";
 }
 
 export interface UseListFocusReturn<T extends HTMLElement> {
@@ -75,7 +96,7 @@ export interface UseListFocusReturn<T extends HTMLElement> {
 export function useListFocus<T extends HTMLElement = HTMLElement>(
   options: UseListFocusOptions = {},
 ): UseListFocusReturn<T> {
-  const { itemSelector = "button", orientation = "horizontal", wrap = true } = options;
+  const { itemSelector = "button", orientation = "horizontal", wrap = true, dir } = options;
   const listRef = useRef<T | null>(null);
 
   const handleKeyDown = useCallback(
@@ -94,13 +115,15 @@ export function useListFocus<T extends HTMLElement = HTMLElement>(
 
       const active = document.activeElement as HTMLElement | null;
       const current = active ? items.indexOf(active) : -1;
-      const next = nextFocusIndex(current, items.length, e.key, { orientation, wrap });
+      // Read the direction only when it can change the answer: a horizontal ArrowLeft or ArrowRight.
+      const rtl = orientation === "horizontal" && HORIZONTAL_ARROWS.has(e.key) && isRightToLeft(list, dir);
+      const next = nextFocusIndex(current, items.length, e.key, { orientation, wrap, rtl });
       if (next == null) return;
 
       e.preventDefault();
       items[next]?.focus();
     },
-    [itemSelector, orientation, wrap],
+    [itemSelector, orientation, wrap, dir],
   );
 
   return { listRef, handleKeyDown };

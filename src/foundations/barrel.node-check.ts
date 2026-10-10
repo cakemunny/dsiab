@@ -145,7 +145,7 @@ const INTERNAL_MODULES: Readonly<Record<string, string>> = {
   // src/hooks. [[internal-hooks]] rules the first three. The rest are engines of one shipped component or capability.
   "hooks/useGridFocus": "[[internal-hooks]]. Calendar is its only caller, and that one caller shaped its API.",
   "hooks/useListFocus":
-    "[[internal-hooks]]. Pagination, SideNav and TopNav call it. It has no right-to-left handling, and Astryx publishes a different hook under the same name.",
+    "[[internal-hooks]]. Pagination, SideNav and TopNav call it, and Astryx publishes a different hook under the same name.",
   "hooks/useScrollOverflow":
     "[[internal-hooks]], deferred. Carousel is its only caller. It publishes with ScrollOverflowState on the first consumer need.",
   "hooks/useTreeFocus": "TreeList's keyboard model ([[tree-list]]), and TreeList is its only caller.",

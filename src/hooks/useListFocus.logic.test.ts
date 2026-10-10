@@ -40,6 +40,34 @@ describe("nextFocusIndex — vertical orientation", () => {
   });
 });
 
+describe("nextFocusIndex — right-to-left swaps the horizontal arrows", () => {
+  it("ArrowLeft advances and ArrowRight retreats", () => {
+    expect(nextFocusIndex(0, 5, "ArrowLeft", { rtl: true })).toBe(1);
+    expect(nextFocusIndex(3, 5, "ArrowRight", { rtl: true })).toBe(2);
+  });
+  it("wraps at the ends in the swapped direction", () => {
+    expect(nextFocusIndex(4, 5, "ArrowLeft", { rtl: true })).toBe(0);
+    expect(nextFocusIndex(0, 5, "ArrowRight", { rtl: true })).toBe(4);
+  });
+  it("clamps in the swapped direction when wrap is off", () => {
+    expect(nextFocusIndex(4, 5, "ArrowLeft", { rtl: true, wrap: false })).toBe(4);
+    expect(nextFocusIndex(0, 5, "ArrowRight", { rtl: true, wrap: false })).toBe(0);
+  });
+  it("leaves Home and End on the first and last item", () => {
+    expect(nextFocusIndex(3, 5, "Home", { rtl: true })).toBe(0);
+    expect(nextFocusIndex(1, 5, "End", { rtl: true })).toBe(4);
+  });
+  it("enters from the matching edge when nothing is focused", () => {
+    expect(nextFocusIndex(-1, 5, "ArrowLeft", { rtl: true })).toBe(0);
+    expect(nextFocusIndex(-1, 5, "ArrowRight", { rtl: true })).toBe(4);
+  });
+  it("does not change a vertical list", () => {
+    expect(nextFocusIndex(0, 3, "ArrowDown", { orientation: "vertical", rtl: true })).toBe(1);
+    expect(nextFocusIndex(2, 3, "ArrowUp", { orientation: "vertical", rtl: true })).toBe(1);
+    expect(nextFocusIndex(0, 3, "ArrowLeft", { orientation: "vertical", rtl: true })).toBeNull();
+  });
+});
+
 describe("nextFocusIndex — non-navigation keys + guards", () => {
   it("returns null for keys it does not handle", () => {
     expect(nextFocusIndex(0, 5, "Enter")).toBeNull();
