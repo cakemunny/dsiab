@@ -1,6 +1,7 @@
-import { useEffect, type ComponentProps, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useRef, type ComponentProps, type ReactNode } from "react";
 import { Table as RadixTable } from "@radix-ui/themes";
 import { useResolvedSize } from "../../theme/SizeContext";
+import { useOverflowStop } from "../../hooks/useOverflowStop";
 import { VisuallyHidden } from "./VisuallyHidden";
 
 // Dev-only accessibility warning, resolved once at module load — the Avatar/Badge pattern verbatim
@@ -68,7 +69,38 @@ type NamingProps =
 type RootProps = Omit<RadixRootProps, "aria-label" | "aria-labelledby"> &
   NamingProps & { "aria-labelledby"?: AriaLabelledByRefused };
 
+const UNNAMED_TABLE_MESSAGE =
+  "a Table wider than its container is a keyboard stop with no accessible name, so a screen reader lands on " +
+  "it and announces nothing. Pass aria-label for a hidden caption, or caption for a visible one (WCAG 4.1.2).";
+
+/* A TABLE THAT OVERFLOWS IS ONE NAMED KEYBOARD STOP ([[scroll-area-keyboard-stop]], applied to Table). Radix renders
+ * its own ScrollArea inside the root and puts no ref on the viewport, so the root finds the viewport after
+ * mount. While the columns outrun the container and the table holds nothing focusable, the viewport takes
+ * tabindex="0", role="region" and aria-labelledby pointing at the caption. A table that fits and a table
+ * that holds a link or a button are left alone. A caller's tabIndex lands on the root, not on the viewport
+ * that scrolls, and focus on the root cannot scroll the table, so the root keeps it and the viewport still
+ * takes its own stop. */
+function useTableOverflowStop(root: { current: HTMLDivElement | null }, captionId: string, named: boolean) {
+  const viewport = () => root.current?.querySelector<HTMLElement>(".rt-ScrollAreaViewport") ?? null;
+  const stop = useOverflowStop(viewport, { named, warnKey: "table-unnamed", warnMessage: UNNAMED_TABLE_MESSAGE });
+  const applies = stop === 0;
+  useEffect(() => {
+    const node = viewport();
+    if (!node || !applies) return;
+    node.setAttribute("tabindex", "0");
+    node.setAttribute("role", "region");
+    if (named) node.setAttribute("aria-labelledby", captionId);
+    return () => {
+      node.removeAttribute("tabindex");
+      node.removeAttribute("role");
+      node.removeAttribute("aria-labelledby");
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [applies, named, captionId]);
+}
+
 function TableRoot({
+  ref,
   size,
   variant = "surface",
   caption,
@@ -83,6 +115,18 @@ function TableRoot({
   // An empty caption is no caption: `caption={row.title}` with nothing to say must not paint a blank
   // line above the header, and `caption={cond ? text : null}` is how conditional content is written.
   const hasCaption = caption != null && caption !== "";
+
+  const captionId = useId();
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const setRoot = useCallback(
+    (node: HTMLDivElement | null) => {
+      rootRef.current = node;
+      if (typeof ref === "function") ref(node);
+      else if (ref) ref.current = node;
+    },
+    [ref],
+  );
+  useTableOverflowStop(rootRef, captionId, hasCaption || Boolean(ariaLabel));
 
   // The type refuses aria-labelledby and refuses the two names together; a JavaScript caller reaching
   // past the type hears it here rather than shipping the silent no-op this component exists to fix.
@@ -103,15 +147,15 @@ function TableRoot({
   // A <caption> must be the table's FIRST child, which is why it is rendered here rather than left to the
   // consumer: `children` are the row groups, and this puts the caption in front of them.
   const captionNode = hasCaption ? (
-    <caption data-side={captionSide}>{caption}</caption>
+    <caption id={captionId} data-side={captionSide}>{caption}</caption>
   ) : ariaLabel ? (
     <VisuallyHidden asChild>
-      <caption>{ariaLabel}</caption>
+      <caption id={captionId}>{ariaLabel}</caption>
     </VisuallyHidden>
   ) : null;
 
   return (
-    <RadixTable.Root variant={variant} size={resolvedSize} {...props}>
+    <RadixTable.Root variant={variant} size={resolvedSize} {...props} ref={setRoot}>
       {captionNode}
       {children}
     </RadixTable.Root>

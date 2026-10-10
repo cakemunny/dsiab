@@ -6255,13 +6255,15 @@ The click route is the same machine, not an addition beside it.
 
 **Why.** Radix puts no tab stop, role or name on the viewport. Chromium 130 and later make such a scroller a tab stop exposed as a generic node, and in a browser without that behaviour the overflow is beyond keyboard reach.
 
+**Table.** `Table.Root` applies the same measure to the viewport Radix renders inside it. While the columns outrun the container and the table holds nothing focusable, the viewport takes `tabindex="0"`, `role="region"` and `aria-labelledby` pointing at the table's caption, visible or hidden. A caller's `tabIndex` lands on the root, which cannot scroll the table, so the root keeps it and the viewport still takes its stop. An overflowing table with no name warns once in development. ScrollArea and Table share the measurement in `hooks/useOverflowStop.ts`. Added 2026-10-09.
+
 **Not covered.** A scroller that holds a focusable element keeps no stop of its own, because the keyboard reaches it through that element.
 
-**Guard.** The `TextOnlyStop` play in `_internal/ScrollArea behavior`.
+**Guard.** The `TextOnlyStop` play in `_internal/ScrollArea behavior`, and the `OverflowStop` play in `_internal/Table behavior`.
 
-**Changed from.** A bare text scroller carried no tabindex and read as a generic node.
+**Changed from.** A bare text scroller carried no tabindex and read as a generic node. A table wider than its container scrolled with no keyboard stop.
 
-**Status.** Ruled 2026-09-24. No later ruling amends it.
+**Status.** Ruled 2026-09-24. On 2026-10-09 the measure extended to `Table`, as **Table** records.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 

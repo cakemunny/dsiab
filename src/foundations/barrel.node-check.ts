@@ -149,6 +149,7 @@ const INTERNAL_MODULES: Readonly<Record<string, string>> = {
     "[[internal-hooks]]. Pagination, SideNav and TopNav call it, and Astryx publishes a different hook under the same name.",
   "hooks/useScrollOverflow":
     "[[internal-hooks]], deferred. Carousel is its only caller. It publishes with ScrollOverflowState on the first consumer need.",
+  "hooks/useOverflowStop": "the keyboard stop of a text-only scroller ([[scroll-area-keyboard-stop]]). ScrollArea and Table call it.",
   "hooks/useTreeFocus": "TreeList's keyboard model ([[tree-list]]), and TreeList is its only caller.",
   "hooks/useOverflow": "OverflowList's measurement engine ([[overflow-list]]), and OverflowList is its only caller.",
   "hooks/useResizable":
