@@ -440,6 +440,20 @@
 .radix-themes.rt-SelectContent.rt-r-size-3:where(:not(.rt-high-contrast)) .rt-SelectLabel { padding-inline: var(--space-4); }
 .radix-themes.rt-SelectContent.rt-r-size-3:where(:not(.rt-high-contrast)) .rt-SelectSeparator { margin-inline-start: var(--space-4); }
 
+/* Long option labels stay on screen and end in an ellipsis, as the trigger, MultiSelect and Typeahead do.
+   Radix sizes the menu to its widest option with no upper bound, so a long label pushed the panel past the
+   viewport. The panel is capped at the width Radix reports as available, and the items fill it. Radix wraps
+   the items in an unclassed `display: table` div with an inline `min-width: 100%`, so that div takes a fixed
+   table layout at full width; without it each item keeps its natural width and no ellipsis fires. */
+.radix-themes.rt-SelectContent.rt-PopperContent { max-width: var(--radix-select-content-available-width); }
+.radix-themes.rt-SelectContent .rt-SelectViewport > div { width: 100%; table-layout: fixed; }
+.radix-themes.rt-SelectContent .rt-SelectItem > span:not(.rt-SelectItemIndicator) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Group label → --ds-text-weak (Radix paints it gray-a10; the system's weak text is gray-11). */
 .radix-themes.rt-SelectContent:where(:not(.rt-high-contrast)) .rt-SelectLabel { color: var(--ds-text-weak); }
 
