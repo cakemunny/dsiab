@@ -2647,7 +2647,7 @@ The primitive sets the live region, so the system never sets `role` or `aria-liv
 - Windowing: only the newest `maxVisible` toasts render, 5 by default.
 - Deduplication by `uniqueID` and `collisionBehavior`.
 - A timer that pauses on hover, focus and window blur, and resumes with at least 1000ms left.
-- On dismiss, focus moves to the next toast, then the previous one, then returns to its earlier place.
+- On dismiss, focus moves to the next toast, then the previous one, then returns to its earlier place. When windowing evicts the toast that holds focus, focus moves to the oldest toast still showing.
 
 **Actions.** One action and a required dismiss sit in a `ButtonGroup`, so `buttonOrder` governs their order. The action is `priority="secondary"`, which keeps the message the main element and matches the overlaid actions of `Overlay`, and `Toast.Action` requires `altText`. Both buttons take `size="1"`, fixed transient chrome outside the `uiSize` lane.
 
@@ -2655,7 +2655,7 @@ The primitive sets the live region, so the system never sets `role` or `aria-liv
 
 **Mounting.** The consumer mounts `ToastProvider` under the system `Provider`. Without it, `useToast` throws, and no singleton fallback exists for server rendering.
 
-**Gap.** A focused toast that windowing evicts can drop focus to `<body>`. The guarantee that focus never lands on `<body>` covers dismissal only, and this case is a named deferral.
+**Eviction.** Focus never lands on `<body>` when a toast leaves, by dismissal or by windowing. `ToastViewport` reads which toast holds focus while it renders, and when windowing is about to drop that toast while it is still open, a layout effect moves focus to the oldest toast still showing, the toast Dismiss would pick. The FocusEvicted story in `_internal/Toast behavior` guards it. Added 2026-10-09, closing the deferral this entry named.
 
 **Changed from.** No earlier ruling covered this. The action first shipped as a solid `primary` button and moved to `secondary` on the day of the ruling.
 
@@ -6160,13 +6160,13 @@ The click route is the same machine, not an addition beside it.
 
 **Container.** The `container` prop defaults to the body. The docs measurement host passes its own element, which keeps its specimens in frame.
 
-**Gap.** A toast raised before the modal opened paints above the scrim but takes no pointer input, because the Radix DismissableLayer disables pointer events on every layer older than the modal. A click there closes the dialog and does not run Undo.
+**Older toasts.** A toast raised before the modal opened is a layer older than the modal, so the Radix DismissableLayer writes an inline `pointer-events: none` on it. Each toast root passes `pointer-events: auto` as its own inline style, which Radix's Slot merges after the layer's, so that toast also takes the click. A click on its Undo runs Undo once, and the dialog stays open. Added 2026-10-09.
 
-**Guard.** The UnderModal story in `_internal/Toast behavior` checks that Undo is a button named "Undo", that it is the hit target, and that a click on it runs Undo and leaves the dialog open.
+**Guard.** The UnderModal story in `_internal/Toast behavior` checks that Undo is a button named "Undo", that it is the hit target, and that a click on it runs Undo and leaves the dialog open. The UnderModalPreexisting story checks the same for a toast raised before the modal opened.
 
 **Changed from.** A toast raised inside a modal sat in an `aria-hidden` subtree, so Chrome marked its Undo button ignored (Radix issue 4115). It also painted under the scrim, because the root `Theme` of the Provider is a `z-index: 0` stacking context that caps `--ds-z-toast`, and a click on Undo closed the dialog.
 
-**Status.** Ruled 2026-09-24. The pointer half landed the same day. No later ruling amends it.
+**Status.** Ruled 2026-09-24. The pointer half landed the same day. On 2026-10-09 the older-toast case closed, as **Older toasts** records.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 
