@@ -141,6 +141,7 @@ const INTERNAL_MODULES: Readonly<Record<string, string>> = {
   groupItems: "grouping helper used by the list-shaped components.",
   useComboboxEngine: "the shared combobox state machine.",
   useReturnFocus: "close-focus restore for the modal surfaces ([[focus-return-on-close]]).",
+  optionNumbering: "the option numbering that Select and MultiSelect share ([[select-option-numbering]]).",
 
   // src/hooks. [[internal-hooks]] rules the first three. The rest are engines of one shipped component or capability.
   "hooks/useGridFocus": "[[internal-hooks]]. Calendar is its only caller, and that one caller shaped its API.",

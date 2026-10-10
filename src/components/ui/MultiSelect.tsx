@@ -19,6 +19,7 @@ import { Field, useOptionalFieldControl } from "./Field";
 import { IconButton } from "./IconButton";
 import { Button } from "./Button";
 import { CheckboxVisual } from "./CheckboxVisual";
+import { useOptionNumbering } from "./optionNumbering";
 
 type Size = "1" | "2" | "3";
 type Validation = { tone: "error" | "warning" | "success" | "info"; message: ReactNode };
@@ -204,6 +205,8 @@ function MultiSelectBody({
   const [open, setOpen] = useState(defaultOpen ?? false);
   const [activeValue, setActiveValue] = useState<string | null>(null);
   const listboxRef = useRef<HTMLDivElement>(null);
+  // The listbox numbers its options (aria-posinset / aria-setsize) the way Select does (optionNumbering.ts).
+  const numberedListboxRef = useOptionNumbering(listboxRef);
   const typeahead = useRef<{ buffer: string; timer: number | null }>({ buffer: "", timer: null });
 
   const options = useMemo(() => { const acc: OptMeta[] = []; collectOptions(children, acc); return acc; }, [children]);
@@ -386,7 +389,7 @@ function MultiSelectBody({
                 </div>
               )}
               <div
-                ref={listboxRef}
+                ref={numberedListboxRef}
                 id={listboxId}
                 role="listbox"
                 aria-multiselectable="true"

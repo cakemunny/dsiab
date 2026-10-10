@@ -6209,11 +6209,11 @@ The click route is the same machine, not an addition beside it.
 
 **Guarded by.** The `Menu states` play holds five options at 1 of 5 through 5 of 5.
 
-**Not covered.** `MultiSelect` options, recorded as a gap in [documentation-and-markup-gaps](#documentation-and-markup-gaps).
+**MultiSelect.** The numbering lives in `optionNumbering.ts`, and the `MultiSelect` listbox uses it too, so its options read their position and the count the same way. Its `Menu states` play holds five options at 1 of 5 through 5 of 5. Added 2026-10-09.
 
 **Changed from.** Options in the open listbox carried no `aria-posinset` or `aria-setsize`.
 
-**Status.** Ruled 2026-09-24. No later ruling amends it.
+**Status.** Ruled 2026-09-24. On 2026-10-09 the numbering extended to `MultiSelect`, closing item 6 of [documentation-and-markup-gaps](#documentation-and-markup-gaps).
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 
@@ -6930,6 +6930,7 @@ On a scrim only the stack changes, to `--accent-ring-stack-scrim` on the dark sc
 **Status.** Ruled 2026-09-27.
 
 - [tabs-open-on-navigation](#tabs-open-on-navigation) closes item 3 and gives the Tabs entry in `registry.json` its `priorArt`.
+- [select-option-numbering](#select-option-numbering) closes item 6 on 2026-10-09: `MultiSelect` options now carry `aria-posinset` and `aria-setsize`.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 

@@ -418,6 +418,15 @@ export const MenuStates: Story = {
     const options = Array.from(listbox.querySelectorAll<HTMLElement>('[role="option"]'));
     if (options.length !== 5) throw new Error(`expected 5 options, got ${options.length}`);
 
+    // Every option says where it sits (Radix #3962, #4110), the way Select numbers its own: DOM order, the
+    // disabled row counted, so the second row reads "Canada, 2 of 5".
+    options.forEach((option, i) => {
+      const pos = option.getAttribute("aria-posinset");
+      const size = option.getAttribute("aria-setsize");
+      if (pos !== String(i + 1) || size !== "5")
+        throw new Error(`option "${option.textContent}" must read ${i + 1} of 5 (aria-posinset / aria-setsize), got ${pos} of ${size}`);
+    });
+
     // CRITICAL a11y guard — a listbox option must NOT contain an interactive widget. The checkbox is a
     // presentational, aria-hidden span; aria-selected is the source of truth.
     for (const opt of options) {
