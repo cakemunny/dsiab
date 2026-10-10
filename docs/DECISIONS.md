@@ -5760,7 +5760,9 @@ The icon and the title move together because they are one visual unit, and a lar
 
 **Measured.** At a 1920px viewport, before the change, the 65ch cap stopped the body 358px short of a 990px content box sized by the reader.
 
-**Gap.** `Callout` caps its own text inline at `--ds-text-measure`, and a page cannot override an inline style without `!important`, which the system bans. A Callout inside a resizable pane keeps the cap until `Callout` changes. On 2026-09-19 the thread summary in the mail pane was such a Callout, 574px wide inside the 990px box.
+**Callout.** `Callout` caps its body through the class `rt-ds-callout-body` at `--ds-text-measure`, and the cap lifts inside any `[data-resizable]` ancestor, the marker that `Layout.Panel` and a resizable `SideNav` set. Measured 2026-10-09: inside a 1000px `[data-resizable]` pane a long Callout body is 922px wide, and in a plain 1000px box it stays 574px. The Usage play of the Callout page guards both. Until 2026-10-09 the cap was an inline style, which a page could not override without `!important`.
+
+**Open.** A content region beside a resizable panel, such as `Layout.Content` in the mail reading view, carries no `data-resizable`, so a Callout there keeps the cap. Whether the release covers that region is not ruled.
 
 **Changed from.** The mail reading body took the 65ch cap like any prose and left the right third of the pane empty.
 
