@@ -78,17 +78,21 @@ const UNNAMED_TABLE_MESSAGE =
  * mount. While the columns outrun the container and the table holds nothing focusable, the viewport takes
  * tabindex="0", and a named table's viewport also takes role="region" and aria-labelledby pointing at the
  * caption. An unnamed one warns once in development. A table that fits and a table
- * that holds a link or a button are left alone. A caller's tabIndex lands on the root, not on the viewport
- * that scrolls, and focus on the root cannot scroll the table, so the root keeps it and the viewport still
- * takes its own stop. */
-function useTableOverflowStop(root: { current: HTMLDivElement | null }, captionId: string, named: boolean) {
+ * that holds a link or a button are left alone. A caller's tabIndex goes on the viewport, never on the root:
+ * focus on the root cannot scroll the table, so the caller's value wins on the node that scrolls, as it does
+ * on ScrollArea, and the table keeps one stop. */
+function useTableOverflowStop(
+  root: { current: HTMLDivElement | null },
+  captionId: string,
+  named: boolean,
+  tabIndex: number | undefined,
+) {
   const viewport = () => root.current?.querySelector<HTMLElement>(".rt-ScrollAreaViewport") ?? null;
-  const stop = useOverflowStop(viewport, { named, warnKey: "table-unnamed", warnMessage: UNNAMED_TABLE_MESSAGE });
-  const applies = stop === 0;
+  const stop = useOverflowStop(viewport, { tabIndex, named, warnKey: "table-unnamed", warnMessage: UNNAMED_TABLE_MESSAGE });
   useEffect(() => {
     const node = viewport();
-    if (!node || !applies) return;
-    node.setAttribute("tabindex", "0");
+    if (!node || stop === undefined) return;
+    node.setAttribute("tabindex", String(stop));
     // A region with no name is noise, so the role comes with the name, as on ScrollArea.
     if (named) {
       node.setAttribute("role", "region");
@@ -100,7 +104,7 @@ function useTableOverflowStop(root: { current: HTMLDivElement | null }, captionI
       node.removeAttribute("aria-labelledby");
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [applies, named, captionId]);
+  }, [stop, named, captionId]);
 }
 
 function TableRoot({
@@ -112,6 +116,7 @@ function TableRoot({
   children,
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledBy,
+  tabIndex,
   ...props
 }: RootProps) {
   const resolvedSize = useResolvedSize("control", size) as RadixRootProps["size"];
@@ -130,7 +135,7 @@ function TableRoot({
     },
     [ref],
   );
-  useTableOverflowStop(rootRef, captionId, hasCaption || Boolean(ariaLabel));
+  useTableOverflowStop(rootRef, captionId, hasCaption || Boolean(ariaLabel), tabIndex);
 
   // The type refuses aria-labelledby and refuses the two names together; a JavaScript caller reaching
   // past the type hears it here rather than shipping the silent no-op this component exists to fix.

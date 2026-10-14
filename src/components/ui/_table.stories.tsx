@@ -11,8 +11,8 @@ import { Table } from "./Table";
    scroller no stop of its own. The system gives that viewport tabindex="0", and a named table's viewport
    also takes role="region" and an aria-labelledby that points at the caption. An unnamed table gets the
    stop with no role, as an unnamed ScrollArea does. A table that fits and a table that holds a link take no
-   stop. A caller's tabIndex stays on the root, and the viewport still takes its stop, because focus on
-   the root cannot scroll the table. */
+   stop. A caller's tabIndex goes on the viewport, never on the root, because focus on the root cannot
+   scroll the table, so the table keeps one stop. */
 
 const COLUMNS = ["Region", "Quarter", "Revenue", "Margin", "Headcount", "Churn", "Pipeline", "Forecast"];
 const WIDE = { width: 260 };
@@ -97,11 +97,11 @@ export const OverflowStop: Story = {
     if (unnamed.hasAttribute("role") || unnamed.hasAttribute("aria-labelledby"))
       throw new Error(`an unnamed table's stop must carry no region role and no aria-labelledby; got role=${unnamed.getAttribute("role")} aria-labelledby=${unnamed.getAttribute("aria-labelledby")}`);
 
-    // A caller's tabIndex lands on the root, which cannot scroll the table. The root keeps it, and the viewport
-    // that scrolls still takes its own stop.
+    // A caller's tabIndex goes on the viewport that scrolls, never on the root, so the table keeps one named stop.
     const callerRoot = canvasElement.querySelector<HTMLElement>('[data-testid="caller-tabindex"]')!;
-    if (callerRoot.getAttribute("tabindex") !== "0") throw new Error(`a caller's tabIndex must stay on the root; got ${callerRoot.getAttribute("tabindex")}`);
+    if (callerRoot.hasAttribute("tabindex")) throw new Error(`a caller's tabIndex must not land on the root, which cannot scroll; got tabindex=${callerRoot.getAttribute("tabindex")}`);
     const caller = viewportOf(canvasElement, "caller-tabindex");
-    if (caller.getAttribute("tabindex") !== "0") throw new Error("the overflowing viewport must still be a keyboard stop when the root carries the caller's tabIndex");
+    if (caller.getAttribute("tabindex") !== "0" || caller.getAttribute("role") !== "region")
+      throw new Error(`the caller's tabIndex must land on the named viewport; got tabindex=${caller.getAttribute("tabindex")} role=${caller.getAttribute("role")}`);
   },
 };
