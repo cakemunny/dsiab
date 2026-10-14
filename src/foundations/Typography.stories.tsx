@@ -466,10 +466,14 @@ export const Ramp: Story = {
         throw new Error(`--ds-text-${key}-size (${size}) != --font-size-${step} (${native})`);
       }
     }
-    // Inter actually loaded — roman + italic across weights (no faux styles).
-    await document.fonts.ready;
-    for (const spec of ["400 16px Inter", "600 16px Inter", "700 16px Inter",
-      "italic 400 16px Inter", "italic 600 16px Inter", "italic 700 16px Inter"]) {
+    // Inter actually loads — roman + italic across weights (no faux styles). `fonts.ready` waits only for
+    // faces the page already asked for, and nothing on this page asks for italic 600, so on a fresh browser
+    // `check` alone reported it missing. Each face is loaded first, then checked: a face that is not
+    // declared loads nothing, and `check` still fails on it.
+    const specs = ["400 16px Inter", "600 16px Inter", "700 16px Inter",
+      "italic 400 16px Inter", "italic 600 16px Inter", "italic 700 16px Inter"];
+    await Promise.all(specs.map((spec) => document.fonts.load(spec)));
+    for (const spec of specs) {
       if (!document.fonts.check(spec)) throw new Error(`Inter not loaded for "${spec}" (faux style risk)`);
     }
   },

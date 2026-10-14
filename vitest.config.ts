@@ -83,6 +83,11 @@ export default defineConfig({
     ],
   },
   test: {
+    // THE CI RUNNER IS SLOWER. A GitHub-hosted Linux runner has two cores, and the two lanes share
+    // them. Measured on the first CI run: the 27-accent sweep in `_non-text-contrast` took 21.5s there
+    // against 2.7s on a laptop, and Decisions `Interactions` passed the 15s default. On CI the limit is
+    // 60s. A local run keeps the 15s default, so a story that grows slow still shows up locally.
+    ...(process.env.CI ? { testTimeout: 60_000 } : {}),
     // `extends: true` reuses the plugins/resolve/optimizeDeps above; only the lane's
     // name + env differ. Each project gets its own browser instance.
     projects: [
