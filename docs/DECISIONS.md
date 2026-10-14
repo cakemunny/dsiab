@@ -1902,17 +1902,19 @@ The rule in [support-text-slot](#support-text-slot) that a message steers toward
 
 **Tags.** `ACCESSIBILITY`, `COMPONENTS`. **Ruled.** 2026-09-17.
 
-**`Overlay`'s hover scrim fails WCAG 1.4.13 Dismissible, and the gap is recorded, not fixed.**
+**`Overlay`'s hover scrim failed WCAG 1.4.13 Dismissible until 2026-10-14, when Escape dismissal closed the gap.**
 
-**What you see.** `Overlay` reveals its scrim with CSS `:hover` and `:focus-within` rules alone, with no keydown handler anywhere in the component. The scrim is hoverable and persistent, but nothing removes it short of moving the pointer or focus.
+**What you saw.** Until 2026-10-14, `Overlay` revealed its scrim with CSS `:hover` and `:focus-within` rules alone, with no keydown handler anywhere in the component. The scrim was hoverable and persistent, but nothing removed it short of moving the pointer or focus.
 
 **Why it fails.** The Dismissible exemption does not apply, because the scrim covers `inset: 0` of the required `media` node and so hides real content. Every other hover-or-focus surface passes: Tooltip, HoverCard and menu submenus inherit the three properties from Radix, and the `TopNav` flyouts implement them by hand.
 
-**Gap.** The fix is a `dismissed` state, set on Escape and cleared on pointer leave or focus out, expressed as a data attribute the reveal rules exclude. That is a component change with its own evidence to gather, so it stays outside this ruling, under the rule that a change contains only what it claims.
+**Fix (2026-10-14).** While the pointer is over the Overlay or focus is inside it, Escape sets `data-dismissed`. The state clears only when both the pointer and focus have left the Overlay, so a dismissal persists until the user gives a new trigger (1.4.13, persistent). A move between two actions inside keeps it. In `focus` mode a hover alone does not arm Escape, because hover reveals nothing there. A veil that hover revealed hides, because the hover reveal rules exclude `data-dismissed`. A veil that focus holds turns transparent and stops taking clicks, and every other scrim child, actions and captions alike, hides, so the focused control stays visible with its ring (WCAG 2.4.7). The ring's colour is measured against the veil ([focus-ring](#focus-ring)), so a hollow 6px plate of the veil's colour sits behind the focused control. The plate is its own element, placed by `Overlay.tsx` around the focused control, and it paints nothing on the control, so a danger, hovered or disabled border stays the control's own. The owner chose the separate plate on 2026-10-14 over a `box-shadow` on the control, which replaced every border a button draws as an inset shadow with the accent border. Measured over media, the ring reads 5.86:1 on the story gradient, 3.20:1 on white, 7.03:1 on mid-grey and 11.69:1 on black, against 1.49 to 2.20:1 with no plate. The owner chose the plate on 2026-10-14 from a rendered comparison with a half-strength veil and the page ring colour, which each failed 3:1 on two of the four backgrounds. An Escape that a layer inside the Overlay already handled, such as a menu, does not dismiss the veil. Focus that moves into a menu opened from inside keeps the dismissal, and a focused control removed from the page clears it, because the browser fires no blur for a removed element. The W3C Understanding text for 1.4.13 exempts only the triggering component itself, so the veil and the other actions must be dismissible while the focused control stays. The owner chose this partial dismiss on 2026-10-14 from a rendered comparison against keeping the whole veil while focus holds it. Guarded by the `EscapeDismissesHover`, `EscapeWithFocusInside`, `EscapePersistsAndGuards` and `EscapeFocusEdges` plays in `_internal/Overlay behavior`.
+
+**Open.** Inside a modal Dialog, Radix handles Escape in the document capture phase, so one Escape closes the whole dialog before the veil can dismiss on its own. That is not a 1.4.13 failure, because the veil leaves with the dialog, but a user who wanted only the veil gone loses the dialog. Not ruled, and kept for review.
 
 **Changed from.** No earlier ruling recorded the gap. [overlay-hover-scrim](#overlay-hover-scrim) defined the reveal with no way to dismiss it.
 
-**Status.** Ruled 2026-09-17. No later ruling amends it.
+**Status.** Ruled 2026-09-17. The fix above closes the 1.4.13 gap on 2026-10-14.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 

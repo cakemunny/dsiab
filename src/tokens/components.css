@@ -1885,12 +1885,44 @@
 /* Pointer hover reveals only the hover-driven modes, and only on real hover devices (no sticky touch
    hover; the tap-toggle above covers coarse pointers). */
 @media (hover: hover) {
-  .radix-themes .rt-ds-overlay[data-show-on="hover"]:hover .rt-ds-overlay-scrim,
-  .radix-themes .rt-ds-overlay[data-show-on="hover-or-focus"]:hover .rt-ds-overlay-scrim {
+  .radix-themes .rt-ds-overlay[data-show-on="hover"]:not([data-dismissed]):hover .rt-ds-overlay-scrim,
+  .radix-themes .rt-ds-overlay[data-show-on="hover-or-focus"]:not([data-dismissed]):hover .rt-ds-overlay-scrim {
     opacity: 1;
     pointer-events: auto;
     transition: opacity var(--ds-duration-moderate) var(--ds-ease-entry);
   }
+}
+/* Escape dismisses the veil (WCAG 1.4.13, [[overlay-dismissible-gap]]). Overlay.tsx writes `data-dismissed`. The hover
+   rules above exclude it, so a hover-revealed veil hides. A veil that focus holds keeps the focused control
+   visible (WCAG 2.4.7): the veil turns transparent, and every scrim child that neither holds focus nor sits
+   inside the focused control hides. The scrim itself keeps opacity 1, because the focused control would
+   inherit a lower one. */
+.radix-themes .rt-ds-overlay[data-dismissed]:focus-within .rt-ds-overlay-scrim {
+  background-color: transparent;
+  /* The transparent veil lets a click reach the media it no longer covers. The focused control takes clicks
+     again below, because pointer-events inherits. */
+  pointer-events: none;
+}
+.radix-themes .rt-ds-overlay[data-dismissed]:focus-within .rt-ds-overlay-scrim :not(:focus-within):not(:focus *) {
+  opacity: 0;
+  pointer-events: none;
+}
+.radix-themes .rt-ds-overlay[data-dismissed]:focus-within .rt-ds-overlay-scrim :focus {
+  pointer-events: auto;
+}
+/* The ring's colour is measured against the veil ([[focus-ring]]), and the veil is gone, so Overlay.tsx places a
+   hollow plate of the veil's colour behind the focused control. Measured over media: 5.86:1 on the story gradient,
+   3.20:1 on white, 7.03:1 on mid-grey and 11.69:1 on black, against 1.49 to 2.20:1 with no plate. The plate is its
+   own element and paints nothing on the control, so a danger, hovered or disabled border stays the control's own.
+   It sits before the scrim in the DOM, so the transparent scrim and the control paint above it. */
+.radix-themes .rt-ds-overlay-plate {
+  position: absolute;
+  box-sizing: border-box;
+  border: 6px solid var(--ds-scrim);
+  pointer-events: none;
+}
+.radix-themes .rt-ds-overlay-plate[data-scrim="light"] {
+  border-color: var(--ds-scrim-light);
 }
 
 /* ===== Toast (D7 tones / D8 lifecycle / D9 interactions) ====================

@@ -1,8 +1,12 @@
+import { createRef, useEffect, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Box } from "@radix-ui/themes";
+import { Box, Flex } from "@radix-ui/themes";
 import { Heart } from "@phosphor-icons/react";
 import { Overlay } from "./Overlay";
 import { IconButton } from "./IconButton";
+import { MoreMenu } from "./MoreMenu";
+import { DropdownMenu } from "./DropdownMenu";
+import { parseColor } from "../../foundations/_assert";
 
 /* Test-only behavior for Overlay — kept OUT of the docs stories (System/Overlay) so viewing a docs
    page never drives a reveal (these plays focus inner actions, toggle the scrim, and animate opacity →
@@ -127,6 +131,264 @@ export const KeyboardReachable: Story = {
     const got = toHex(getComputedStyle(scrim).backgroundColor);
     const want = tokenHex(scrim, "--ds-scrim");
     if (got !== want) throw new Error(`scrim background must resolve --ds-scrim; got ${got} vs ${want}`);
+  },
+};
+
+const pressEscape = () =>
+  (document.activeElement ?? document.body).dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+
+/** Escape dismisses a hover-revealed veil (WCAG 1.4.13). A real CSS :hover cannot be driven in a headless play,
+ *  so the play drives the pointer events Overlay listens to and checks the state the hover rules key on:
+ *  Escape sets data-dismissed, the hover reveal selector then stops matching, and pointer leave clears it. */
+export const EscapeDismissesHover: Story = {
+  render: () => (
+    <Box p="5">
+      <Overlay showOn="hover-or-focus" position="bottom" media={<Media />}>
+        <IconButton priority="secondary" aria-label="Save to favourites"><Heart /></IconButton>
+      </Overlay>
+    </Box>
+  ),
+  play: async ({ canvasElement }) => {
+    const overlay = canvasElement.querySelector<HTMLElement>(".rt-ds-overlay")!;
+    // React derives enter and leave from pointerover and pointerout. A null relatedTarget reads as a pointer
+    // arriving from, or leaving to, outside the page, which reaches onPointerEnter and onPointerLeave.
+    const pointer = { bubbles: true, relatedTarget: null, pointerId: 1, pointerType: "mouse" };
+    overlay.dispatchEvent(new PointerEvent("pointerover", pointer));
+    await sleep(20);
+    pressEscape();
+    await waitFor(() => overlay.getAttribute("data-dismissed") === "true").catch(() => {
+      throw new Error("Escape with the pointer over the Overlay must set data-dismissed");
+    });
+    if (overlay.matches('[data-show-on="hover-or-focus"]:not([data-dismissed])'))
+      throw new Error("a dismissed Overlay must fall out of the hover reveal rule");
+    overlay.dispatchEvent(new PointerEvent("pointerout", pointer));
+    await waitFor(() => !overlay.hasAttribute("data-dismissed")).catch(() => {
+      throw new Error("the pointer leaving the Overlay must clear data-dismissed, so the next hover reveals again");
+    });
+  },
+};
+
+/** Escape with focus inside: the veil turns transparent and every action except the focused one hides, so the
+ *  focused control stays visible with its ring (WCAG 1.4.13 and 2.4.7). A move between actions inside keeps the
+ *  state, and focus leaving the Overlay clears it. */
+const callerRef = createRef<HTMLDivElement>();
+export const EscapeWithFocusInside: Story = {
+  render: () => (
+    <Box p="5">
+      <button type="button" data-testid="before">Before</button>
+      <Overlay ref={callerRef} showOn="hover-or-focus" position="top" media={<Media />}>
+        <Flex gap="2" justify="end" width="100%">
+          <IconButton priority="secondary" aria-label="Expand"><Heart /></IconButton>
+          <IconButton priority="secondary" tone="danger" aria-label="Download"><Heart /></IconButton>
+        </Flex>
+      </Overlay>
+    </Box>
+  ),
+  play: async ({ canvasElement }) => {
+    const overlay = canvasElement.querySelector<HTMLElement>(".rt-ds-overlay")!;
+    const scrim = overlay.querySelector<HTMLElement>(".rt-ds-overlay-scrim")!;
+    const [expand, download] = [...overlay.querySelectorAll<HTMLButtonElement>("button")];
+    const visible = (el: Element) => {
+      for (let n: Element | null = el; n && n !== overlay; n = n.parentElement) if (opacityOf(n) < 0.9) return false;
+      return true;
+    };
+    const veilAlpha = () => parseColor(getComputedStyle(scrim).backgroundColor).a;
+
+    // Each action's own border, read before any dismissal. The plate must leave both untouched.
+    const ownBorder = new Map<HTMLElement, string>([expand, download].map((b) => [b, getComputedStyle(b).boxShadow]));
+    expand.focus();
+    await waitFor(() => opacityOf(scrim) > 0.9 && veilAlpha() > 0.1);
+    pressEscape();
+    await waitFor(() => overlay.getAttribute("data-dismissed") === "true").catch(() => {
+      throw new Error("Escape with focus inside the Overlay must set data-dismissed");
+    });
+    await waitFor(() => veilAlpha() < 0.01).catch(() => {
+      throw new Error(`a dismissed veil held by focus must turn transparent; background is ${getComputedStyle(scrim).backgroundColor}`);
+    });
+    if (!visible(expand)) throw new Error("the focused action must stay visible after Escape (WCAG 2.4.7)");
+    await waitFor(() => opacityOf(download) < 0.1).catch(() => {
+      throw new Error(`an action without focus must hide after Escape; its opacity is ${getComputedStyle(download).opacity}`);
+    });
+
+    // The ring keeps a hollow plate of the veil's colour behind it, so it holds 3:1 over any media. The plate is its
+    // own element, 6px around the focused action, and the action keeps the border it draws itself.
+    const wantPlate = parseColor(getComputedStyle(scrim).getPropertyValue("--ds-scrim"));
+    const checkPlate = async (target: HTMLElement) => {
+      const plateEl = await waitFor(() => overlay.querySelector<HTMLElement>(".rt-ds-overlay-plate")).catch(() => {
+        throw new Error("a dismissed Overlay with focus inside must place a plate behind the focused action");
+      });
+      const ps = getComputedStyle(plateEl!);
+      const got = parseColor(ps.borderTopColor);
+      if (ps.borderTopWidth !== "6px" || Math.abs(got.r - wantPlate.r) > 2 || Math.abs(got.g - wantPlate.g) > 2 || Math.abs(got.b - wantPlate.b) > 2 || Math.abs(got.a - wantPlate.a) > 0.02)
+        throw new Error(`the plate must be a 6px border of --ds-scrim; got ${ps.borderTopWidth} ${ps.borderTopColor}`);
+      const p = plateEl!.getBoundingClientRect(), r = target.getBoundingClientRect();
+      if ([p.left - (r.left - 6), p.top - (r.top - 6), p.right - (r.right + 6), p.bottom - (r.bottom + 6)].some((d) => Math.abs(d) > 0.5))
+        throw new Error(`the plate must sit 6px around the focused action; plate ${JSON.stringify(p)}, action ${JSON.stringify(r)}`);
+      if (getComputedStyle(target).boxShadow !== ownBorder.get(target))
+        throw new Error(`the plate must leave the action's own border alone; before "${ownBorder.get(target)}", after "${getComputedStyle(target).boxShadow}"`);
+    };
+    await checkPlate(expand);
+
+    // The transparent veil passes clicks to the media, and the focused action still takes them.
+    if (getComputedStyle(scrim).pointerEvents !== "none") throw new Error("the transparent veil must not catch clicks meant for the media");
+    const r = expand.getBoundingClientRect();
+    const hit = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+    if (!hit || !expand.contains(hit)) throw new Error(`the focused action must still take the click; the hit test found <${hit?.tagName.toLowerCase()}>`);
+
+    // A caller's ref reaches the root, and the internal one still works (the focus move below depends on it).
+    if (callerRef.current !== overlay) throw new Error("a ref passed to Overlay must reach its root element");
+
+    // A move to the other action keeps the dismissal, and that action is now the visible one.
+    download.focus();
+    await sleep(20);
+    if (overlay.getAttribute("data-dismissed") !== "true") throw new Error("a focus move inside the Overlay must keep it dismissed");
+    await waitFor(() => visible(download) && opacityOf(expand) < 0.1).catch(() => {
+      throw new Error("after a focus move inside, the newly focused action must show and the other must hide");
+    });
+    // The plate follows focus, and the danger action keeps its red border under it.
+    await waitFor(() => {
+      const p = overlay.querySelector(".rt-ds-overlay-plate")?.getBoundingClientRect();
+      return p && Math.abs(p.left - (download.getBoundingClientRect().left - 6)) < 0.5;
+    });
+    await checkPlate(download);
+
+    // Focus leaving the Overlay clears the state.
+    canvasElement.querySelector<HTMLButtonElement>('[data-testid="before"]')!.focus();
+    await waitFor(() => !overlay.hasAttribute("data-dismissed")).catch(() => {
+      throw new Error("focus leaving the Overlay must clear data-dismissed");
+    });
+    if (overlay.querySelector(".rt-ds-overlay-plate")) throw new Error("the plate must go once the dismissal clears");
+  },
+};
+
+/** A dismissal lasts until the user leaves the Overlay entirely (WCAG 1.4.13, persistent). With focus inside,
+ *  the pointer leaving keeps it, and focus leaving afterwards clears it. In focus-only mode a hover alone does
+ *  not arm Escape, and an Escape that a layer inside already handled leaves the veil alone. */
+export const EscapePersistsAndGuards: Story = {
+  render: () => (
+    <Box p="5">
+      <button type="button" data-testid="outside">Outside</button>
+      <Overlay data-testid="both" showOn="hover-or-focus" position="bottom" media={<Media />}>
+        <IconButton priority="secondary" aria-label="Save"><Heart /></IconButton>
+      </Overlay>
+      <Overlay data-testid="focus-only" showOn="focus" position="bottom" media={<Media />}>
+        <IconButton priority="secondary" aria-label="Share"><Heart /></IconButton>
+      </Overlay>
+    </Box>
+  ),
+  play: async ({ canvasElement }) => {
+    const pointer = { bubbles: true, relatedTarget: null, pointerId: 1, pointerType: "mouse" };
+    const outside = canvasElement.querySelector<HTMLButtonElement>('[data-testid="outside"]')!;
+
+    // Pointer and focus inside, Escape, then the pointer leaves: still dismissed. Then focus leaves: cleared.
+    const both = canvasElement.querySelector<HTMLElement>('[data-testid="both"]')!;
+    both.dispatchEvent(new PointerEvent("pointerover", pointer));
+    both.querySelector("button")!.focus();
+    await sleep(20);
+    pressEscape();
+    await waitFor(() => both.getAttribute("data-dismissed") === "true");
+    both.dispatchEvent(new PointerEvent("pointerout", pointer));
+    await sleep(60);
+    if (both.getAttribute("data-dismissed") !== "true")
+      throw new Error("the pointer leaving while focus stays inside must keep the Overlay dismissed (WCAG 1.4.13, persistent)");
+    outside.focus();
+    await waitFor(() => !both.hasAttribute("data-dismissed")).catch(() => {
+      throw new Error("once both the pointer and focus have left, the dismissal must clear");
+    });
+
+    // An Escape a layer inside already handled (defaultPrevented) leaves the veil alone.
+    both.querySelector("button")!.focus();
+    await sleep(20);
+    const handled = (e: KeyboardEvent) => e.preventDefault();
+    window.addEventListener("keydown", handled, { capture: true });
+    try {
+      (document.activeElement ?? document.body).dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
+      await sleep(60);
+    } finally {
+      window.removeEventListener("keydown", handled, { capture: true });
+    }
+    if (both.hasAttribute("data-dismissed")) throw new Error("an Escape a layer inside already handled must not dismiss the veil");
+    outside.focus();
+    await sleep(20);
+
+    // Focus-only mode: a hover shows nothing, so Escape while hovering must not arm a dismissal in advance.
+    const focusOnly = canvasElement.querySelector<HTMLElement>('[data-testid="focus-only"]')!;
+    focusOnly.dispatchEvent(new PointerEvent("pointerover", pointer));
+    await sleep(20);
+    pressEscape();
+    await sleep(60);
+    if (focusOnly.hasAttribute("data-dismissed")) throw new Error("in focus-only mode a hover alone must not arm Escape");
+    focusOnly.dispatchEvent(new PointerEvent("pointerout", pointer));
+  },
+};
+
+let removeAction: (() => void) | null = null;
+function RemovableAction() {
+  const [shown, setShown] = useState(true);
+  useEffect(() => {
+    removeAction = () => setShown(false);
+    return () => {
+      removeAction = null;
+    };
+  }, []);
+  return shown ? <IconButton priority="secondary" aria-label="Archive"><Heart /></IconButton> : null;
+}
+
+/** Two ways focus leaves without the usual blur into the page. A focused action removed from the page fires no blur,
+ *  and the dismissal must still clear. Focus moving into a menu opened from inside leaves the Overlay's DOM for a
+ *  portal, and the dismissal must survive it and the Escape that closes the menu. */
+export const EscapeFocusEdges: Story = {
+  render: () => (
+    <Box p="5">
+      <button type="button" data-testid="outside">Outside</button>
+      <Overlay data-testid="removable" showOn="hover-or-focus" position="bottom" media={<Media />}>
+        <RemovableAction />
+      </Overlay>
+      <Overlay data-testid="portal" showOn="hover-or-focus" position="bottom" media={<Media />}>
+        <MoreMenu label="More" priority="secondary" modal={false}>
+          <DropdownMenu.Item>Rename</DropdownMenu.Item>
+        </MoreMenu>
+      </Overlay>
+    </Box>
+  ),
+  play: async ({ canvasElement }) => {
+    const removable = canvasElement.querySelector<HTMLElement>('[data-testid="removable"]')!;
+    removable.querySelector("button")!.focus();
+    await sleep(20);
+    pressEscape();
+    await waitFor(() => removable.getAttribute("data-dismissed") === "true");
+    await waitFor(() => removable.querySelector(".rt-ds-overlay-plate"));
+    removeAction!();
+    await waitFor(() => !removable.hasAttribute("data-dismissed")).catch(() => {
+      throw new Error("a focused action removed from the page must clear the dismissal, because focus has left");
+    });
+    if (removable.querySelector(".rt-ds-overlay-plate")) throw new Error("the plate must go with the removed action");
+
+    const portal = canvasElement.querySelector<HTMLElement>('[data-testid="portal"]')!;
+    const trigger = portal.querySelector<HTMLButtonElement>('button[aria-label="More"]')!;
+    trigger.focus();
+    await sleep(20);
+    pressEscape();
+    await waitFor(() => portal.getAttribute("data-dismissed") === "true");
+    trigger.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    await waitFor(() => document.activeElement?.closest('[role="menu"]')).catch(() => {
+      throw new Error(`Enter on the trigger must open the menu and move focus into it; focus is on <${document.activeElement?.tagName.toLowerCase()}>`);
+    });
+    await sleep(60);
+    if (portal.getAttribute("data-dismissed") !== "true")
+      throw new Error("focus moving into a menu opened from inside the Overlay must keep it dismissed");
+    // The menu's own Escape closes the menu only, and focus returns to the trigger with the dismissal intact.
+    (document.activeElement ?? document.body).dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
+    await waitFor(() => document.activeElement === trigger).catch(() => {
+      throw new Error("Escape in the menu must close it and return focus to the trigger");
+    });
+    await sleep(60);
+    if (portal.getAttribute("data-dismissed") !== "true")
+      throw new Error("closing the menu with Escape must leave the Overlay dismissed");
+    canvasElement.querySelector<HTMLButtonElement>('[data-testid="outside"]')!.focus();
+    await waitFor(() => !portal.hasAttribute("data-dismissed")).catch(() => {
+      throw new Error("focus leaving to the page must clear the dismissal");
+    });
   },
 };
 
