@@ -4732,8 +4732,38 @@
    glyph drops to the system disabled icon role. */
 .radix-themes .rt-ds-lightbox-control { background-color: var(--ds-scrim); color: var(--ds-text-strong); }
 .radix-themes .rt-ds-lightbox-control[data-disabled] { color: var(--ds-icon-disabled); }
+/* Hover LIFTS the disc and never replaces the scrim, the Thumbnail remove-✕ rule above. In the dark scale
+   --ds-fill-strong resolves to the same value as --ds-text-strong, so a disc painted with it hid the glyph
+   (measured on Next: rgb(237, 238, 240) on rgb(237, 238, 240), 1:1). The tint is a background-image over the scrim. */
 @media (hover: hover) {
-  .radix-themes .rt-ds-lightbox-control:not([data-disabled]):hover { background-color: var(--ds-fill-strong); }
+  .radix-themes .rt-ds-lightbox-control:not([data-disabled]):hover {
+    background-image: linear-gradient(var(--ds-fill-hover), var(--ds-fill-hover));
+  }
+}
+/* Pan keypad ([[dragging-movement-gaps]]) — bottom-left, only while an image is zoomed. Four keycaps in the inverted-T
+   of a keyboard: W on the top row over S, with A and D beside S. Each key stacks its arrow over its letter. */
+.radix-themes .rt-ds-lightbox-pan {
+  position: absolute;
+  left: var(--ds-space-16);
+  bottom: var(--ds-space-16);
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  gap: var(--ds-space-4);
+}
+.radix-themes .rt-ds-lightbox-key[data-dir="up"] { grid-column: 2; grid-row: 1; }
+.radix-themes .rt-ds-lightbox-key[data-dir="left"] { grid-column: 1; grid-row: 2; }
+.radix-themes .rt-ds-lightbox-key[data-dir="down"] { grid-column: 2; grid-row: 2; }
+.radix-themes .rt-ds-lightbox-key[data-dir="right"] { grid-column: 3; grid-row: 2; }
+/* A key at its edge dims its letter with its arrow, so the disabled state does not rest on the arrow alone. */
+.radix-themes .rt-ds-lightbox-key[data-disabled] .rt-Kbd { color: inherit; }
+.radix-themes .rt-ds-lightbox-key {
+  flex-direction: column;
+  gap: var(--ds-space-2);
+  width: auto;
+  height: auto;
+  min-width: var(--base-button-height);
+  padding: var(--ds-space-4);
 }
 
 /* ---- PowerSearch ([[power-search]], B5) — structured filter bar + non-dialog edit popover ----------------------

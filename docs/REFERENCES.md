@@ -68,6 +68,16 @@ shaped the token layer or a policy rather than any one component.
 | [WCAG 2.2, Understanding SC 2.5.7 Dragging Movements](https://www.w3.org/WAI/WCAG22/Understanding/dragging-movements.html) | The normative reason the single-pointer route exists, and the source of the rule that a keyboard equivalent does NOT discharge 2.5.7. |
 | [ARIA in HTML](https://www.w3.org/TR/html-aria/) | `aria-grabbed` and `aria-dropeffect` are deprecated with no replacement, which is why drag state is carried by the accessible name and live announcements. |
 
+## Panning a zoomed image without a drag ([[dragging-movement-gaps]])
+
+| Source | What it informed |
+|---|---|
+| [WCAG 2.2, Understanding SC 2.5.7 Dragging Movements](https://www.w3.org/WAI/WCAG22/Understanding/dragging-movements.html) | [[dragging-movement-gaps]]. READ: the worked example is a map that a user can drag, with up, down, left and right buttons that move the view as well. ADOPTED: four buttons that pan a zoomed Lightbox image one step per click. REJECTED: the buttons at the middle of each image edge, because the left and right ones sat at the height of Previous and Next with the same chevron and covered the image. |
+| [yet-another-react-lightbox, Zoom plugin](https://yet-another-react-lightbox.com/plugins/zoom) | [[dragging-movement-gaps]]. READ: a zoomed image pans with click-and-drag, the mouse wheel and the four arrow keys, with a keyboard step of 50px by default. REJECTED: the arrow keys as the pan keys, because the arrow keys page the gallery here and the owner kept them for paging. ADOPTED in its place: W, A, S and D, matched by physical key. |
+| [PhotoSwipe, click and tap actions](https://photoswipe.com/click-and-tap-actions/) | [[dragging-movement-gaps]]. READ: a click on the image zooms it by default (`imageClickAction: 'zoom-or-close'`) and a double tap zooms (`doubleTapAction: 'zoom'`). REJECTED: zoom toward a clicked point as the only route to an edge, because double-click timing is hard for people with tremor, the users 2.5.7 protects, and nothing on screen says that it works. |
+| [WCAG 2.2, Understanding SC 2.1.4 Character Key Shortcuts](https://www.w3.org/WAI/WCAG22/Understanding/character-key-shortcuts.html) | [[dragging-movement-gaps]]. READ: a single-letter shortcut passes when it can be turned off or remapped, or when it is active only while its component has focus. ADOPTED: W, A, S and D pan only while focus is inside the open viewer and the image is zoomed. |
+| [WICG, Keyboard Map](https://wicg.github.io/keyboard-map/) | [[dragging-movement-gaps]]. READ: `navigator.keyboard.getLayoutMap()` resolves to a map from each physical key code to the character it types on the user's layout. The specification is a draft report of a community group, not a W3C standard, so a browser may not implement it. ADOPTED: each keycap shows the letter of the user's layout where the browser reports it, and W A S D everywhere else. |
+
 ## Colour and contrast ([[oxblood-preset]], [[brand-status-collision-gate]])
 
 Not every source informs a component. These two informed the token layer, so they are attached to

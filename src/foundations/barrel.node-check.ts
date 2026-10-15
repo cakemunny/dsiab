@@ -142,6 +142,7 @@ const INTERNAL_MODULES: Readonly<Record<string, string>> = {
   useComboboxEngine: "the shared combobox state machine.",
   useReturnFocus: "close-focus restore for the modal surfaces ([[focus-return-on-close]]).",
   optionNumbering: "the option numbering that Select and MultiSelect share ([[select-option-numbering]]).",
+  lightboxPan: "the pan keypad and its keys, and Lightbox is its only caller ([[dragging-movement-gaps]]).",
 
   // src/hooks. [[internal-hooks]] rules the first three. The rest are engines of one shipped component or capability.
   "hooks/useGridFocus": "[[internal-hooks]]. Calendar is its only caller, and that one caller shaped its API.",
