@@ -127,9 +127,11 @@ export const MalformedRevert: Story = {
     await waitFor(() => input.getAttribute("aria-invalid") === "true");
     if (calls("niBad").length !== 0) throw new Error("a non-integer under isIntegerOnly must not fire");
     input.blur();
-    await sleep(40);
-    if (!/whole number/i.test(liveAssertive()))
+    // The announcer clears the region and writes on the next animation frame, which a busy runner can delay
+    // past any fixed sleep, so wait for the words rather than for a time.
+    await waitFor(() => /whole number/i.test(liveAssertive())).catch(() => {
       throw new Error(`isIntegerOnly revert must announce the whole-number ask; got "${liveAssertive()}"`);
+    });
     // No prior value → the announcement carries no "Kept …".
     if (/kept/i.test(liveAssertive())) throw new Error("with no prior value the announcement must omit 'Kept'");
   },
