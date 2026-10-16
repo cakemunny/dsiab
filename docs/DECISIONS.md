@@ -1931,7 +1931,7 @@ The rule in [support-text-slot](#support-text-slot) that a message steers toward
 **Failures.**
 
 - `ResizeHandle`: a drag from `onPointerDown` is the only pointer route to a size. Its double-click toggles collapse, not resize, and does nothing unless `collapsible` is set, which defaults to false. The gap reaches the resizable panels of `Layout` and `SideNav`.
-- `Lightbox` pan: drag only, with no key route, because the arrow keys move through the gallery. A zoom resets the pan to the origin, so without a drag the edges of a 2x image are out of reach. This half also fails 2.1.1, the cheaper failure to close.
+- `Lightbox` pan: drag only, with no key route, because the arrow keys move through the gallery. A zoom resets the pan to the origin, so without a drag the edges of a 2x image are out of reach. This half also fails 2.1.1, the cheaper failure to close. Closed on 2026-10-15, by the Lightbox fix below.
 
 **Not essential.** Neither drag is essential under the criterion's test. The worked example W3C gives is a map with direction buttons beside the drag.
 
@@ -1942,11 +1942,13 @@ The rule in [support-text-slot](#support-text-slot) that a message steers toward
 - `Toast`: a Dismiss button sits beside the swipe at all times.
 - `FileInput`: the drop adds to a native file input.
 
-**Gap.** Recorded and not fixed, for the reason recorded in [overlay-dismissible-gap](#overlay-dismissible-gap): a change contains only what it claims, and each fix is a component change with its own evidence to gather.
+**Lightbox fix (2026-10-15).** While an image is zoomed, a keypad in the bottom-left corner of the stage pans it, and W, A, S and D do the same from the keyboard. The keypad holds four keycaps in the inverted-T of a keyboard, and each key shows its arrow over its letter in a `Kbd`. A press moves the image a quarter of the way from the centre to an edge, so four presses reach any edge. The arrow keys keep paging the gallery, which the owner kept on 2026-10-15 because Left and Right are the expected paging keys. The letters match by physical key (`KeyboardEvent.code`), so the same four keys pan on any layout, and each keycap shows the letter of the user's layout where the browser reports it through the Keyboard Map API, and W A S D everywhere else. Ctrl, Cmd or Alt with a letter is left to the browser. A key at the edge it moves toward is `aria-disabled` and painted disabled, letter included, and it keeps focus, because a `disabled` button that held focus dropped it to `<body>`. The letters pan only while focus is inside the open viewer and the image is zoomed, which is the "active only on focus" exception of WCAG 2.1.4. The owner chose the keypad on 2026-10-15 from a rendered comparison with one arrow at the middle of each image edge, whose left and right arrows matched Previous and Next, and with zoom toward a clicked point, which double-click timing puts out of reach of the users 2.5.7 protects. Guarded by the `PanKeypad` play in `_internal/Lightbox behavior`.
+
+**Gap.** `ResizeHandle` is recorded and not fixed, for the reason recorded in [overlay-dismissible-gap](#overlay-dismissible-gap): a change contains only what it claims, and each fix is a component change with its own evidence to gather.
 
 **Changed from.** No earlier ruling covered this.
 
-**Status.** Ruled 2026-09-17. No later ruling amends it.
+**Status.** Ruled 2026-09-17. The Lightbox fix above closes the Lightbox half on 2026-10-15.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 
@@ -3492,10 +3494,13 @@ A numeric `value` under `1e12` reads as Unix seconds, and a larger one as millis
 
 - Left and Right arrows move through the gallery.
 - `+` or `=` zooms in, `-` or `_` zooms out, and `0` resets.
+- W, A, S and D pan a zoomed image ([dragging-movement-gaps](#dragging-movement-gaps)).
 
-Double-click toggles between 1x and 2x, and a drag pans. Zoom and pan are off for video and reset on every change of index or source.
+Double-click toggles between 1x and 2x. While zoomed, a drag, the keypad in the bottom-left corner or W, A, S and D pans. Zoom and pan are off for video and reset on every change of index or source. A hovered control keeps its `--ds-scrim` disc under a `--ds-fill-hover` tint, the Thumbnail remove-button rule, because `--ds-fill-strong` resolves to the glyph colour in the dark scale and hid the glyph.
 
 **Gallery.** Previous and next are `disabled` at the ends of the range but stay mounted, because an unmounted focused control drops focus to `<body>`. The `N / M` counter is `aria-hidden`, and `useAnnounce` politely announces each change of index within an open session, never on mount, open or close, since the dialog's `aria-label` names the current item on open.
+
+**Open.** Measured on 2026-10-15: when Previous turns `disabled` at the start of the gallery while it holds focus, focus drops to `<body>`, so the claim above and the caption on the Keyboard page do not hold. Not fixed in the pan change, and kept for review.
 
 **API.** `isOpen`, `onOpenChange`, `media` (one `LightboxMedia` or an array, each `{src, alt, caption?, type?}`), `index`, `defaultIndex` (0), `onIndexChange`, `hasZoom` (false), `hasAutoPlay` (false) and `ref`. The `useLightbox` hook returns `open(i)`, `close`, `isOpen`, `index`, `element`, `triggerProps` and `getTriggerProps(i)`, and the trigger props carry `role="button"`, `tabIndex=0`, `aria-haspopup="dialog"` and Enter and Space activation.
 
@@ -3505,7 +3510,7 @@ Double-click toggles between 1x and 2x, and a drag pans. Zoom and pan are off fo
 
 - [standard-dialog](#standard-dialog) ships the system `Dialog` and keeps Lightbox on the raw Radix Dialog on purpose, because Lightbox steers its own focus, skins its own content and animates its own tiers.
 - [focus-return-on-close](#focus-return-on-close) returns focus to the opener on close, which Radix does not do for a dialog opened from a prop.
-- [dragging-movement-gaps](#dragging-movement-gaps) records pan as drag-only, a failure of WCAG 2.5.7 Dragging Movements, recorded and not fixed.
+- [dragging-movement-gaps](#dragging-movement-gaps) records pan as drag-only, a failure of WCAG 2.5.7 Dragging Movements, and its Lightbox fix of 2026-10-15 adds the pan keypad and W, A, S and D.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 
