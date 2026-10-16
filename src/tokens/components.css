@@ -4960,6 +4960,27 @@
    file stacks the alpha on a matching ::after. Inset (-2px) within that zone, so the ring reaches no
    further into the panels than the grab zone already does, and the pill between the two bands stays
    clear of both. */
+/* Step keys ([[dragging-movement-gaps]]). Two keycap chips centred on the seam, overhanging both panes and taking no
+   layout. Each chip is the system Kbd on a transparent 24px button, the WCAG 2.5.8 floor, with no border or fill of
+   its own. A chip at its bound dims its glyph to the disabled text role. */
+.radix-themes .rt-ds-resize-keys {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  gap: var(--ds-space-8);
+  transform: translate(-50%, -50%);
+}
+.radix-themes .rt-ds-resize-keys[data-orientation="horizontal"] { flex-direction: column; }
+.radix-themes .rt-ds-resize-key {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.radix-themes .rt-ds-resize-key[data-disabled] { cursor: default; }
+.radix-themes .rt-ds-resize-key[data-disabled] .rt-Kbd { color: var(--ds-text-disabled); }
 .radix-themes .rt-ds-resize-handle:focus-visible {
   outline: none;
 }

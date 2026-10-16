@@ -72,7 +72,8 @@ function TwoPaneDemo({
           <Text size="1" weight="bold" style={{ color: "var(--ds-text-weak)", letterSpacing: "0.06em" }}>CONTENT</Text>
           <Text as="p" size="2" mt="1" style={{ color: "var(--ds-text-strong)", lineHeight: 1.6 }}>
             Drag the handle to resize, or focus it and use {isVertical ? "←/→" : "↑/↓"} (±10px), Shift+arrow
-            (±50px), Home/End (min/max){collapsible ? ", Enter or double-click to collapse" : ""}.
+            (±50px), Home/End (min/max){collapsible ? ", Enter or double-click to collapse" : ""}. Without a drag, hover or
+            tap the handle and click the {isVertical ? "← and →" : "↑ and ↓"} chips, 50px per click.
           </Text>
         </Box>
       </Box>
@@ -173,7 +174,7 @@ export const Usage: Story = {
       <Page>
         <PageHeader title="ResizeHandle · Usage" standfirst={DEFINITION} />
 
-        <Section title="Specimen" lead="A live two-pane split. Drag the handle, or focus it and use the arrows / Home / End / Enter — the left panel reports its size as it changes.">
+        <Section title="Specimen" lead="A live two-pane split. Drag the handle, click the arrow chips that a hover or a tap shows on it, or focus it and use the arrows / Home / End / Enter. The left panel reports its size as it changes.">
           <TwoPaneDemo collapsible minSizePx={140} maxSizePx={420} defaultSize={240} label="Resize the panel" testid="rh-overview" />
         </Section>
 

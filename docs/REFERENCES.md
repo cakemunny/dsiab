@@ -78,6 +78,15 @@ shaped the token layer or a policy rather than any one component.
 | [WCAG 2.2, Understanding SC 2.1.4 Character Key Shortcuts](https://www.w3.org/WAI/WCAG22/Understanding/character-key-shortcuts.html) | [[dragging-movement-gaps]]. READ: a single-letter shortcut passes when it can be turned off or remapped, or when it is active only while its component has focus. ADOPTED: W, A, S and D pan only while focus is inside the open viewer and the image is zoomed. |
 | [WICG, Keyboard Map](https://wicg.github.io/keyboard-map/) | [[dragging-movement-gaps]]. READ: `navigator.keyboard.getLayoutMap()` resolves to a map from each physical key code to the character it types on the user's layout. The specification is a draft report of a community group, not a W3C standard, so a browser may not implement it. ADOPTED: each keycap shows the letter of the user's layout where the browser reports it, and W A S D everywhere else. |
 
+## Resizing a pane without a drag ([[dragging-movement-gaps]])
+
+| Source | What it informed |
+|---|---|
+| [WCAG 2.2, Understanding SC 2.5.7 Dragging Movements](https://www.w3.org/WAI/WCAG22/Understanding/dragging-movements.html) | [[dragging-movement-gaps]]. READ: its single-pointer alternatives are direction buttons (a map, a carousel), a pop-up menu (a task board), a click on the target (a slider track) and two clicks (an image selection). ADOPTED: two buttons that move the divider one step per click. REJECTED: a size menu on a click of the divider, which put five items behind a 1px target and cost two clicks per step. REJECTED: click to lift and click to place, a hidden mode that only a tooltip explained and that fell back on Escape to cancel. |
+| [Zag, Splitter](https://zagjs.com/components/splitter) | [[dragging-movement-gaps]]. READ: the splitter resizes by pointer drag and by arrow keys with a configurable step, and the documentation shows no pointer route that avoids the drag. |
+| [Nord, Resizable handle](https://nordhealth.design/components/resizable-handle) | [[dragging-movement-gaps]]. READ: arrows step the size, Shift with an arrow takes a larger step, Home and End reach the bounds and Enter toggles a collapsible panel, the same key model as `useResizable`. The documentation shows no pointer route that avoids the drag. ADOPTED: the Shift step as the size of one click, so a click and a key press move the divider the same way. |
+| [Atlassian, Page layout examples](https://atlassian.design/components/page-layout/examples) | [[dragging-movement-gaps]]. READ: the left sidebar resizes with a mouse or a keyboard and collapses or expands with a mouse or a keyboard, through a labelled grab area and a resize button. The page names no single-pointer route to a width. |
+
 ## Colour and contrast ([[oxblood-preset]], [[brand-status-collision-gate]])
 
 Not every source informs a component. These two informed the token layer, so they are attached to
