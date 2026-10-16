@@ -160,6 +160,8 @@ export const ConditionalClampAndHint: Story = {
     await waitFor(() => ti.getAttribute("aria-invalid") === "true"); // aria-invalid WHILE pending (out of range)
     ti.blur();
     await waitFor(() => ti.value !== "7:00 AM"); // silently reverts
+    // The announcer writes on the next animation frame, so wait for the words before reading them.
+    await waitFor(() => /at or after 9:00 AM/i.test(liveAssertive())).catch(() => undefined);
     if (!/at or after 9:00 AM/i.test(liveAssertive()))
       throw new Error(`a too-early time must revert with TimeInput's assertive announce; got "${liveAssertive()}"`);
     if (calls("dtClamp").some((v) => v === "2026-07-03T07:00"))

@@ -100,6 +100,8 @@ export const RejectNotClamp: Story = {
     if (reverted !== "5")
       throw new Error(`reject-not-clamp: the value must REVERT to 5, never become the bound 10 (got "${reverted}")`);
     if (input.getAttribute("aria-invalid") === "true") throw new Error("aria-invalid must clear on revert");
+    // The announcer writes on the next animation frame, so wait for the words before reading them.
+    await waitFor(() => /from 1 to 10/i.test(liveAssertive())).catch(() => undefined);
     const msg = liveAssertive();
     if (!/from 1 to 10/i.test(msg) || !/kept 5/i.test(msg))
       throw new Error(`revert must announce the range + kept value assertively; got "${msg}"`);
