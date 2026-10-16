@@ -1,9 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import type { ReactNode } from "react";
+import type { AnchorHTMLAttributes, ReactNode } from "react";
 import { useContext, useLayoutEffect, useRef, useState } from "react";
 import { Box, Code, Flex, Grid, Text as RadixText } from "@radix-ui/themes";
 import { House, CaretRight, Folder } from "@phosphor-icons/react";
 import { Breadcrumbs, BreadcrumbItem, type BreadcrumbsVariant } from "./Breadcrumbs";
+import { LinkProvider } from "./Link";
 import {
   AnatomyLegend, Caption, Decision, DoDont, DODONT_LABEL, dotStyle, HexThemeKey, hLine, MeasuredRow, MeasuredSpec,
   NoteRow, Page, PageHeader, PropsLead, type PropDef, PropTable, Rule, Section, tick, TokenGroup,
@@ -173,7 +174,7 @@ const ANATOMY_PARTS: [number, string, string][] = [
   [1, "Landmark", "a <nav aria-label=\"Breadcrumb\"> wrapping an ordered <ol> — the WAI-ARIA breadcrumb pattern."],
   [2, "Item", "each crumb is an <li>. Give each Breadcrumbs on a page a distinct label (two nav landmarks need unique names)."],
   [3, "Separator", "a LEADING aria-hidden span before every crumb, hidden on the first via CSS. Decorative — screen readers skip it."],
-  [4, "Link crumb", "a plain <a> (or a caller `as` component) — muted secondary text, underline on hover, the system focus ring ([[focus-ring]])."],
+  [4, "Link crumb", "a caller `as` component, else the app's LinkProvider link, else a native <a>. Muted secondary text, underline on hover, the system focus ring ([[focus-ring]])."],
   [5, "Current crumb", "the trail's end: aria-current=\"page\" on the CONTENT element (link/button/span, never the <li>) + strong text, no link when explicit."],
   [6, "Start icon", "an optional glyph before the label (a House on Home, a Folder on a section)."],
 ];
@@ -447,6 +448,82 @@ export const Usage: Story = {
   },
 };
 
+/* ---- Routing ------------------------------------------------------------- */
+/* Two stand-ins for an app's framework Link. Each renders a real <a> with a marker attribute, so the
+   play can tell which component a crumb rendered, and swallows the click so the docs iframe stays put. */
+function AppRouterLink({ children, onClick, ...rest }: { href: string } & AnchorHTMLAttributes<HTMLAnchorElement>) {
+  return (
+    <a {...rest} data-app-router="" onClick={(e) => { e.preventDefault(); onClick?.(e); }}>
+      {children}
+    </a>
+  );
+}
+function ExternalDocsLink({ children, onClick, ...rest }: { href: string } & AnchorHTMLAttributes<HTMLAnchorElement>) {
+  return (
+    <a {...rest} data-explicit-as="" onClick={(e) => { e.preventDefault(); onClick?.(e); }}>
+      {children}
+    </a>
+  );
+}
+
+export const Routing: Story = {
+  render: () => (
+    <Page maxWidth={860}>
+      <PageHeader title="Breadcrumbs · Routing" standfirst={DEFINITION} />
+      <Section title="Routing" lead="A linked crumb renders the app's framework Link when a LinkProvider sits above the trail, so a click routes inside the app instead of reloading the page.">
+        <Flex direction="column" gap="4">
+          <Box data-testid="bc-routed">
+            <LinkProvider component={AppRouterLink}>
+              <Breadcrumbs label="Routed path">
+                <BreadcrumbItem href="#home">Home</BreadcrumbItem>
+                <BreadcrumbItem href="#guides" as={ExternalDocsLink}>Guides</BreadcrumbItem>
+                <BreadcrumbItem href="#settings">Settings</BreadcrumbItem>
+                <BreadcrumbItem isCurrent>Billing</BreadcrumbItem>
+              </Breadcrumbs>
+            </LinkProvider>
+          </Box>
+          <Box data-testid="bc-plain">
+            <Breadcrumbs label="Plain path">
+              <BreadcrumbItem href="#home">Home</BreadcrumbItem>
+              <BreadcrumbItem isCurrent>Billing</BreadcrumbItem>
+            </Breadcrumbs>
+          </Box>
+        </Flex>
+        <Caption>
+          The first trail sits inside a <Code>LinkProvider</Code>. Its <Code>Guides</Code> crumb passes its own{" "}
+          <Code>as</Code>, which wins over the provider. The second trail has no provider, so its crumbs are native{" "}
+          <Code>{`<a>`}</Code> elements.
+        </Caption>
+      </Section>
+    </Page>
+  ),
+  play: async ({ canvasElement }) => {
+    const links = (testId: string) =>
+      Array.from(canvasElement.querySelectorAll<HTMLAnchorElement>(`[data-testid="${testId}"] .rt-ds-breadcrumb-link`));
+    const routed = links("bc-routed");
+    const plain = links("bc-plain");
+    if (routed.length !== 3) throw new Error(`expected 3 linked crumbs in the routed trail; got ${routed.length}`);
+    if (plain.length !== 1) throw new Error(`expected 1 linked crumb in the plain trail; got ${plain.length}`);
+
+    // Inside a LinkProvider, a crumb with no `as` renders the provided component, and the href reaches it.
+    const [home, guides, settings] = routed;
+    for (const link of [home, settings]) {
+      if (!link.hasAttribute("data-app-router"))
+        throw new Error(`crumb "${link.textContent}" inside a LinkProvider must render the provided Link`);
+    }
+    if (home.getAttribute("href") !== "#home") throw new Error("the href must reach the provided Link");
+
+    // An explicit `as` beats the provider.
+    if (!guides.hasAttribute("data-explicit-as") || guides.hasAttribute("data-app-router"))
+      throw new Error("a crumb's explicit `as` must win over the LinkProvider");
+
+    // With no provider, a crumb is a native <a> with no marker, the output every existing trail keeps.
+    const [bare] = plain;
+    if (bare.tagName !== "A" || bare.hasAttribute("data-app-router") || bare.hasAttribute("data-explicit-as"))
+      throw new Error("a crumb with no provider and no `as` must be a plain native <a>");
+  },
+};
+
 /* ---- Props ---------------------------------------------------------- */
 const SEPARATORS: Record<string, ReactNode> = {
   slash: "/",
@@ -462,11 +539,11 @@ const BC_PROPS: PropDef[] = [
 ];
 const ITEM_PROPS: PropDef[] = [
   { name: "children", type: "ReactNode", desc: <>The crumb label.</>, source: "BreadcrumbItem" },
-  { name: "href", type: "string", desc: <>URL → renders a link (<Code>&lt;a&gt;</Code>). Omit for the current page.</>, source: "BreadcrumbItem" },
+  { name: "href", type: "string", desc: <>URL → renders a link: the <Code>as</Code> component, else the nearest <Code>LinkProvider</Code> link, else a native <Code>&lt;a&gt;</Code>. Omit for the current page.</>, source: "BreadcrumbItem" },
   { name: "onClick", type: "(e) => void", desc: <>Click handler — with <Code>href</Code> (link) or without (a reset <Code>&lt;button&gt;</Code>).</>, source: "BreadcrumbItem" },
   { name: "isCurrent", type: "boolean", desc: <>Marks this crumb current (a <Code>&lt;span aria-current&gt;</Code>). Unset on all → the last is auto-detected.</>, source: "BreadcrumbItem" },
   { name: "startIcon", type: "ReactNode", desc: <>Optional glyph before the label.</>, source: "BreadcrumbItem" },
-  { name: "as", type: "ElementType", desc: <>Custom link component (a router Link) for a linked crumb.</>, source: "BreadcrumbItem" },
+  { name: "as", type: "ElementType", desc: <>Custom link component (a router Link) for a linked crumb. It wins over a <Code>LinkProvider</Code>.</>, source: "BreadcrumbItem" },
 ];
 
 type PropsArgs = {
@@ -533,13 +610,13 @@ export const History: Story = {
             <Code>:first-child</Code> via CSS. Separators are <strong>decorative</strong> — screen readers skip
             them; the crumbs carry the meaning.
           </Decision>
-          <Decision id="[[breadcrumb-trail]] · plain-<a> links">
-            Linked crumbs render as a plain
-            <Code>&lt;a&gt;</Code> styled from <Code>--ds-*</Code> tokens — muted secondary text
-            (<Code>--ds-text-weak</Code>), underline on hover, the system focus ring ([[focus-ring]]) — not the raw Radix
-            <Code>Link</Code>, whose accent skin would fight the muted trail. A caller <Code>as</Code> component
-            (a router Link) can override. Current text is <Code>--ds-text-strong</Code>. <strong>Zero net-new
-            tokens.</strong>
+          <Decision id="[[breadcrumb-trail]] · muted links">
+            Linked crumbs are styled from <Code>--ds-*</Code> tokens: muted secondary text
+            (<Code>--ds-text-weak</Code>), underline on hover, the system focus ring ([[focus-ring]]), never the
+            raw Radix <Code>Link</Code>, whose accent skin would fight the muted trail. The element is a caller
+            <Code>as</Code> component, else the app's <Code>LinkProvider</Code> link ([[link-and-link-provider]]),
+            else a native <Code>&lt;a&gt;</Code>. Current text is <Code>--ds-text-strong</Code>. <strong>Zero
+            net-new tokens.</strong>
           </Decision>
           <Decision id="[[breadcrumb-trail]] · no collapse">
             There is <strong>no collapse mechanism</strong> — flatten the hierarchy rather than truncate a long

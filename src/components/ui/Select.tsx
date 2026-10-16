@@ -1,10 +1,11 @@
-import { createContext, useCallback, useContext, useRef, useState, type ComponentProps, type KeyboardEvent, type ReactNode } from "react";
+import { createContext, useContext, useState, type ComponentProps, type KeyboardEvent, type ReactNode } from "react";
 import { Select as RadixSelect } from "@radix-ui/themes";
 import { X } from "@phosphor-icons/react";
 import { useResolvedSize } from "../../theme/SizeContext";
 import { accentColorProps, type AccentColor } from "../../theme/Provider";
 import { Field, useOptionalFieldControl } from "./Field";
 import { IconButton } from "./IconButton";
+import { useOptionNumbering } from "./optionNumbering";
 
 type TriggerProps = ComponentProps<typeof RadixSelect.Trigger>;
 type ContentProps = ComponentProps<typeof RadixSelect.Content>;
@@ -100,32 +101,6 @@ const SelectTrigger = ({ icon, color, ...props }: TriggerOwnProps) => {
   );
 };
 
-// EVERY OPTION SAYS WHERE IT SITS (Radix #3962, #4110).
-//
-// Radix's listbox wraps each option in three layers of divs, and it sets no `aria-posinset` or
-// `aria-setsize`. The two issues report that VoiceOver with Chrome then announces an option with no
-// position and no count. So the open listbox numbers its own options in DOM order, the way a flat
-// listbox is counted, and renumbers them whenever its items change. An option that carries its own
-// numbering keeps it, which leaves room for a list that renders only part of a longer set.
-//
-// The listbox node exists only while the menu is open, so the numbering hangs off its ref. React
-// calls a ref in the same commit phase as a layout effect, each time the node mounts, so the numbers
-// land before the first paint of the open menu.
-const OPTION = '[role="option"]';
-const numberedByUs = new WeakSet<Element>();
-
-function numberOptions(listbox: HTMLElement) {
-  const options = listbox.querySelectorAll(OPTION);
-  const size = String(options.length);
-  options.forEach((option, i) => {
-    const ownNumbering = option.hasAttribute("aria-posinset") || option.hasAttribute("aria-setsize");
-    if (ownNumbering && !numberedByUs.has(option)) return;
-    numberedByUs.add(option);
-    option.setAttribute("aria-posinset", String(i + 1));
-    option.setAttribute("aria-setsize", size);
-  });
-}
-
 // THE LISTBOX IS ANCHORED TO ITS CONTROL ([[select-anchoring]]).
 //
 // Radix's Select defaults to `position="item-aligned"`, which floats the panel so the SELECTED
@@ -147,22 +122,11 @@ function numberOptions(listbox: HTMLElement) {
 // rule that would have floored it. One switch repairs all three symptoms. This is the repo's
 // standing rule about overrides: probe the cascade before adding one, because most of the time the
 // existing selector already wins.
+//
+// EVERY OPTION SAYS WHERE IT SITS (Radix #3962, #4110): the content numbers its options through
+// `useOptionNumbering`, which MultiSelect shares (optionNumbering.ts gives the reason).
 const SelectContent = ({ ref, color, ...props }: Omit<ContentProps, "variant" | "color"> & { color?: AccentColor }) => {
-  const observer = useRef<MutationObserver | null>(null);
-  const attach = useCallback(
-    (node: HTMLDivElement | null) => {
-      observer.current?.disconnect();
-      observer.current = null;
-      if (node) {
-        numberOptions(node);
-        observer.current = new MutationObserver(() => numberOptions(node));
-        observer.current.observe(node, { childList: true, subtree: true });
-      }
-      if (typeof ref === "function") ref(node);
-      else if (ref) ref.current = node;
-    },
-    [ref],
-  );
+  const attach = useOptionNumbering<HTMLDivElement>(ref);
   return <RadixSelect.Content variant="solid" position="popper" sideOffset={4} {...accentColorProps(color)} {...props} ref={attach} />;
 };
 

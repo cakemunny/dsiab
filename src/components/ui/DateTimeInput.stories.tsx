@@ -570,10 +570,10 @@ export const History: Story = {
             + auto-seed-now, the two-tier feedback (sub-field ephemeral + composite standing + the proactive window
             hint), and <Code>disabledReason</Code> on both. Stories: History · Anatomy · Usage · Props.
           </Decision>
-          <Decision id="Deferred → describedby into subfields">
-            <strong>The fuller FieldGroup-message-describedby-INTO-subfields wiring</strong> — pointing each
-            sub-input’s <Code>aria-describedby</Code> at the composite message. Ships the minimal{" "}
-            <Code>role="alert"</Code> + composite <Code>aria-invalid</Code> path for now.
+          <Decision id="[[date-time-input]] · describedby into subfields">
+            Each sub-input’s <Code>aria-describedby</Code> carries the id of the composite message, beside the
+            <Code>role="alert"</Code> and the composite <Code>aria-invalid</Code>, so a screen reader that lands on the
+            date or the time hears why the pair is invalid.
           </Decision>
           <Decision id="Deferred → server actions">
             <strong>The <Code>changeAction</Code> async-optimistic layer</strong> (<Code>isLoading</Code> / an inset

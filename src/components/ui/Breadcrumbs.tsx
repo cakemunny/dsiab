@@ -13,6 +13,7 @@ import {
   type ReactNode,
 } from "react";
 import { useResolvedSize } from "../../theme/SizeContext";
+import { useLinkComponent } from "./Link";
 
 /* Breadcrumbs ([[breadcrumb-trail]] · D22) — a navigation trail: <nav aria-label="Breadcrumb"> › <ol> › <li> items with
  * a leading, decorative separator between them. Encodes the wave-3 plan's [[floating-surface-fill]] (D22, Astryx [[catalog-as-specification]] @ 88c95e4).
@@ -25,10 +26,10 @@ import { useResolvedSize } from "../../theme/SizeContext";
  * child structure. See DECISIONS [[breadcrumb-trail]].
  *
  * NORMALIZED from Astryx ([[catalog-as-specification]]): StyleX *Vars → --ds-* (tokens/components.css); themeProps/mergeProps/
- * mergeRefs/stylex.props dropped (inline className merge + a callback ref); `useLinkComponent`/
- * `LinkComponentType` → a plain <a> styled from --ds-* (System Link is `planned` — the [[component-registry]] agent-gap
- * rule; a plain <a> takes the muted breadcrumb treatment without Radix Link's accent skin fighting it),
- * or a caller-supplied `as` component. Zero net-new tokens. */
+ * mergeRefs/stylex.props dropped (inline className merge + a callback ref). A linked crumb renders a
+ * caller-supplied `as` component, else the app's framework Link from `useLinkComponent()` (a `LinkProvider`
+ * above the trail), else a native <a>. Every one carries the `rt-ds-breadcrumb-link` class, so the muted
+ * breadcrumb treatment from --ds-* applies without Radix Link's accent skin. Zero net-new tokens. */
 
 export interface BreadcrumbsVariantMap {
   default: true;
@@ -118,8 +119,9 @@ export interface BreadcrumbItemProps {
   /** Ref forwarded to the root <li>. */
   ref?: React.Ref<HTMLLIElement>;
   /**
-   * Custom component to render instead of `<a>` for a linked item (e.g. a router Link). Must accept
-   * `href`, `className`, `ref`, and `children`. Applies only to non-current linked items.
+   * Custom component to render for a linked item (e.g. a router Link). Must accept `href`, `className`,
+   * `ref`, and `children`. Applies only to non-current linked items. When omitted, a linked item renders
+   * the component from the nearest `LinkProvider`, or a native `<a>` when there is no provider.
    */
   as?: ElementType;
   /** The label content of the item. */
@@ -154,6 +156,8 @@ export function BreadcrumbItem({
   "data-testid": testId,
 }: BreadcrumbItemProps) {
   const ctx = useContext(BreadcrumbContext);
+  // The app's framework Link, read unconditionally so the hook order holds on every render path.
+  const ProvidedLink = useLinkComponent();
   const liRef = useRef<HTMLLIElement>(null);
   // The element that holds this item's content (link/button/span). Auto-current sets aria-current on
   // THIS, not a guessed last child of the <li>, so it lands on the actual interactive element.
@@ -220,10 +224,10 @@ export function BreadcrumbItem({
     );
   }
 
-  // Linked (auto-candidate) → an <a> (or the `as` component). The effect adds aria-current when this is
-  // the auto-detected last item — including on this link.
+  // Linked (auto-candidate) → the `as` component, else the provided framework Link, else a native <a>.
+  // The effect adds aria-current when this is the auto-detected last item — including on this link.
   if (href != null) {
-    const LinkComp = (as ?? "a") as ElementType;
+    const LinkComp = (as ?? ProvidedLink) as ElementType;
     return (
       <li {...liProps}>
         {separator}

@@ -41,6 +41,8 @@ import {
  *     would double-render).
  *   • The COMPOSITE STANDING problem (the combined value out of min/max, or a caller `validation`) surfaces
  *     ONCE via `FieldGroup.Message` (role="alert" on appearance) + the group's composite `aria-invalid`.
+ *     Each subfield's aria-describedby also carries the message id (useGroupItemDescribedBy), so a screen
+ *     reader that lands on the date or the time input hears the reason, not only the alert on appearance.
  *   • The proactive clamp HINT (the active time window on a boundary date) rides `FieldGroup.Description` as
  *     weak-neutral GUIDANCE — it never trips aria-invalid or the validation channel ([[disabled-reason]] guidance-not-error).
  *
@@ -52,8 +54,7 @@ import {
  * always combines with a time (never emits a date-only value).
  *
  * DEFERRED (named parks, NOT built): the `changeAction`/`isLoading` async-optimistic layer; InputGroup
- * composition; the fuller FieldGroup-message-describedby-INTO-subfields wiring (we ship the minimal
- * role="alert" + composite aria-invalid path).
+ * composition.
  */
 
 type Size = "1" | "2" | "3";

@@ -2,7 +2,17 @@
 // Portions derived from facebook/astryx packages/core/src/Overlay/Overlay.tsx @ 88c95e4 (MIT, © Meta Platforms)
 // Portions derived from facebook/astryx packages/core/src/Overlay/useOverlay.tsx @ 88c95e4 (MIT, © Meta Platforms)
 
-import { type ComponentProps, type MouseEvent, type ReactNode, useState } from "react";
+import {
+  type ComponentProps,
+  type FocusEvent,
+  type MouseEvent,
+  type PointerEvent,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 /* Overlay — a media hover-scrim (D10). RECLASSIFIED: this is NOT a portal layer. The registry
  * hypothesis "Portal + Dialog.Overlay" was falsified — Astryx's Overlay is a small fully-custom
@@ -22,7 +32,24 @@ import { type ComponentProps, type MouseEvent, type ReactNode, useState } from "
  * TAP-TO-TOGGLE (ported from Astryx's `useOverlay` as-is): on `(hover: none)` devices hover can never
  * fire, so a tap on the media toggles the scrim. The hover capability is read at interaction time via
  * `matchMedia` (no listener needed — it responds to a device change on the next tap).
+ *
+ * ESCAPE DISMISSES THE VEIL (WCAG 1.4.13, [[overlay-dismissible-gap]]). While the pointer is over the Overlay or
+ * focus is inside it, Escape sets `data-dismissed`. A veil that hover revealed hides. A veil that focus
+ * holds turns transparent and stops taking clicks, and every other scrim child, actions and captions alike,
+ * hides, so the focused control stays visible with its ring (WCAG 2.4.7). A hollow plate of the veil's colour
+ * sits behind the focused control so the ring keeps 3:1 over any media. The plate is its own element, so the
+ * control keeps every border it draws itself. The state clears only when both the pointer and focus have left.
  */
+
+const PLATE = 6; // px of veil colour around the focused control, behind its ring
+
+interface PlateBox {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  radius: number;
+}
 
 export type OverlayShowOn = "hover" | "focus" | "always" | "hover-or-focus";
 export type OverlayPosition = "fill" | "bottom" | "top";
@@ -50,9 +77,103 @@ export function Overlay({
   media,
   children,
   onClick,
+  onPointerEnter,
+  onPointerLeave,
+  onFocus,
+  onBlur,
+  ref,
   ...rest
 }: OverlayProps) {
   const [tapped, setTapped] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+  // `focus` holds the focused element, so the plate can follow it from one action to the next.
+  const [engaged, setEngaged] = useState<{ hover: boolean; focus: Element | null }>({ hover: false, focus: null });
+  const [plate, setPlate] = useState<PlateBox | null>(null);
+  // The blur check needs the root node, and a caller may pass a ref of their own (a plain prop in React 19).
+  const root = useRef<HTMLDivElement | null>(null);
+  const setRoot = useCallback(
+    (node: HTMLDivElement | null) => {
+      root.current = node;
+      if (typeof ref === "function") ref(node);
+      else if (ref) ref.current = node;
+    },
+    [ref],
+  );
+
+  // Escape is heard on the document only while this Overlay shows its veil, and only until it dismisses.
+  // Hover counts only in the modes hover reveals. `always` content is not hover or focus content.
+  const hoverReveals = showOn === "hover" || showOn === "hover-or-focus";
+  const listening = ((engaged.hover && hoverReveals) || !!engaged.focus) && !dismissed && showOn !== "always";
+  useEffect(() => {
+    if (!listening) return;
+    const onKey = (e: KeyboardEvent) => {
+      // An Escape that a layer inside already handled (a menu, a select) closes that layer only.
+      if (e.key === "Escape" && !e.defaultPrevented) setDismissed(true);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [listening]);
+
+  const handlePointerEnter = (e: PointerEvent<HTMLDivElement>) => {
+    onPointerEnter?.(e);
+    setEngaged((s) => ({ ...s, hover: true }));
+  };
+  // A dismissal lasts until the user leaves the Overlay entirely (WCAG 1.4.13, persistent): the pointer leaving
+  // while focus stays inside, or focus leaving while the pointer stays, keeps it.
+  useEffect(() => {
+    if (!engaged.hover && !engaged.focus) setDismissed(false);
+  }, [engaged.hover, engaged.focus]);
+
+  // The plate follows the focused control while the Overlay is dismissed. A control focused in a portal (a menu
+  // the action opened) sits outside the root and gets no plate.
+  const focused = dismissed ? engaged.focus : null;
+  useEffect(() => {
+    const node = root.current;
+    if (!(focused instanceof HTMLElement) || !node?.contains(focused)) {
+      setPlate(null);
+      return;
+    }
+    const place = () => {
+      // A focused control removed from the page fires no blur. Treat it as focus leaving, so the dismissal clears.
+      if (!focused.isConnected) {
+        setEngaged((s) => (s.focus === focused ? { ...s, focus: null } : s));
+        return;
+      }
+      const o = node.getBoundingClientRect();
+      const r = focused.getBoundingClientRect();
+      setPlate({
+        left: r.left - o.left - PLATE,
+        top: r.top - o.top - PLATE,
+        width: r.width + 2 * PLATE,
+        height: r.height + 2 * PLATE,
+        radius: (parseFloat(getComputedStyle(focused).borderTopLeftRadius) || 0) + PLATE,
+      });
+    };
+    place();
+    // A removed element resizes to zero, so the observer also reports the removal.
+    const observer = new ResizeObserver(place);
+    observer.observe(node);
+    observer.observe(focused);
+    return () => observer.disconnect();
+  }, [focused]);
+
+  const handlePointerLeave = (e: PointerEvent<HTMLDivElement>) => {
+    onPointerLeave?.(e);
+    setEngaged((s) => ({ ...s, hover: false, focus: s.focus?.isConnected ? s.focus : null }));
+  };
+  const handleFocus = (e: FocusEvent<HTMLDivElement>) => {
+    onFocus?.(e);
+    const target = e.target as Element;
+    setEngaged((s) => ({ ...s, focus: target }));
+  };
+  const handleBlur = (e: FocusEvent<HTMLDivElement>) => {
+    onBlur?.(e);
+    // A move between two actions inside the Overlay keeps the state. Only focus leaving it clears it.
+    if (root.current?.contains(e.relatedTarget as Node | null)) return;
+    // Focus that moves into a portal opened from inside (a menu) reaches handleFocus through the React tree, which
+    // sets it again before the effect that clears the dismissal runs.
+    setEngaged((s) => ({ ...s, focus: null }));
+  };
 
   const handleClick = (e: MouseEvent<HTMLDivElement>) => {
     onClick?.(e);
@@ -67,13 +188,27 @@ export function Overlay({
 
   return (
     <div
+      ref={setRoot}
       className="rt-ds-overlay"
       data-show-on={showOn}
       data-tapped={tapped ? "true" : undefined}
+      data-dismissed={dismissed ? "true" : undefined}
       onClick={handleClick}
+      onPointerEnter={handlePointerEnter}
+      onPointerLeave={handlePointerLeave}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
       {...rest}
     >
       {media}
+      {plate && (
+        <div
+          className="rt-ds-overlay-plate"
+          data-scrim={scrim}
+          aria-hidden="true"
+          style={{ left: plate.left, top: plate.top, width: plate.width, height: plate.height, borderRadius: plate.radius }}
+        />
+      )}
       <div className="rt-ds-overlay-scrim" data-position={position} data-scrim={scrim}>
         {children}
       </div>

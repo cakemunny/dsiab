@@ -4,6 +4,7 @@ import { TextB, TextItalic, TextUnderline, ArrowUUpLeft, ArrowUUpRight } from "@
 import { Toolbar } from "./Toolbar";
 import { Button } from "./Button";
 import { IconButton } from "./IconButton";
+import { SizeContext } from "../../theme/SizeContext";
 
 /* Test-only behavior for Toolbar — kept OUT of the docs stories (System/Toolbar) so viewing a docs page
    doesn't drive focus (the plays move the roving focus between items → a visible focus walk on view).
@@ -141,5 +142,50 @@ export const Vertical: Story = {
     await sleep(0);
     if (document.activeElement !== bold)
       throw new Error("ArrowUp must move roving focus back in a vertical toolbar");
+  },
+};
+
+/* ---- Size seeding ----------------------------------------------------------------------------------
+   The toolbar seeds its `size` into the SizeContext only when the size is a plain step. A responsive
+   size object has no single tier, so composed controls must keep the ambient tier instead of falling
+   back to `small`. The ambient tier here is `medium` (step 2), so a fallback to `small` (step 1) shows. */
+const sizeStep = (el: Element | null) => (el?.className.match(/rt-r-size-(\d)/) ?? [])[1];
+
+export const SizeSeeding: Story = {
+  render: () => (
+    <SizeContext.Provider value="medium">
+      <Box p="4">
+        <Toolbar.Root
+          aria-label="Responsive size"
+          data-testid="tb-responsive"
+          // An untyped caller: the type admits only a plain step, so the object arrives through a cast.
+          size={{ initial: "1", md: "3" } as unknown as "1"}
+          start={
+            <Toolbar.Button asChild>
+              <Button priority="secondary">Save</Button>
+            </Toolbar.Button>
+          }
+        />
+        <Toolbar.Root
+          aria-label="Large size"
+          data-testid="tb-large"
+          size="3"
+          start={
+            <Toolbar.Button asChild>
+              <Button priority="secondary">Save</Button>
+            </Toolbar.Button>
+          }
+        />
+      </Box>
+    </SizeContext.Provider>
+  ),
+  play: async ({ canvasElement }) => {
+    const responsive = canvasElement.querySelector('[data-testid="tb-responsive"] button');
+    const large = canvasElement.querySelector('[data-testid="tb-large"] button');
+    if (!responsive || !large) throw new Error("both toolbars must render a Button");
+    if (sizeStep(responsive) !== "2")
+      throw new Error(`a responsive toolbar size must leave the Button at the ambient step 2; got "${responsive.className}"`);
+    if (sizeStep(large) !== "3")
+      throw new Error(`size="3" must seed the large tier into the Button (step 3); got "${large.className}"`);
   },
 };

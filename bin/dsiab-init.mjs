@@ -46,6 +46,7 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { createInterface } from "node:readline";
 import { fileURLToPath } from "node:url";
 import { dirname, join, relative, sep } from "node:path";
+import { admits } from "./peer-range.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const CWD = process.cwd();
@@ -170,7 +171,7 @@ function detectProject() {
   return { ok: true, manifest, deps, framework, entry };
 }
 
-/** Peer ranges this package needs. The plan reports a peer only when its name is absent from package.json, and does not compare the declared range. */
+/** Peer ranges this package needs. The plan reports a peer when its name is absent from package.json, or when its declared range shares no version with the need (`bin/peer-range.mjs`). A tag, `*` or a protocol such as `workspace:` cannot be compared, so the plan says nothing about it. */
 const PEERS = [
   { name: "react", need: ">=19" },
   { name: "react-dom", need: ">=19" },
@@ -320,14 +321,27 @@ if (rl) rl.close();
 process.stdout.write("\n  PLAN\n");
 
 /* 1. peers */
-const missingPeers = PEERS.filter((peer) => !project.deps[peer.name]);
+const missingPeers = PEERS.filter((peer) => {
+  const declared = project.deps[peer.name];
+  return !declared || admits(declared, peer.need) === false;
+});
 if (missingPeers.length) {
-  for (const peer of missingPeers) line(TODO, `${peer.name} (needs ${peer.need}) is not in package.json`);
-  // Only the ones actually absent. Telling somebody to install react when they already have it
-  // is the kind of noise that teaches people to skim a tool's output.
+  for (const peer of missingPeers) {
+    const declared = project.deps[peer.name];
+    line(
+      TODO,
+      declared
+        ? `${peer.name} (needs ${peer.need}) is declared as ${declared}`
+        : `${peer.name} (needs ${peer.need}) is not in package.json`,
+    );
+  }
+  // Only the ones absent or clearly out of range. Telling somebody to install react when they
+  // already have a usable one is the kind of noise that teaches people to skim a tool's output.
   line(TODO, `install: npm i ${missingPeers.map((p) => `${p.name}@"${p.need}"`).join(" ")}`);
 } else {
-  line(OK, `peer dependencies present: ${PEERS.map((p) => p.name).join(", ")}`);
+  // A range that cannot be compared (a tag, `*`, `workspace:`) lands here too, so this says
+  // listed, not satisfied.
+  line(OK, `peer dependencies listed, none clearly out of range: ${PEERS.map((p) => p.name).join(", ")}`);
 }
 
 /* 2. the token override file */

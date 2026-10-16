@@ -54,6 +54,7 @@ const SHIPPED = [
   "bin/dsiab.mjs",
   "bin/docs-url.mjs",
   "bin/dsiab-init.mjs",
+  "bin/peer-range.mjs",
   "bin/ds-check.mjs",
 ];
 

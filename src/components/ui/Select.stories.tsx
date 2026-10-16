@@ -847,6 +847,69 @@ export const Usage: Story = {
   },
 };
 
+const LONG_OPTION =
+  "Quarterly revenue reconciliation for the North American and European subsidiaries, 2026";
+
+/** Long labels — an option longer than the room the menu has stays on one line and ends in an ellipsis, and
+ *  the menu never runs past the viewport. */
+export const LongLabels: Story = {
+  name: "Long labels",
+  parameters: {
+    // The menu renders open (defaultOpen), so the same aria-hidden-focus carve-out as Menu states applies.
+    a11y: { context: { exclude: [DODONT_LABEL] }, config: { rules: [{ id: "aria-hidden-focus", enabled: false }] } },
+  },
+  render: () => (
+    <Page>
+      <PageHeader title="Select · Long labels" standfirst={DEFINITION} />
+      <Section
+        title="An option longer than the menu"
+        lead="The menu is capped at the width the viewport leaves it, and a label that does not fit ends in an ellipsis on one line, as the trigger does. The full text stays the option's accessible name."
+      >
+        <Box style={{ minHeight: 200, maxWidth: 320 }}>
+          <Select label="Report" defaultValue="long" defaultOpen>
+            <Select.Trigger />
+            <Select.Content>
+              <Select.Item value="long">{LONG_OPTION}</Select.Item>
+              <Select.Item value="short">Monthly summary</Select.Item>
+            </Select.Content>
+          </Select>
+        </Box>
+      </Section>
+    </Page>
+  ),
+  play: async () => {
+    const content = document.querySelector<HTMLElement>(".rt-SelectContent");
+    if (!content) throw new Error("open panel: .rt-SelectContent not found (menu should be defaultOpen)");
+
+    // The cap: the panel's max-width resolves to the width Radix reports as available.
+    const available = parseFloat(getComputedStyle(content).getPropertyValue("--radix-select-content-available-width"));
+    const cap = parseFloat(getComputedStyle(content).maxWidth);
+    if (!(available > 0) || !(Math.abs(cap - available) <= 0.5))
+      throw new Error(`the menu must be capped at --radix-select-content-available-width (${available}px); its max-width is ${getComputedStyle(content).maxWidth}`);
+    const right = content.getBoundingClientRect().right;
+    if (right > window.innerWidth + 0.5) throw new Error(`the menu runs past the viewport: right edge ${right}px, viewport ${window.innerWidth}px`);
+
+    // The ellipsis, measured at a fixed narrow width so the result does not depend on the test viewport. The
+    // long option is the selected one, so the check covers a row that also carries the selected weight. The
+    // menu's min-width is the trigger width, which would beat a max-width, so both are pinned.
+    content.style.minWidth = "240px";
+    content.style.maxWidth = "240px";
+    try {
+      const longItem = content.querySelector<HTMLElement>('.rt-SelectItem[data-state="checked"]')!;
+      const text = longItem.querySelector<HTMLElement>(":scope > span:not(.rt-SelectItemIndicator)")!;
+      if (longItem.getBoundingClientRect().width > 240.5)
+        throw new Error(`a long option must fit the menu; the row is ${longItem.getBoundingClientRect().width}px in a 240px menu`);
+      if (getComputedStyle(text).textOverflow !== "ellipsis" || !(text.scrollWidth > text.clientWidth))
+        throw new Error(`a long option must end in an ellipsis; text-overflow ${getComputedStyle(text).textOverflow}, scrollWidth ${text.scrollWidth} vs clientWidth ${text.clientWidth}`);
+      if (Math.round(longItem.getBoundingClientRect().height) !== Math.round(content.querySelector<HTMLElement>('.rt-SelectItem[data-state="unchecked"]')!.getBoundingClientRect().height))
+        throw new Error("a long option must stay on one line, the same height as a short one");
+    } finally {
+      content.style.minWidth = "";
+      content.style.maxWidth = "";
+    }
+  },
+};
+
 /* Leading-icon options for the Props — primitive arg → Phosphor node, so Controls only ever
    holds the string key (a ReactNode can't be a Storybook control). */
 const LEADING_ICONS: Record<string, ReactNode> = {

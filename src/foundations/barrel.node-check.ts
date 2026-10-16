@@ -141,13 +141,16 @@ const INTERNAL_MODULES: Readonly<Record<string, string>> = {
   groupItems: "grouping helper used by the list-shaped components.",
   useComboboxEngine: "the shared combobox state machine.",
   useReturnFocus: "close-focus restore for the modal surfaces ([[focus-return-on-close]]).",
+  optionNumbering: "the option numbering that Select and MultiSelect share ([[select-option-numbering]]).",
+  lightboxPan: "the pan keypad and its keys, and Lightbox is its only caller ([[dragging-movement-gaps]]).",
 
   // src/hooks. [[internal-hooks]] rules the first three. The rest are engines of one shipped component or capability.
   "hooks/useGridFocus": "[[internal-hooks]]. Calendar is its only caller, and that one caller shaped its API.",
   "hooks/useListFocus":
-    "[[internal-hooks]]. Pagination, SideNav and TopNav call it. It has no right-to-left handling, and Astryx publishes a different hook under the same name.",
+    "[[internal-hooks]]. Pagination, SideNav and TopNav call it, and Astryx publishes a different hook under the same name.",
   "hooks/useScrollOverflow":
     "[[internal-hooks]], deferred. Carousel is its only caller. It publishes with ScrollOverflowState on the first consumer need.",
+  "hooks/useOverflowStop": "the keyboard stop of a text-only scroller ([[scroll-area-keyboard-stop]]). ScrollArea and Table call it.",
   "hooks/useTreeFocus": "TreeList's keyboard model ([[tree-list]]), and TreeList is its only caller.",
   "hooks/useOverflow": "OverflowList's measurement engine ([[overflow-list]]), and OverflowList is its only caller.",
   "hooks/useResizable":

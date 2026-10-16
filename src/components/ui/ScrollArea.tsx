@@ -1,7 +1,7 @@
-import { forwardRef, useCallback, useEffect, useRef, useState, type ComponentPropsWithoutRef, type ElementRef } from "react";
+import { forwardRef, useCallback, useRef, type ComponentPropsWithoutRef, type ElementRef } from "react";
 import { ScrollArea as RadixScrollArea } from "@radix-ui/themes";
 import { useResolvedSize } from "../../theme/SizeContext";
-import { warnOnce } from "../../theme/detectAndWarn";
+import { useOverflowStop } from "../../hooks/useOverflowStop";
 
 /* ScrollArea — a custom-scrollbar scroll container for a BOUNDED region that holds more content than
  * fits (a fixed-height list, a message log, a wide row of cards). A THIN wrap over Radix Themes'
@@ -38,13 +38,9 @@ import { warnOnce } from "../../theme/detectAndWarn";
  * caller passed a `tabIndex` of its own. A viewport given `aria-label` or `aria-labelledby` takes
  * `role="region"`, a role that carries a name, unless the caller passed a `role`. A focusable viewport
  * with no name warns once in development (WCAG 4.1.2). A scroller that holds a link, a button or a field
- * is reached through those and keeps no stop of its own. */
+ * is reached through those and keeps no stop of its own. The measurement lives in `hooks/useOverflowStop.ts`,
+ * which Table shares. */
 export type ScrollAreaProps = ComponentPropsWithoutRef<typeof RadixScrollArea>;
-
-const FOCUSABLE =
-  'a[href], area[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), ' +
-  'textarea:not([disabled]), iframe, audio[controls], video[controls], summary, [contenteditable]:not([contenteditable="false"]), ' +
-  '[tabindex]:not([tabindex="-1"])';
 
 const UNNAMED_SCROLLER_MESSAGE =
   "a ScrollArea is a keyboard stop with no accessible name, so a screen reader lands on it and announces " +
@@ -63,26 +59,13 @@ export const ScrollArea = forwardRef<ElementRef<typeof RadixScrollArea>, ScrollA
       [ref],
     );
 
-    const [textOnlyOverflow, setTextOnlyOverflow] = useState(false);
-    useEffect(() => {
-      const node = viewport.current;
-      if (!node || tabIndex !== undefined) return;
-      const measure = () => {
-        const overflows = node.scrollHeight > node.clientHeight || node.scrollWidth > node.clientWidth;
-        setTextOnlyOverflow(overflows && !node.querySelector(FOCUSABLE));
-      };
-      measure();
-      const observer = new ResizeObserver(measure);
-      observer.observe(node);
-      if (node.firstElementChild) observer.observe(node.firstElementChild);
-      return () => observer.disconnect();
-    }, [tabIndex]);
-
-    const stop = tabIndex ?? (textOnlyOverflow ? 0 : undefined);
     const named = Boolean(props["aria-label"] || props["aria-labelledby"]);
-    useEffect(() => {
-      if (stop !== undefined && stop >= 0 && !named) warnOnce("scroll-area-unnamed", UNNAMED_SCROLLER_MESSAGE);
-    }, [stop, named]);
+    const stop = useOverflowStop(() => viewport.current, {
+      tabIndex,
+      named,
+      warnKey: "scroll-area-unnamed",
+      warnMessage: UNNAMED_SCROLLER_MESSAGE,
+    });
 
     return (
       <RadixScrollArea

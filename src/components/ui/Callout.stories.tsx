@@ -620,6 +620,26 @@ export const Usage: Story = {
     if (rows.measured !== 7 || rows.unproven !== 0) {
       throw new Error(`expected 7 measured / 0 unproven token rows, got ${rows.measured} / ${rows.unproven}`);
     }
+
+    // The body's reading cap is a CSS rule, not an inline style, so a resizable panel can lift it.
+    // Outside a `[data-resizable]` ancestor the cap holds. A copy placed inside one fills its pane.
+    const body = canvasElement.querySelector<HTMLElement>(".rt-ds-callout-body");
+    if (!body) throw new Error("a callout body must carry the rt-ds-callout-body class");
+    if (body.style.maxWidth) throw new Error(`the callout cap must live in CSS, not an inline style; got style="${body.getAttribute("style")}"`);
+    if (getComputedStyle(body).maxWidth === "none") throw new Error("outside a resizable panel the callout body must keep its reading cap");
+    const pane = document.createElement("div");
+    pane.setAttribute("data-resizable", "");
+    pane.style.width = "1000px";
+    pane.append(body.closest(".rt-CalloutRoot")!.cloneNode(true));
+    // Inside the theme root, where the Callout rules apply. Outside it no rule reaches the copy, and "none" proves nothing.
+    body.closest(".radix-themes")!.append(pane);
+    try {
+      const inPane = pane.querySelector<HTMLElement>(".rt-ds-callout-body")!;
+      if (getComputedStyle(inPane).maxWidth !== "none")
+        throw new Error(`inside a resizable panel the callout body must drop its cap; got max-width ${getComputedStyle(inPane).maxWidth}`);
+    } finally {
+      pane.remove();
+    }
   },
 };
 
@@ -631,7 +651,7 @@ const CALLOUT_PROPS: PropDef[] = [
   { name: "size", type: `"1" | "2" | "3" | "inherit"`, desc: <>Radix Callout size. Unset, it resolves from the global <Code>uiSize</Code> (text lane, default <Code>small</Code> → <Code>1</Code>); pass <Code>inherit</Code> to opt out of the global size.</>, source: "Callout.tsx:53 · Radix" },
   { name: "icon", type: "ReactNode", desc: <>Override the default per-tone glyph; <Code>null</Code> suppresses the icon entirely. Every tone otherwise carries a fixed icon so colour is never the only signal (WCAG 1.4.1).</>, source: "Callout.tsx:55" },
   { name: "title", type: "ReactNode", desc: <>An optional bold lead line above the body — a paragraph, not a heading, so a callout can nest at any depth without injecting a jump into the document outline.</>, source: "Callout.tsx:57" },
-  { name: "children", type: "ReactNode", desc: <>The message body. Rides the 65-char reading measure (<Code>--ds-text-measure</Code>) so long copy stays legible.</>, source: "Radix" },
+  { name: "children", type: "ReactNode", desc: <>The message body. Rides the 65-char reading measure (<Code>--ds-text-measure</Code>) so long copy stays legible. Inside a resizable panel (<Code>[data-resizable]</Code>) the cap lifts and the body fills the pane.</>, source: "Radix" },
   { name: "onDismiss", type: "() => void", desc: <>When set, renders a top-right inset ✕ (a ≥24×24 <Code>IconButton</Code>, WCAG 2.5.8). The consumer owns whether the dismissal persists.</>, source: "Callout.tsx:59" },
   { name: "dismissLabel", type: "string", def: `"Dismiss"`, desc: <>Accessible name for the dismiss ✕ control.</>, source: "Callout.tsx:61" },
   { name: "actions", type: "ReactNode", desc: <>Trailing action slot — a <Code>priority="secondary"</Code> Button, never the page’s single solid primary.</>, source: "Callout.tsx:63" },

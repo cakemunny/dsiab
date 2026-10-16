@@ -14,6 +14,7 @@ import {
 import { Dialog, Theme } from "@radix-ui/themes";
 import { CaretLeft, CaretRight, X } from "@phosphor-icons/react";
 import { IconButton } from "./IconButton";
+import { LightboxPanPad, PAN_KEYS, PAN_STEPS_TO_EDGE, type PanDirection, useLayoutLetters } from "./lightboxPan";
 import { useAnnounce } from "./useAnnounce";
 import { useReturnFocus } from "./useReturnFocus";
 
@@ -35,7 +36,9 @@ import { useReturnFocus } from "./useReturnFocus";
  * Controls sit in a permanently-dark <Theme> so their glyphs + the counter/caption read light on the dark
  * stage in both app modes (the scrim-surface idiom, shared with Thumbnail). Announce via OUR useAnnounce
  * (polite "{alt}, N of M"), fired ONLY on an in-session index change — not on mount/open/close. Reuses our
- * IconButton + Phosphor glyphs. Zero net-new tokens; scoped .radix-themes; no !important. */
+ * IconButton + Phosphor glyphs. Zero net-new tokens; scoped .radix-themes; no !important.
+ *
+ * PAN WITHOUT A DRAG lives in lightboxPan.tsx ([[dragging-movement-gaps]]). */
 
 export type LightboxMediaType = "image" | "video";
 
@@ -65,7 +68,7 @@ export interface LightboxProps {
   defaultIndex?: number;
   /** Called when the gallery index changes via prev/next. */
   onIndexChange?: (index: number) => void;
-  /** Enable zoom (double-click or +/-/0; images only). Drag to pan when zoomed. @default false */
+  /** Enable zoom (double-click or +/-/0; images only). While zoomed, drag, the keypad or W A S D pans. @default false */
   hasZoom?: boolean;
   /** Autoplay video when the lightbox opens. @default false */
   hasAutoPlay?: boolean;
@@ -93,6 +96,11 @@ export const Lightbox = forwardRef<HTMLDivElement, LightboxProps>(function Light
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const dragStartRef = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
+  const imageRef = useRef<HTMLImageElement>(null);
+  // How far the image can move from the centre on each axis before an edge of the image reaches the edge of the
+  // viewport. It follows the image's displayed size, which changes with the window.
+  const [panLimit, setPanLimit] = useState({ x: 0, y: 0 });
+  const letters = useLayoutLetters(isOpen && hasZoom);
 
   const mediaArray = useMemo(() => (Array.isArray(media) ? media : [media]), [media]);
   const isGallery = mediaArray.length > 1;
@@ -149,10 +157,48 @@ export const Lightbox = forwardRef<HTMLDivElement, LightboxProps>(function Light
     else zoomOut();
   }, [hasZoom, isVideo, zoom, zoomIn, zoomOut]);
 
-  // Keyboard: arrows navigate the gallery; +/-/0 zoom (D18 addition). Escape is left to Radix Dialog.
+  const isZoomed = zoom > 1;
+  const canPan = hasZoom && !isVideo && isZoomed;
+  useEffect(() => {
+    const image = imageRef.current;
+    if (!canPan || !image) return;
+    const measure = () =>
+      setPanLimit({ x: (image.offsetWidth * (zoom - 1)) / 2, y: (image.offsetHeight * (zoom - 1)) / 2 });
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(image);
+    return () => observer.disconnect();
+  }, [canPan, zoom]);
+
+  // "Pan up" shows more of the top of the image, so the image itself moves down.
+  const atEdge: Record<PanDirection, boolean> = {
+    up: pan.y >= panLimit.y - 0.5,
+    down: pan.y <= -panLimit.y + 0.5,
+    left: pan.x >= panLimit.x - 0.5,
+    right: pan.x <= -panLimit.x + 0.5,
+  };
+  const panBy = useCallback(
+    (dir: PanDirection) => {
+      const clamp = (v: number, limit: number) => Math.max(-limit, Math.min(limit, v));
+      const sx = panLimit.x / PAN_STEPS_TO_EDGE;
+      const sy = panLimit.y / PAN_STEPS_TO_EDGE;
+      setPan((p) => ({
+        x: clamp(p.x + (dir === "left" ? sx : dir === "right" ? -sx : 0), panLimit.x),
+        y: clamp(p.y + (dir === "up" ? sy : dir === "down" ? -sy : 0), panLimit.y),
+      }));
+    },
+    [panLimit],
+  );
+
+  // Keyboard: arrows navigate the gallery; +/-/0 zoom (D18 addition); W A S D pan while zoomed. Escape is left to
+  // Radix Dialog.
   const handleKeyDown = useCallback(
     (e: ReactKeyboardEvent) => {
-      if (e.key === "ArrowLeft") {
+      const panKey = canPan && !e.ctrlKey && !e.metaKey && !e.altKey ? PAN_KEYS.find((k) => k.code === e.code) : undefined;
+      if (panKey) {
+        e.preventDefault();
+        panBy(panKey.dir);
+      } else if (e.key === "ArrowLeft") {
         e.preventDefault();
         goToPrev();
       } else if (e.key === "ArrowRight") {
@@ -169,7 +215,7 @@ export const Lightbox = forwardRef<HTMLDivElement, LightboxProps>(function Light
         zoomOut();
       }
     },
-    [goToPrev, goToNext, hasZoom, isVideo, zoomIn, zoomOut],
+    [canPan, panBy, goToPrev, goToNext, hasZoom, isVideo, zoomIn, zoomOut],
   );
 
   // Pan: pointer drag when zoomed.
@@ -198,7 +244,6 @@ export const Lightbox = forwardRef<HTMLDivElement, LightboxProps>(function Light
     };
   }, [isDragging]);
 
-  const isZoomed = zoom > 1;
   const imageTransform = zoom === 1 ? undefined : `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`;
 
   // Clicking the empty stage area (not the media or a control) closes — Radix's overlay is fully covered
@@ -262,6 +307,7 @@ export const Lightbox = forwardRef<HTMLDivElement, LightboxProps>(function Light
                   <video className="rt-ds-lightbox-video" src={currentItem.src} aria-label={currentItem.alt} controls autoPlay={hasAutoPlay} />
                 ) : (
                   <img
+                    ref={imageRef}
                     className="rt-ds-lightbox-img"
                     src={currentItem.src}
                     alt={currentItem.alt}
@@ -273,6 +319,11 @@ export const Lightbox = forwardRef<HTMLDivElement, LightboxProps>(function Light
               </div>
               {currentItem.caption && <div className="rt-ds-lightbox-caption">{currentItem.caption}</div>}
             </div>
+
+            {/* Pan keypad — only while an image is zoomed. Each key names its action and the letter that does the same. */}
+            {canPan && (
+              <LightboxPanPad letters={letters} atEdge={atEdge} onPan={panBy} />
+            )}
 
             {/* Next — disabled (not unmounted) at the end. */}
             {isGallery && (

@@ -77,6 +77,9 @@ export interface SeparatorProps {
   tabIndex: 0;
   onKeyDown: (e: React.KeyboardEvent) => void;
   onDoubleClick: (e: React.MouseEvent) => void;
+  /** The dock side and the smallest expanded size, which ResizeHandle's step keys read to dim a key at its bound. */
+  "data-side"?: "start" | "end";
+  "data-min-size"?: number;
 }
 
 export interface UseResizableReturn {
@@ -330,6 +333,8 @@ export function useResizable(options: UseResizableOptions): UseResizableReturn {
     tabIndex: 0,
     onKeyDown,
     onDoubleClick,
+    "data-side": side,
+    "data-min-size": Math.round(minSizePx),
   };
 
   return {

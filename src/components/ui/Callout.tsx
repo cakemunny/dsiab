@@ -102,8 +102,9 @@ export interface CalloutProps extends Omit<RadixCalloutRootProps, "variant" | "s
  *      renders in Radix.
  *   2. The parts would open a second way to build a callout that bypasses every rule this wrapper
  *      exists to enforce: the tone → fixed-glyph pairing (WCAG 1.4.1, colour never the only signal),
- *      the `--ds-text-measure` cap on the body, the error → `role="alert"` decision (and `announce`
- *      for the polite case), and the dismiss control's inset geometry.
+ *      the `--ds-text-measure` cap on the body (the `rt-ds-callout-body` class, released inside a
+ *      `[data-resizable]` pane in components.css), the error → `role="alert"` decision (and
+ *      `announce` for the polite case), and the dismiss control's inset geometry.
  *
  * The system equivalent of the Radix compound form is the flat one:
  *   Radix   <Callout.Root color="red"><Callout.Icon>…</Callout.Icon><Callout.Text>…</Callout.Text></Callout.Root>
@@ -142,7 +143,7 @@ export function Callout({
       {resolvedIcon ? <RadixCallout.Icon>{resolvedIcon}</RadixCallout.Icon> : null}
       {title != null ? <RadixCallout.Text weight="bold">{title}</RadixCallout.Text> : null}
       {children != null ? (
-        <RadixCallout.Text style={{ maxWidth: "var(--ds-text-measure)" }}>{children}</RadixCallout.Text>
+        <RadixCallout.Text className="rt-ds-callout-body">{children}</RadixCallout.Text>
       ) : null}
       {actions ? (
         <Flex className="rt-ds-callout-actions" gap="3" align="center" wrap="wrap">{actions}</Flex>

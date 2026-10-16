@@ -40,6 +40,7 @@ function RZFixture({
   defaultSize = 200,
   minSizePx = 100,
   maxSizePx = 400,
+  side = "start",
 }: {
   testid: string;
   orientation?: ResizeOrientation;
@@ -47,8 +48,9 @@ function RZFixture({
   defaultSize?: number;
   minSizePx?: number;
   maxSizePx?: number;
+  side?: "start" | "end";
 }) {
-  const rz = useResizable({ orientation, collapsible, defaultSize, minSizePx, maxSizePx, "aria-label": "Resize the panel" });
+  const rz = useResizable({ orientation, collapsible, defaultSize, minSizePx, maxSizePx, side, "aria-label": "Resize the panel" });
   const isVertical = orientation === "vertical";
   const size = rz.isCollapsed ? 0 : rz.size;
   return (
@@ -219,5 +221,93 @@ export const UnmountMidDragNoLeak: Story = {
       window.removeEventListener = rawRemove;
       host.remove();
     }
+  },
+};
+
+/** Single-pointer resize (WCAG 2.5.7, [[dragging-movement-gaps]]). A tap on the handle shows two keycap chips beside it,
+ *  not inside it. A chip click moves the seam by the Shift+arrow step, a chip at its bound is aria-disabled with a
+ *  dimmed glyph and keeps focus, the grow chip follows the dock side, a drag shows no chips, and a press outside
+ *  hides them. */
+export const StepKeys: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: 16 }}>
+      <RZFixture testid="rh-step" minSizePx={100} maxSizePx={400} defaultSize={200} />
+      <RZFixture testid="rh-step-end" side="end" minSizePx={100} maxSizePx={400} defaultSize={200} />
+      <RZFixture testid="rh-step-rows" orientation="horizontal" minSizePx={60} maxSizePx={200} defaultSize={100} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const sep = (id: string) => canvasElement.querySelector<HTMLElement>(`[data-testid="${id}"] [role="separator"]`)!;
+    const chips = (id: string) => [...canvasElement.querySelectorAll<HTMLButtonElement>(`[data-testid="${id}"] .rt-ds-resize-key`)];
+    const tap = (el: HTMLElement, dx = 0) => {
+      const r = el.getBoundingClientRect();
+      const at = { clientX: r.x, clientY: r.y + r.height / 2, pointerId: 7, button: 0, bubbles: true };
+      el.dispatchEvent(new PointerEvent("pointerdown", at));
+      window.dispatchEvent(new PointerEvent("pointermove", { ...at, clientX: at.clientX + dx }));
+      window.dispatchEvent(new PointerEvent("pointerup", { ...at, clientX: at.clientX + dx }));
+    };
+    const off = (b: HTMLButtonElement) => b.getAttribute("aria-disabled") === "true";
+
+    // A drag shows no chips. A tap shows them, beside the separator and never inside it.
+    const handle = sep("rh-step");
+    await expectNow(handle, 200, "initial size");
+    tap(handle, 40);
+    await expectNow(handle, 240, "the drag resizes");
+    await sleep(300);
+    if (chips("rh-step").length) throw new Error("a drag must not leave the step chips on screen");
+    tap(handle);
+    const [left, right] = await waitFor(() => chips("rh-step").length === 2 && chips("rh-step")).catch(() => {
+      throw new Error("a tap on the handle must show the two step chips");
+    });
+    if (handle.contains(left)) throw new Error("the chips must sit beside the separator, whose children are presentational");
+    if (left.getAttribute("aria-label") !== "Move the divider left" || right.getAttribute("aria-keyshortcuts") !== "Shift+ArrowRight")
+      throw new Error("each chip must name its direction and its key");
+    if (left.tabIndex !== -1) throw new Error("the chips must stay out of the tab order, because the separator answers the keys");
+
+    // A click moves the seam by the Shift+arrow step, and stops at the bound with focus kept on the chip.
+    right.focus();
+    right.click();
+    await expectNow(handle, 290, "a right chip click moves the seam +50");
+    for (let i = 0; i < 3; i++) right.click();
+    await expectNow(handle, 400, "the right chip reaches the maximum");
+    await waitFor(() => off(chips("rh-step")[1])).catch(() => {
+      throw new Error("at the maximum the right chip must be aria-disabled");
+    });
+    const atMax = chips("rh-step")[1];
+    atMax.click();
+    await sleep(60);
+    if (now(handle) !== 400) throw new Error("a click on a chip at its bound must not move the seam");
+    if (document.activeElement !== atMax) throw new Error("a chip at its bound must keep focus");
+    const glyph = (b: HTMLButtonElement) => getComputedStyle(b.querySelector(".rt-Kbd")!).color;
+    if (glyph(atMax) === glyph(chips("rh-step")[0])) throw new Error("a chip at its bound must dim its glyph");
+    for (let i = 0; i < 7; i++) chips("rh-step")[0].click();
+    await expectNow(handle, 100, "the left chip reaches the minimum");
+    await waitFor(() => off(chips("rh-step")[0]) && !off(chips("rh-step")[1])).catch(() => {
+      throw new Error("at the minimum only the left chip must be aria-disabled");
+    });
+
+    // A press outside, which also takes focus away, hides the chips.
+    (document.activeElement as HTMLElement | null)?.blur();
+    document.body.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, pointerId: 8 }));
+    await waitFor(() => chips("rh-step").length === 0).catch(() => {
+      throw new Error("a press outside the handle and the chips must hide them");
+    });
+
+    // A pane docked at the end grows toward its dock, so the LEFT chip grows it.
+    const end = sep("rh-step-end");
+    tap(end);
+    const [endLeft] = await waitFor(() => chips("rh-step-end").length === 2 && chips("rh-step-end"));
+    endLeft.click();
+    await expectNow(end, 250, "on an end-docked pane the left chip grows the pane");
+    for (let i = 0; i < 3; i++) chips("rh-step-end")[0].click();
+    await expectNow(end, 400, "the left chip grows an end-docked pane to its maximum");
+    await waitFor(() => off(chips("rh-step-end")[0]) && !off(chips("rh-step-end")[1])).catch(() => {
+      throw new Error("on an end-docked pane at its maximum, the left chip must be the disabled one");
+    });
+
+    // A horizontal handle offers up and down.
+    tap(sep("rh-step-rows"));
+    const rows = await waitFor(() => chips("rh-step-rows").length === 2 && chips("rh-step-rows"));
+    if (rows.map((b) => b.textContent).join("") !== "↑↓") throw new Error("a horizontal handle must offer ↑ and ↓");
   },
 };
