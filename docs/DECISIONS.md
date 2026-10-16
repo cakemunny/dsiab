@@ -1930,7 +1930,7 @@ The rule in [support-text-slot](#support-text-slot) that a message steers toward
 
 **Failures.**
 
-- `ResizeHandle`: a drag from `onPointerDown` is the only pointer route to a size. Its double-click toggles collapse, not resize, and does nothing unless `collapsible` is set, which defaults to false. The gap reaches the resizable panels of `Layout` and `SideNav`.
+- `ResizeHandle`: a drag from `onPointerDown` is the only pointer route to a size. Its double-click toggles collapse, not resize, and does nothing unless `collapsible` is set, which defaults to false. The gap reaches the resizable panels of `Layout` and `SideNav`. Closed on 2026-10-16, by the ResizeHandle fix below.
 - `Lightbox` pan: drag only, with no key route, because the arrow keys move through the gallery. A zoom resets the pan to the origin, so without a drag the edges of a 2x image are out of reach. This half also fails 2.1.1, the cheaper failure to close. Closed on 2026-10-15, by the Lightbox fix below.
 
 **Not essential.** Neither drag is essential under the criterion's test. The worked example W3C gives is a map with direction buttons beside the drag.
@@ -1944,11 +1944,13 @@ The rule in [support-text-slot](#support-text-slot) that a message steers toward
 
 **Lightbox fix (2026-10-15).** While an image is zoomed, a keypad in the bottom-left corner of the stage pans it, and W, A, S and D do the same from the keyboard. The keypad holds four keycaps in the inverted-T of a keyboard, and each key shows its arrow over its letter in a `Kbd`. A press moves the image a quarter of the way from the centre to an edge, so four presses reach any edge. The arrow keys keep paging the gallery, which the owner kept on 2026-10-15 because Left and Right are the expected paging keys. The letters match by physical key (`KeyboardEvent.code`), so the same four keys pan on any layout, and each keycap shows the letter of the user's layout where the browser reports it through the Keyboard Map API, and W A S D everywhere else. Ctrl, Cmd or Alt with a letter is left to the browser. A key at the edge it moves toward is `aria-disabled` and painted disabled, letter included, and it keeps focus, because a `disabled` button that held focus dropped it to `<body>`. The letters pan only while focus is inside the open viewer and the image is zoomed, which is the "active only on focus" exception of WCAG 2.1.4. The owner chose the keypad on 2026-10-15 from a rendered comparison with one arrow at the middle of each image edge, whose left and right arrows matched Previous and Next, and with zoom toward a clicked point, which double-click timing puts out of reach of the users 2.5.7 protects. Guarded by the `PanKeypad` play in `_internal/Lightbox behavior`.
 
-**Gap.** `ResizeHandle` is recorded and not fixed, for the reason recorded in [overlay-dismissible-gap](#overlay-dismissible-gap): a change contains only what it claims, and each fix is a component change with its own evidence to gather.
+**ResizeHandle fix (2026-10-16).** A hover, a keyboard focus or a tap on the handle shows two keycap chips centred on the seam, ← and → on a vertical handle and ↑ and ↓ on a horizontal one. Each chip is the system `Kbd` on a transparent 24px button, the WCAG 2.5.8 floor, with no border or fill of its own. A click moves the seam by the Shift+arrow step, 50px, by sending that key to the separator's own handler, so the bounds, the collapsed state and a pane docked at the end behave exactly as the keys do. The chips render beside the separator, not inside it, because a focusable separator presents its children to assistive technology as plain content. They stay out of the tab order, because the separator already answers the keys. A chip at its bound is `aria-disabled`, dims its glyph to `--ds-text-disabled` and keeps focus. A press that moves less than 4px is a tap and shows the chips. A longer press is a drag and shows none. A press outside the handle and the chips hides them. The owner chose the chips on 2026-10-16 from a rendered comparison with a size menu on a click of the divider and with click to lift and click to place, then chose the flat keycap chip over a bordered button, bare arrows and a capsule grown from the grab pill. Guarded by the `StepKeys` play in `_internal/ResizeHandle behavior`.
+
+**Status of the gaps.** Both halves are closed: Lightbox on 2026-10-15 and ResizeHandle on 2026-10-16.
 
 **Changed from.** No earlier ruling covered this.
 
-**Status.** Ruled 2026-09-17. The Lightbox fix above closes the Lightbox half on 2026-10-15.
+**Status.** Ruled 2026-09-17. The Lightbox fix closes the Lightbox half on 2026-10-15, and the ResizeHandle fix closes the ResizeHandle half on 2026-10-16.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 
@@ -3806,13 +3808,13 @@ Double-click toggles between 1x and 2x. While zoomed, a drag, the keypad in the 
 - Several regions take a fixed number of hooks, never hooks inside `.map()`.
 - The drag listeners are removed on unmount in the middle of a drag.
 
-**Gap.** `useResizable` is not exported, so a consumer has no supported way to drive `ResizeHandle` outside `Layout` and `SideNav` ([internal-hooks](#internal-hooks)). The drag is the only pointer route to a size, a WCAG 2.5.7 failure ([dragging-movement-gaps](#dragging-movement-gaps)).
+**Gap.** `useResizable` is not exported, so a consumer has no supported way to drive `ResizeHandle` outside `Layout` and `SideNav` ([internal-hooks](#internal-hooks)). A pointer that cannot drag reaches a size through the step chips a hover, focus or tap shows on the handle ([dragging-movement-gaps](#dragging-movement-gaps)).
 
 **Changed from.** No earlier ruling covered this.
 
 **Status.** Ruled 2026-07-17.
 
-- [dragging-movement-gaps](#dragging-movement-gaps) records the drag as the only pointer route to a size, a WCAG 2.5.7 failure.
+- [dragging-movement-gaps](#dragging-movement-gaps) recorded the drag as the only pointer route to a size, a WCAG 2.5.7 failure, and its ResizeHandle fix of 2026-10-16 adds the step chips.
 - [seam-ownership](#seam-ownership) makes the handle the one part that draws the seam at a resizable panel.
 - [resize-handle-seam](#resize-handle-seam) makes the handle the 1px hairline itself, with the grab zone as a `::before` overlay that takes no layout.
 - [focus-ring](#focus-ring) replaces the inset focus hairline with the accent focus ring around the grab zone.
