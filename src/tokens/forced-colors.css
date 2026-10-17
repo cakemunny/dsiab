@@ -104,15 +104,15 @@
     border-color: var(--ds-stroke-disabled);
   }
 
-  /* The Token toggles ([[token-pressed-state]]). A Token whose body carries `aria-pressed` draws its edge
-     with the surface box-shadow, so under forcing a toggle at rest painted Canvas on Canvas with no edge.
-     The chip sizes to its label, so the edge is the inset ::after of the boxed controls above and the
-     chip keeps its size. Under forcing nothing else draws on the Token container's ::after, since the
-     two-layer focus ring in components.css draws on it only in `forced-colors: none`. */
-  .radix-themes .rt-ds-token:has(> .rt-ds-token-body[aria-pressed]) {
+  /* Every Token chip ([[token-pressed-state]]), a Tokenizer chip included. A Token draws its edge with the surface
+     box-shadow, so under forcing a chip painted Canvas on Canvas with no edge. The chip sizes to its label, so
+     the edge is the inset ::after of the boxed controls above and the chip keeps its size. Under forcing
+     nothing else draws on the Token container's ::after, since the two-layer focus ring in components.css
+     draws on it only in `forced-colors: none`. */
+  .radix-themes .rt-ds-token {
     position: relative;
   }
-  .radix-themes .rt-ds-token:has(> .rt-ds-token-body[aria-pressed])::after {
+  .radix-themes .rt-ds-token::after {
     content: "";
     position: absolute;
     inset: 0;
@@ -120,8 +120,39 @@
     border-radius: inherit;
     pointer-events: none;
   }
-  .radix-themes .rt-ds-token[data-disabled]:has(> .rt-ds-token-body[aria-pressed])::after {
+  .radix-themes .rt-ds-token[data-disabled]::after {
     border-color: var(--ds-stroke-disabled);
+  }
+
+  /* SegmentedControl, Slider and the cards draw their edges with box-shadow, so under forcing the control
+     track, the slider and every unchecked card painted nothing. Each takes a real edge. */
+  .radix-themes .rt-SegmentedControlRoot {
+    position: relative;
+  }
+  .radix-themes .rt-SegmentedControlRoot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--ds-stroke-strong);
+    border-radius: inherit;
+    pointer-events: none;
+  }
+  .radix-themes .rt-SliderTrack {
+    border: 1px solid var(--ds-stroke-strong);
+  }
+  .radix-themes .rt-SliderThumb::after {
+    box-sizing: border-box;
+    border: 2px solid ButtonText;
+    background-color: Canvas;
+  }
+  .radix-themes .rt-SliderRoot[data-disabled] .rt-SliderTrack,
+  .radix-themes .rt-SliderRoot[data-disabled] .rt-SliderThumb::after {
+    border-color: var(--ds-stroke-disabled);
+  }
+  /* The cards draw their edge on ::after, which Radix sizes and rounds to the card. */
+  .radix-themes .rt-BaseCard:not(.rt-variant-ghost)::after {
+    box-sizing: border-box;
+    border: 1px solid var(--ds-stroke-strong);
   }
 
   /* ---- 3. Marks ------------------------------------------------------------ */
@@ -173,6 +204,38 @@
   .radix-themes .rt-ds-pagination .rt-ds-pagination__dot[aria-current="page"]:disabled {
     border-color: var(--ds-stroke-disabled);
     background-color: var(--ds-stroke-disabled);
+  }
+
+  /* The selected segment: the indicator under it paints Highlight, and the label opts out of forcing so the
+     browser paints no Canvas backplate behind its HighlightText (the pressed Token note below measured that). */
+  .radix-themes .rt-SegmentedControlIndicator::before {
+    background-color: var(--ds-fill-selected);
+  }
+  .radix-themes .rt-SegmentedControlItem[data-state="on"] {
+    forced-color-adjust: none;
+    color: HighlightText;
+  }
+  /* The Slider range, the filled part of the track. */
+  .radix-themes .rt-SliderRange {
+    background-color: var(--ds-fill-selected);
+  }
+  .radix-themes .rt-SliderRoot[data-disabled] .rt-SliderRange {
+    background-color: var(--ds-stroke-disabled);
+  }
+  /* A checked card keeps Radix's 2px band on ::after, which forcing paints in the text colour, so a focused
+     checked card showed the text colour on its edge. The band paints Highlight, as every selected state here does. */
+  .radix-themes .rt-RadioCardsItem[data-state="checked"]::after,
+  .radix-themes .rt-CheckboxCardsItem:has(.rt-CheckboxCardCheckbox[data-state="checked"]):not(:has(:disabled)):not(:has(:focus-visible))::after {
+    /* The CheckboxCards arm repeats the selector shape of its band in components.css, which it must outrank. */
+    outline-color: var(--ds-fill-selected);
+  }
+  /* A pressed ToggleButton or ToggleButtonGroup item is a ghost Button with a tinted fill, which forcing turns
+     to Canvas, so pressed and at rest differed by weight alone. It paints Highlight under HighlightText. */
+  .radix-themes .rt-BaseButton.rt-variant-ghost:is([aria-pressed="true"], [data-state="on"]):not(:disabled, [data-disabled]) {
+    forced-color-adjust: none;
+    background-color: var(--ds-fill-selected);
+    color: HighlightText;
+    box-shadow: none;
   }
 
   /* A pressed Token ([[token-pressed-state]]). The tint is forced to Canvas, so without this a pressed
