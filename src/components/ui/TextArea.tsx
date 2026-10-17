@@ -38,7 +38,9 @@ export interface TextAreaProps extends Omit<RadixRootProps, "variant" | "color">
 type TextAreaControlProps = Omit<TextAreaProps, "label" | "info" | "endSlot" | "description" | "validation" | "showCount">;
 
 /* Radix writes data-accent-color on the field's root div, and the rest of the props and the ref reach the
- * textarea inside it. So oxblood reaches that root from the ref, one element up ([[part-colour-parity]]). */
+ * textarea inside it. So oxblood reaches that root from the ref, one element up ([[part-colour-parity]]). The
+ * spread also puts the attribute on the textarea, which a server render keeps, and oxblood.css maps the root from
+ * it until the ref runs. */
 const textAreaRoot = (node: HTMLTextAreaElement) => node.closest(".rt-TextAreaRoot");
 
 // The control inside the Field — pulls id / aria-describedby / aria-invalid from the Field context.
@@ -47,7 +49,7 @@ const TextAreaControl = forwardRef<ComponentRef<typeof RadixTextArea>, TextAreaC
     const resolvedSize = useResolvedSize("control", size);
     const aria = useFieldControl();
     const own = useAccentColorRef<HTMLTextAreaElement>(color, ref, textAreaRoot);
-    return <RadixTextArea ref={own} variant="surface" size={resolvedSize} color={accentColorProps(color).color} {...aria} {...rest} />;
+    return <RadixTextArea ref={own} variant="surface" size={resolvedSize} {...accentColorProps(color)} {...aria} {...rest} />;
   },
 );
 

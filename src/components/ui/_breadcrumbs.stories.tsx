@@ -179,3 +179,41 @@ export const NavStructure: Story = {
       throw new Error("each crumb must be a direct <li> child of the <ol>");
   },
 };
+
+/** The current crumb differs from its siblings by weight as well as colour (WCAG 1.4.1), in both variants and for
+ *  an auto-detected last link, and the separator mirrors under right-to-left. */
+export const CurrentCueAndRtl: Story = {
+  render: () => (
+    <Box p="4" style={{ display: "grid", gap: 24 }}>
+      <Breadcrumbs label="Default explicit">
+        <BreadcrumbItem href="#a">Alpha</BreadcrumbItem>
+        <BreadcrumbItem isCurrent>Beta</BreadcrumbItem>
+      </Breadcrumbs>
+      <Breadcrumbs label="Supporting auto" variant="supporting">
+        <BreadcrumbItem href="#a">Alpha</BreadcrumbItem>
+        <BreadcrumbItem href="#b">Beta</BreadcrumbItem>
+      </Breadcrumbs>
+      <div dir="rtl">
+        <Breadcrumbs label="Right to left">
+          <BreadcrumbItem href="#a">Alpha</BreadcrumbItem>
+          <BreadcrumbItem isCurrent>Beta</BreadcrumbItem>
+        </Breadcrumbs>
+      </div>
+    </Box>
+  ),
+  play: async ({ canvasElement }) => {
+    const nav = (label: string) => canvasElement.querySelector<HTMLElement>(`nav[aria-label="${label}"]`)!;
+    const weight = (el: Element) => Number(getComputedStyle(el).fontWeight);
+    for (const label of ["Default explicit", "Supporting auto"]) {
+      const current = await waitFor(() => nav(label).querySelector('[aria-current="page"]'));
+      const sibling = nav(label).querySelector("a:not([aria-current])")!;
+      if (!(weight(current) > weight(sibling)))
+        throw new Error(`${label}: the current crumb must be heavier than its siblings; ${weight(current)} vs ${weight(sibling)}`);
+    }
+    const seps = nav("Right to left").querySelectorAll<HTMLElement>(".rt-ds-breadcrumb-sep");
+    const shown = [...seps].find((s) => getComputedStyle(s).display !== "none")!;
+    if (!/matrix\(-1,/.test(getComputedStyle(shown).transform))
+      throw new Error(`under right-to-left the separator must mirror; transform is ${getComputedStyle(shown).transform}`);
+    await sleep(0);
+  },
+};

@@ -867,12 +867,19 @@
   align-items: flex-start;
   gap: var(--space-3);
 }
-.radix-themes .rt-ds-datetimeinput-date { flex: 1 1 auto; min-width: 0; }
-.radix-themes .rt-ds-datetimeinput-time { flex: 0 0 auto; }
+.radix-themes .rt-ds-datetimeinput-date { flex: 1 0 auto; min-width: 0; }
+.radix-themes .rt-ds-datetimeinput-time { flex: 0 1 auto; min-width: 0; }
 @container (max-width: 22rem) {
   .radix-themes .rt-ds-datetimeinput-row { flex-direction: column; }
   .radix-themes .rt-ds-datetimeinput-date,
   .radix-themes .rt-ds-datetimeinput-time { width: 100%; }
+}
+/* The date keeps its full width and the time gives way, so a long date never cuts off in a row. At the large size
+   the two need about 384px side by side: measured, "September 30, 2026" takes a 236px date box, and "12:45 PM"
+   clipped in the time box below a 380px row. So the large row stacks below 24rem rather than 22rem. */
+@container (max-width: 24rem) {
+  .radix-themes .rt-ds-datetimeinput-row:has(.rt-TextFieldRoot.rt-r-size-3) { flex-direction: column; }
+  .radix-themes .rt-ds-datetimeinput-row:has(.rt-TextFieldRoot.rt-r-size-3) > :is(.rt-ds-datetimeinput-date, .rt-ds-datetimeinput-time) { width: 100%; }
 }
 
 /* ---- FileInput ([[file-input]]) — a dropzone file picker: the ONE wave-3 component earning genuinely net-new UI, a
@@ -2409,6 +2416,13 @@
      row 1 taller — it never floats to the middle of the block, matching the top-aligned icon. */
   align-self: start;
   margin-inline-start: var(--space-3); /* gap from the text */
+  /* The action box is one line tall, and the button centres in it and reaches evenly above and below. A
+     button taller than the line (32px on a 20px line at medium, 40px on 24px at large) then centres on the first
+     line instead of hanging below it, and the row keeps the height of the text. The box wraps, so align-content
+     centres its one line of actions. */
+  height: var(--callout-icon-height);
+  align-items: center;
+  align-content: center;
 }
 
 /* Body measure: the body rides --ds-text-measure (65ch) so long copy stays legible in a page column.
@@ -4364,6 +4378,17 @@
    (supporting already sits at --ds-text-weak, so only default needs the bump). */
 .radix-themes .rt-ds-breadcrumb-item[data-variant="default"] .rt-ds-breadcrumb-link[aria-current="page"] {
   color: var(--ds-text-strong);
+}
+/* The current crumb is set apart by weight as well as colour (WCAG 1.4.1, [[breadcrumb-trail]]). The two colours
+   measure 2.76:1 against each other, under the 3:1 a colour-only difference needs, and in the supporting variant
+   the current crumb and its siblings share --ds-text-weak. The weight keys on aria-current, so it lands on an
+   explicit current crumb and on an auto-detected last link alike, and never on a plain crumb with no link. */
+.radix-themes .rt-ds-breadcrumb-item [aria-current="page"] {
+  font-weight: var(--ds-font-weight-strong);
+}
+/* Under right-to-left the trail runs the other way, so the separator mirrors with it. */
+.radix-themes .rt-ds-breadcrumb-sep:dir(rtl) {
+  transform: scaleX(-1);
 }
 /* Leading icon slot. */
 .radix-themes .rt-ds-breadcrumb-icon {

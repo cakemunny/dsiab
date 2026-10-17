@@ -49,11 +49,22 @@ export interface LinkProps extends Omit<RadixLinkProps, "color"> {
 
 /** System text link — Radix Themes `Link` on the `--ds-text-link` skin + the [[focus-ring]] focus ring.
  *  Defaults `underline` to `always` (accessible inline distinction; override per Radix). Radix writes
- *  data-accent-color on the anchor after the rest of its props, so oxblood reaches that same anchor
- *  through the ref ([[part-colour-parity]]). */
-export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link({ underline = "always", color, ...props }, ref) {
+ *  data-accent-color on the anchor after the rest of its props ([[part-colour-parity]]). For oxblood the Link
+ *  renders its own anchor through `asChild`, where the child's props win, so a server render carries oxblood.
+ *  A caller's own `asChild` child keeps the ref route, which sets the attribute once the page runs. */
+export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link({ underline = "always", color, asChild, children, ...props }, ref) {
   const own = useAccentColorRef<HTMLAnchorElement>(color, ref);
-  return <RadixLink ref={own} underline={underline} color={accentColorProps(color).color} {...props} />;
+  if (color === "oxblood" && !asChild)
+    return (
+      <RadixLink ref={own} underline={underline} {...props} asChild>
+        <a data-accent-color="oxblood">{children}</a>
+      </RadixLink>
+    );
+  return (
+    <RadixLink ref={own} underline={underline} color={accentColorProps(color).color} asChild={asChild} {...props}>
+      {children}
+    </RadixLink>
+  );
 });
 Link.displayName = "Link";
 
