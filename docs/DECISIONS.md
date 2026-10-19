@@ -2883,7 +2883,7 @@ The field otherwise rests in its neutral state. A red border on a field that rev
 - Each subfield's `aria-describedby` carries the id of `FieldGroup.Message` through `useGroupItemDescribedBy`, so a screen reader on either input hears the composite error. Added 2026-10-09.
 - On a boundary date, a hint of the available times shows in `FieldGroup.Description` as guidance, and never sets `aria-invalid`.
 
-**Layout.** The row is a flex row under `rt-ds-datetimeinput-*` with a `--space-3` gap. The date grows, the time keeps its own width, and a container query stacks the two below 22rem of group width. No token is new.
+**Layout.** The row is a flex row under `rt-ds-datetimeinput-*` with a `--space-3` gap. The date grows, the time keeps its own width, and a container query stacks the two below 22rem of group width. No token is new. From 2026-10-16 the date keeps its full width and the time gives way, and at the large size the row stacks below 24rem. In a 412px row at large the date had cut off at "October 20," while the time box held empty space, and below 384px the time text clipped instead. The owner chose this on 2026-10-16 over stacking at every width and over a short date format, which still cut off. Guarded by *LargeRowFitsTheDate* in `_internal/DateTimeInput behavior`.
 
 **Not covered.** An asynchronous optimistic layer of `changeAction` and `isLoading`, and InputGroup composition.
 
@@ -3411,6 +3411,8 @@ A numeric `value` under `1e12` reads as Unix seconds, and a larger one as millis
 **Separators.** Each item renders its own leading separator span, `aria-hidden`, which takes any React node and defaults to `/`, and CSS hides it on the first item. Screen readers skip the separators, and the crumbs carry the meaning.
 
 **Skin.** A linked crumb is styled from `--ds-*` in `--ds-text-weak`, underlined on hover and ringed by the system focus ring, not the Radix `Link`, whose accent skin clashes with the muted trail. The current crumb is set in `--ds-text-strong` in the `default` variant and `--ds-text-weak` in `supporting`, the two variants sit one step apart on the Radix type scale, `--font-size-2` and `--font-size-1` at the default size, and the trail has no collapse, after the reference catalogue's advice to flatten a hierarchy rather than truncate it.
+
+**Current crumb and direction (2026-10-16).** The current crumb, the element carrying `aria-current="page"`, also takes `--ds-font-weight-strong`, so it differs from its siblings by more than colour (WCAG 1.4.1). The two colours measured 2.76:1 against each other, under the 3:1 a colour-only difference needs, and in `supporting` the current crumb and its siblings share `--ds-text-weak`. Under right-to-left the separator mirrors with `scaleX(-1)`, so the default `/` reads as `\`, as upstream Astryx does. The owner chose the weight on 2026-10-16 from a rendered comparison with weight 700 and an underline, which reads as a link here. Guarded by *CurrentCueAndRtl* in `_internal/Breadcrumbs behavior`.
 
 **Changed from.** The system had no breadcrumb trail. This one ports the reference catalogue's component under [catalog-as-specification](#catalog-as-specification).
 
@@ -6200,6 +6202,8 @@ The click route is the same machine, not an addition beside it.
 
 **Changed from.** A Title-only Dialog or AlertDialog carried an `aria-describedby` that referenced no element, and a comment in `Dialog.tsx` claimed that Radix warned in development.
 
+**Upstream fix (2026-10-19).** Radix fixed the broken reference in its release of 20 July 2026 (pull request 4031), which `radix-ui` v1.7.0 and later carry. The repository's lockfile moved to `radix-ui` v1.8.1 on 2026-10-19. The wrappers stay, because the package accepts `radix-ui` from v1.1.3, and a consumer locked to an older release still needs them.
+
 **Status.** Ruled 2026-09-24. No later ruling amends it.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
@@ -6296,7 +6300,9 @@ The click route is the same machine, not an addition beside it.
 
 **Guard.** `_internal/Forced colors` enables emulation through the `cdp()` of Vitest Browser Mode and asserts every edge and state in both palettes.
 
-**Gap.** Composite surfaces still draw their edge with box-shadow: Tokenizer, SegmentedControl, Slider, CheckboxCards, RadioCards and Card. A standalone StatusDot shows nothing under forced colours ([status-dot-edges](#status-dot-edges)).
+**Composite surfaces (2026-10-16).** Every Token chip, a Tokenizer chip included, the SegmentedControl track and every Card, CheckboxCards and RadioCards item take a 1px `ButtonBorder` edge, and the Slider track takes a border and its thumb a 2px `ButtonText` ring on `Canvas`. The selected segment, the Slider range, a checked card's band and a pressed ToggleButton or ToggleButtonGroup item paint `Highlight`, and a label on `Highlight` opts out of forcing so the browser paints no `Canvas` backplate behind its `HighlightText`. A focused checked RadioCards card had shown the text colour on its band. The band now paints `Highlight`. The guard measures all of them in both palettes.
+
+**Gap.** A standalone StatusDot shows nothing under forced colours ([status-dot-edges](#status-dot-edges)). Its fill waits on the owner's choice.
 
 **Changed from.** The system carried no forced-colours rules, so every control edge and every checked state vanished under forcing.
 
@@ -6900,7 +6906,7 @@ On a scrim only the stack changes, to `--accent-ring-stack-scrim` on the dark sc
 
 **Limits.**
 
-- A part that takes oxblood through the ref paints the theme's colour in a server render until the page hydrates.
+- A part that takes oxblood through the ref painted the theme's colour in a server render until the page hydrated. From 2026-10-16, Link renders its own anchor through Radix's `asChild` for oxblood, and TextField and TextArea spread the attribute onto their inner field, which an `oxblood.css` arm reads from the root with `:has()`, so all three carry oxblood in a server render. DataList.Label stays on the ref, because its Radix label has no `asChild` and no inner element that takes our props, and a Link given the caller's own `asChild` child keeps the ref route. The owner chose this on 2026-10-16 over copying the Radix label. Guarded by `oxblood-ssr.node-check.ts` and *OxbloodLinkAndField* in `_internal/Oxblood parts`.
 - The Badge wrapper locks the soft variant, so the Radix solid Badge keeps step 9 under its ink.
 - A gray part three nested neutral themes deep takes the base fill, and a dark theme inside a light theme inside a dark page reads the light arm.
 - Under forced colours both selected roles stay on the root. A later consumer of either role on a coloured part needs the roles block of `forced-colors.css` widened to `.radix-themes, .radix-themes :where([data-accent-color]:not([data-accent-color=""]))`.
