@@ -92,33 +92,28 @@ export default defineConfig({
     ...(process.env.CI ? { testTimeout: 180_000 } : {}),
     // `extends: true` reuses the plugins/resolve/optimizeDeps above; only the lane's
     // name + env differ. Each project gets its own browser instance.
-    projects: [
-      {
-        extends: true,
-        test: {
-          name: "light",
-          env: { VITE_SB_APPEARANCE: "light" },
-          browser: {
-            enabled: true,
-            headless: true,
-            provider: provider(),
-            instances: [{ browser: "chromium" }],
-          },
-        },
-      },
-      {
-        extends: true,
-        test: {
-          name: "dark",
-          env: { VITE_SB_APPEARANCE: "dark" },
-          browser: {
-            enabled: true,
-            headless: true,
-            provider: provider(),
-            instances: [{ browser: "chromium" }],
-          },
-        },
-      },
-    ],
+    //
+    // THE SIDEBAR "Run tests" WIDGET RUNS THE LIGHT LANE ONLY. The widget sets VITEST_STORYBOOK, and under
+    // that flag the storybookTest plugin renames every project it reaches to `storybook:<configDir>`
+    // (@storybook/addon-vitest 10.4.6, workspace-name-override) and then asks Vitest for that one name.
+    // Two lanes then share one name, and Vitest refuses to start: "Project name ... is not unique". The
+    // command line keeps both lanes.
+    projects: process.env.VITEST_STORYBOOK === "true" ? [lane("light")] : [lane("light"), lane("dark")],
   },
 });
+
+function lane(appearance: "light" | "dark") {
+  return {
+    extends: true,
+    test: {
+      name: appearance,
+      env: { VITE_SB_APPEARANCE: appearance },
+      browser: {
+        enabled: true,
+        headless: true,
+        provider: provider(),
+        instances: [{ browser: "chromium" as const }],
+      },
+    },
+  };
+}
