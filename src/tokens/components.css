@@ -867,17 +867,20 @@
   align-items: flex-start;
   gap: var(--space-3);
 }
-.radix-themes .rt-ds-datetimeinput-date { flex: 1 0 auto; min-width: 0; }
-.radix-themes .rt-ds-datetimeinput-time { flex: 0 1 auto; min-width: 0; }
+.radix-themes .rt-ds-datetimeinput-date { flex: 1 1 auto; min-width: 0; }
+.radix-themes .rt-ds-datetimeinput-time { flex: 0 0 auto; }
 @container (max-width: 22rem) {
   .radix-themes .rt-ds-datetimeinput-row { flex-direction: column; }
   .radix-themes .rt-ds-datetimeinput-date,
   .radix-themes .rt-ds-datetimeinput-time { width: 100%; }
 }
-/* The date keeps its full width and the time gives way, so a long date never cuts off in a row. At the large size
-   the two need about 384px side by side: measured, "September 30, 2026" takes a 236px date box, and "12:45 PM"
-   clipped in the time box below a 380px row. So the large row stacks below 24rem rather than 22rem. */
-@container (max-width: 24rem) {
+/* The time field is as wide as its text, 9ch of its own font, so it scales with the font and never gives its room
+   away, and the date takes the rest of the row. A native input defaults to about 20 characters, which made the time
+   box 251px at large and cut the date off. Measured in Inter and Verdana with "September 30, 2026" and "12:45 PM":
+   nothing clips at any size down to 22rem, except the large date in Verdana below 400px. So the large row stacks
+   below 25rem rather than 22rem. */
+.radix-themes .rt-ds-datetimeinput-time .rt-TextFieldInput { width: 9ch; flex: none; }
+@container (max-width: 25rem) {
   .radix-themes .rt-ds-datetimeinput-row:has(.rt-TextFieldRoot.rt-r-size-3) { flex-direction: column; }
   .radix-themes .rt-ds-datetimeinput-row:has(.rt-TextFieldRoot.rt-r-size-3) > :is(.rt-ds-datetimeinput-date, .rt-ds-datetimeinput-time) { width: 100%; }
 }

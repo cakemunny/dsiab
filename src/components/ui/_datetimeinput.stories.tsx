@@ -320,12 +320,12 @@ export const DisabledReasonSoftDisablesBoth: Story = {
   },
 };
 
-/** At the large size the full date shows beside the time in a 412px row, the time text is not clipped at 390px,
- *  and below 24rem the row stacks. Measured with the longest date and time a field shows. */
+/** At the large size the full date shows beside the time in a 412px row, and at 25rem and below the row stacks.
+ *  Measured with the longest date and time a field shows. */
 export const LargeRowFitsTheDate: Story = {
   render: () => (
     <Box p="4" style={{ display: "grid", gap: 24 }}>
-      {[412, 390, 380].map((w) => (
+      {[412, 390].map((w) => (
         <Box key={w} data-testid={`dt-large-${w}`} style={{ width: w }}>
           <DateTimeInput label={`Booking ${w}`} size="3" defaultValue={dt("2026-09-30T12:45")} onValueChange={() => {}} />
         </Box>
@@ -339,11 +339,11 @@ export const LargeRowFitsTheDate: Story = {
       throw new Error(`the date must show "September 30, 2026"; it shows "${input(412, "date").value}"`);
     });
     const clipped = (el: HTMLInputElement) => el.scrollWidth > el.clientWidth;
-    for (const w of [412, 390]) {
+    for (const w of [412]) {
       if (getComputedStyle(row(w)).flexDirection !== "row") throw new Error(`at ${w}px the large row must stay one row`);
       if (clipped(input(w, "date"))) throw new Error(`at ${w}px the date must not cut off (${input(w, "date").scrollWidth} > ${input(w, "date").clientWidth})`);
       if (clipped(input(w, "time"))) throw new Error(`at ${w}px the time must not cut off (${input(w, "time").scrollWidth} > ${input(w, "time").clientWidth})`);
     }
-    if (getComputedStyle(row(380)).flexDirection !== "column") throw new Error("below 24rem the large row must stack");
+    if (getComputedStyle(row(390)).flexDirection !== "column") throw new Error("at 25rem and below the large row must stack");
   },
 };
