@@ -206,10 +206,11 @@ export const Usage: Story = {
   //  scrollable region. That clone is now aria-hidden + inert (see TableSpec), which removes it from
   //  the a11y tree and with it the finding, so the rule runs here again with nothing suppressed.
   //
-  //  NOTE — the visible table takes NO tabIndex. It never overflows at any width measured, and a
-  //  tabIndex on a region that cannot scroll is its own defect: it puts an empty stop in the tab order
-  //  that announces nothing and does nothing. A table whose columns genuinely outrun their container
-  //  does need one, and that belongs with the component, applied on the overflow condition.)
+  //  NOTE — the visible table takes NO tabIndex, because it never overflows at any width measured, and a
+  //  tabIndex on a region that cannot scroll puts an empty stop in the tab order. A table whose columns
+  //  outrun their container gets its stop from the component: Table.Root gives the scrolling viewport
+  //  tabindex="0" while it overflows, and a named table's viewport also takes role="region" with the
+  //  caption as its name (_internal/Table behavior).)
   parameters: {
     a11y: {
       context: { exclude: [DODONT_LABEL, ".rt-Badge[data-tone]"] },

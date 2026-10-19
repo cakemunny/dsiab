@@ -11,9 +11,169 @@ export type ChangelogEntry = {
 };
 
 export const CHANGELOG: { generatedFrom: string; kept: number; entries: ChangelogEntry[] } = {
-  "generatedFrom": "main",
-  "kept": 1,
+  "generatedFrom": "HEAD",
+  "kept": 21,
   "entries": [
+    {
+      "date": "2026-10-19",
+      "type": "fix",
+      "scope": "datetimeinput",
+      "summary": "size the time field to its text, not to the font's default",
+      "hash": "9b03fde",
+      "refs": []
+    },
+    {
+      "date": "2026-10-19",
+      "type": "fix",
+      "scope": "status-dot",
+      "summary": "fill the Avatar dot to its edge, keep dot fills in contrast themes",
+      "hash": "45fd483",
+      "refs": []
+    },
+    {
+      "date": "2026-10-16",
+      "type": "fix",
+      "scope": "forced-colors",
+      "summary": "edges and states for seven controls in contrast themes",
+      "hash": "3553964",
+      "refs": []
+    },
+    {
+      "date": "2026-10-16",
+      "type": "fix",
+      "scope": null,
+      "summary": "four Tier 1 defects in Breadcrumbs, Callout, DateTimeInput and oxblood parts",
+      "hash": "17dc2d5",
+      "refs": []
+    },
+    {
+      "date": "2026-10-15",
+      "type": "feat",
+      "scope": "resize-handle",
+      "summary": "step the divider with arrow chips (WCAG 2.5.7)",
+      "hash": "6a083ee",
+      "refs": []
+    },
+    {
+      "date": "2026-10-15",
+      "type": "feat",
+      "scope": "lightbox",
+      "summary": "pan a zoomed image with a W A S D keypad (WCAG 2.5.7, 2.1.1)",
+      "hash": "b70ec5e",
+      "refs": []
+    },
+    {
+      "date": "2026-10-14",
+      "type": "fix",
+      "scope": "overlay",
+      "summary": "dismiss the scrim with Escape (WCAG 1.4.13)",
+      "hash": "984d8ef",
+      "refs": []
+    },
+    {
+      "date": "2026-10-14",
+      "type": "fix",
+      "scope": "table",
+      "summary": "move a caller's tabIndex onto the scrolling viewport",
+      "hash": "75ea5ba",
+      "refs": []
+    },
+    {
+      "date": "2026-10-09",
+      "type": "fix",
+      "scope": "table",
+      "summary": "give the overflow stop a region role only when the table has a name",
+      "hash": "f6cd520",
+      "refs": []
+    },
+    {
+      "date": "2026-10-09",
+      "type": "fix",
+      "scope": "table",
+      "summary": "give a table that overflows one named keyboard stop",
+      "hash": "2c82ef9",
+      "refs": []
+    },
+    {
+      "date": "2026-10-09",
+      "type": "fix",
+      "scope": "multiselect",
+      "summary": "number the options the way Select does",
+      "hash": "49e5dba",
+      "refs": []
+    },
+    {
+      "date": "2026-10-09",
+      "type": "fix",
+      "scope": "datetimeinput",
+      "summary": "point each subfield at the composite error message",
+      "hash": "33277e3",
+      "refs": []
+    },
+    {
+      "date": "2026-10-09",
+      "type": "fix",
+      "scope": "select",
+      "summary": "keep a long option label on screen and end it in an ellipsis",
+      "hash": "9807a9a",
+      "refs": []
+    },
+    {
+      "date": "2026-10-09",
+      "type": "fix",
+      "scope": "callout",
+      "summary": "move the body's reading cap into CSS so a resizable panel lifts it",
+      "hash": "b7bb25d",
+      "refs": []
+    },
+    {
+      "date": "2026-10-09",
+      "type": "fix",
+      "scope": "pagination",
+      "summary": "follow reading order with the arrow keys under right-to-left",
+      "hash": "d381364",
+      "refs": []
+    },
+    {
+      "date": "2026-10-09",
+      "type": "breaking",
+      "scope": "slider",
+      "summary": "type the color prop as AccentColor",
+      "hash": "4437393",
+      "refs": []
+    },
+    {
+      "date": "2026-10-09",
+      "type": "fix",
+      "scope": "toolbar",
+      "summary": "seed no size from a responsive size object",
+      "hash": "392e909",
+      "refs": []
+    },
+    {
+      "date": "2026-10-09",
+      "type": "fix",
+      "scope": "breadcrumbs",
+      "summary": "route linked crumbs through the LinkProvider",
+      "hash": "740d0dc",
+      "refs": []
+    },
+    {
+      "date": "2026-10-09",
+      "type": "fix",
+      "scope": "toast",
+      "summary": "keep the pointer and the focus on toasts around modals and windowing",
+      "hash": "c1b9b5f",
+      "refs": []
+    },
+    {
+      "date": "2026-10-09",
+      "type": "fix",
+      "scope": "init",
+      "summary": "name a peer whose declared range is out of reach",
+      "hash": "8692b56",
+      "refs": []
+    },
     {
       "date": "2026-10-03",
       "type": "feat",

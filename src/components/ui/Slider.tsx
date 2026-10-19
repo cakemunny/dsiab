@@ -13,6 +13,7 @@ import {
 } from "react";
 import { Slider as SliderPrimitive } from "radix-ui";
 import { Text, TextField, VisuallyHidden } from "@radix-ui/themes";
+import type { AccentColor } from "../../theme/Provider";
 import { useResolvedSize } from "../../theme/SizeContext";
 import { useOptionalFieldControl, useOptionalFieldLabelId } from "./Field";
 import { useAnnounce } from "./useAnnounce";
@@ -127,8 +128,9 @@ export interface SliderProps {
   variant?: Variant;
   /** Raises the filled range's contrast against the page. */
   highContrast?: boolean;
-  /** Accent override for the filled range; unset, it paints the running brand accent. */
-  color?: string;
+  /** Accent override for the filled range: a Radix accent name or `oxblood`. Unset, it paints the
+   *  running brand accent. */
+  color?: AccentColor;
   /** Track + thumb corner radius; unset, it inherits the theme radius. */
   radius?: Radius;
   /** Accessible name when the slider is not inside a `Field.Root` with a `Field.Label`. */

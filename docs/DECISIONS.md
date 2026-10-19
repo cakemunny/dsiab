@@ -604,7 +604,7 @@ This ledger records the rulings that shape the design system and the reason behi
 | --- | --- | --- |
 | `useFieldGroupControl`, `useGroupItemDescribedBy` | Withheld with `FieldGroup` | Both read the group context that only `FieldGroup.Root` provides, and `FieldGroup` does not ship. Outside one, the first throws and the second only joins two id strings. The `Field` entry in `registry.json` lists both in `internalExports`. |
 | `useGridFocus` | Withheld | Its one caller, `Calendar`, shaped its API: Page Up and Page Down call back with no event, and the caller passes the writing direction as an argument. Publishing it would freeze both. |
-| `useListFocus` | Withheld | It is about a hundred lines of index arithmetic with no right-to-left handling, and Astryx ([catalog-as-specification](#catalog-as-specification)) publishes a different hook under the same name. |
+| `useListFocus` | Withheld | Its three callers shaped its API, and Astryx ([catalog-as-specification](#catalog-as-specification)) publishes a different hook under the same name. Under right-to-left, a horizontal list moves to the next item on ArrowLeft. An explicit `dir` option wins over the computed `direction` of the list, and vertical lists ignore direction. Added 2026-10-09. |
 | `useScrollOverflow` | Deferred | It is generic, and `Carousel` ships the pattern it serves. It is published the first time a consumer needs edge-overflow state on a scroller of their own, as the hook and `ScrollOverflowState` only. |
 
 **Guard.** Arm D of `src/foundations/barrel.node-check.ts` walks `src/components/ui` and `src/hooks` from one `WALKED_DIRS` list. `INTERNAL_MODULES` maps each internal module, keyed by a path such as `hooks/useGridFocus`, to a one-line reason. A new module under `src/hooks` with no registry entry and no line fails, and the failure prints a registry entry ready to paste. Arm C fails a line whose file is gone, whose module is now registered, whose reason is empty, or whose directory arm D does not walk.
@@ -1902,17 +1902,19 @@ The rule in [support-text-slot](#support-text-slot) that a message steers toward
 
 **Tags.** `ACCESSIBILITY`, `COMPONENTS`. **Ruled.** 2026-09-17.
 
-**`Overlay`'s hover scrim fails WCAG 1.4.13 Dismissible, and the gap is recorded, not fixed.**
+**`Overlay`'s hover scrim failed WCAG 1.4.13 Dismissible until 2026-10-14, when Escape dismissal closed the gap.**
 
-**What you see.** `Overlay` reveals its scrim with CSS `:hover` and `:focus-within` rules alone, with no keydown handler anywhere in the component. The scrim is hoverable and persistent, but nothing removes it short of moving the pointer or focus.
+**What you saw.** Until 2026-10-14, `Overlay` revealed its scrim with CSS `:hover` and `:focus-within` rules alone, with no keydown handler anywhere in the component. The scrim was hoverable and persistent, but nothing removed it short of moving the pointer or focus.
 
 **Why it fails.** The Dismissible exemption does not apply, because the scrim covers `inset: 0` of the required `media` node and so hides real content. Every other hover-or-focus surface passes: Tooltip, HoverCard and menu submenus inherit the three properties from Radix, and the `TopNav` flyouts implement them by hand.
 
-**Gap.** The fix is a `dismissed` state, set on Escape and cleared on pointer leave or focus out, expressed as a data attribute the reveal rules exclude. That is a component change with its own evidence to gather, so it stays outside this ruling, under the rule that a change contains only what it claims.
+**Fix (2026-10-14).** While the pointer is over the Overlay or focus is inside it, Escape sets `data-dismissed`. The state clears only when both the pointer and focus have left the Overlay, so a dismissal persists until the user gives a new trigger (1.4.13, persistent). A move between two actions inside keeps it. In `focus` mode a hover alone does not arm Escape, because hover reveals nothing there. A veil that hover revealed hides, because the hover reveal rules exclude `data-dismissed`. A veil that focus holds turns transparent and stops taking clicks, and every other scrim child, actions and captions alike, hides, so the focused control stays visible with its ring (WCAG 2.4.7). The ring's colour is measured against the veil ([focus-ring](#focus-ring)), so a hollow 6px plate of the veil's colour sits behind the focused control. The plate is its own element, placed by `Overlay.tsx` around the focused control, and it paints nothing on the control, so a danger, hovered or disabled border stays the control's own. The owner chose the separate plate on 2026-10-14 over a `box-shadow` on the control, which replaced every border a button draws as an inset shadow with the accent border. Measured over media, the ring reads 5.86:1 on the story gradient, 3.20:1 on white, 7.03:1 on mid-grey and 11.69:1 on black, against 1.49 to 2.20:1 with no plate. The owner chose the plate on 2026-10-14 from a rendered comparison with a half-strength veil and the page ring colour, which each failed 3:1 on two of the four backgrounds. An Escape that a layer inside the Overlay already handled, such as a menu, does not dismiss the veil. Focus that moves into a menu opened from inside keeps the dismissal, and a focused control removed from the page clears it, because the browser fires no blur for a removed element. The W3C Understanding text for 1.4.13 exempts only the triggering component itself, so the veil and the other actions must be dismissible while the focused control stays. The owner chose this partial dismiss on 2026-10-14 from a rendered comparison against keeping the whole veil while focus holds it. Guarded by the `EscapeDismissesHover`, `EscapeWithFocusInside`, `EscapePersistsAndGuards` and `EscapeFocusEdges` plays in `_internal/Overlay behavior`.
+
+**Open.** Inside a modal Dialog, Radix handles Escape in the document capture phase, so one Escape closes the whole dialog before the veil can dismiss on its own. That is not a 1.4.13 failure, because the veil leaves with the dialog, but a user who wanted only the veil gone loses the dialog. Not ruled, and kept for review.
 
 **Changed from.** No earlier ruling recorded the gap. [overlay-hover-scrim](#overlay-hover-scrim) defined the reveal with no way to dismiss it.
 
-**Status.** Ruled 2026-09-17. No later ruling amends it.
+**Status.** Ruled 2026-09-17. The fix above closes the 1.4.13 gap on 2026-10-14.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 
@@ -1928,8 +1930,8 @@ The rule in [support-text-slot](#support-text-slot) that a message steers toward
 
 **Failures.**
 
-- `ResizeHandle`: a drag from `onPointerDown` is the only pointer route to a size. Its double-click toggles collapse, not resize, and does nothing unless `collapsible` is set, which defaults to false. The gap reaches the resizable panels of `Layout` and `SideNav`.
-- `Lightbox` pan: drag only, with no key route, because the arrow keys move through the gallery. A zoom resets the pan to the origin, so without a drag the edges of a 2x image are out of reach. This half also fails 2.1.1, the cheaper failure to close.
+- `ResizeHandle`: a drag from `onPointerDown` is the only pointer route to a size. Its double-click toggles collapse, not resize, and does nothing unless `collapsible` is set, which defaults to false. The gap reaches the resizable panels of `Layout` and `SideNav`. Closed on 2026-10-16, by the ResizeHandle fix below.
+- `Lightbox` pan: drag only, with no key route, because the arrow keys move through the gallery. A zoom resets the pan to the origin, so without a drag the edges of a 2x image are out of reach. This half also fails 2.1.1, the cheaper failure to close. Closed on 2026-10-15, by the Lightbox fix below.
 
 **Not essential.** Neither drag is essential under the criterion's test. The worked example W3C gives is a map with direction buttons beside the drag.
 
@@ -1940,11 +1942,15 @@ The rule in [support-text-slot](#support-text-slot) that a message steers toward
 - `Toast`: a Dismiss button sits beside the swipe at all times.
 - `FileInput`: the drop adds to a native file input.
 
-**Gap.** Recorded and not fixed, for the reason recorded in [overlay-dismissible-gap](#overlay-dismissible-gap): a change contains only what it claims, and each fix is a component change with its own evidence to gather.
+**Lightbox fix (2026-10-15).** While an image is zoomed, a keypad in the bottom-left corner of the stage pans it, and W, A, S and D do the same from the keyboard. The keypad holds four keycaps in the inverted-T of a keyboard, and each key shows its arrow over its letter in a `Kbd`. A press moves the image a quarter of the way from the centre to an edge, so four presses reach any edge. The arrow keys keep paging the gallery, which the owner kept on 2026-10-15 because Left and Right are the expected paging keys. The letters match by physical key (`KeyboardEvent.code`), so the same four keys pan on any layout, and each keycap shows the letter of the user's layout where the browser reports it through the Keyboard Map API, and W A S D everywhere else. Ctrl, Cmd or Alt with a letter is left to the browser. A key at the edge it moves toward is `aria-disabled` and painted disabled, letter included, and it keeps focus, because a `disabled` button that held focus dropped it to `<body>`. The letters pan only while focus is inside the open viewer and the image is zoomed, which is the "active only on focus" exception of WCAG 2.1.4. The owner chose the keypad on 2026-10-15 from a rendered comparison with one arrow at the middle of each image edge, whose left and right arrows matched Previous and Next, and with zoom toward a clicked point, which double-click timing puts out of reach of the users 2.5.7 protects. Guarded by the `PanKeypad` play in `_internal/Lightbox behavior`.
+
+**ResizeHandle fix (2026-10-16).** A hover, a keyboard focus or a tap on the handle shows two keycap chips centred on the seam, ← and → on a vertical handle and ↑ and ↓ on a horizontal one. Each chip is the system `Kbd` on a transparent 24px button, the WCAG 2.5.8 floor, with no border or fill of its own. A click moves the seam by the Shift+arrow step, 50px, by sending that key to the separator's own handler, so the bounds, the collapsed state and a pane docked at the end behave exactly as the keys do. The chips render beside the separator, not inside it, because a focusable separator presents its children to assistive technology as plain content. They stay out of the tab order, because the separator already answers the keys. A chip at its bound is `aria-disabled`, dims its glyph to `--ds-text-disabled` and keeps focus. A press that moves less than 4px is a tap and shows the chips. A longer press is a drag and shows none. A press outside the handle and the chips hides them. The owner chose the chips on 2026-10-16 from a rendered comparison with a size menu on a click of the divider and with click to lift and click to place, then chose the flat keycap chip over a bordered button, bare arrows and a capsule grown from the grab pill. Guarded by the `StepKeys` play in `_internal/ResizeHandle behavior`.
+
+**Status of the gaps.** Both halves are closed: Lightbox on 2026-10-15 and ResizeHandle on 2026-10-16.
 
 **Changed from.** No earlier ruling covered this.
 
-**Status.** Ruled 2026-09-17. No later ruling amends it.
+**Status.** Ruled 2026-09-17. The Lightbox fix closes the Lightbox half on 2026-10-15, and the ResizeHandle fix closes the ResizeHandle half on 2026-10-16.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 
@@ -2647,7 +2653,7 @@ The primitive sets the live region, so the system never sets `role` or `aria-liv
 - Windowing: only the newest `maxVisible` toasts render, 5 by default.
 - Deduplication by `uniqueID` and `collisionBehavior`.
 - A timer that pauses on hover, focus and window blur, and resumes with at least 1000ms left.
-- On dismiss, focus moves to the next toast, then the previous one, then returns to its earlier place.
+- On dismiss, focus moves to the next toast, then the previous one, then returns to its earlier place. When windowing evicts the toast that holds focus, focus moves to the oldest toast still showing.
 
 **Actions.** One action and a required dismiss sit in a `ButtonGroup`, so `buttonOrder` governs their order. The action is `priority="secondary"`, which keeps the message the main element and matches the overlaid actions of `Overlay`, and `Toast.Action` requires `altText`. Both buttons take `size="1"`, fixed transient chrome outside the `uiSize` lane.
 
@@ -2655,7 +2661,7 @@ The primitive sets the live region, so the system never sets `role` or `aria-liv
 
 **Mounting.** The consumer mounts `ToastProvider` under the system `Provider`. Without it, `useToast` throws, and no singleton fallback exists for server rendering.
 
-**Gap.** A focused toast that windowing evicts can drop focus to `<body>`. The guarantee that focus never lands on `<body>` covers dismissal only, and this case is a named deferral.
+**Eviction.** Focus never lands on `<body>` when a toast leaves, by dismissal or by windowing. `ToastViewport` reads which toast holds focus while it renders, and when windowing is about to drop that toast while it is still open, a layout effect moves focus to the oldest toast still showing, the toast Dismiss would pick. The FocusEvicted story in `_internal/Toast behavior` guards it. Added 2026-10-09, closing the deferral this entry named.
 
 **Changed from.** No earlier ruling covered this. The action first shipped as a solid `primary` button and moved to `secondary` on the day of the ruling.
 
@@ -2874,11 +2880,12 @@ The field otherwise rests in its neutral state. A red border on a field that rev
 
 - Each embedded input keeps its own local ephemeral channel. The composite error never reaches a child as a `validation` prop, which would render it twice.
 - A standing problem of the composite, a caller `validation` or a combined value out of range, shows once in `FieldGroup.Message` with `role="alert"`, and the group carries `aria-invalid`. Two fields are few enough for one group-level signal, unlike the many items of CheckboxGroup and RadioGroup.
+- Each subfield's `aria-describedby` carries the id of `FieldGroup.Message` through `useGroupItemDescribedBy`, so a screen reader on either input hears the composite error. Added 2026-10-09.
 - On a boundary date, a hint of the available times shows in `FieldGroup.Description` as guidance, and never sets `aria-invalid`.
 
-**Layout.** The row is a flex row under `rt-ds-datetimeinput-*` with a `--space-3` gap. The date grows, the time keeps its own width, and a container query stacks the two below 22rem of group width. No token is new.
+**Layout.** The row is a flex row under `rt-ds-datetimeinput-*` with a `--space-3` gap. The date grows, the time keeps its own width, and a container query stacks the two below 22rem of group width. No token is new. From 2026-10-16 the date takes the room the time does not need, and at the large size the row stacks at 25rem and below. In a 412px row at large the date had cut off at "October 20," while the time box held empty space, because a native input defaults to about 20 characters. The time input is 9ch of its own font, so the split no longer depends on the font: a first build that let the date keep its intrinsic width passed on macOS and clipped the time to 53px on the Linux CI runner. Measured in Inter and Verdana with "September 30, 2026" and "12:45 PM", nothing clips at any size, except the large date in Verdana below 400px, which the 25rem stack covers. The owner chose this on 2026-10-16 over stacking at every width and over a short date format, which still cut off. Guarded by *LargeRowFitsTheDate* in `_internal/DateTimeInput behavior`.
 
-**Not covered.** The group message wired into the `aria-describedby` of each subfield, an asynchronous optimistic layer of `changeAction` and `isLoading`, and InputGroup composition.
+**Not covered.** An asynchronous optimistic layer of `changeAction` and `isLoading`, and InputGroup composition.
 
 **Changed from.** No earlier ruling covered this.
 
@@ -3396,14 +3403,16 @@ A numeric `value` under `1e12` reads as Unix seconds, and a larger one as millis
 
 **Element forms.**
 
-- `href`: a link, a plain `<a>` or the component passed in `as`, such as a router link.
+- `href`: a link. It renders the component passed in `as`, such as a router link, else the app's `LinkProvider` link, else a native `<a>` ([link-and-link-provider](#link-and-link-provider)).
 - `onClick` alone: a reset `<button type="button">` in the link's skin.
 - `isCurrent`: a non-interactive `<span aria-current="page">`.
 - Neither: a plain `<span>`, still a candidate for the current page.
 
 **Separators.** Each item renders its own leading separator span, `aria-hidden`, which takes any React node and defaults to `/`, and CSS hides it on the first item. Screen readers skip the separators, and the crumbs carry the meaning.
 
-**Skin.** A linked crumb is a plain `<a>` styled from `--ds-*` in `--ds-text-weak`, underlined on hover and ringed by the system focus ring, not the Radix `Link`, whose accent skin clashes with the muted trail. The current crumb is set in `--ds-text-strong` in the `default` variant and `--ds-text-weak` in `supporting`, the two variants sit one step apart on the Radix type scale, `--font-size-2` and `--font-size-1` at the default size, and the trail has no collapse, after the reference catalogue's advice to flatten a hierarchy rather than truncate it.
+**Skin.** A linked crumb is styled from `--ds-*` in `--ds-text-weak`, underlined on hover and ringed by the system focus ring, not the Radix `Link`, whose accent skin clashes with the muted trail. The current crumb is set in `--ds-text-strong` in the `default` variant and `--ds-text-weak` in `supporting`, the two variants sit one step apart on the Radix type scale, `--font-size-2` and `--font-size-1` at the default size, and the trail has no collapse, after the reference catalogue's advice to flatten a hierarchy rather than truncate it.
+
+**Current crumb and direction (2026-10-16).** The current crumb, the element carrying `aria-current="page"`, also takes `--ds-font-weight-strong`, so it differs from its siblings by more than colour (WCAG 1.4.1). The two colours measured 2.76:1 against each other, under the 3:1 a colour-only difference needs, and in `supporting` the current crumb and its siblings share `--ds-text-weak`. Under right-to-left the separator mirrors with `scaleX(-1)`, so the default `/` reads as `\`, as upstream Astryx does. The owner chose the weight on 2026-10-16 from a rendered comparison with weight 700 and an underline, which reads as a link here. Guarded by *CurrentCueAndRtl* in `_internal/Breadcrumbs behavior`.
 
 **Changed from.** The system had no breadcrumb trail. This one ports the reference catalogue's component under [catalog-as-specification](#catalog-as-specification).
 
@@ -3489,10 +3498,13 @@ A numeric `value` under `1e12` reads as Unix seconds, and a larger one as millis
 
 - Left and Right arrows move through the gallery.
 - `+` or `=` zooms in, `-` or `_` zooms out, and `0` resets.
+- W, A, S and D pan a zoomed image ([dragging-movement-gaps](#dragging-movement-gaps)).
 
-Double-click toggles between 1x and 2x, and a drag pans. Zoom and pan are off for video and reset on every change of index or source.
+Double-click toggles between 1x and 2x. While zoomed, a drag, the keypad in the bottom-left corner or W, A, S and D pans. Zoom and pan are off for video and reset on every change of index or source. A hovered control keeps its `--ds-scrim` disc under a `--ds-fill-hover` tint, the Thumbnail remove-button rule, because `--ds-fill-strong` resolves to the glyph colour in the dark scale and hid the glyph.
 
 **Gallery.** Previous and next are `disabled` at the ends of the range but stay mounted, because an unmounted focused control drops focus to `<body>`. The `N / M` counter is `aria-hidden`, and `useAnnounce` politely announces each change of index within an open session, never on mount, open or close, since the dialog's `aria-label` names the current item on open.
+
+**Open.** Measured on 2026-10-15: when Previous turns `disabled` at the start of the gallery while it holds focus, focus drops to `<body>`, so the claim above and the caption on the Keyboard page do not hold. Not fixed in the pan change, and kept for review.
 
 **API.** `isOpen`, `onOpenChange`, `media` (one `LightboxMedia` or an array, each `{src, alt, caption?, type?}`), `index`, `defaultIndex` (0), `onIndexChange`, `hasZoom` (false), `hasAutoPlay` (false) and `ref`. The `useLightbox` hook returns `open(i)`, `close`, `isOpen`, `index`, `element`, `triggerProps` and `getTriggerProps(i)`, and the trigger props carry `role="button"`, `tabIndex=0`, `aria-haspopup="dialog"` and Enter and Space activation.
 
@@ -3502,7 +3514,7 @@ Double-click toggles between 1x and 2x, and a drag pans. Zoom and pan are off fo
 
 - [standard-dialog](#standard-dialog) ships the system `Dialog` and keeps Lightbox on the raw Radix Dialog on purpose, because Lightbox steers its own focus, skins its own content and animates its own tiers.
 - [focus-return-on-close](#focus-return-on-close) returns focus to the opener on close, which Radix does not do for a dialog opened from a prop.
-- [dragging-movement-gaps](#dragging-movement-gaps) records pan as drag-only, a failure of WCAG 2.5.7 Dragging Movements, recorded and not fixed.
+- [dragging-movement-gaps](#dragging-movement-gaps) records pan as drag-only, a failure of WCAG 2.5.7 Dragging Movements, and its Lightbox fix of 2026-10-15 adds the pan keypad and W, A, S and D.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 
@@ -3653,7 +3665,7 @@ Double-click toggles between 1x and 2x, and a drag pans. Zoom and pan are off fo
 
 **Item.** This ruling amends [item-row-primitive](#item-row-primitive). An `Item` with `href` renders `linkComponent ?? useLinkComponent()`, so a nav row routes through a framework `<Link>` and still composes `Item`. With no provider the output is identical to the old output, so List, TreeList and Token do not change.
 
-**Not covered.** The ruling left the adoption by Breadcrumbs and Outline to a named later change.
+**Breadcrumbs and Outline.** Both route their links through `useLinkComponent()`. Outline renders the provided component directly. A linked `BreadcrumbItem` renders `as ?? useLinkComponent()`, so an explicit `as` still wins over the provider. With no provider both render a native `<a>`, and the output is unchanged. The Breadcrumbs adoption landed 2026-10-09, guarded by the play of the Breadcrumbs Routing page.
 
 **Changed from.** `Item` rendered its `href` body as a plain `<a>`, and the system offered no link wrapper and no router seam.
 
@@ -3798,13 +3810,13 @@ Double-click toggles between 1x and 2x, and a drag pans. Zoom and pan are off fo
 - Several regions take a fixed number of hooks, never hooks inside `.map()`.
 - The drag listeners are removed on unmount in the middle of a drag.
 
-**Gap.** `useResizable` is not exported, so a consumer has no supported way to drive `ResizeHandle` outside `Layout` and `SideNav` ([internal-hooks](#internal-hooks)). The drag is the only pointer route to a size, a WCAG 2.5.7 failure ([dragging-movement-gaps](#dragging-movement-gaps)).
+**Gap.** `useResizable` is not exported, so a consumer has no supported way to drive `ResizeHandle` outside `Layout` and `SideNav` ([internal-hooks](#internal-hooks)). A pointer that cannot drag reaches a size through the step chips a hover, focus or tap shows on the handle ([dragging-movement-gaps](#dragging-movement-gaps)).
 
 **Changed from.** No earlier ruling covered this.
 
 **Status.** Ruled 2026-07-17.
 
-- [dragging-movement-gaps](#dragging-movement-gaps) records the drag as the only pointer route to a size, a WCAG 2.5.7 failure.
+- [dragging-movement-gaps](#dragging-movement-gaps) recorded the drag as the only pointer route to a size, a WCAG 2.5.7 failure, and its ResizeHandle fix of 2026-10-16 adds the step chips.
 - [seam-ownership](#seam-ownership) makes the handle the one part that draws the seam at a resizable panel.
 - [resize-handle-seam](#resize-handle-seam) makes the handle the 1px hairline itself, with the grab zone as a `::before` overlay that takes no layout.
 - [focus-ring](#focus-ring) replaces the inset focus hairline with the accent focus ring around the grab zone.
@@ -5760,7 +5772,9 @@ The icon and the title move together because they are one visual unit, and a lar
 
 **Measured.** At a 1920px viewport, before the change, the 65ch cap stopped the body 358px short of a 990px content box sized by the reader.
 
-**Gap.** `Callout` caps its own text inline at `--ds-text-measure`, and a page cannot override an inline style without `!important`, which the system bans. A Callout inside a resizable pane keeps the cap until `Callout` changes. On 2026-09-19 the thread summary in the mail pane was such a Callout, 574px wide inside the 990px box.
+**Callout.** `Callout` caps its body through the class `rt-ds-callout-body` at `--ds-text-measure`, and the cap lifts inside any `[data-resizable]` ancestor, the marker that `Layout.Panel` and a resizable `SideNav` set. Measured 2026-10-09: inside a 1000px `[data-resizable]` pane a long Callout body is 922px wide, and in a plain 1000px box it stays 574px. The Usage play of the Callout page guards both. Until 2026-10-09 the cap was an inline style, which a page could not override without `!important`.
+
+**Open.** A content region beside a resizable panel, such as `Layout.Content` in the mail reading view, carries no `data-resizable`, so a Callout there keeps the cap. Whether the release covers that region is not ruled.
 
 **Changed from.** The mail reading body took the 65ch cap like any prose and left the right third of the pane empty.
 
@@ -6160,13 +6174,13 @@ The click route is the same machine, not an addition beside it.
 
 **Container.** The `container` prop defaults to the body. The docs measurement host passes its own element, which keeps its specimens in frame.
 
-**Gap.** A toast raised before the modal opened paints above the scrim but takes no pointer input, because the Radix DismissableLayer disables pointer events on every layer older than the modal. A click there closes the dialog and does not run Undo.
+**Older toasts.** A toast raised before the modal opened is a layer older than the modal, so the Radix DismissableLayer writes an inline `pointer-events: none` on it. Each toast root passes `pointer-events: auto` as its own inline style, which Radix's Slot merges after the layer's, so that toast also takes the click. A click on its Undo runs Undo once, and the dialog stays open. Added 2026-10-09.
 
-**Guard.** The UnderModal story in `_internal/Toast behavior` checks that Undo is a button named "Undo", that it is the hit target, and that a click on it runs Undo and leaves the dialog open.
+**Guard.** The UnderModal story in `_internal/Toast behavior` checks that Undo is a button named "Undo", that it is the hit target, and that a click on it runs Undo and leaves the dialog open. The UnderModalPreexisting story checks the same for a toast raised before the modal opened.
 
 **Changed from.** A toast raised inside a modal sat in an `aria-hidden` subtree, so Chrome marked its Undo button ignored (Radix issue 4115). It also painted under the scrim, because the root `Theme` of the Provider is a `z-index: 0` stacking context that caps `--ds-z-toast`, and a click on Undo closed the dialog.
 
-**Status.** Ruled 2026-09-24. The pointer half landed the same day. No later ruling amends it.
+**Status.** Ruled 2026-09-24. The pointer half landed the same day. On 2026-10-09 the older-toast case closed, as **Older toasts** records.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 
@@ -6188,6 +6202,8 @@ The click route is the same machine, not an addition beside it.
 
 **Changed from.** A Title-only Dialog or AlertDialog carried an `aria-describedby` that referenced no element, and a comment in `Dialog.tsx` claimed that Radix warned in development.
 
+**Upstream fix (2026-10-19).** Radix fixed the broken reference in its release of 20 July 2026 (pull request 4031), which `radix-ui` v1.7.0 and later carry. The repository's lockfile moved to `radix-ui` v1.8.1 on 2026-10-19. The wrappers stay, because the package accepts `radix-ui` from v1.1.3, and a consumer locked to an older release still needs them.
+
 **Status.** Ruled 2026-09-24. No later ruling amends it.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
@@ -6206,11 +6222,11 @@ The click route is the same machine, not an addition beside it.
 
 **Guarded by.** The `Menu states` play holds five options at 1 of 5 through 5 of 5.
 
-**Not covered.** `MultiSelect` options, recorded as a gap in [documentation-and-markup-gaps](#documentation-and-markup-gaps).
+**MultiSelect.** The numbering lives in `optionNumbering.ts`, and the `MultiSelect` listbox uses it too, so its options read their position and the count the same way. Its `Menu states` play holds five options at 1 of 5 through 5 of 5. Added 2026-10-09.
 
 **Changed from.** Options in the open listbox carried no `aria-posinset` or `aria-setsize`.
 
-**Status.** Ruled 2026-09-24. No later ruling amends it.
+**Status.** Ruled 2026-09-24. On 2026-10-09 the numbering extended to `MultiSelect`, closing item 6 of [documentation-and-markup-gaps](#documentation-and-markup-gaps).
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 
@@ -6252,13 +6268,15 @@ The click route is the same machine, not an addition beside it.
 
 **Why.** Radix puts no tab stop, role or name on the viewport. Chromium 130 and later make such a scroller a tab stop exposed as a generic node, and in a browser without that behaviour the overflow is beyond keyboard reach.
 
+**Table.** `Table.Root` applies the same measure to the viewport Radix renders inside it. While the columns outrun the container and the table holds nothing focusable, the viewport takes `tabindex="0"`, `role="region"` and `aria-labelledby` pointing at the table's caption, visible or hidden. A caller's `tabIndex` goes on the viewport, never on the root, because focus on the root cannot scroll the table. The caller's value wins there, as it does on ScrollArea, and the table keeps one stop. Ruled 2026-10-14. An overflowing table with no name warns once in development. ScrollArea and Table share the measurement in `hooks/useOverflowStop.ts`. Added 2026-10-09.
+
 **Not covered.** A scroller that holds a focusable element keeps no stop of its own, because the keyboard reaches it through that element.
 
-**Guard.** The `TextOnlyStop` play in `_internal/ScrollArea behavior`.
+**Guard.** The `TextOnlyStop` play in `_internal/ScrollArea behavior`, and the `OverflowStop` play in `_internal/Table behavior`.
 
-**Changed from.** A bare text scroller carried no tabindex and read as a generic node.
+**Changed from.** A bare text scroller carried no tabindex and read as a generic node. A table wider than its container scrolled with no keyboard stop.
 
-**Status.** Ruled 2026-09-24. No later ruling amends it.
+**Status.** Ruled 2026-09-24. On 2026-10-09 the measure extended to `Table`, as **Table** records.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 
@@ -6282,7 +6300,9 @@ The click route is the same machine, not an addition beside it.
 
 **Guard.** `_internal/Forced colors` enables emulation through the `cdp()` of Vitest Browser Mode and asserts every edge and state in both palettes.
 
-**Gap.** Composite surfaces still draw their edge with box-shadow: Tokenizer, SegmentedControl, Slider, CheckboxCards, RadioCards and Card. A standalone StatusDot shows nothing under forced colours ([status-dot-edges](#status-dot-edges)).
+**Composite surfaces (2026-10-16).** Every Token chip, a Tokenizer chip included, the SegmentedControl track and every Card, CheckboxCards and RadioCards item take a 1px `ButtonBorder` edge, and the Slider track takes a border and its thumb a 2px `ButtonText` ring on `Canvas`. The selected segment, the Slider range, a checked card's band and a pressed ToggleButton or ToggleButtonGroup item paint `Highlight`, and a label on `Highlight` opts out of forcing so the browser paints no `Canvas` backplate behind its `HighlightText`. A focused checked RadioCards card had shown the text colour on its band. The band now paints `Highlight`. The guard measures all of them in both palettes.
+
+**Status dots (2026-10-19).** Forcing painted every StatusDot `Canvas`, so a standalone dot vanished and an Avatar dot showed only a ring, the same for every status. Each dot now opts out of forcing, keeps its success, error, warning or neutral fill, and takes a 1px `CanvasText` border on top of the fill, standalone and on an Avatar. The border carries the outline, because a fill alone can read under 3:1 against `Canvas`: warning measured 1.58:1 in the light palette. Online stays on success and busy on error. The owner ruled this on 2026-10-19 over the system `Highlight` colour for online, which means "selected" everywhere else here. The guard measures the border and the fills in both palettes ([status-dot-edges](#status-dot-edges)).
 
 **Changed from.** The system carried no forced-colours rules, so every control edge and every checked state vanished under forcing.
 
@@ -6886,7 +6906,7 @@ On a scrim only the stack changes, to `--accent-ring-stack-scrim` on the dark sc
 
 **Limits.**
 
-- A part that takes oxblood through the ref paints the theme's colour in a server render until the page hydrates.
+- A part that takes oxblood through the ref painted the theme's colour in a server render until the page hydrated. From 2026-10-16, Link renders its own anchor through Radix's `asChild` for oxblood, and TextField and TextArea spread the attribute onto their inner field, which an `oxblood.css` arm reads from the root with `:has()`, so all three carry oxblood in a server render. DataList.Label stays on the ref, because its Radix label has no `asChild` and no inner element that takes our props, and a Link given the caller's own `asChild` child keeps the ref route. The owner chose this on 2026-10-16 over copying the Radix label. Guarded by `oxblood-ssr.node-check.ts` and *OxbloodLinkAndField* in `_internal/Oxblood parts`.
 - The Badge wrapper locks the soft variant, so the Radix solid Badge keeps step 9 under its ink.
 - A gray part three nested neutral themes deep takes the base fill, and a dark theme inside a light theme inside a dark page reads the light arm.
 - Under forced colours both selected roles stay on the root. A later consumer of either role on a coloured part needs the roles block of `forced-colors.css` widened to `.radix-themes, .radix-themes :where([data-accent-color]:not([data-accent-color=""]))`.
@@ -6918,7 +6938,7 @@ On a scrim only the stack changes, to `--accent-ring-stack-scrim` on the dark sc
 3. The Tabs entry in `registry.json` carried no `priorArt`, so the React Aria and Radix Tabs sources reached it only through [tab-panel-focus-clearance](#tab-panel-focus-clearance). Closed, see Status.
 4. A comment in `DragHandle.tsx` and one in `PowerSearch.tsx` describe a neutral focus ring, which [focus-ring](#focus-ring) replaced with the accent.
 5. Two tables on the Table Usage page have no accessible name.
-6. `MultiSelect` options carry no `aria-posinset` or `aria-setsize`, which [select-option-numbering](#select-option-numbering) added to `Select` only.
+6. `MultiSelect` options carried no `aria-posinset` or `aria-setsize`, which [select-option-numbering](#select-option-numbering) added to `Select` only. Closed, see Status.
 
 **Correction.** One [part-colour-parity](#part-colour-parity) limit no longer holds. The Colors page alias reader reads every block for a colour, so it names oxblood-9 as the error fill of gold, orange, tomato, red, ruby, crimson and pink again.
 
@@ -6927,6 +6947,7 @@ On a scrim only the stack changes, to `--accent-ring-stack-scrim` on the dark sc
 **Status.** Ruled 2026-09-27.
 
 - [tabs-open-on-navigation](#tabs-open-on-navigation) closes item 3 and gives the Tabs entry in `registry.json` its `priorArt`.
+- [select-option-numbering](#select-option-numbering) closes item 6 on 2026-10-09: `MultiSelect` options now carry `aria-posinset` and `aria-setsize`.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 
@@ -6938,7 +6959,7 @@ On a scrim only the stack changes, to `--accent-ring-stack-scrim` on the dark sc
 
 **Every status dot, Progress bar and checked control clears WCAG 3:1 and APCA Lc 30 with its centre colour unchanged, and the description of a selected row reads in strong ink.**
 
-**Dot edges.** The warning, success and error StatusDot each stack a 1px inset edge on the fill, `--warning-dot-edge`, `--success-dot-edge` or `--error-dot-edge`, and the centre keeps its colour. The Avatar status dot is a StatusDot and paints the same edge inside its 2px cutout border.
+**Dot edges.** The warning, success and error StatusDot each stack a 1px inset edge on the fill, `--warning-dot-edge`, `--success-dot-edge` or `--error-dot-edge`, and the centre keeps its colour. The Avatar status dot is a StatusDot and paints the same edge. From 2026-10-19 its opaque fill runs to the dot's edge, with no cutout border, and a 1px `--ds-stroke-strong` stroke sits on top of the fill, over its dot edge. The owner ruled this on 2026-10-19: the 2px `--ds-bg-base` cutout had left a 4px centre and vanished on a light page, and the avatar's border showed through a translucent ring. The rim reads 5.27:1 or more against the page for the default brand, where the warning dot read 3.13:1 against its old ring. *AvatarDotFillsToEdge* in `_internal/StatusDot behavior` holds the rim, and `_internal/Non-text contrast` holds it against the four surfaces.
 
 **Edge steps.** Each edge is the lightest step of Radix's black alpha scale in light, or white alpha scale in dark, whose stack on the fill clears both floors against the page, the subtle recess, a card and a panel on all six neutrals. `theme.css` keys the table on the brand at the theme root, because the status families shift with the brand ([brand-status-collision-gate](#brand-status-collision-gate)) and never with a part, so a part given its own colour takes the edge of the brand whose fill it paints.
 
@@ -6961,7 +6982,7 @@ Light error and dark warning and success clear on the fill alone and keep the tr
 
 **Limits.**
 
-- A standalone StatusDot shows nothing under forced colours, because `forced-colors.css` names no rule for it ([forced-colours](#forced-colours)). This ruling leaves that gap open.
+- A standalone StatusDot showed nothing under forced colours, because `forced-colors.css` named no rule for it. Closed on 2026-10-19 ([forced-colours](#forced-colours)).
 - A seeded brand keeps the transparent base of the three dot edges, as [part-fill-edge](#part-fill-edge) records for the part edge.
 - A dot given `isPulsing` dims to half opacity at the low point of its pulse, edge included, so the floors hold at rest.
 - The change bar in `CodeEditor.stories.tsx` stacks the warning and success edges, but it sits in a showcase, which [showcases-and-fixture](#showcases-and-fixture) bars from a play, so no guard holds it.

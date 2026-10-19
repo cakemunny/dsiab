@@ -466,11 +466,22 @@ export const Ramp: Story = {
         throw new Error(`--ds-text-${key}-size (${size}) != --font-size-${step} (${native})`);
       }
     }
-    // Inter actually loaded — roman + italic across weights (no faux styles).
-    await document.fonts.ready;
-    for (const spec of ["400 16px Inter", "600 16px Inter", "700 16px Inter",
-      "italic 400 16px Inter", "italic 600 16px Inter", "italic 700 16px Inter"]) {
-      if (!document.fonts.check(spec)) throw new Error(`Inter not loaded for "${spec}" (faux style risk)`);
+    // Inter ships each weight and style the ramp uses, so none renders as a faux style. The assertion reads
+    // the face `fonts.load` returns. `fonts.check` cannot do this job: font matching hands back the nearest
+    // declared face, so it reports true for a missing italic 600 (it loads 700 italic) and even for a family
+    // with no faces at all. `fonts.load` also requests the face, which `fonts.ready` alone never does for a
+    // style the page does not render.
+    const specs = [
+      ["400", "normal"], ["600", "normal"], ["700", "normal"],
+      ["400", "italic"], ["600", "italic"], ["700", "italic"],
+    ] as const;
+    for (const [weight, style] of specs) {
+      const spec = `${style === "italic" ? "italic " : ""}${weight} 16px Inter`;
+      const faces = await document.fonts.load(spec);
+      if (!faces.some((f) => f.family.replace(/["']/g, "") === "Inter" && f.weight === weight && f.style === style)) {
+        const got = faces.map((f) => `${f.family} ${f.weight} ${f.style}`).join(", ") || "no face";
+        throw new Error(`Inter ${weight} ${style} is not shipped; "${spec}" loads ${got} (faux style risk)`);
+      }
     }
   },
 };

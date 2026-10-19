@@ -160,6 +160,8 @@ export const ConditionalClampAndHint: Story = {
     await waitFor(() => ti.getAttribute("aria-invalid") === "true"); // aria-invalid WHILE pending (out of range)
     ti.blur();
     await waitFor(() => ti.value !== "7:00 AM"); // silently reverts
+    // The announcer writes on the next animation frame, so wait for the words before reading them.
+    await waitFor(() => /at or after 9:00 AM/i.test(liveAssertive())).catch(() => undefined);
     if (!/at or after 9:00 AM/i.test(liveAssertive()))
       throw new Error(`a too-early time must revert with TimeInput's assertive announce; got "${liveAssertive()}"`);
     if (calls("dtClamp").some((v) => v === "2026-07-03T07:00"))
@@ -260,6 +262,18 @@ export const CompositeStandingError: Story = {
       throw new Error("the single validation marker must be the composite group root (wrapping both sub-fields)");
     if (dateField(scope)!.getAttribute("aria-invalid") === "true" || timeField(scope)!.getAttribute("aria-invalid") === "true")
       throw new Error("the sub-inputs must not carry aria-invalid (the composite owns the standing signal)");
+
+    // Each sub-input points at the composite message through aria-describedby, so a screen reader that lands on
+    // the date or the time hears the reason, not only the alert on appearance.
+    const msgId = alerts[0].id;
+    if (!msgId) throw new Error("the composite message must carry an id for aria-describedby to reference");
+    for (const [name, input] of [["date", dateField(scope)!], ["time", timeField(scope)!]] as const) {
+      const ids = (input.getAttribute("aria-describedby") ?? "").split(/\s+/);
+      if (!ids.includes(msgId))
+        throw new Error(`the ${name} input's aria-describedby must include the composite message id "${msgId}"; got "${input.getAttribute("aria-describedby")}"`);
+      for (const id of ids.filter(Boolean))
+        if (!document.getElementById(id)) throw new Error(`the ${name} input's aria-describedby names "${id}", which no element carries`);
+    }
   },
 };
 
@@ -303,5 +317,33 @@ export const DisabledReasonSoftDisablesBoth: Story = {
     await sleep(80);
     if (di.getAttribute("aria-controls")) throw new Error("a soft-disabled date field must not open the calendar");
     if (calls("dtSoft").length !== 0) throw new Error("a soft-disabled composite must not fire onValueChange");
+  },
+};
+
+/** At the large size the full date shows beside the time in a 412px row, and at 25rem and below the row stacks.
+ *  Measured with the longest date and time a field shows. */
+export const LargeRowFitsTheDate: Story = {
+  render: () => (
+    <Box p="4" style={{ display: "grid", gap: 24 }}>
+      {[412, 390].map((w) => (
+        <Box key={w} data-testid={`dt-large-${w}`} style={{ width: w }}>
+          <DateTimeInput label={`Booking ${w}`} size="3" defaultValue={dt("2026-09-30T12:45")} onValueChange={() => {}} />
+        </Box>
+      ))}
+    </Box>
+  ),
+  play: async ({ canvasElement }) => {
+    const row = (w: number) => canvasElement.querySelector<HTMLElement>(`[data-testid="dt-large-${w}"] .rt-ds-datetimeinput-row`)!;
+    const input = (w: number, part: "date" | "time") => row(w).querySelector<HTMLInputElement>(`.rt-ds-datetimeinput-${part} input`)!;
+    await waitFor(() => /September 30, 2026/.test(input(412, "date").value)).catch(() => {
+      throw new Error(`the date must show "September 30, 2026"; it shows "${input(412, "date").value}"`);
+    });
+    const clipped = (el: HTMLInputElement) => el.scrollWidth > el.clientWidth;
+    for (const w of [412]) {
+      if (getComputedStyle(row(w)).flexDirection !== "row") throw new Error(`at ${w}px the large row must stay one row`);
+      if (clipped(input(w, "date"))) throw new Error(`at ${w}px the date must not cut off (${input(w, "date").scrollWidth} > ${input(w, "date").clientWidth})`);
+      if (clipped(input(w, "time"))) throw new Error(`at ${w}px the time must not cut off (${input(w, "time").scrollWidth} > ${input(w, "time").clientWidth})`);
+    }
+    if (getComputedStyle(row(390)).flexDirection !== "column") throw new Error("at 25rem and below the large row must stack");
   },
 };

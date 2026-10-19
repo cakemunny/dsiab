@@ -1,0 +1,66 @@
+# Runs the four checks that AGENTS.md names on every push to main and on every pull request, so a
+# failing commit shows red on GitHub.
+#
+#   1. npx ds-check src            the shipped rules, over the system's own source
+#   2. tsc --noEmit                the type gate
+#   3. npm run test:tokens         the source-scanning guards and the pure-logic suites, after a
+#                                  build, because one guard reads the built package
+#   4. vitest run                  the story suite in the browser, light and dark, with axe
+#
+# The story suite drives Playwright's own Chromium. `scripts/browser.mjs` picks it when
+# DS_BROWSER_PATH is unset ([[test-browser-order]]), and that is the case on this runner.
+#
+# Step 4 calls `vitest run` and not `npm test`, because `npm test` runs `test:tokens` again as its
+# pretest hook, and step 3 already ran it.
+
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Install Playwright's Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: ds-check
+        run: npx ds-check src
+
+      - name: Type check
+        run: ./node_modules/.bin/tsc --noEmit
+
+      # The citation guard resolves `dsiab/DECISIONS.md` and `dsiab/registry.json` through the
+      # package exports, which point into `dist/`. A clean checkout has no `dist/`, so the build
+      # runs first.
+      - name: Build
+        run: npm run build
+
+      - name: Source-scanning guards
+        run: npm run test:tokens
+
+      - name: Story suite
+        run: npx vitest run

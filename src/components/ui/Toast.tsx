@@ -21,6 +21,7 @@ import { ButtonGroup } from "./ButtonGroup";
 import { Button } from "./Button";
 import { IconButton } from "./IconButton";
 import { useUISize } from "../../theme/SizeContext";
+import { useIsomorphicLayoutEffect } from "../../hooks/useIsomorphicLayoutEffect";
 
 /**
  * Toast — transient feedback that floats over content, built on the raw
@@ -136,23 +137,29 @@ export function useToast(): (options: ToastOptions) => DismissFn {
 }
 
 // ---- focus handoff (DOM-driven, so it's independent of render timing) ---------
+// The live (not closing) toasts in DOM order, which is oldest first.
+function liveToastEls(): HTMLElement[] {
+  return Array.from(document.querySelectorAll<HTMLElement>("[data-ds-toast-id]")).filter(
+    (el) => el.getAttribute("data-state") !== "closed",
+  );
+}
+
+// Focus the first control in a toast; true when focus landed inside it.
+function focusToast(el: HTMLElement | null | undefined): boolean {
+  if (!el) return false;
+  const target = el.querySelector<HTMLElement>('button, [href], [tabindex]:not([tabindex="-1"])') ?? el;
+  target.focus();
+  return document.activeElement !== document.body && el.contains(document.activeElement);
+}
+
 // When the dismissed toast holds focus, move it to the NEXT live toast, else the
 // PREVIOUS, else restore the pre-chain element — never let it drop to <body>.
 function handoffFocus(id: string, restore: HTMLElement | null) {
   const dismissed = document.querySelector<HTMLElement>(`[data-ds-toast-id="${id}"]`);
   if (!dismissed || !dismissed.contains(document.activeElement)) return;
-  const live = Array.from(document.querySelectorAll<HTMLElement>("[data-ds-toast-id]")).filter(
-    (el) => el.getAttribute("data-state") !== "closed",
-  );
+  const live = liveToastEls();
   const idx = live.indexOf(dismissed);
-  const focusInside = (el: HTMLElement | null | undefined): boolean => {
-    if (!el) return false;
-    const target =
-      el.querySelector<HTMLElement>('button, [href], [tabindex]:not([tabindex="-1"])') ?? el;
-    target.focus();
-    return document.activeElement !== document.body && el.contains(document.activeElement);
-  };
-  if (focusInside(live[idx + 1]) || focusInside(live[idx - 1])) return;
+  if (focusToast(live[idx + 1]) || focusToast(live[idx - 1])) return;
   if (restore && document.contains(restore)) restore.focus();
 }
 
@@ -294,9 +301,10 @@ export interface ToastViewportProps {
  *  `[data-is-root-theme='true']`), so inside it `--ds-z-toast` only orders the rail among the app's own
  *  layers. A modal's overlay portals to the body after it, so a toast raised under an open modal painted
  *  beneath the scrim, and a click at Undo landed on the dialog and closed it. At body level the rail's
- *  z-index stacks above the scrim. One case stays open: a toast raised BEFORE the modal opened paints
- *  above the scrim but takes no pointer input, because Radix's DismissableLayer turns pointer events off
- *  on every layer older than the modal.
+ *  z-index stacks above the scrim. A toast raised BEFORE the modal opened is a layer older than the
+ *  modal, so Radix's DismissableLayer writes an inline `pointer-events: none` on it. Each toast root
+ *  passes `pointer-events: auto` as its own inline style, which Radix's Slot merges after the layer's,
+ *  so that toast still takes the click.
  *
  *  Why `aria-live="off"`: a modal Dialog hides everything outside itself with `aria-hidden` (the
  *  aria-hidden package), and that package leaves any `[aria-live]` node and its ancestors alone. The
@@ -305,11 +313,24 @@ export interface ToastViewportProps {
  *  speaks once. */
 export function ToastViewport({ position = "bottom-end", maxVisible = 5, hotkey, label, container }: ToastViewportProps) {
   const { entries } = useManager();
-  // Known limitation: handoffFocus guarantees a dismissed toast never drops focus to <body>, but that
-  // covers DISMISSAL only. A toast that currently holds focus and is evicted here by windowing (a newer
-  // toast pushes it past maxVisible) can still drop focus to <body>. Accepted as a named deferral —
-  // windowing an actively-focused toast is a rare race (see DECISIONS [[toast-feedback-tier]]).
   const visible = entries.slice(-maxVisible); // window: only the newest maxVisible render
+  // Eviction keeps focus off <body>, as dismissal does. The read happens during render, while the toast
+  // that holds focus is still in the DOM: if windowing is about to drop it while it is still open, the
+  // layout effect moves focus to the oldest toast still showing, the one Dismiss would pick for it.
+  const evictedFocus = useRef(false);
+  const focusedId =
+    typeof document === "undefined"
+      ? null
+      : document.activeElement?.closest?.("[data-ds-toast-id]")?.getAttribute("data-ds-toast-id");
+  evictedFocus.current =
+    focusedId != null &&
+    entries.some((e) => e.id === focusedId && e.open) &&
+    !visible.some((e) => e.id === focusedId);
+  useIsomorphicLayoutEffect(() => {
+    if (!evictedFocus.current) return;
+    evictedFocus.current = false;
+    if (document.activeElement == null || document.activeElement === document.body) focusToast(liveToastEls()[0]);
+  });
   // The body is read after mount, so a server render emits nothing and hydration matches.
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -420,6 +441,9 @@ function ToastItem({ entry }: { entry: Entry }) {
       className="rt-ds-toast"
       data-tone={tone}
       data-ds-toast-id={id}
+      // A toast older than an open modal gets an inline `pointer-events: none` from Radix's
+      // DismissableLayer. Slot merges this style after the layer's, so the toast keeps the click.
+      style={{ pointerEvents: "auto" }}
       type={isError ? "foreground" : "background"}
       duration={Infinity}
       open={open}

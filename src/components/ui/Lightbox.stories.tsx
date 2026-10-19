@@ -40,7 +40,7 @@ const ANATOMY_PARTS: [number, string, string][] = [
   [2, "Close", "a scrim-disc IconButton, top-right. Named 'Close'."],
   [3, "Counter", "top-left 'N / M' (gallery only, aria-hidden — the polite announcer speaks the change instead)."],
   [4, "Prev / next", "mid-height edge buttons (gallery only). Disabled — NOT unmounted — at the range ends, so reaching a boundary never drops focus to <body>."],
-  [5, "Media", "the image (object-fit: contain) or a <video controls>. With hasZoom, double-click or +/-/0 zooms an image; drag to pan."],
+  [5, "Media", "the image (object-fit: contain) or a <video controls>. With hasZoom, double-click or +/-/0 zooms an image. While zoomed, drag, the W A S D keypad in the bottom-left corner, or the W A S D keys pan it."],
   [6, "Caption", "optional text below the media, per item."],
 ];
 
@@ -317,7 +317,7 @@ export const Usage: Story = {
       <PageHeader title="Lightbox · Usage" standfirst={DEFINITION} />
       <Section title="A single image" lead="Give any trigger an onClick that opens the Lightbox with one media item. A Thumbnail is the natural launcher.">
         <SingleDemo />
-        <Caption>Click the tile to open. With <Code>hasZoom</Code>, double-click the image (or press <Code>+</Code>) to zoom, then drag to pan.</Caption>
+        <Caption>Click the tile to open. With <Code>hasZoom</Code>, double-click the image (or press <Code>+</Code>) to zoom. Then drag, click the keypad in the bottom-left corner, or press <Code>W</Code> <Code>A</Code> <Code>S</Code> <Code>D</Code> to pan.</Caption>
       </Section>
 
       <Rule />
@@ -413,6 +413,7 @@ export const Keyboard: Story = {
           <KeyRow keys={["+", "="]} action={<>Zoom in (images, when <Code>hasZoom</Code>) — zoom is fully keyboard-operable, not mouse-only.</>} src="system" />
           <KeyRow keys={["-"]} action={<>Zoom out.</>} src="system" />
           <KeyRow keys={["0"]} action={<>Reset zoom + pan to fit.</>} src="system" />
+          <KeyRow keys={["W", "A", "S", "D"]} action={<>Pan a zoomed image up, left, down or right, a quarter of the way to an edge per press. The keys match by position, so the same four keys pan on any keyboard layout, and the keypad shows the user's own letters where the browser reports the layout. The arrow keys keep paging.</>} src="system" />
         </Box>
         <Caption>Prev / next are <Code>disabled</Code> at the range ends but stay mounted, so Tab focus never falls out of the dialog to the page body.</Caption>
       </Section>
@@ -428,7 +429,7 @@ const PROPS: PropDef[] = [
   { name: "index", type: "number", desc: <>Current gallery index — provide to control the component.</>, source: "Lightbox.tsx" },
   { name: "defaultIndex", type: "number", def: "0", desc: <>Initial index for uncontrolled gallery usage.</>, source: "Lightbox.tsx" },
   { name: "onIndexChange", type: "(i) => void", desc: <>Called when the index changes via prev/next.</>, source: "Lightbox.tsx" },
-  { name: "hasZoom", type: "boolean", def: "false", desc: <>Enable zoom (double-click or <Code>+</Code>/<Code>-</Code>/<Code>0</Code>; images only) + drag-to-pan.</>, source: "Lightbox.tsx" },
+  { name: "hasZoom", type: "boolean", def: "false", desc: <>Enable zoom (double-click or <Code>+</Code>/<Code>-</Code>/<Code>0</Code>; images only). While zoomed, drag, the keypad or <Code>W</Code> <Code>A</Code> <Code>S</Code> <Code>D</Code> pans.</>, source: "Lightbox.tsx" },
   { name: "hasAutoPlay", type: "boolean", def: "false", desc: <>Autoplay video on open.</>, source: "Lightbox.tsx" },
 ];
 
@@ -450,7 +451,7 @@ export const Props: StoryObj<PropsArgs> = {
   args: { mode: "gallery", hasZoom: true, hasAutoPlay: false },
   argTypes: {
     mode: { control: "inline-radio", options: ["single", "gallery"], description: "One image, or a navigable gallery.", table: { category: "Content" } },
-    hasZoom: { control: "boolean", description: "Double-click / +/-/0 to zoom images; drag to pan.", table: { category: "Behavior" } },
+    hasZoom: { control: "boolean", description: "Double-click / +/-/0 to zoom images; drag, the keypad or W A S D to pan.", table: { category: "Behavior" } },
     hasAutoPlay: { control: "boolean", description: "Autoplay video on open (no effect on images).", table: { category: "Behavior" } },
   },
   parameters: { controls: { disable: false } },

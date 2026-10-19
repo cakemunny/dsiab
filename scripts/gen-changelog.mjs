@@ -41,7 +41,7 @@
  *         CHANGELOG.md                            (ships to consumers via package.json files[])
  */
 import { execFileSync } from "node:child_process";
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { readPrivateTerms } from "./private-terms.mjs";
@@ -50,6 +50,31 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const REF = process.argv[2] || "main";
 const OUT = resolve(ROOT, "src/foundations/changelog.generated.ts");
 const OUT_MD = resolve(ROOT, "CHANGELOG.md");
+
+/* The history must be this package's own. In a clone nested inside another repository, `git log`
+   reads the host's history and writes it into both outputs. So git runs from ROOT, and the script
+   stops before it writes anything unless ROOT is the top of its repository. The same check guards
+   `scripts/install-git-hooks.mjs`. */
+const git = (...args) => execFileSync("git", args, { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+let toplevel = "";
+try {
+  toplevel = git("rev-parse", "--show-toplevel").trim();
+} catch {
+  // Not a git checkout. The check below names ROOT and stops.
+}
+const samePath = (a, b) => {
+  try {
+    return realpathSync(a) === realpathSync(b);
+  } catch {
+    return false;
+  }
+};
+if (!samePath(toplevel, ROOT)) {
+  console.error(
+    `gen-changelog: ${ROOT} is not the root of its git repository${toplevel ? ` (the root is ${toplevel})` : ""}. Nothing was written.`,
+  );
+  process.exit(1);
+}
 
 // A commit summary cites a ruling as [[name]]. Only a name with a `### name` entry in the ledger
 // becomes a cross-link, so a mistyped or retired name in a commit subject stays plain text.
@@ -85,7 +110,7 @@ const RS = "\x1e"; // record separator (survives multi-line bodies)
 const raw = execFileSync(
   "git",
   ["log", REF, "--no-merges", "--date=short", `--format=%H${US}%ad${US}%s${US}%b${RS}`],
-  { encoding: "utf8", maxBuffer: 32 * 1024 * 1024 },
+  { cwd: ROOT, encoding: "utf8", maxBuffer: 32 * 1024 * 1024 },
 );
 
 const CONVENTIONAL = /^(\w+)(?:\(([^)]+)\))?(!)?:\s*(.+)$/;
@@ -173,7 +198,7 @@ function releaseTags() {
   const listed = execFileSync(
     "git",
     ["tag", "--list", "--format=%(refname:short)" + US + "%(objectname)" + US + "%(*objectname)"],
-    { encoding: "utf8" },
+    { cwd: ROOT, encoding: "utf8" },
   );
   const position = new Map(order.map((hash, i) => [hash, i]));
   return listed

@@ -99,10 +99,13 @@
    its 26 built-ins, on the theme root and on any part inside it that sets oxblood as its own colour
    ([[part-colour-parity]]). Radix maps a part's colour with a bare [data-accent-color] rule, and a part given oxblood
    takes the same map here, so it paints what the same part paints on an oxblood theme. Both arms
-   are (0,1,0). The --oxblood-* re-resolve per mode through the .dark block above, and a part
+   are (0,1,0). The two :has() arms colour a TextField or TextArea root from its inner field, which carries the
+   attribute in a server render, before the ref sets it on the root. The --oxblood-* re-resolve per mode through the .dark block above, and a part
    inherits them from its theme, so this one block covers light and dark. */
 .radix-themes:where([data-accent-color="oxblood"]),
-.radix-themes :where([data-accent-color="oxblood"]) {
+.radix-themes :where([data-accent-color="oxblood"]),
+.radix-themes :where(.rt-TextFieldRoot:has(> .rt-TextFieldInput[data-accent-color="oxblood"])),
+.radix-themes :where(.rt-TextAreaRoot:has(> .rt-TextAreaInput[data-accent-color="oxblood"])) {
   --accent-1: var(--oxblood-1);
   --accent-2: var(--oxblood-2);
   --accent-3: var(--oxblood-3);

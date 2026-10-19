@@ -107,6 +107,8 @@ export const SilentRevertOnInvalid: Story = {
     input.blur();
     await waitFor(() => input.value === "2:30 PM");
     if (input.getAttribute("aria-invalid") === "true") throw new Error("aria-invalid must clear on revert");
+    // The announcer writes on the next animation frame, so wait for the words before reading them.
+    await waitFor(() => /didn.t recognize/i.test(liveAssertive())).catch(() => undefined);
     if (!/didn.t recognize/i.test(liveAssertive()) || !/2:30 PM/.test(liveAssertive()))
       throw new Error(`revert must announce assertively with the kept time; got "${liveAssertive()}"`);
     if (calls("tiRevert").length !== 0) throw new Error("a reverted invalid entry must never fire onValueChange");

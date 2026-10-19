@@ -199,6 +199,33 @@ export const FocusHandoff: Story = {
   },
 };
 
+/** [[toast-feedback-tier]] focus on eviction — when windowing pushes out the toast that holds focus, focus moves to
+ *  the oldest toast still showing, the one Dismiss would pick, and never drops to <body>. */
+export const FocusEvicted: Story = {
+  render: () => (
+    <Sandbox maxVisible={2}>
+      <Spawner
+        specs={[{ id: "spawn", label: "spawn", make: () => ({ body: "Notice.", tone: "error" }) }]}
+      />
+    </Sandbox>
+  ),
+  play: async ({ canvasElement }) => {
+    for (let i = 0; i < 2; i++) click(canvasElement, "spawn");
+    await waitFor(() => liveToasts().length === 2);
+    const [t1, t2] = liveToasts();
+    // Focus the OLDEST toast's dismiss control. A scripted click on the spawner moves no focus.
+    const dismiss1 = t1.querySelector<HTMLElement>('[aria-label="Dismiss"]')!;
+    dismiss1.focus();
+    if (!t1.contains(document.activeElement)) throw new Error("precondition: focus should be inside the oldest toast");
+    click(canvasElement, "spawn");
+    await waitFor(() => !t1.isConnected);
+    await waitFor(() => t2.contains(document.activeElement), 1000).catch(() => {
+      const at = document.activeElement;
+      throw new Error(`evicting the focused toast must move focus to the oldest toast still showing; focus is on <${at?.tagName.toLowerCase()}>`);
+    });
+  },
+};
+
 /** Motion — a toast arrives on the moderate tier and leaves on the SLOWER expressive tier, and the
  *  entry is held in the DOM long enough for that exit to finish. The exit half is the one that bites:
  *  the manager hard-removes the node on a timer (EXIT_GC_MS in Toast.tsx) that is independent of the
@@ -414,8 +441,8 @@ function clickAt(x: number, y: number): Element {
  *  Undo. The rail now carries `aria-live="off"`, which aria-hidden leaves alone with its ancestors.
  *  The pointer half: the rail portals to the body, so the toast paints above the scrim, Undo is the hit
  *  target at its centre, and a click there runs Undo while the dialog stays open. A toast raised BEFORE
- *  the modal opened is not covered, because Radix turns pointer events off on every older layer. The
- *  toast body text is excluded from the contrast rule, as on ActionCluster. */
+ *  the modal opened has its own story below. The toast body text is excluded from the contrast rule, as
+ *  on ActionCluster. */
 export const UnderModal: Story = {
   parameters: { a11y: { context: { exclude: [".rt-ds-toast-body"] } } },
   render: () => (
@@ -466,5 +493,60 @@ export const UnderModal: Story = {
     if (underModalUndo.runs !== 1) throw new Error(`one click at Undo must run Undo once; it ran ${underModalUndo.runs} times`);
     if (!dialog.isConnected || dialog.getAttribute("data-state") !== "open")
       throw new Error(`a click at Undo on a toast must leave the modal open; the dialog is ${dialog.isConnected ? `data-state="${dialog.getAttribute("data-state")}"` : "unmounted"}`);
+  },
+};
+
+/** A toast raised BEFORE the modal opened is a layer older than the modal, so Radix's DismissableLayer writes
+ *  an inline `pointer-events: none` on it. The toast root passes its own `pointer-events: auto`, which Slot
+ *  merges last, so the hit test at Undo still lands on Undo, Undo runs once, and the dialog stays open. */
+const preexistingUndo = { runs: 0 };
+export const UnderModalPreexisting: Story = {
+  parameters: { a11y: { context: { exclude: [".rt-ds-toast-body"] } } },
+  render: () => (
+    <Sandbox>
+      <Flex gap="2">
+        <Spawner
+          specs={[{
+            id: "raise-before",
+            label: "Raise toast",
+            make: () => ({ body: "Project archived.", tone: "info", autoHide: false, action: { label: "Undo", altText: "Undo archiving the project", onClick: () => { preexistingUndo.runs += 1; } } }),
+          }]}
+        />
+        <ModalRaiser />
+      </Flex>
+    </Sandbox>
+  ),
+  play: async ({ canvasElement }) => {
+    preexistingUndo.runs = 0;
+    click(canvasElement, "raise-before");
+    const el = await waitFor(() => document.querySelector<HTMLElement>(".rt-ds-toast"));
+    canvasElement.querySelector<HTMLElement>('[data-testid="open-modal"]')!.click();
+    const dialog = await waitFor(() => document.querySelector<HTMLElement>('[role="dialog"]'));
+
+    const undo = Array.from(el.querySelectorAll<HTMLElement>("button")).find((b) => b.textContent === "Undo");
+    if (!undo) throw new Error("precondition: the Undo action should render in the toast");
+    const centre = () => {
+      const r = undo.getBoundingClientRect();
+      return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+    };
+    let hit: Element | null = null;
+    await waitFor(() => {
+      const { x, y } = centre();
+      hit = document.elementFromPoint(x, y);
+      return hit != null && undo.contains(hit);
+    }).catch(() => {
+      const at = hit as Element | null;
+      throw new Error(`a toast raised before a modal must still take the pointer; the hit test at Undo returned <${at?.tagName.toLowerCase()} class="${at?.getAttribute("class")}">`);
+    });
+
+    const { x, y } = centre();
+    const clicked = clickAt(x, y);
+    await waitFor(() => preexistingUndo.runs > 0, 1000).catch(() => {
+      throw new Error(`a click at Undo on a toast raised before the modal must run Undo; it reached <${clicked.tagName.toLowerCase()} class="${clicked.getAttribute("class")}"> and Undo ran ${preexistingUndo.runs} times`);
+    });
+    await sleep(150);
+    if (preexistingUndo.runs !== 1) throw new Error(`one click at Undo must run Undo once; it ran ${preexistingUndo.runs} times`);
+    if (!dialog.isConnected || dialog.getAttribute("data-state") !== "open")
+      throw new Error(`a click at Undo must leave the modal open; the dialog is ${dialog.isConnected ? `data-state="${dialog.getAttribute("data-state")}"` : "unmounted"}`);
   },
 };

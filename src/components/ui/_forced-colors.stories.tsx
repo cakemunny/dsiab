@@ -13,6 +13,15 @@ import { Tabs } from "./Tabs";
 import { Callout } from "./Callout";
 import { Pagination } from "./Pagination";
 import { Token } from "./Token";
+import { SegmentedControl } from "./SegmentedControl";
+import { Slider } from "./Slider";
+import { CheckboxCards } from "./CheckboxCards";
+import { RadioCards } from "./RadioCards";
+import { Card } from "./Card";
+import { ToggleButton } from "./ToggleButton";
+import { ToggleButtonGroup } from "./ToggleButtonGroup";
+import { StatusDot } from "./StatusDot";
+import { Avatar } from "./Avatar";
 import { contrastRatio, flatten, parseColor, type RGBA } from "../../foundations/_assert";
 
 /* Test-only guard for src/tokens/forced-colors.css (Windows contrast themes). Underscore-prefixed, so
@@ -193,6 +202,43 @@ function Sheet() {
       <Box data-fc="dots">
         <Pagination variant="dots" page={2} onChange={() => {}} totalPages={5} label="Slides" />
       </Box>
+      <Flex gap="3" align="center" wrap="wrap">
+        <Token data-fc="tk-chip">Design</Token>
+        <SegmentedControl.Root defaultValue="eur" aria-label="Currency" data-fc="seg">
+          <SegmentedControl.Item value="usd">USD</SegmentedControl.Item>
+          <SegmentedControl.Item value="eur">EUR</SegmentedControl.Item>
+        </SegmentedControl.Root>
+        <ToggleButton defaultPressed data-fc="tb-on">Bold</ToggleButton>
+        <ToggleButton data-fc="tb-off">Italic</ToggleButton>
+        <Box data-fc="tbg">
+          <ToggleButtonGroup.Root type="single" defaultValue="left" label="Alignment">
+            <ToggleButtonGroup.Item value="left">Left</ToggleButtonGroup.Item>
+            <ToggleButtonGroup.Item value="right">Right</ToggleButtonGroup.Item>
+          </ToggleButtonGroup.Root>
+        </Box>
+      </Flex>
+      <Box width="300px" data-fc="slider"><Slider aria-label="Volume" defaultValue={[60]} /></Box>
+      <Flex gap="3" wrap="wrap">
+        <Box width="200px" data-fc="cbc">
+          <CheckboxCards.Root defaultValue={["a"]} columns="1" aria-label="Alerts">
+            <CheckboxCards.Item value="a">Email</CheckboxCards.Item>
+            <CheckboxCards.Item value="b">SMS</CheckboxCards.Item>
+          </CheckboxCards.Root>
+        </Box>
+        <Box width="200px" data-fc="rc">
+          <RadioCards.Root defaultValue="a" columns="1" aria-label="Plan card">
+            <RadioCards.Item value="a">Pro</RadioCards.Item>
+            <RadioCards.Item value="b">Starter</RadioCards.Item>
+          </RadioCards.Root>
+        </Box>
+        <Box width="200px"><Card data-fc="card">Orbit, 12 members</Card></Box>
+      </Flex>
+      <Flex gap="4" align="center" data-fc="dots-status">
+        <StatusDot variant="success" label="Online" data-fc="sd-success" />
+        <StatusDot variant="warning" label="Away" data-fc="sd-warning" />
+        <Avatar fallback="AL" status="online" />
+        <Avatar fallback="AL" status="away" />
+      </Flex>
     </Flex>
   );
 }
@@ -359,6 +405,42 @@ export const EdgesAndStates: Story = {
           }
         }
 
+        // A Tokenizer chip, a SegmentedControl, a Slider and the cards draw their edges with box-shadow, so
+        // forced-colors.css gives each a real edge, and their selected parts paint Highlight.
+        const COMPOSITE = "forced-colors.css layer 2, the composite edges";
+        edge("Token chip", q('[data-fc="tk-chip"]'), "::after", COMPOSITE);
+        edge("SegmentedControl track", q('[data-fc="seg"]'), "::after", COMPOSITE);
+        edge("Slider track", q('[data-fc="slider"] .rt-SliderTrack'), null, COMPOSITE);
+        edge("Slider thumb", q('[data-fc="slider"] .rt-SliderThumb'), "::after", COMPOSITE);
+        sheet.querySelectorAll('[data-fc="cbc"] .rt-CheckboxCardsItem, [data-fc="rc"] .rt-RadioCardsItem').forEach((c, i) => edge(`card picker ${i + 1}`, c, "::after", COMPOSITE));
+        edge("Card", q('[data-fc="card"]'), "::after", COMPOSITE);
+
+        const segFill = fillOf(q('[data-fc="seg"] .rt-SegmentedControlIndicator'), "::before");
+        onFill("selected segment", segFill);
+        mark("selected segment label", parseColor(getComputedStyle(q('[data-fc="seg"] [data-state="on"]')).color), segFill);
+        onFill("Slider range", fillOf(q('[data-fc="slider"] .rt-SliderRange'), null));
+        const highlight = systemColour(sheet, "Highlight");
+        for (const [label, sel] of [["checked CheckboxCards", '[data-fc="cbc"] .rt-CheckboxCardsItem'], ["checked RadioCards", '[data-fc="rc"] .rt-RadioCardsItem[data-state="checked"]']] as const) {
+          const band = parseColor(getComputedStyle(q(sel), "::after").outlineColor);
+          if (ratio(band, highlight) > 1.05) fail(`${label}: its band paints ${getComputedStyle(q(sel), "::after").outlineColor}, not Highlight (${MARKS})`);
+        }
+        for (const [label, sel] of [["pressed ToggleButton", '[data-fc="tb-on"]'], ["pressed ToggleButtonGroup item", '[data-fc="tbg"] [data-state="on"]']] as const) {
+          const fill = fillOf(q(sel), null);
+          onFill(label, fill);
+          mark(`${label} label`, parseColor(getComputedStyle(q(sel)).color), fill);
+        }
+        offFill("ToggleButton at rest", fillOf(q('[data-fc="tb-off"]'), null));
+        offFill("ToggleButtonGroup item at rest", fillOf(q('[data-fc="tbg"] [data-state="off"]'), null));
+
+        // [[status-dot-edges]]. Every StatusDot keeps its status fill under a 1px CanvasText border, standalone and on an Avatar.
+        const DOT = "forced-colors.css, the StatusDot rule";
+        const statusDots = [...sheet.querySelectorAll<HTMLElement>('[data-fc="dots-status"] .rt-ds-statusdot')];
+        if (statusDots.length !== 4) fail(`expected 4 status dots, found ${statusDots.length}`);
+        statusDots.forEach((d) => edge(`status dot ${d.getAttribute("aria-label")}${d.classList.contains("rt-ds-avatar-status") ? " on an Avatar" : ""}`, d, null, DOT));
+        const fills = statusDots.map((d) => fillOf(d, null));
+        if (fills.some((f) => ratio(f, canvas) < 1.05)) fail(`a status dot paints Canvas, so it lost its status fill (${DOT})`);
+        if (ratio(fills[0], fills[1]) < 1.05) fail(`the online and away dots paint the same fill, so they no longer differ (${DOT})`);
+
         // FOCUS. The ring is an outline, which forcing keeps. It must stay at 3:1 on Canvas.
         const ring = (label: string, target: HTMLElement, ringEl: Element, pseudo: string | null) => {
           target.focus({ focusVisible: true } as FocusOptions);
@@ -373,6 +455,14 @@ export const EdgesAndStates: Story = {
         ring("Button focus", q('[data-fc="secondary"]'), q('[data-fc="secondary"]'), null);
         ring("TextField focus", q('[data-fc="field"] input'), q('[data-fc="field"] .rt-TextFieldRoot'), null);
         ring("Checkbox focus", q('[data-fc="cb-off"]'), q('[data-fc="cb-off"]'), "::before");
+        // A focused checked RadioCards card: the 4px ring is the item's outline, and the band under it paints
+        // Highlight, never the text colour (the gap this file recorded on 2026-09-24).
+        const rcOn = q('[data-fc="rc"] .rt-RadioCardsItem[data-state="checked"]');
+        ring("checked RadioCards focus", rcOn, rcOn, null);
+        rcOn.focus({ focusVisible: true } as FocusOptions);
+        const focusedBand = parseColor(getComputedStyle(rcOn, "::after").outlineColor);
+        if (ratio(focusedBand, highlight) > 1.05) fail(`focused checked RadioCards: its band paints ${getComputedStyle(rcOn, "::after").outlineColor}, not Highlight`);
+        rcOn.blur();
       }
     } finally {
       // axe runs next, on the page as a reader sees it, so the emulation goes off here too.

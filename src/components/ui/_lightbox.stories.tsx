@@ -7,8 +7,8 @@ import { assertDisabledPaintDiffers } from "../../foundations/_disabledPaint";
 /* Test-only behavior for Lightbox — kept OUT of the docs stories (System/Lightbox). Underscore-prefixed →
    registry- and story-order-guard-exempt, grouped under _internal. Opening a fullscreen portal here is
    fine (the on-view flash concern is a docs-story rule). Covers open/close + Escape, gallery nav +
-   disabled-not-unmounted ends, the counter, keyboard zoom (D18 addition), and the polite announcer that
-   fires ONLY on an in-session index change. */
+   disabled-not-unmounted ends, the counter, keyboard zoom (D18 addition), the pan keypad and W A S D
+   ([[dragging-movement-gaps]]), and the polite announcer that fires ONLY on an in-session index change. */
 
 async function waitFor<T>(fn: () => T | null | undefined | false, timeout = 3000): Promise<T> {
   const t0 = performance.now();
@@ -169,6 +169,76 @@ export const KeyboardZoom: Story = {
     // "0" → reset (no transform).
     dialog.dispatchEvent(new KeyboardEvent("keydown", { key: "0", bubbles: true }));
     await waitFor(() => image().style.transform === "");
+
+    (document.querySelector('[aria-label="Close"]') as HTMLButtonElement).click();
+    await gone(".rt-ds-lightbox");
+  },
+};
+
+/** Pan without a drag (WCAG 2.5.7 and 2.1.1). While zoomed, a keypad pans one step per press and W A S D do the
+ *  same, matched by physical key. A key at its edge is aria-disabled, painted as disabled, and keeps focus. The
+ *  arrow keys keep paging, and zooming out with focus on a key moves focus to the dialog, not <body>. */
+export const PanKeypad: Story = {
+  render: () => <Harness media={GALLERY} hasZoom />,
+  play: async ({ canvasElement }) => {
+    (canvasElement.querySelector('[data-testid="open"]') as HTMLButtonElement).click();
+    const dialog = await waitFor(() => document.querySelector<HTMLElement>(".rt-ds-lightbox"));
+    const image = () => dialog.querySelector<HTMLImageElement>("img.rt-ds-lightbox-img")!;
+    const key = (label: string) => dialog.querySelector<HTMLButtonElement>(`.rt-ds-lightbox-pan [aria-label="${label}"]`);
+    const panY = () => Number(/translate\([^,]+, (-?[\d.]+)px\)/.exec(image().style.transform)?.[1] ?? NaN);
+    const press = (code: string, init: KeyboardEventInit = {}) =>
+      (document.activeElement ?? dialog).dispatchEvent(new KeyboardEvent("keydown", { code, key: code.slice(3).toLowerCase(), bubbles: true, cancelable: true, ...init }));
+
+    if (dialog.querySelector(".rt-ds-lightbox-pan")) throw new Error("the keypad must not show at 1x");
+    dialog.dispatchEvent(new KeyboardEvent("keydown", { key: "+", bubbles: true }));
+    await waitFor(() => key("Pan up")).catch(() => {
+      throw new Error("zooming in must show the pan keypad");
+    });
+    const labels = [...dialog.querySelectorAll(".rt-ds-lightbox-pan button")].map((b) => b.getAttribute("aria-label"));
+    if (labels.join() !== "Pan up,Pan left,Pan down,Pan right")
+      throw new Error(`the keys must read W, then A S D, in the tab order; got ${labels.join(", ")}`);
+    if (key("Pan up")!.getAttribute("aria-keyshortcuts")?.length !== 1)
+      throw new Error("each key must name its letter in aria-keyshortcuts");
+
+    // W pans toward the top. A modified W (Ctrl, Cmd, Alt) is left to the browser.
+    press("KeyW", { ctrlKey: true });
+    await new Promise((r) => setTimeout(r, 60));
+    if (panY() !== 0) throw new Error(`Ctrl+W must not pan; the image moved to ${panY()}px`);
+    press("KeyW");
+    await waitFor(() => panY() > 0).catch(() => {
+      throw new Error(`W must pan the image toward its top; transform is "${image().style.transform}"`);
+    });
+    for (let i = 0; i < 6; i++) press("KeyW");
+    await waitFor(() => key("Pan up")!.getAttribute("aria-disabled") === "true").catch(() => {
+      throw new Error("at the top edge the W key must be marked disabled");
+    });
+    assertDisabledPaintDiffers(key("Pan up")!, key("Pan down")!, "the pan key at its edge");
+    const kbd = (label: string) => getComputedStyle(key(label)!.querySelector(".rt-Kbd")!).color;
+    if (kbd("Pan up") === kbd("Pan down")) throw new Error("the letter on a key at its edge must dim with its arrow");
+
+    // A pointer click on a key pans too, and a key that reaches its edge while focused keeps focus.
+    const down = key("Pan down")!;
+    down.focus();
+    for (let i = 0; i < 9; i++) down.click();
+    await waitFor(() => down.getAttribute("aria-disabled") === "true");
+    if (document.activeElement !== down) throw new Error(`the key at its edge must keep focus; focus is on <${document.activeElement?.tagName.toLowerCase()}>`);
+    const atBottom = panY();
+    down.click();
+    await new Promise((r) => setTimeout(r, 60));
+    if (panY() !== atBottom) throw new Error("a click on a key at its edge must not move the image");
+
+    // Zooming out with focus on a key unmounts the keypad. Radix's focus trap keeps focus in the dialog.
+    down.dispatchEvent(new KeyboardEvent("keydown", { key: "0", bubbles: true }));
+    await waitFor(() => !dialog.querySelector(".rt-ds-lightbox-pan"));
+    if (document.activeElement === document.body) throw new Error("zooming out from a pan key must not drop focus to <body>");
+
+    // The arrow keys still page while zoomed, and paging leaves the zoom.
+    dialog.dispatchEvent(new KeyboardEvent("keydown", { key: "+", bubbles: true }));
+    await waitFor(() => key("Pan up"));
+    dialog.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }));
+    await waitFor(() => dialog.querySelector(".rt-ds-lightbox-counter")?.textContent === "2 / 4").catch(() => {
+      throw new Error("ArrowRight must page to the next image while zoomed");
+    });
 
     (document.querySelector('[aria-label="Close"]') as HTMLButtonElement).click();
     await gone(".rt-ds-lightbox");

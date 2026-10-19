@@ -177,6 +177,39 @@ export const DotsRovingSelection: Story = {
   },
 };
 
+/** Dots under right-to-left — the row lays out right to left, so the arrows follow reading order:
+ *  ArrowLeft moves to the next page and ArrowRight to the previous one, with the same wrap. */
+export const DotsRovingRtl: Story = {
+  render: () => (
+    <div dir="rtl">
+      <Box p="4">
+        <Controlled initial={1} totalPages={5} variant="dots" label="Dots roving, right to left" />
+      </Box>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const group = canvasElement.querySelector<HTMLElement>(".rt-ds-pagination__dots")!;
+    if (getComputedStyle(group).direction !== "rtl") throw new Error("precondition: the dots must lay out right to left");
+    const dots = () => Array.from(group.querySelectorAll<HTMLButtonElement>(".rt-ds-pagination__dot"));
+    const activeIndex = () => dots().findIndex((d) => d.getAttribute("aria-current") === "page");
+
+    dots()[0].focus();
+    press(dots()[0], "ArrowLeft");
+    await waitFor(() => activeIndex() === 1).catch(() => {
+      throw new Error(`under right-to-left, ArrowLeft on dot 1 must select page 2; the active dot is ${activeIndex() + 1}`);
+    });
+    if (document.activeElement !== dots()[1]) throw new Error("focus must be on dot 2 after ArrowLeft");
+
+    press(dots()[1], "ArrowRight");
+    await waitFor(() => activeIndex() === 0);
+    if (read(spy.page) !== 1) throw new Error(`under right-to-left, ArrowRight on dot 2 must select page 1; got ${spy.page}`);
+
+    press(dots()[0], "ArrowRight");
+    await waitFor(() => activeIndex() === 4);
+    if (read(spy.page) !== 5) throw new Error(`under right-to-left, ArrowRight on the first dot must wrap to page 5; got ${spy.page}`);
+  },
+};
+
 /** The polite live region announces "Page N of M" on a user-driven change. */
 export const PageAnnounce: Story = {
   render: () => (

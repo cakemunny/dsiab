@@ -114,8 +114,11 @@ export const ToolbarRoot = forwardRef<ComponentRef<typeof RadixToolbar.Root>, To
   { start, center, end, orientation = "horizontal", size, dividers, style, asChild, children, ...rest },
   ref,
 ) {
-  const resolvedStep = useResolvedSize("control", size) as ToolbarSize;
-  const uiSize = CONTROL_STEP_TO_UISIZE[resolvedStep] ?? "small";
+  // Seed a tier only for a plain step, as ChatComposer does. A responsive size object has no single
+  // tier, so nothing is seeded and every composed control keeps the ambient tier from above. A fallback
+  // tier here would shrink every child to `small` whenever `size` arrived as an object.
+  const resolvedStep = useResolvedSize<ToolbarSize>("control", size);
+  const seedTier = typeof resolvedStep === "string" ? CONTROL_STEP_TO_UISIZE[resolvedStep] : undefined;
   const horizontal = orientation === "horizontal";
   const hasCenter = center != null && center !== false;
 
@@ -164,27 +167,27 @@ export const ToolbarRoot = forwardRef<ComponentRef<typeof RadixToolbar.Root>, To
   // reports a child that declares its own `role`, which would replace the toolbar role that the
   // roving focus and the whole widget's semantics rest on.
   if (asChild) checkAsChild("Toolbar.Root", children, { element: "div", owns: { role: "toolbar" } });
-  return (
-    <SizeContext.Provider value={uiSize}>
-      <ToolbarOrientationContext.Provider value={orientation}>
-        <RadixToolbar.Root
-          ref={ref}
-          asChild={asChild}
-          orientation={orientation}
-          style={{ ...layout, ...style }}
-          {...rest}
-        >
-          {/* The slot target, when there is one. `Slottable` tells Slot WHICH child is the consumer's
-              element; the three regions beside it become that element's children, so the toolbar
-              becomes their `nav` / `section` / `header` instead of nesting inside one. */}
-          {asChild ? <Slottable>{children}</Slottable> : null}
-          {renderSlot(start, "start")}
-          {renderSlot(center, "center")}
-          {renderSlot(end, "end")}
-        </RadixToolbar.Root>
-      </ToolbarOrientationContext.Provider>
-    </SizeContext.Provider>
+  const toolbar = (
+    <ToolbarOrientationContext.Provider value={orientation}>
+      <RadixToolbar.Root
+        ref={ref}
+        asChild={asChild}
+        orientation={orientation}
+        style={{ ...layout, ...style }}
+        {...rest}
+      >
+        {/* The slot target, when there is one. `Slottable` tells Slot WHICH child is the consumer's
+            element; the three regions beside it become that element's children, so the toolbar
+            becomes their `nav` / `section` / `header` instead of nesting inside one. */}
+        {asChild ? <Slottable>{children}</Slottable> : null}
+        {renderSlot(start, "start")}
+        {renderSlot(center, "center")}
+        {renderSlot(end, "end")}
+      </RadixToolbar.Root>
+    </ToolbarOrientationContext.Provider>
   );
+
+  return seedTier ? <SizeContext.Provider value={seedTier}>{toolbar}</SizeContext.Provider> : toolbar;
 });
 
 export interface ToolbarSeparatorProps extends ComponentProps<typeof RadixToolbar.Separator> {}

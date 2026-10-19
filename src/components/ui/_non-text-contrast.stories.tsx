@@ -1638,8 +1638,8 @@ export const GreyAndWhiteParts: Story = {
      recess, a card and a panel. The warning, success and error dots stack their
      dot edge, the accent dot stacks --accent-part-edge and the neutral dot
      clears on its own fill.
-   · each Avatar status dot at 3:1 and Lc 30 against its cutout ring, which
-     paints the page colour on any surface.
+   · each Avatar status dot at 3:1 and Lc 30 against the four surfaces. Its fill
+     runs to its edge, with a --ds-stroke-strong stroke stacked over its dot edge.
    · every part that stacks --accent-part-edge ([[part-fill-edge]], [[radio-cards-band-edge]], [[indicator-mark-edges]]) at 3:1 and Lc 30
      against each of the four surfaces, and the Progress bar and the Slider
      range against their track on each surface as well. PartsWithoutText holds
@@ -1736,14 +1736,13 @@ export const DotsEdgesAndSelectedRows: Story = {
             };
             // The same four surfaces [[drop-target-dash]] and [[neutral-part-stacks]] hold a part on.
             const surfaces = (Object.keys(DASH_SURFACES) as (keyof typeof DASH_SURFACES)[]).map((name) => ({ name, colour: surfaceColour(theme, { name, layers: DASH_SURFACES[name] }) }));
-            const page = surfaces[0].colour;
 
-            // The Avatar status dots, against the cutout ring around each.
+            // The Avatar status dots. The fill runs to the dot's edge with no ring, so the rim, every inset stroke
+            // flattened on the fill, is held against each surface the avatar can sit on.
             for (const status of STATUS_DOT_PRESENCE) {
               const dot = theme.querySelector<HTMLElement>(`[data-part="avatars"] .rt-ds-avatar-status[aria-label="${status[0].toUpperCase()}${status.slice(1)}"]`);
               if (!dot) throw new Error(`${at} the ${status} Avatar dot did not render`);
-              const ring = flatten(paint(dot, null, "borderTopColor"), page);
-              hold(`Avatar ${status} dot`, insetEdge(dot, null, flatten(paint(dot, null), ring)), "cutout ring", ring);
+              for (const surface of surfaces) hold(`Avatar ${status} dot`, insetEdge(dot, null, flatten(paint(dot, null), surface.colour)), surface.name, surface.colour);
             }
 
             const dots = STATUS_DOT_VARIANTS.map((variant) => ({ variant, el: find("dots", `.rt-ds-statusdot[data-variant="${variant}"]`) }));

@@ -24,7 +24,8 @@ function typeStyle(type: string): CSSProperties {
   return {
     fontFamily: "var(--code-font-family)", fontSize: 11, fontWeight: 700, letterSpacing: "0.02em",
     padding: "1px 6px", borderRadius: "var(--ds-radius-2)", flexShrink: 0, alignSelf: "flex-start",
-    color: breaking ? "var(--ds-text-error)" : "var(--ds-text-weak)",
+    // Strong ink on the error tint, as a field in an error state paints its text. The error ink measured 4.42:1 there.
+    color: breaking ? "var(--ds-text-strong)" : "var(--ds-text-weak)",
     background: breaking ? "var(--ds-fill-error-weak)" : "var(--ds-fill-weak)",
     textTransform: "uppercase",
   };

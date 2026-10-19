@@ -440,6 +440,20 @@
 .radix-themes.rt-SelectContent.rt-r-size-3:where(:not(.rt-high-contrast)) .rt-SelectLabel { padding-inline: var(--space-4); }
 .radix-themes.rt-SelectContent.rt-r-size-3:where(:not(.rt-high-contrast)) .rt-SelectSeparator { margin-inline-start: var(--space-4); }
 
+/* Long option labels stay on screen and end in an ellipsis, as the trigger, MultiSelect and Typeahead do.
+   Radix sizes the menu to its widest option with no upper bound, so a long label pushed the panel past the
+   viewport. The panel is capped at the width Radix reports as available, and the items fill it. Radix wraps
+   the items in an unclassed `display: table` div with an inline `min-width: 100%`, so that div takes a fixed
+   table layout at full width; without it each item keeps its natural width and no ellipsis fires. */
+.radix-themes.rt-SelectContent.rt-PopperContent { max-width: var(--radix-select-content-available-width); }
+.radix-themes.rt-SelectContent .rt-SelectViewport > div { width: 100%; table-layout: fixed; }
+.radix-themes.rt-SelectContent .rt-SelectItem > span:not(.rt-SelectItemIndicator) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Group label → --ds-text-weak (Radix paints it gray-a10; the system's weak text is gray-11). */
 .radix-themes.rt-SelectContent:where(:not(.rt-high-contrast)) .rt-SelectLabel { color: var(--ds-text-weak); }
 
@@ -859,6 +873,16 @@
   .radix-themes .rt-ds-datetimeinput-row { flex-direction: column; }
   .radix-themes .rt-ds-datetimeinput-date,
   .radix-themes .rt-ds-datetimeinput-time { width: 100%; }
+}
+/* The time field is as wide as its text, 9ch of its own font, so it scales with the font and never gives its room
+   away, and the date takes the rest of the row. A native input defaults to about 20 characters, which made the time
+   box 251px at large and cut the date off. Measured in Inter and Verdana with "September 30, 2026" and "12:45 PM":
+   nothing clips at any size down to 22rem, except the large date in Verdana below 400px. So the large row stacks
+   below 25rem rather than 22rem. */
+.radix-themes .rt-ds-datetimeinput-time .rt-TextFieldInput { width: 9ch; flex: none; }
+@container (max-width: 25rem) {
+  .radix-themes .rt-ds-datetimeinput-row:has(.rt-TextFieldRoot.rt-r-size-3) { flex-direction: column; }
+  .radix-themes .rt-ds-datetimeinput-row:has(.rt-TextFieldRoot.rt-r-size-3) > :is(.rt-ds-datetimeinput-date, .rt-ds-datetimeinput-time) { width: 100%; }
 }
 
 /* ---- FileInput ([[file-input]]) — a dropzone file picker: the ONE wave-3 component earning genuinely net-new UI, a
@@ -1871,12 +1895,44 @@
 /* Pointer hover reveals only the hover-driven modes, and only on real hover devices (no sticky touch
    hover; the tap-toggle above covers coarse pointers). */
 @media (hover: hover) {
-  .radix-themes .rt-ds-overlay[data-show-on="hover"]:hover .rt-ds-overlay-scrim,
-  .radix-themes .rt-ds-overlay[data-show-on="hover-or-focus"]:hover .rt-ds-overlay-scrim {
+  .radix-themes .rt-ds-overlay[data-show-on="hover"]:not([data-dismissed]):hover .rt-ds-overlay-scrim,
+  .radix-themes .rt-ds-overlay[data-show-on="hover-or-focus"]:not([data-dismissed]):hover .rt-ds-overlay-scrim {
     opacity: 1;
     pointer-events: auto;
     transition: opacity var(--ds-duration-moderate) var(--ds-ease-entry);
   }
+}
+/* Escape dismisses the veil (WCAG 1.4.13, [[overlay-dismissible-gap]]). Overlay.tsx writes `data-dismissed`. The hover
+   rules above exclude it, so a hover-revealed veil hides. A veil that focus holds keeps the focused control
+   visible (WCAG 2.4.7): the veil turns transparent, and every scrim child that neither holds focus nor sits
+   inside the focused control hides. The scrim itself keeps opacity 1, because the focused control would
+   inherit a lower one. */
+.radix-themes .rt-ds-overlay[data-dismissed]:focus-within .rt-ds-overlay-scrim {
+  background-color: transparent;
+  /* The transparent veil lets a click reach the media it no longer covers. The focused control takes clicks
+     again below, because pointer-events inherits. */
+  pointer-events: none;
+}
+.radix-themes .rt-ds-overlay[data-dismissed]:focus-within .rt-ds-overlay-scrim :not(:focus-within):not(:focus *) {
+  opacity: 0;
+  pointer-events: none;
+}
+.radix-themes .rt-ds-overlay[data-dismissed]:focus-within .rt-ds-overlay-scrim :focus {
+  pointer-events: auto;
+}
+/* The ring's colour is measured against the veil ([[focus-ring]]), and the veil is gone, so Overlay.tsx places a
+   hollow plate of the veil's colour behind the focused control. Measured over media: 5.86:1 on the story gradient,
+   3.20:1 on white, 7.03:1 on mid-grey and 11.69:1 on black, against 1.49 to 2.20:1 with no plate. The plate is its
+   own element and paints nothing on the control, so a danger, hovered or disabled border stays the control's own.
+   It sits before the scrim in the DOM, so the transparent scrim and the control paint above it. */
+.radix-themes .rt-ds-overlay-plate {
+  position: absolute;
+  box-sizing: border-box;
+  border: 6px solid var(--ds-scrim);
+  pointer-events: none;
+}
+.radix-themes .rt-ds-overlay-plate[data-scrim="light"] {
+  border-color: var(--ds-scrim-light);
 }
 
 /* ===== Toast (D7 tones / D8 lifecycle / D9 interactions) ====================
@@ -2363,7 +2419,22 @@
      row 1 taller — it never floats to the middle of the block, matching the top-aligned icon. */
   align-self: start;
   margin-inline-start: var(--space-3); /* gap from the text */
+  /* The action box is one line tall, and the button centres in it and reaches evenly above and below. A
+     button taller than the line (32px on a 20px line at medium, 40px on 24px at large) then centres on the first
+     line instead of hanging below it, and the row keeps the height of the text. The box wraps, so align-content
+     centres its one line of actions. */
+  height: var(--callout-icon-height);
+  align-items: center;
+  align-content: center;
 }
+
+/* Body measure: the body rides --ds-text-measure (65ch) so long copy stays legible in a page column.
+   A class, not an inline style, so the rule below can release it without !important.
+   Inside a resizable pane ([data-resizable]: Layout.Panel, a resizable SideNav) the reader sets the
+   width by dragging the handle, so the body fills the pane instead of stopping at 65ch. (0,4,0) beats
+   the (0,2,0) cap on specificity. */
+.radix-themes .rt-ds-callout-body { max-width: var(--ds-text-measure); }
+.radix-themes [data-resizable] .rt-CalloutText.rt-ds-callout-body { max-width: none; }
 
 /* ============================================================================
    === Avatar === (coordination banner; Badge/Callout append their own blocks)
@@ -2466,18 +2537,24 @@
 .radix-themes .rt-ds-avatar-shell { position: relative; display: inline-flex; vertical-align: middle; }
 /* On-avatar status dot = the StatusDot component, skinned for the avatar context. StatusDot supplies the
    accent-aware colour (its [data-variant]), the role="img"+label, and the optional pulse; the avatar
-   re-adds the two things StatusDot deliberately omits — it SCALES with the avatar box and carries a
-   --ds-bg-base cutout ring so it reads over the image. Scoped under the shell (0,3,0) so it outranks
-   StatusDot's own fixed-8px rule; colour is NOT set here. The [[status-dot-edges]] edge comes from the StatusDot rule
-   too, an inset box-shadow, which paints inside this border, so it lies on the dot's own fill. */
+   re-adds what StatusDot omits — it SCALES with the avatar box. Scoped under the shell (0,3,0) so it outranks
+   StatusDot's own fixed-8px rule; colour is NOT set here.
+   The fill runs to the dot's edge and is opaque, so the avatar's own border never shows through it. A 1px
+   --ds-stroke-strong stroke sits on top of the fill and darkens its rim against any page, listed first so it
+   paints over the variant's own [[status-dot-edges]] edge, which stays under it. The owner ruled this on
+   2026-10-19, replacing a 2px --ds-bg-base cutout ring that left a 4px centre and vanished on a light page. */
 .radix-themes .rt-ds-avatar-shell .rt-ds-avatar-status {
   position: absolute; right: 0; bottom: 0;
   width:  max(8px, calc(var(--ds-avatar-box, var(--ds-text-md-leading)) * 0.25));
   height: max(8px, calc(var(--ds-avatar-box, var(--ds-text-md-leading)) * 0.25));
   border-radius: var(--ds-radius-full);
-  border: 2px solid var(--ds-bg-base);
   box-sizing: border-box;
+  box-shadow: inset 0 0 0 1px var(--ds-stroke-strong);
 }
+.radix-themes .rt-ds-avatar-shell .rt-ds-avatar-status[data-variant="success"] { box-shadow: inset 0 0 0 1px var(--ds-stroke-strong), inset 0 0 0 1px var(--success-dot-edge); }
+.radix-themes .rt-ds-avatar-shell .rt-ds-avatar-status[data-variant="warning"] { box-shadow: inset 0 0 0 1px var(--ds-stroke-strong), inset 0 0 0 1px var(--warning-dot-edge); }
+.radix-themes .rt-ds-avatar-shell .rt-ds-avatar-status[data-variant="error"]   { box-shadow: inset 0 0 0 1px var(--ds-stroke-strong), inset 0 0 0 1px var(--error-dot-edge); }
+.radix-themes .rt-ds-avatar-shell .rt-ds-avatar-status[data-variant="accent"]  { box-shadow: inset 0 0 0 1px var(--ds-stroke-strong), inset 0 0 0 1px var(--accent-part-edge); }
 
 /* AvatarGroup — a tight, cohesive overlapped stack (single row, one avatar tall); a bg-base ring so
    overlaps read. Every disc — including the "+N" overflow counter, which reuses Avatar so it is the
@@ -4229,9 +4306,9 @@
    (--ds-text-weak) that underlines on hover (the bounded row is the affordance, the Token/Citation
    idiom) with the system accent focus ring ([[focus-ring]]); the current crumb (and any plain-span crumb) is
    --ds-text-strong (default) / --ds-text-weak (supporting), no link. Text sizes off the Radix scale by
-   variant (the [[inline-citation]] component-layer precedent). System Link is `planned`, so linked crumbs render as a
-   plain <a> styled here ([[component-registry]] agent-gap) — not the raw Radix Link whose accent skin would fight the muted
-   trail. Scoped .radix-themes, no !important, zero net-new tokens. */
+   variant (the [[inline-citation]] component-layer precedent). Linked crumbs render a caller `as`, else the app's
+   LinkProvider link, else a native <a> ([[link-and-link-provider]]), styled here, never the raw Radix Link, whose accent
+   skin would fight the muted trail. Scoped .radix-themes, no !important, zero net-new tokens. */
 .radix-themes .rt-ds-breadcrumbs-nav { display: block; }
 .radix-themes .rt-ds-breadcrumbs {
   display: flex;
@@ -4310,6 +4387,17 @@
    (supporting already sits at --ds-text-weak, so only default needs the bump). */
 .radix-themes .rt-ds-breadcrumb-item[data-variant="default"] .rt-ds-breadcrumb-link[aria-current="page"] {
   color: var(--ds-text-strong);
+}
+/* The current crumb is set apart by weight as well as colour (WCAG 1.4.1, [[breadcrumb-trail]]). The two colours
+   measure 2.76:1 against each other, under the 3:1 a colour-only difference needs, and in the supporting variant
+   the current crumb and its siblings share --ds-text-weak. The weight keys on aria-current, so it lands on an
+   explicit current crumb and on an auto-detected last link alike, and never on a plain crumb with no link. */
+.radix-themes .rt-ds-breadcrumb-item [aria-current="page"] {
+  font-weight: var(--ds-font-weight-strong);
+}
+/* Under right-to-left the trail runs the other way, so the separator mirrors with it. */
+.radix-themes .rt-ds-breadcrumb-sep:dir(rtl) {
+  transform: scaleX(-1);
 }
 /* Leading icon slot. */
 .radix-themes .rt-ds-breadcrumb-icon {
@@ -4678,8 +4766,38 @@
    glyph drops to the system disabled icon role. */
 .radix-themes .rt-ds-lightbox-control { background-color: var(--ds-scrim); color: var(--ds-text-strong); }
 .radix-themes .rt-ds-lightbox-control[data-disabled] { color: var(--ds-icon-disabled); }
+/* Hover LIFTS the disc and never replaces the scrim, the Thumbnail remove-✕ rule above. In the dark scale
+   --ds-fill-strong resolves to the same value as --ds-text-strong, so a disc painted with it hid the glyph
+   (measured on Next: rgb(237, 238, 240) on rgb(237, 238, 240), 1:1). The tint is a background-image over the scrim. */
 @media (hover: hover) {
-  .radix-themes .rt-ds-lightbox-control:not([data-disabled]):hover { background-color: var(--ds-fill-strong); }
+  .radix-themes .rt-ds-lightbox-control:not([data-disabled]):hover {
+    background-image: linear-gradient(var(--ds-fill-hover), var(--ds-fill-hover));
+  }
+}
+/* Pan keypad ([[dragging-movement-gaps]]) — bottom-left, only while an image is zoomed. Four keycaps in the inverted-T
+   of a keyboard: W on the top row over S, with A and D beside S. Each key stacks its arrow over its letter. */
+.radix-themes .rt-ds-lightbox-pan {
+  position: absolute;
+  left: var(--ds-space-16);
+  bottom: var(--ds-space-16);
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  gap: var(--ds-space-4);
+}
+.radix-themes .rt-ds-lightbox-key[data-dir="up"] { grid-column: 2; grid-row: 1; }
+.radix-themes .rt-ds-lightbox-key[data-dir="left"] { grid-column: 1; grid-row: 2; }
+.radix-themes .rt-ds-lightbox-key[data-dir="down"] { grid-column: 2; grid-row: 2; }
+.radix-themes .rt-ds-lightbox-key[data-dir="right"] { grid-column: 3; grid-row: 2; }
+/* A key at its edge dims its letter with its arrow, so the disabled state does not rest on the arrow alone. */
+.radix-themes .rt-ds-lightbox-key[data-disabled] .rt-Kbd { color: inherit; }
+.radix-themes .rt-ds-lightbox-key {
+  flex-direction: column;
+  gap: var(--ds-space-2);
+  width: auto;
+  height: auto;
+  min-width: var(--base-button-height);
+  padding: var(--ds-space-4);
 }
 
 /* ---- PowerSearch ([[power-search]], B5) — structured filter bar + non-dialog edit popover ----------------------
@@ -4876,6 +4994,27 @@
    file stacks the alpha on a matching ::after. Inset (-2px) within that zone, so the ring reaches no
    further into the panels than the grab zone already does, and the pill between the two bands stays
    clear of both. */
+/* Step keys ([[dragging-movement-gaps]]). Two keycap chips centred on the seam, overhanging both panes and taking no
+   layout. Each chip is the system Kbd on a transparent 24px button, the WCAG 2.5.8 floor, with no border or fill of
+   its own. A chip at its bound dims its glyph to the disabled text role. */
+.radix-themes .rt-ds-resize-keys {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  gap: var(--ds-space-8);
+  transform: translate(-50%, -50%);
+}
+.radix-themes .rt-ds-resize-keys[data-orientation="horizontal"] { flex-direction: column; }
+.radix-themes .rt-ds-resize-key {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.radix-themes .rt-ds-resize-key[data-disabled] { cursor: default; }
+.radix-themes .rt-ds-resize-key[data-disabled] .rt-Kbd { color: var(--ds-text-disabled); }
 .radix-themes .rt-ds-resize-handle:focus-visible {
   outline: none;
 }

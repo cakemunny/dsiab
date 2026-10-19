@@ -489,6 +489,9 @@ export const Usage: Story = {
     }
 
     // Every chip in the row keeps its edges when one filter is pressed and released, so a press moves no tag.
+    // The fonts settle first. A width read taken mid-swap would compare a fallback-rendered rest state against an
+    // Inter-rendered pressed state, a false move of a fraction of a pixel (the same race `_toggle-button.stories.tsx` waits out).
+    await document.fonts.ready;
     const filterChips = Array.from(group.querySelectorAll<HTMLElement>(".rt-ds-token"));
     const edges = () => filterChips.map((c) => { const r = c.getBoundingClientRect(); return [r.left, r.top, r.width]; });
     const assertEdges = (rest: number[][], when: string) => {

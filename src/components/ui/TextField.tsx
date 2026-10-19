@@ -34,7 +34,8 @@ export interface TextFieldProps extends Omit<RadixRootProps, "variant" | "color"
 }
 
 /* Radix writes data-accent-color on the field's root div, and the rest of the props and the ref reach the
- * input inside it. So oxblood reaches that root from the ref ([[part-colour-parity]]). */
+ * input inside it. So oxblood reaches that root from the ref ([[part-colour-parity]]). The spread also puts the
+ * attribute on the input, which a server render keeps, and oxblood.css maps the root from it until the ref runs. */
 const textFieldRoot = (node: HTMLInputElement) => node.closest(".rt-TextFieldRoot");
 
 function Input({ size, children, color, ref, ...rest }: Omit<TextFieldProps, "label" | "info" | "endSlot" | "description" | "validation">) {
@@ -42,7 +43,7 @@ function Input({ size, children, color, ref, ...rest }: Omit<TextFieldProps, "la
   const aria = useFieldControl();
   const own = useAccentColorRef<HTMLInputElement>(color, ref, textFieldRoot);
   return (
-    <RadixTextField.Root ref={own} variant="surface" size={resolvedSize} color={accentColorProps(color).color} {...aria} {...rest}>
+    <RadixTextField.Root ref={own} variant="surface" size={resolvedSize} {...accentColorProps(color)} {...aria} {...rest}>
       {children}
     </RadixTextField.Root>
   );
