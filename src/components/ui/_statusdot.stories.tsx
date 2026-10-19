@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Flex } from "@radix-ui/themes";
 import { StatusDot, type StatusDotVariant } from "./StatusDot";
+import { Avatar } from "./Avatar";
+import { contrastRatio, flatten, parseColor } from "../../foundations/_assert";
 
 /* Test-only behavior for StatusDot — kept OUT of the docs stories (System/StatusDot). Underscore-prefixed
    file → registry- and story-order-guard-exempt, grouped under _internal. Covers the role/label a11y
@@ -122,5 +124,34 @@ export const ReducedMotionOverride: Story = {
     }
     if (!found)
       throw new Error("no @media (prefers-reduced-motion: reduce) rule sets animation: none on .rt-ds-statusdot[data-pulsing]");
+  },
+};
+
+/** The Avatar dot is filled to its edge, with no gap, and a stroke on top of the fill darkens its rim to 3:1 or
+ *  more against the page for every status ([[status-dot-edges]]). */
+export const AvatarDotFillsToEdge: Story = {
+  render: () => (
+    <Flex gap="4" p="4" data-testid="avatars">
+      {(["online", "busy", "away", "offline"] as const).map((s) => (
+        <Avatar key={s} fallback="AL" status={s} />
+      ))}
+    </Flex>
+  ),
+  play: async ({ canvasElement }) => {
+    // The page colour is the theme root's background; the iframe body is transparent.
+    const page = flatten(parseColor(getComputedStyle((canvasElement.closest(".radix-themes") ?? document.querySelector(".radix-themes"))!).getPropertyValue("--ds-bg-base").trim() || "white"), parseColor("white"));
+    const dots = [...canvasElement.querySelectorAll<HTMLElement>('[data-testid="avatars"] .rt-ds-avatar-status')];
+    if (dots.length !== 4) throw new Error(`expected 4 Avatar dots, found ${dots.length}`);
+    for (const dot of dots) {
+      const cs = getComputedStyle(dot);
+      const label = dot.getAttribute("aria-label");
+      if (cs.borderTopWidth !== "0px") throw new Error(`${label}: the dot must fill to its edge; it has a ${cs.borderTopWidth} border`);
+      // The rim is the fill under every inset stroke, top layer last: the box-shadow list paints first-on-top.
+      const layers = [...cs.boxShadow.matchAll(/(rgba?\([^)]*\))[^,]*inset/g)].map((m) => parseColor(m[1])).reverse();
+      if (!layers.length) throw new Error(`${label}: the dot must carry a stroke on top of its fill`);
+      const rim = layers.reduce((under, top) => flatten(top, under), flatten(parseColor(cs.backgroundColor), page));
+      const ratio = contrastRatio(rim, flatten(page, page));
+      if (ratio < 3) throw new Error(`${label}: the dot's rim reads ${ratio.toFixed(2)}:1 against the page, needs 3:1`);
+    }
   },
 };

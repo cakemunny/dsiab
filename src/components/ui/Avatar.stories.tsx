@@ -101,7 +101,7 @@ const ANATOMY_PARTS: [number, string, string][] = [
   [1, "Ring / box", "the circular (or rounded-square) container — sized off the text line-height ladder (--ds-avatar-box → --avatar-size), so an avatar standing beside text matches the line it sits on. An AvatarGroup takes the taller portrait ramp instead (24 / 30 / 40) and gives every box a 2px bg-base ring so overlaps read"],
   [2, "Image", "an <img> (object-fit: cover) shown when src is set — it sits on top of the fallback"],
   [3, "Fallback", "initials (person) or a Phosphor icon (system/bot) shown when there's no image (or it fails to load)"],
-  [4, "Status dot", "optional presence: the accent-aware fill with the StatusDot's 1px inset edge on it ([[status-dot-edges]]), a 2px bg-base cutout ring, and a hidden text label"],
+  [4, "Status dot", "optional presence: the accent-aware fill, opaque and running to the dot's edge, a 1px --ds-stroke-strong stroke on top of the fill over the StatusDot's own inset edge ([[status-dot-edges]]), and a hidden text label"],
 ];
 
 /* ---- anatomy diagram (Avatar-specific) — one 40px specimen (a photo + a presence dot) centred in a
@@ -160,7 +160,7 @@ function StatusDotSpec() {
       <MeasuredRow part="Busy" note="Signed in, but not to be interrupted." token="--ds-fill-error" select='.rt-ds-avatar-status[data-variant="error"]' prop="background-color" />
       <MeasuredRow part="Away" note="Signed in, away from the desk." token="--ds-fill-warning" select='.rt-ds-avatar-status[data-variant="warning"]' prop="background-color" />
       <MeasuredRow part="Offline" note="The absence gray — OPAQUE, so it holds over an AvatarGroup overlap where a translucent fill would let the disc behind it bleed through." token="--ds-icon-neutral" select='.rt-ds-avatar-status[data-variant="neutral"]' prop="background-color" />
-      <MeasuredRow part="Cutout ring" note="The 2px band that punches the dot off the avatar's own edge — and off whatever the avatar is sitting on." token="--ds-bg-base" select=".rt-ds-avatar-status" prop="border-top-color" />
+      <MeasuredRow part="Rim stroke" note="A 1px stroke on top of the opaque fill, which runs to the dot's edge. It darkens the rim against the avatar's edge and the page, over the dot's own inset edge." token="--ds-stroke-strong" select='.rt-ds-avatar-status[data-variant="neutral"]' prop="box-shadow" />
     </MeasuredSpec>
   );
 }
@@ -266,7 +266,7 @@ export const Anatomy: Story = {
   // Folds the former `_SizeContract` + `_StatusDot` fixtures into this doc story's play (matching
   // Badge/Callout) so neither needs a sidebar page. Asserts: the size contract (number → 64px box;
   // "inherit" → no rt-ds-avatar class) and the presence dot (accessible name; accent-aware fill incl.
-  // offline=--ds-icon-neutral; a 2px --ds-bg-base ring that reads over a COLOURED backdrop).
+  // offline=--ds-icon-neutral; a fill that runs to the edge under a --ds-stroke-strong stroke).
   play: async ({ canvasElement }) => {
     // --- size contract (from _SizeContract) ---
     const num = canvasElement.querySelector('[data-testid="size-contract"] [data-case="number"] .rt-AvatarRoot') as HTMLElement | null;
@@ -294,8 +294,9 @@ export const Anatomy: Story = {
       const got = parseColor(getComputedStyle(dot).backgroundColor);
       const want = resolveColor(root, token);
       if (!near(got, want)) fail.push(`${status}: dot ${JSON.stringify(got)} != ${token} ${JSON.stringify(want)}`);
-      // Ring reads over the coloured backdrop (2px bg-base border present).
-      if (!getComputedStyle(dot).border.includes("2px")) fail.push(`${status}: missing 2px ring`);
+      // The fill runs to the edge (no border), and a stroke sits on top of it ([[status-dot-edges]]).
+      if (getComputedStyle(dot).borderTopWidth !== "0px") fail.push(`${status}: the fill must run to the edge, found a ${getComputedStyle(dot).borderTopWidth} border`);
+      if (!/inset/.test(getComputedStyle(dot).boxShadow)) fail.push(`${status}: missing the stroke on top of the fill`);
     }
     if (fail.length) throw new Error("Status-dot failures:\n" + fail.join("\n"));
   },

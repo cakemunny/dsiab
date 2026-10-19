@@ -20,6 +20,8 @@ import { RadioCards } from "./RadioCards";
 import { Card } from "./Card";
 import { ToggleButton } from "./ToggleButton";
 import { ToggleButtonGroup } from "./ToggleButtonGroup";
+import { StatusDot } from "./StatusDot";
+import { Avatar } from "./Avatar";
 import { contrastRatio, flatten, parseColor, type RGBA } from "../../foundations/_assert";
 
 /* Test-only guard for src/tokens/forced-colors.css (Windows contrast themes). Underscore-prefixed, so
@@ -231,6 +233,12 @@ function Sheet() {
         </Box>
         <Box width="200px"><Card data-fc="card">Orbit, 12 members</Card></Box>
       </Flex>
+      <Flex gap="4" align="center" data-fc="dots-status">
+        <StatusDot variant="success" label="Online" data-fc="sd-success" />
+        <StatusDot variant="warning" label="Away" data-fc="sd-warning" />
+        <Avatar fallback="AL" status="online" />
+        <Avatar fallback="AL" status="away" />
+      </Flex>
     </Flex>
   );
 }
@@ -423,6 +431,15 @@ export const EdgesAndStates: Story = {
         }
         offFill("ToggleButton at rest", fillOf(q('[data-fc="tb-off"]'), null));
         offFill("ToggleButtonGroup item at rest", fillOf(q('[data-fc="tbg"] [data-state="off"]'), null));
+
+        // [[status-dot-edges]]. Every StatusDot keeps its status fill under a 1px CanvasText border, standalone and on an Avatar.
+        const DOT = "forced-colors.css, the StatusDot rule";
+        const statusDots = [...sheet.querySelectorAll<HTMLElement>('[data-fc="dots-status"] .rt-ds-statusdot')];
+        if (statusDots.length !== 4) fail(`expected 4 status dots, found ${statusDots.length}`);
+        statusDots.forEach((d) => edge(`status dot ${d.getAttribute("aria-label")}${d.classList.contains("rt-ds-avatar-status") ? " on an Avatar" : ""}`, d, null, DOT));
+        const fills = statusDots.map((d) => fillOf(d, null));
+        if (fills.some((f) => ratio(f, canvas) < 1.05)) fail(`a status dot paints Canvas, so it lost its status fill (${DOT})`);
+        if (ratio(fills[0], fills[1]) < 1.05) fail(`the online and away dots paint the same fill, so they no longer differ (${DOT})`);
 
         // FOCUS. The ring is an outline, which forcing keeps. It must stay at 3:1 on Canvas.
         const ring = (label: string, target: HTMLElement, ringEl: Element, pseudo: string | null) => {

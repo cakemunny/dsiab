@@ -32,7 +32,7 @@ const STATUS_LABEL: Record<AvatarStatus, string> = {
 
 // The presence dot IS a StatusDot (one source of truth for the accent-aware colour + role/label + pulse).
 // The avatar semantics map onto StatusDot's variants; the avatar context (CSS) re-adds the scale-with-box
-// sizing and the --ds-bg-base cutout ring that StatusDot deliberately omits. See DECISIONS [[status-dot]] (StatusDot).
+// sizing, and a stroke on top of the fill that darkens its rim ([[status-dot-edges]]). See DECISIONS [[status-dot]] (StatusDot).
 const STATUS_VARIANT: Record<AvatarStatus, StatusDotVariant> = {
   online: "success",
   busy: "error",

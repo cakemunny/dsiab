@@ -2534,18 +2534,24 @@
 .radix-themes .rt-ds-avatar-shell { position: relative; display: inline-flex; vertical-align: middle; }
 /* On-avatar status dot = the StatusDot component, skinned for the avatar context. StatusDot supplies the
    accent-aware colour (its [data-variant]), the role="img"+label, and the optional pulse; the avatar
-   re-adds the two things StatusDot deliberately omits — it SCALES with the avatar box and carries a
-   --ds-bg-base cutout ring so it reads over the image. Scoped under the shell (0,3,0) so it outranks
-   StatusDot's own fixed-8px rule; colour is NOT set here. The [[status-dot-edges]] edge comes from the StatusDot rule
-   too, an inset box-shadow, which paints inside this border, so it lies on the dot's own fill. */
+   re-adds what StatusDot omits — it SCALES with the avatar box. Scoped under the shell (0,3,0) so it outranks
+   StatusDot's own fixed-8px rule; colour is NOT set here.
+   The fill runs to the dot's edge and is opaque, so the avatar's own border never shows through it. A 1px
+   --ds-stroke-strong stroke sits on top of the fill and darkens its rim against any page, listed first so it
+   paints over the variant's own [[status-dot-edges]] edge, which stays under it. The owner ruled this on
+   2026-10-19, replacing a 2px --ds-bg-base cutout ring that left a 4px centre and vanished on a light page. */
 .radix-themes .rt-ds-avatar-shell .rt-ds-avatar-status {
   position: absolute; right: 0; bottom: 0;
   width:  max(8px, calc(var(--ds-avatar-box, var(--ds-text-md-leading)) * 0.25));
   height: max(8px, calc(var(--ds-avatar-box, var(--ds-text-md-leading)) * 0.25));
   border-radius: var(--ds-radius-full);
-  border: 2px solid var(--ds-bg-base);
   box-sizing: border-box;
+  box-shadow: inset 0 0 0 1px var(--ds-stroke-strong);
 }
+.radix-themes .rt-ds-avatar-shell .rt-ds-avatar-status[data-variant="success"] { box-shadow: inset 0 0 0 1px var(--ds-stroke-strong), inset 0 0 0 1px var(--success-dot-edge); }
+.radix-themes .rt-ds-avatar-shell .rt-ds-avatar-status[data-variant="warning"] { box-shadow: inset 0 0 0 1px var(--ds-stroke-strong), inset 0 0 0 1px var(--warning-dot-edge); }
+.radix-themes .rt-ds-avatar-shell .rt-ds-avatar-status[data-variant="error"]   { box-shadow: inset 0 0 0 1px var(--ds-stroke-strong), inset 0 0 0 1px var(--error-dot-edge); }
+.radix-themes .rt-ds-avatar-shell .rt-ds-avatar-status[data-variant="accent"]  { box-shadow: inset 0 0 0 1px var(--ds-stroke-strong), inset 0 0 0 1px var(--accent-part-edge); }
 
 /* AvatarGroup — a tight, cohesive overlapped stack (single row, one avatar tall); a bg-base ring so
    overlaps read. Every disc — including the "+N" overflow counter, which reuses Avatar so it is the

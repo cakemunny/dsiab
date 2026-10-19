@@ -6302,7 +6302,7 @@ The click route is the same machine, not an addition beside it.
 
 **Composite surfaces (2026-10-16).** Every Token chip, a Tokenizer chip included, the SegmentedControl track and every Card, CheckboxCards and RadioCards item take a 1px `ButtonBorder` edge, and the Slider track takes a border and its thumb a 2px `ButtonText` ring on `Canvas`. The selected segment, the Slider range, a checked card's band and a pressed ToggleButton or ToggleButtonGroup item paint `Highlight`, and a label on `Highlight` opts out of forcing so the browser paints no `Canvas` backplate behind its `HighlightText`. A focused checked RadioCards card had shown the text colour on its band. The band now paints `Highlight`. The guard measures all of them in both palettes.
 
-**Gap.** A standalone StatusDot shows nothing under forced colours ([status-dot-edges](#status-dot-edges)). Its fill waits on the owner's choice.
+**Status dots (2026-10-19).** Forcing painted every StatusDot `Canvas`, so a standalone dot vanished and an Avatar dot showed only a ring, the same for every status. Each dot now opts out of forcing, keeps its success, error, warning or neutral fill, and takes a 1px `CanvasText` border on top of the fill, standalone and on an Avatar. The border carries the outline, because a fill alone can read under 3:1 against `Canvas`: warning measured 1.58:1 in the light palette. Online stays on success and busy on error. The owner ruled this on 2026-10-19 over the system `Highlight` colour for online, which means "selected" everywhere else here. The guard measures the border and the fills in both palettes ([status-dot-edges](#status-dot-edges)).
 
 **Changed from.** The system carried no forced-colours rules, so every control edge and every checked state vanished under forcing.
 
@@ -6959,7 +6959,7 @@ On a scrim only the stack changes, to `--accent-ring-stack-scrim` on the dark sc
 
 **Every status dot, Progress bar and checked control clears WCAG 3:1 and APCA Lc 30 with its centre colour unchanged, and the description of a selected row reads in strong ink.**
 
-**Dot edges.** The warning, success and error StatusDot each stack a 1px inset edge on the fill, `--warning-dot-edge`, `--success-dot-edge` or `--error-dot-edge`, and the centre keeps its colour. The Avatar status dot is a StatusDot and paints the same edge inside its 2px cutout border.
+**Dot edges.** The warning, success and error StatusDot each stack a 1px inset edge on the fill, `--warning-dot-edge`, `--success-dot-edge` or `--error-dot-edge`, and the centre keeps its colour. The Avatar status dot is a StatusDot and paints the same edge. From 2026-10-19 its opaque fill runs to the dot's edge, with no cutout border, and a 1px `--ds-stroke-strong` stroke sits on top of the fill, over its dot edge. The owner ruled this on 2026-10-19: the 2px `--ds-bg-base` cutout had left a 4px centre and vanished on a light page, and the avatar's border showed through a translucent ring. The rim reads 5.27:1 or more against the page for the default brand, where the warning dot read 3.13:1 against its old ring. *AvatarDotFillsToEdge* in `_internal/StatusDot behavior` holds the rim, and `_internal/Non-text contrast` holds it against the four surfaces.
 
 **Edge steps.** Each edge is the lightest step of Radix's black alpha scale in light, or white alpha scale in dark, whose stack on the fill clears both floors against the page, the subtle recess, a card and a panel on all six neutrals. `theme.css` keys the table on the brand at the theme root, because the status families shift with the brand ([brand-status-collision-gate](#brand-status-collision-gate)) and never with a part, so a part given its own colour takes the edge of the brand whose fill it paints.
 
@@ -6982,7 +6982,7 @@ Light error and dark warning and success clear on the fill alone and keep the tr
 
 **Limits.**
 
-- A standalone StatusDot shows nothing under forced colours, because `forced-colors.css` names no rule for it ([forced-colours](#forced-colours)). This ruling leaves that gap open.
+- A standalone StatusDot showed nothing under forced colours, because `forced-colors.css` named no rule for it. Closed on 2026-10-19 ([forced-colours](#forced-colours)).
 - A seeded brand keeps the transparent base of the three dot edges, as [part-fill-edge](#part-fill-edge) records for the part edge.
 - A dot given `isPulsing` dims to half opacity at the low point of its pulse, edge included, so the floors hold at rest.
 - The change bar in `CodeEditor.stories.tsx` stacks the warning and success edges, but it sits in a showcase, which [showcases-and-fixture](#showcases-and-fixture) bars from a play, so no guard holds it.

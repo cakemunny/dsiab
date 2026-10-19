@@ -238,6 +238,19 @@
     box-shadow: none;
   }
 
+  /* StatusDot, standalone and on an Avatar ([[status-dot-edges]]). Forcing painted every dot Canvas, so a standalone dot
+     vanished and an Avatar dot showed only its ring, the same for every status. Each dot opts out of forcing,
+     so it keeps its status fill, and a 1px CanvasText border sits on top of the fill and carries its outline:
+     a fill alone can read under 3:1 against Canvas (warning measured 1.58:1 in the light palette). The
+     selectors match the variant rules in components.css at equal or higher specificity, so this file, loaded
+     later, wins. The owner ruled this on 2026-10-19. */
+  .radix-themes .rt-ds-statusdot[data-variant],
+  .radix-themes .rt-ds-avatar-shell .rt-ds-avatar-status[data-variant] {
+    forced-color-adjust: none;
+    border: 1px solid CanvasText;
+    box-shadow: none;
+  }
+
   /* A pressed Token ([[token-pressed-state]]). The tint is forced to Canvas, so without this a pressed
      chip differs from a chip at rest by its check and weight alone. The check takes the label's ink.
      Gated on `[data-interactive]` as in components.css, which a disabled chip never carries.
