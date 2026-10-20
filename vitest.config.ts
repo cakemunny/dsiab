@@ -90,6 +90,9 @@ export default defineConfig({
     // timing out. On CI the limit is 180s. A local run keeps the 15s default, so a story that grows slow
     // still shows up locally.
     ...(process.env.CI ? { testTimeout: 180_000 } : {}),
+    // COVERAGE runs only with `--coverage`. `include` lists every file under src/, so a file no story loads
+    // still appears at 0%. Each Vitest config writes its own folder, because a run deletes its folder first.
+    coverage: { provider: "v8", include: ["src/**"], reportsDirectory: "./coverage/stories" },
     // `extends: true` reuses the plugins/resolve/optimizeDeps above; only the lane's
     // name + env differ. Each project gets its own browser instance.
     //
