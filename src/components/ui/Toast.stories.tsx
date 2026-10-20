@@ -253,8 +253,8 @@ function SaveButton() {
   );
 }`;
 
-/* The Toast · Callout · AlertDialog comparison table now lives in ./_comparisons (MESSAGING_COMPARISON),
-   rendered from all three components' Usage stories via ComparisonSection so the copies can't drift. */
+/* The Toast · Callout · AlertDialog · ChatSystemMessage comparison table now lives in ./_comparisons (MESSAGING_COMPARISON),
+   rendered from all four components' Usage stories via ComparisonSection so the copies can't drift. */
 
 /* ---- Keyboard contract ---------------------------------------------------- */
 

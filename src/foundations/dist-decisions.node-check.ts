@@ -29,8 +29,10 @@
        ([[package-licence]]), and the public documents under `docs/` are real
        paths since [[agent-files-and-docs-layout]] moved the private folder out
        of it.
-     DECLARED — the rewrite table still consumes exactly the sites it claims.
-       `buildDistDecisions` throws with the record named when a count drifts.
+     DECLARED — `buildDistDecisions` runs clean over the real ledger. The rewrite table
+       holds no record today, so this arm has no count to check. It still fails when a
+       record is added later whose count drifts, because the build throws with the
+       record named.
      ENTRY-COMPLETE — the projection drops no `### name` entry heading, because
        every `[name](#name)` link in the ledger resolves inside this same
        document.

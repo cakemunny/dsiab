@@ -2,8 +2,8 @@
    registry-tier.node-check.ts — THE TIER ↔ STORY-SPINE PARITY GUARD
    -----------------------------------------------------------------------------
    Sibling of registry.node-check.ts (same node lane, same harness). Stops the
-   registry `tier` field from drifting out of sync with the story it labels —
-   the drift Task [[light-and-dark-token-set]] corrected by hand (Breadcrumbs / Pagination / StatusDot were
+   registry `tier` field ([[component-registry]]) from drifting out of sync with the story it labels —
+   the drift that was corrected by hand before this guard existed (Breadcrumbs / Pagination / StatusDot were
    built full but labelled "lite").
 
    THE INVARIANT — a BICONDITIONAL since the docs-grammar refactor (2026-07-30,

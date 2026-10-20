@@ -8800,7 +8800,7 @@ html[data-ds-reorder-dragging] .radix-themes * {
   /* [[card-picker-focus-width]]. The card pickers ring 4px, a literal as every ring width in this file is. The [[radio-cards-band-edge]] and [[colour-prop-and-high-contrast]]
      bands do not paint on a focused card, so the ring paints where the band would, twice as wide.
      This rule restates only the width, and it wins on source order at the same specificity. Forced
-     colours keep the 2px outline on the item, above. */
+     colours keep the 4px outline on the item, set by the card-picker rule above. */
   .radix-themes :is(
     .rt-CheckboxCardsItem:where(:has(:focus-visible)),
     .rt-RadioCardsItem:where(:focus-visible)

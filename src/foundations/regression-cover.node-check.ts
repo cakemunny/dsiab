@@ -94,7 +94,7 @@ const COVERED_BY: Record<string, string> = {
   "resize-handle-seam": "src/components/ui/Layout.stories.tsx — the ResizeHandle IS the seam, asserted beside [[seam-ownership]]'s arm on the same boundary",
   "component-shadowing": "src/foundations/component-shadow.node-check.ts — the shadow itself is the defect, and that guard went red on this exact line before the fix landed",
   "side-nav-section-divider": "src/components/ui/SideNav.stories.tsx — the divided Section is a rendered story state with its own play assertion",
-  "token-pressed-state": "src/components/ui/Token.stories.tsx — the Usage play clicks a filter Token and asserts aria-pressed, the check glyph, and the computed fill, ink and weight against the roles resolved on a probe",
+  "token-pressed-state": "src/components/ui/Token.stories.tsx — the Usage play clicks a filter Token and asserts aria-pressed, that no glyph draws in either state, and the computed fill, ink and weight against the roles resolved on a probe",
   "chrome-heading-lane": "src/foundations/size-lanes.node-check.ts — the chromeHeading lane is asserted as text+1 and as non-inert, which is the whole of [[chrome-heading-lane]]",
   "display-size-lane": "src/foundations/size-lanes.node-check.ts — the display lane is asserted to sit above heading and to step",
   "size-lane-hook": "src/foundations/size-lanes.node-check.ts — the public lane surface is asserted there, and barrel.node-check.ts holds the export",
