@@ -10,6 +10,7 @@ import {
 } from "react";
 import { CHAT_MESSAGE_ATTR } from "../../hooks/useChatNewMessages";
 import { useResolvedSize } from "../../theme/SizeContext";
+import { AvatarHostSizedContext } from "./Avatar";
 
 /* =============================================================================
  * ChatMessage — one turn in a conversation: who said it, what they said, and
@@ -207,7 +208,13 @@ export const ChatMessage = forwardRef<HTMLElement, ChatMessageProps>(function Ch
         aria-label={hasName ? undefined : fallbackLabel}
         {...rest}
       >
-        {hasAvatar && <div className="rt-ds-chat-message-avatar">{avatar}</div>}
+        {hasAvatar && (
+          // The slot sizes its avatar to --chat-avatar-box through CSS ([[chat-avatar-size]]), so the avatar keeps
+          // its initials there ([[avatar-initials-floor]]).
+          <div className="rt-ds-chat-message-avatar">
+            <AvatarHostSizedContext.Provider value={true}>{avatar}</AvatarHostSizedContext.Provider>
+          </div>
+        )}
         {holdsGutter && <div className="rt-ds-chat-message-gutter" />}
 
         <div className="rt-ds-chat-message-column">

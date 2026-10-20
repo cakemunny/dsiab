@@ -14,8 +14,8 @@ import {
 /** The one definition of this component — the standfirst every page of it opens with. */
 const DEFINITION = (
   <>
-    A tight, cohesive stack of avatars, each ringed in the page background so its edge reads against its
-    neighbour. <Code>max</Code> caps the stack and folds the rest into a +N counter that reuses{" "}
+    A tight, cohesive stack of avatars, each keeping its own 1px edge, so the front disc's edge marks where it
+    overlaps the one behind. <Code>max</Code> caps the stack and folds the rest into a +N counter that reuses{" "}
     <Code>Avatar</Code> itself — the same size, the same circle, never a shorter pill. Every child renders
     at the group's size.
   </>
@@ -29,8 +29,8 @@ const meta: Meta<typeof AvatarGroup> = {
     docs: {
       description: {
         component:
-          "AvatarGroup overlaps a set of avatars into a tight, cohesive stack — a bg-base ring makes each " +
-          "edge read against its neighbour. `max` caps the stack and folds the rest into a neutral **+N** " +
+          "AvatarGroup overlaps a set of avatars into a tight, cohesive stack — each disc keeps its own 1px " +
+          "edge, so the front disc's edge marks the overlap. `max` caps the stack and folds the rest into a neutral **+N** " +
           "counter that reuses **Avatar** — a same-size, same-shape circular disc, so the surplus " +
           "indicator sits in the stack like any other avatar and the row keeps one rhythm to its end, " +
           "never a shorter pill. Every child renders at the group's size.",
@@ -160,7 +160,7 @@ function LabelledProjectRow({ children }: { children: ReactNode }) {
    sliver the moment anything about that box changed.
 
    This one specimen is deliberately PINNED to `xl`: the parts it labels are a
-   2px ring and a 40% seam, which are simply not resolvable on a 24px disc.
+   1px edge and an overlap seam, which are simply not resolvable on a 24px disc.
    Every other stack on the page is left unset and tracks the toolbar. */
 
 const PIN_BAND = 92;
@@ -173,7 +173,7 @@ const ELBOW = 42;
 /** [callout number, which disc it points at, where across that disc (0–1)] */
 const PINS: [number, number, number][] = [
   [1, 0, 0.35], // the disc itself
-  [2, 1, 0.05], // the ring — the leading sliver of the next disc
+  [2, 1, 0.05], // the edge — where the next disc's edge crosses the one behind
   [3, 2, 0.02], // the overlap seam — where the third disc starts covering the second
   [4, 3, 0.6], // the +N counter
 ];
@@ -249,8 +249,8 @@ function AnatomyDiagram() {
 
 const ANATOMY_PARTS: [number, string, string][] = [
   [1, "Disc", "one Avatar, forced to the GROUP's box — a per-child size is overridden, so a stack can never come out ragged. It is painted with the OPAQUE twin of the standalone avatar's tinted fill, because a translucent disc would let the one behind it bleed through the overlap."],
-  [2, "Ring", "a 2px band in the page background around every disc, so an edge reads against its neighbour instead of melting into it. Drawn as a shadow rather than a border, so keeping the discs apart costs the box no width."],
-  [3, "Overlap", "each disc after the first is pulled back over the one before it by 40% of the box — tight enough that the row reads as one thing rather than a line of separate segments. Derived from the box, so the stack stays proportional at every size."],
+  [2, "Edge", "the 1px edge every avatar has. Where a disc overlaps the one behind it, its edge is the line between them, so the stack needs no ring of its own and shows no halo on a tinted surface."],
+  [3, "Overlap", "each disc after the first is pulled back over the one before it by 20% of the box, the most that keeps both letters of every two-letter pair readable ([[avatar-group-overlap]]). Derived from the box, so the stack stays proportional at every size."],
   [4, "+N counter", "present only when max is smaller than the set it was handed. Another Avatar — same diameter, same circle, overlapping like the rest — carrying a stronger neutral fill so it reads as a count rather than as one more person. Never a shorter pill."],
 ];
 
@@ -258,9 +258,8 @@ const ANATOMY_PARTS: [number, string, string][] = [
    AvatarGroup owns no fills — every disc IS an Avatar, so its fills ARE Avatar's, swapped to the
    OPAQUE step (so an overlap obscures the disc behind it). Each row names an element and a property,
    reads that property off a REAL rendered group, and checks it against the token it claims, so a row
-   can disagree with the component. The ring is a colour carried INSIDE a box-shadow, which the row
-   compares colour-against-colour and reports the geometry of; the overlap is a calc() margin with no
-   token behind it at all, so it stays a prose row read live off the rendered stack. */
+   can disagree with the component. The overlap is a calc() margin with no token behind it at all, so it
+   stays a prose row read live off the rendered stack. */
 function AvatarGroupTokens() {
   const themeKey = useContext(HexThemeKey);
   const ref = useRef<HTMLDivElement>(null);
@@ -299,23 +298,16 @@ function AvatarGroupTokens() {
           select=".rt-ds-avatar-count .rt-AvatarFallback"
           prop="color"
         />
-        <MeasuredRow
-          part="Read-through ring"
-          note="The band that separates a disc from the one behind it. It is drawn as a shadow rather than a border, so the row proves the ring's COLOUR and reports its geometry — the 2px spread — beside it."
-          token="--ds-bg-base"
-          select=".rt-ds-avatar-group .rt-AvatarRoot"
-          prop="box-shadow"
-        />
       </MeasuredSpec>
       {/* The overlap is a calc() margin with no token behind it, so there is nothing for a measured row
           to compare against — it is read live off the rendered stack and reported as the geometry it is. */}
-      <NoteRow part="Overlap" value={`−40% of the box — margin-inline-start ${overlap ?? "…"}`} />
+      <NoteRow part="Overlap" value={`−20% of the box — margin-inline-start ${overlap ?? "…"}`} />
       <NoteRow part="Box (size)" value="unset → the portrait ramp: 24 / 30 / 40 by tier. Pinned, any rung of Avatar's shared ladder (xs–xl: 16 / 20 / 24 / 30 / 40)" radix="--ds-avatar-box" />
     </TokenGroup>
   );
 }
 /** Rows in the measured spec — the exact count the Usage play asserts have measured. */
-const SPEC_ROWS = 4;
+const SPEC_ROWS = 3;
 
 export const Anatomy: Story = {
   render: (_args, { globals }) => (
@@ -324,7 +316,7 @@ export const Anatomy: Story = {
         <PageHeader title="AvatarGroup · Anatomy" standfirst={DEFINITION} />
         <Section
           title="The parts"
-          lead="A stack is one Avatar repeated and pulled back over itself, with a ring holding the edges apart and — once there are more people than room — a counter standing in for the rest. Only the discs are the component's own; everything else is geometry derived from a single box size. The callouts are pinned onto a live stack; the legend spells each one out."
+          lead="A stack is one Avatar repeated and pulled back over itself, with each disc's own edge marking where it overlaps the next and — once there are more people than room — a counter standing in for the rest. Only the discs are the component's own; everything else is geometry derived from a single box size. The callouts are pinned onto a live stack; the legend spells each one out."
         >
           <AnatomyDiagram />
           <AnatomyLegend parts={ANATOMY_PARTS} />
@@ -345,8 +337,8 @@ export const Anatomy: Story = {
             </Scenario>
           </Flex>
           <Caption>
-            The ring is <Code>box-shadow: 0 0 0 2px var(--ds-bg-base)</Code>; the overlap is a negative
-            inline-start margin (~40% of the box). The <Code>+N</Code> is another <Code>Avatar</Code> —
+            Each disc keeps the 1px edge every avatar has; the overlap is a negative inline-start margin of
+            20% of the box ([[avatar-group-overlap]]). The <Code>+N</Code> is another <Code>Avatar</Code> —
             same diameter, same circle, overlapping like the rest.
           </Caption>
         </Section>
@@ -432,7 +424,7 @@ export const Usage: Story = {
   // "+3" glyph — `elmPartiallyObscuring`, "background color could not be determined because it partially
   // overlaps other elements". It is not a defect, and it is not resolvable. Both halves were MEASURED on
   // this page rather than assumed:
-  //   · WHY axe punts — it samples `elementsFromPoint` at the glyph's corners and centre. The 40%
+  //   · WHY axe punts — it samples `elementsFromPoint` at the glyph's corners and centre. The 20%
   //     overlap pulls the disc BEHIND the counter under the glyph's left edge, so that disc is in the
   //     stack at the left corners and absent at the right ones. Differing stacks → incomplete.
   //   · WHY z-order cannot fix it — `elementsFromPoint` is geometry, not paint order. Measured live on
@@ -563,7 +555,7 @@ export const Usage: Story = {
 
       <Section
         title="A summary, not a roster"
-        lead="The overlap covers 40% of every disc except the last, so a stack can say HOW MANY and roughly WHO — and it can never say WHICH. The moment a reader has to tell one person from another, or read something that differs per person, the picture is the wrong shape for the job and the row has to give back the space it saved."
+        lead="The overlap covers 20% of every disc except the last, so a stack can say HOW MANY and roughly WHO — and it can never say WHICH. The moment a reader has to tell one person from another, or read something that differs per person, the picture is the wrong shape for the job and the row has to give back the space it saved."
       >
         <Grid columns={{ initial: "1", sm: "2" }} gap="3">
           <DoDont
@@ -586,7 +578,7 @@ export const Usage: Story = {
           <DoDont
             kind="dont"
             bare
-            note={<>Three different verdicts folded into one picture. Two of the three discs are 40% covered, none of them carries a name, and there is nowhere to hang "requested changes" — so the reader cannot act on any of it.</>}
+            note={<>Three different verdicts folded into one picture. Two of the three discs are 20% covered, none of them carries a name, and there is nowhere to hang "requested changes" — so the reader cannot act on any of it.</>}
           >
             <Box style={{ width: "100%" }}>
               <Surface maxWidth="100%">
@@ -616,7 +608,7 @@ export const Usage: Story = {
       <HexThemeKey.Provider value={`${globals.accent}-${globals.appearance}-${globals.contrast}`}>
         <Section
           title="Tokens"
-          lead="Every row below is read off a rendered stack and checked against the token it names, so the table reports what the stack paints rather than what the tokens say. Zero net-new colour: the disc fills are Avatar's own, swapped to their opaque step; only the read-through ring and the overlap belong to the group."
+          lead="Every row below is read off a rendered stack and checked against the token it names, so the table reports what the stack paints rather than what the tokens say. Zero net-new colour: the disc fills are Avatar's own, swapped to their opaque step; only the overlap belongs to the group."
         >
           <AvatarGroupTokens />
         </Section>
@@ -625,7 +617,7 @@ export const Usage: Story = {
   ),
   play: async ({ canvasElement }) => {
     // The token table's EVIDENCE, asserted at runtime — every row read a REAL rendered part of a real
-    // stack (both fills, the count's ink, and the ring's colour out of its box-shadow), never a swatch
+    // stack (both fills and the count's ink), never a swatch
     // this story painted. `rows: N` is the exact form: an "at least one" floor is satisfied by a table
     // that has not filled in yet.
     const rows = await awaitMeasuredRows(canvasElement, { rows: SPEC_ROWS });
@@ -649,7 +641,7 @@ export const Usage: Story = {
 
 const GROUP_PROPS: PropDef[] = [
   { name: "children", type: "ReactNode", desc: <>The avatars to stack — <Code>Avatar</Code> elements. Every one renders at the group's box, so a per-child <Code>size</Code> is overridden.</>, source: "AvatarGroup.tsx:9" },
-  { name: "size", type: `"xs" | "sm" | "md" | "lg" | "xl" | number | "inherit"`, def: "portrait ramp (md at small)", desc: <>The box every disc renders at — the same line-height ladder <Code>Avatar</Code> rides (<Code>xs</Code> 16 · <Code>sm</Code> 20 · <Code>md</Code> 24 · <Code>lg</Code> 30 · <Code>xl</Code> 40). Unset, it follows the global <Code>uiSize</Code> on the <strong>portrait</strong> ramp (<Code>small</Code> → <Code>md</Code>, 24px · <Code>medium</Code> → <Code>lg</Code>, 30px · <Code>large</Code> → <Code>xl</Code>, 40px), not the beside-text ramp a standalone <Code>Avatar</Code> takes: a stack is an identity, and discs overlapped by 40% need a face-sized box to read as people. The overlap is derived from the box, so the stack stays proportional at every step.</>, source: "AvatarGroup.tsx:11" },
+  { name: "size", type: `"xs" | "sm" | "md" | "lg" | "xl" | number | "inherit"`, def: "portrait ramp (md at small)", desc: <>The box every disc renders at — the same line-height ladder <Code>Avatar</Code> rides (<Code>xs</Code> 16 · <Code>sm</Code> 20 · <Code>md</Code> 24 · <Code>lg</Code> 30 · <Code>xl</Code> 40). Unset, it follows the global <Code>uiSize</Code> on the <strong>portrait</strong> ramp (<Code>small</Code> → <Code>md</Code>, 24px · <Code>medium</Code> → <Code>lg</Code>, 30px · <Code>large</Code> → <Code>xl</Code>, 40px), not the beside-text ramp a standalone <Code>Avatar</Code> takes: a stack is an identity, and overlapped discs need a face-sized box to read as people. The overlap is derived from the box, so the stack stays proportional at every step.</>, source: "AvatarGroup.tsx:11" },
   { name: "max", type: "number", desc: <>Show at most this many avatars; the surplus folds into a single <Code>+N</Code> counter. The counter reuses <Code>Avatar</Code>, so it's the same diameter and circle as the rest of the stack — never a shorter pill. Set it on any stack whose length is data-driven.</>, source: "AvatarGroup.tsx:13" },
   { name: "label", type: "string", def: '"{count} avatars"', desc: <>Accessible name for the stack. The root is a <Code>role="group"</Code>, so a screen reader announces one named unit (e.g. "4 team members") instead of a pile of loose discs. The <Code>+N</Code> counter announces itself as "<Code>N more</Code>" inside it.</>, source: "AvatarGroup.tsx:18" },
 ];
@@ -684,7 +676,7 @@ export const Props: StoryObj<PGArgs> = {
       </Box>
       <PropsLead />
       <Rule />
-      <Section title="Props reference" lead={<>Every prop <Code>AvatarGroup</Code> accepts. It paints nothing of its own — the discs are <Code>Avatar</Code>s; the group adds the box, the overlap, the ring, and the named-group boundary.</>}>
+      <Section title="Props reference" lead={<>Every prop <Code>AvatarGroup</Code> accepts. It paints nothing of its own — the discs are <Code>Avatar</Code>s; the group adds the box, the overlap and the named-group boundary.</>}>
         <PropTable rows={GROUP_PROPS} />
       </Section>
     </Page>
@@ -704,15 +696,15 @@ export const History: Story = {
             stops to read a number, and a differently shaped thing sitting there breaks the stack at
             exactly the point it is being counted.
           </Decision>
-          <Decision id="Ring">
-            Each disc carries a 2px <Code>--ds-bg-base</Code> ring so overlaps read on any background. It
-            is drawn as a <strong>shadow</strong>, not a border, so keeping the discs apart costs the box
-            no width and the stack's whole geometry stays derived from one number.
+          <Decision id="[[avatar-group-seam]] · the edge, not a ring">
+            Each disc keeps the 1px edge every avatar has, so the front disc's edge marks the overlap. The
+            2px <Code>--ds-bg-base</Code> ring that did that before the edge existed cut a pale band through
+            the disc behind and drew a halo on any tinted surface, so it was removed.
           </Decision>
           <Decision id="Overlap">
-            Discs overlap ~40% of the box — tight enough that the row reads as one cohesive unit, not a
-            spaced "caterpillar". The figure is <strong>derived from the box</strong>, so a stack stays
-            proportional at every size step instead of needing a table of pitches.
+            Discs overlap 20% of the box ([[avatar-group-overlap]]), the most that leaves both letters of
+            every two-letter pair readable. The figure is <strong>derived from the box</strong>, so a stack
+            stays proportional at every size step instead of needing a table of pitches.
           </Decision>
           <Decision id="Uniform">
             All children render at the group's size; per-child sizes are overridden. A stack is one
@@ -736,6 +728,7 @@ export const History: Story = {
       </Section>
       <Rule />
       <Section title="Changelog" lead="Notable changes, newest first.">
+        <Decision id="0.9.1">The 2px ring is gone, so each disc shows its own 1px edge, and initials centre on their capitals ([[avatar-group-seam]]).</Decision>
         <Decision id="0.9.0">Initial component — tight overlapped stack (~40%), bg-base ring, and the same-size Avatar "+N" counter disc.</Decision>
       </Section>
     </Page>
