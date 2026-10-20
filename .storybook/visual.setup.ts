@@ -5,7 +5,8 @@
 //
 // SCOPE. The first story of each docs page, in the lane's appearance: the Anatomy or Usage story, which a
 // guard keeps first. The internal `_*.stories.tsx` files hold behaviour plays, not pages, so they take no
-// image.
+// image. The Decisions page takes none either: it renders the whole ledger as text, far taller than the
+// 16,000-pixel window, and its capture never settled on the CI runner.
 //
 // The image goes beside its story file, in `__screenshots__/<file>/<appearance>-chromium-linux.png`, the
 // default path of `toMatchScreenshot`.
@@ -27,7 +28,7 @@ function firstTest(node: RunnerTestFile | RunnerTestSuite): RunnerTestCase | und
 if (env.DS_VISUAL === "1") {
   afterEach(async ({ task }) => {
     const fileName = task.file.name.split("/").pop() ?? "";
-    if (fileName.startsWith("_") || firstTest(task.file) !== task) return;
+    if (fileName.startsWith("_") || fileName === "Decisions.stories.tsx" || firstTest(task.file) !== task) return;
     await document.fonts.ready;
     // The test frame paints only its own viewport, and a docs page is taller, so the frame grows to the
     // page for the capture and returns to its size after it.
