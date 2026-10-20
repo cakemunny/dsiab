@@ -608,7 +608,7 @@ const PROPS: PropDef[] = [
   { name: "onPageSizeChange", type: "(n: number) => void", desc: <>Called with the new page size.</>, source: "Pagination.tsx" },
   { name: "variant", type: `"pages" | "count" | "compact" | "dots" | "none"`, def: `"pages"`, desc: <>What appears between prev/next.</>, source: "Pagination.tsx" },
   { name: "siblingCount", type: "number", def: "1", desc: <>Page buttons on each side of the current one (variant <Code>pages</Code>).</>, source: "Pagination.tsx" },
-  { name: "size", type: `"sm" | "md"`, desc: <>Control size. <strong>Unset, it follows the global <Code>uiSize</Code></strong> (the control lane) so it scales with the toolbar like every other control; <Code>sm</Code>/<Code>md</Code> pin it to Radix steps 1 / 2 per-instance.</>, source: "Pagination.tsx" },
+  { name: "size", type: `"sm" | "md"`, def: `control lane (1 at small)`, desc: <>Control size. <strong>Unset, it follows the global <Code>uiSize</Code></strong> (the control lane) so it scales with the toolbar like every other control; <Code>sm</Code>/<Code>md</Code> pin it to Radix steps 1 / 2 per-instance.</>, source: "Pagination.tsx" },
   { name: "isDisabled", type: "boolean", def: "false", desc: <>Disables the whole control.</>, source: "Pagination.tsx" },
   { name: "label", type: "string", def: `"Pagination"`, desc: <>Accessible name for the <Code>&lt;nav&gt;</Code> landmark. Make it distinct per pager.</>, source: "Pagination.tsx" },
 ];

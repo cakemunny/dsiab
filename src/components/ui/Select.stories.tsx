@@ -332,7 +332,7 @@ const ROOT_PROPS: PropDef[] = [
   { name: "clearable", type: "boolean", def: "false", desc: <>Shows a clear ✕ while a value is set and resets to the placeholder; Backspace/Delete also clears (keyboard parity). The Root manages the value so it can reset.</>, source: "Select.tsx:31" },
   { name: "value / defaultValue", type: "string", desc: <>Controlled / uncontrolled selected value.</>, source: "Radix" },
   { name: "onValueChange", type: "(v: string) => void", desc: <>Fires when the selection changes.</>, source: "Radix" },
-  { name: "size", type: `"1" | "2" | "3"`, def: `"1"`, desc: <>Control size. Unset, it resolves from the global <Code>uiSize</Code> (default <Code>small</Code> → <Code>1</Code>); Radix’s own default is <Code>2</Code>.</>, source: "Radix · :104" },
+  { name: "size", type: `"1" | "2" | "3"`, def: `control lane (1 at small)`, desc: <>Control size. Unset, it resolves from the global <Code>uiSize</Code> (default <Code>small</Code> → <Code>1</Code>); Radix’s own default is <Code>2</Code>.</>, source: "Radix · :104" },
   { name: "disabled", type: "boolean", def: "false", desc: <>Dims the trigger and makes it inert — not focusable, not submitted.</>, source: "Radix" },
   { name: "required", type: "boolean", def: "false", desc: <>Marks the field required for native form submission.</>, source: "Radix" },
   { name: "name", type: "string", desc: <>Form field name; submits a hidden native input carrying the value.</>, source: "Radix" },

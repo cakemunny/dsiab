@@ -339,7 +339,7 @@ const ROOT_PROPS: PropDef[] = [
   { name: "endSlot", type: "ReactNode", desc: <>Optional pinned note at the far end of the label row — “Optional”, a count, an action.</>, source: "MultiSelect.tsx" },
   { name: "description", type: "ReactNode", desc: <>Persistent helper line under the trigger; replaced by the validation message while a tone is active.</>, source: "MultiSelect.tsx" },
   { name: "validation", type: `{ tone; message }`, desc: <>Accent-aware validation painted on the <strong>trigger only</strong> — border + faint tint + status glyph + message below. The portaled panel stays neutral.</>, source: "MultiSelect.tsx" },
-  { name: "size", type: `"1" | "2" | "3"`, def: `"1"`, desc: <>Control size. Unset, it resolves from the global <Code>uiSize</Code> (default <Code>small</Code> → <Code>1</Code>).</>, source: "MultiSelect.tsx" },
+  { name: "size", type: `"1" | "2" | "3"`, def: `control lane (1 at small)`, desc: <>Control size. Unset, it resolves from the global <Code>uiSize</Code> (default <Code>small</Code> → <Code>1</Code>).</>, source: "MultiSelect.tsx" },
   { name: "disabled", type: "boolean", def: "false", desc: <>Dims the trigger and makes it inert — not focusable, won’t open.</>, source: "MultiSelect.tsx" },
 ];
 

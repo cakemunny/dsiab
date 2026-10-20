@@ -447,7 +447,7 @@ export const Usage: Story = {
    each rendered as its own labelled Section + PropTable inside the merged Props below. */
 
 const ROOT_PROPS: PropDef[] = [
-  { name: "size", type: `"1" | "2" | "3"`, desc: <>Control size. Unset, it resolves from the global <Code>uiSize</Code> (default <Code>small</Code> → <Code>1</Code>); Radix’s own default is <Code>2</Code>.</>, source: "RadioGroup.tsx:22 · Radix" },
+  { name: "size", type: `"1" | "2" | "3"`, def: `control lane (1 at small)`, desc: <>Control size. Unset, it resolves from the global <Code>uiSize</Code> (default <Code>small</Code> → <Code>1</Code>); Radix’s own default is <Code>2</Code>.</>, source: "RadioGroup.tsx:22 · Radix" },
   { name: "variant", type: `"surface" | "soft" | "classic"`, locked: true, desc: <>Radix’s raw variant is <strong>not exposed</strong> — the wrapper omits it from the public type and hard-sets <Code>surface</Code> internally, so every item stays identifiable (like every input on this system). <Code>soft</Code> and <Code>classic</Code> are unavailable.</>, source: "RadioGroup.tsx:21,26" },
   { name: "color", type: "Radix accent", desc: <>Accent override for the selected fill and border; unset, it inherits the theme accent.</>, source: "Radix" },
   { name: "highContrast", type: "boolean", def: "false", desc: <>Increases the contrast of the selected fill/border in Radix’s high-contrast mode.</>, source: "Radix" },

@@ -359,7 +359,7 @@ const DATALIST_PROPS: PropDef[] = [
   {
     name: "size",
     type: `"1" | "2" | "3"`,
-    def: `control lane`,
+    def: `control lane (1 at small)`,
     desc: <>The type + gap step. Left unset it rides the uiSize <strong>control lane</strong> (small → <Code>1</Code>, medium → <Code>2</Code>, large → <Code>3</Code>), so a spec sheet matches the controls beside it; an explicit value wins per instance.</>,
     source: "DataList.tsx",
   },

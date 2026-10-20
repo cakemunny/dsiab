@@ -161,7 +161,7 @@ const PROPS: PropDef[] = [
   { name: "onValueChange", type: "(value) => void", desc: <>Fires when the selection changes — controlled or uncontrolled.</>, source: "Radix" },
   { name: "label", type: "string", desc: <>Accessible name → <Code>aria-label</Code> on the group. The radiogroup/toolbar has no visible label of its own.</>, source: "ToggleButtonGroup.tsx" },
   { name: "pressedIcon", type: "ReactNode", desc: <>On an <strong>Item</strong> — the content shown while that item is selected; it swaps the rest content. The same prop, name and semantics as <strong>ToggleButton</strong>'s. <strong>Required on an icon-only item</strong>: without it the selected state is the fill and its 1px edge, both colour differences.</>, source: "ToggleButtonGroup.tsx" },
-  { name: "size", type: `"1" | "2" | "3"`, desc: <>Applied to every item's Button. Unset → the global <Code>uiSize</Code> control lane (default <Code>small</Code> → <Code>1</Code>).</>, source: "ToggleButtonGroup.tsx" },
+  { name: "size", type: `"1" | "2" | "3"`, def: `control lane (1 at small)`, desc: <>Applied to every item's Button. Unset → the global <Code>uiSize</Code> control lane (default <Code>small</Code> → <Code>1</Code>).</>, source: "ToggleButtonGroup.tsx" },
   { name: "disabled", type: "boolean", desc: <>On the Root disables the whole group; on an Item disables that one (kept out of roving focus, pressed paint gated off).</>, source: "Radix" },
 ];
 

@@ -63,7 +63,7 @@ const SIZES: { size: "1" | "2" | "3"; text: "1" | "2" | "3"; label: string }[] =
 ];
 
 const SPINNER_PROPS: PropDef[] = [
-  { name: "size", type: `"1" | "2" | "3"`, desc: <>The ring's diameter step. Unset → the <strong>control lane</strong> (small → <Code>1</Code>), so a spinner matches the control/text beside it; an explicit <Code>1</Code>–<Code>3</Code> wins. Radix's own default is <Code>2</Code>.</>, source: "Spinner.tsx" },
+  { name: "size", type: `"1" | "2" | "3"`, def: `control lane (1 at small)`, desc: <>The ring's diameter step. Unset → the <strong>control lane</strong> (small → <Code>1</Code>), so a spinner matches the control/text beside it; an explicit <Code>1</Code>–<Code>3</Code> wins. Radix's own default is <Code>2</Code>.</>, source: "Spinner.tsx" },
   { name: "loading", type: "boolean", def: "true", desc: <>Whether the spinner shows. <Code>true</Code> → the ring; <Code>false</Code> → renders <Code>children</Code> in its place (so a control can swap its spinner for a result without a layout shift).</>, source: "Radix" },
 ];
 

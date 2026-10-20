@@ -46,7 +46,7 @@ function KbdSpec() {
 /* ---- Properties (Kbd-specific) ------------------------------------------- */
 
 const KBD_PROPS: PropDef[] = [
-  { name: "size", type: `"1"–"9" | "inherit"`, desc: <>Radix size step. Unset, it resolves from the global <Code>uiSize</Code> (text lane; default <Code>small</Code> → <Code>1</Code>) — the same lane <Code>Text</Code> reads. The cap then paints at <strong>0.8×</strong> that step's type, clamped <em>up</em> to the system's 12px floor (12 / 12 / 12.8px across the three tiers), so it sits a size under the text beside it. <Code>"inherit"</Code> opts out entirely.</>, source: "Kbd.tsx" },
+  { name: "size", type: `"1"–"9" | "inherit"`, def: `text lane (1 at small)`, desc: <>Radix size step. Unset, it resolves from the global <Code>uiSize</Code> (text lane; default <Code>small</Code> → <Code>1</Code>) — the same lane <Code>Text</Code> reads. The cap then paints at <strong>0.8×</strong> that step's type, clamped <em>up</em> to the system's 12px floor (12 / 12 / 12.8px across the three tiers), so it sits a size under the text beside it. <Code>"inherit"</Code> opts out entirely.</>, source: "Kbd.tsx" },
   { name: "variant", type: `"classic" | "soft"`, def: `"classic"`, desc: <>Radix Kbd skin. <Code>classic</Code> is the raised key-cap; <Code>soft</Code> is a flatter tint. Display-only, so <Code>soft</Code> is allowed here — the ban on <Code>soft</Code> covers interactive controls only.</>, source: "Radix" },
   { name: "children", type: "ReactNode", desc: <>The key label — <strong>one key per Kbd</strong>. Compose a shortcut as a sequence of adjacent <Code>Kbd</Code>s, not one Kbd holding the whole combo.</>, source: "Radix" },
 ];

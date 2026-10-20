@@ -371,7 +371,7 @@ const BADGE_PROPS: PropDef[] = [
   { name: "leadingIcon", type: "ReactNode", desc: <>Optional identification glyph before the label — a fixed-width slot rendered as an <Code>aria-hidden</Code> affix (decorative, since the label is the accessible name).</>, source: "Badge.tsx:20" },
   { name: "trailingIcon", type: "ReactNode", desc: <>Optional display glyph after the label. Keep it <strong>inert</strong> — a trailing caret or ✕ promises an action, and an action belongs on a <Code>Token</Code>, not a Badge.</>, source: "Badge.tsx:23" },
   { name: "radius", type: `"full" | "none" | "small" | "medium" | "large"`, def: `"full"`, desc: <>Corner radius. Defaults to <Code>full</Code> (a pill) so a badge never reads as a button.</>, source: "Badge.tsx:42" },
-  { name: "size", type: `"1" | "2" | "3"`, desc: <>Text size lane. Unset, it resolves from the global <Code>uiSize</Code> (default <Code>small</Code> → <Code>1</Code>); Radix’s own default is <Code>2</Code>.</>, source: "Badge.tsx:43 · Radix" },
+  { name: "size", type: `"1" | "2" | "3"`, def: `text lane (1 at small)`, desc: <>Text size lane. Unset, it resolves from the global <Code>uiSize</Code> (default <Code>small</Code> → <Code>1</Code>); Radix’s own default is <Code>2</Code>.</>, source: "Badge.tsx:43 · Radix" },
   { name: "children", type: "ReactNode", desc: <>The visible label — also the badge’s accessible name when there’s no <Code>aria-label</Code>.</>, source: "Radix" },
   { name: "aria-label", type: "string", desc: <>Accessible name — <strong>required</strong> for an icon-only badge (no visible text), which otherwise has no name (WCAG 4.1.2).</>, source: "Badge.tsx:45" },
 ];

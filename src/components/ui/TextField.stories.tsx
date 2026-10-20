@@ -694,7 +694,7 @@ const TEXTFIELD_PROPS: PropDef[] = [
   { name: "info", type: "ReactNode", desc: <>Optional inline affordance beside the label — a tip icon or helper toggle.</>, source: "TextField.tsx:12" },
   { name: "endSlot", type: "ReactNode", desc: <>Optional pinned note at the far end of the label row — “Optional”, a counter, an action.</>, source: "TextField.tsx:13" },
   { name: "variant", type: `"surface"`, locked: true, desc: <>Locked to <Code>surface</Code> — <Code>soft</Code>, <Code>outline</Code>, and <Code>classic</Code> aren’t exposed, so an input can’t drift off-system.</>, source: "TextField.tsx:10 · 23" },
-  { name: "size", type: `"1" | "2" | "3"`, def: `"1"`, desc: <>Control size. Unset, it resolves from the global <Code>uiSize</Code> (default <Code>small</Code> → <Code>1</Code>); Radix’s own default is <Code>2</Code>.</>, source: "TextField.tsx:20 · Radix" },
+  { name: "size", type: `"1" | "2" | "3"`, def: `control lane (1 at small)`, desc: <>Control size. Unset, it resolves from the global <Code>uiSize</Code> (default <Code>small</Code> → <Code>1</Code>); Radix’s own default is <Code>2</Code>.</>, source: "TextField.tsx:20 · Radix" },
   { name: "placeholder", type: "string", desc: <>Hint text <em>inside</em> the field (an example or format) — greyed, and <strong>not</strong> a label.</>, source: "Radix" },
   { name: "type", type: `"text" | "password" | "email" | …`, def: `"text"`, desc: <>Native input type.</>, source: "Radix" },
   { name: "disabled", type: "boolean", def: "false", desc: <>Dimmed and inert — not focusable, not submitted.</>, source: "Radix" },

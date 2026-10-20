@@ -549,7 +549,7 @@ const PROPS: PropDef[] = [
   { name: "removeLabel", type: "string", def: "Remove {label}", desc: <>Accessible name for the ✕ when the label isn't a plain string.</>, source: "Token.tsx" },
   { name: "color", type: "RadixColor", desc: <>Categorical hue (Badge's palette). There is <strong>no <Code>tone</Code></strong> — a token carries no destructive valence.</>, source: "Token.tsx" },
   { name: "leadingIcon", type: "ReactNode", desc: <>Optional glyph before the label (fixed-width, <Code>aria-hidden</Code>).</>, source: "Token.tsx" },
-  { name: "size", type: `"1" | "2" | "3" | "inherit"`, desc: <>Unset → the global <Code>uiSize</Code> text lane (default <Code>small</Code> → <Code>1</Code>).</>, source: "Token.tsx" },
+  { name: "size", type: `"1" | "2" | "3" | "inherit"`, def: `text lane (1 at small)`, desc: <>Unset → the global <Code>uiSize</Code> text lane (default <Code>small</Code> → <Code>1</Code>).</>, source: "Token.tsx" },
   { name: "disabled", type: "boolean", desc: <>Disables the body AND the ✕; dims via Radix's own disabled skin.</>, source: "Token.tsx" },
 ];
 

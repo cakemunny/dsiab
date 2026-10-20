@@ -337,7 +337,7 @@ const PROPS: PropDef[] = [
   { name: "numberOfMonths", type: "1 | 2", def: "2", desc: <>Months shown side by side in the dialog.</>, source: "DateRangeInput.tsx" },
   { name: "placeholder", type: "string", def: `"Select dates"`, desc: <>Greyed hint while empty.</>, source: "DateRangeInput.tsx" },
   { name: "hasClear", type: "boolean", def: "true", desc: <>A trailing clear ✕ (out of tab order, Backspace/Delete parity) while a range is set.</>, source: "DateRangeInput.tsx" },
-  { name: "size", type: `"1" | "2" | "3"`, def: `"1"`, desc: <>Control size. Unset, it resolves from the global <Code>uiSize</Code> control lane.</>, source: "DateRangeInput.tsx" },
+  { name: "size", type: `"1" | "2" | "3"`, def: `control lane (1 at small)`, desc: <>Control size. Unset, it resolves from the global <Code>uiSize</Code> control lane.</>, source: "DateRangeInput.tsx" },
   { name: "disabled", type: "boolean", def: "false", desc: <>Dims the trigger and makes it inert (native disabled — unless paired with a reason).</>, source: "DateRangeInput.tsx" },
   { name: "disabledReason", type: "string", desc: <>A non-empty reason SOFT-disables (aria-disabled + reason tooltip + glyph) so the reason stays perceivable on hover and focus.</>, source: "DateRangeInput.tsx" },
   { name: "label / info / endSlot / description / validation", type: "Field props", desc: <>The shared <Code>Field</Code> shell. <Code>validation</Code> is the STANDING channel (a committed range out of min/max synthesizes a message). Pass none of label / description / validation to keep the control bare.</>, source: "DateRangeInput.tsx" },
