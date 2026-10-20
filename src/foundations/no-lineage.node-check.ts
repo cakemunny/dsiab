@@ -243,8 +243,6 @@ const ATTR_LINKING: Record<string, readonly string[]> = {
   DoDont: ["note"],
   MeasuredRow: ["part", "note"],
   NoteRow: ["part", "value"],
-  RenderedRow: ["label"],
-  RoleRow: ["part"],
   LiteTokenSpec: ["rationale"],
   TokenGroup: ["blurb"],
   KeyRow: ["action"],

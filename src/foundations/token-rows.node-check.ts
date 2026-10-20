@@ -13,19 +13,18 @@
    paints. [[measured-token-rows]] is the stricter rule: read the value off the ELEMENT THAT PAINTS
    IT, and print the verdict.
 
-   The five rules, in the order a row fails them:
+   The five rules, in the order a row fails them (R2 is retired, see below):
 
      R1  Every user-facing Components/* story has a TOKEN SURFACE — a `MeasuredSpec`,
          a `TokenGroup`, a `LiteTokenSpec`, or a `Section` titled ~/token|role|
          spec/i. Floor: ZERO violations. A component cannot ship with no token
          documentation at all.
 
-     R2  A token row is a `MeasuredRow`. `RoleRow` and `RenderedRow` take the
-         value from the story — RoleRow resolves the very token it names, and
-         RenderedRow accepts whatever the story computed — so neither row can
-         disagree with the component. This is the CONVERSION WORK-LIST, and it
-         is deliberately left failing: the list of rows nobody has verified is
-         more useful checked in than deleted.
+     R2  Retired. It listed every `RoleRow` and `RenderedRow`, the two legacy
+         primitives that took the value from the story. The conversion is done
+         and both primitives are deleted, so a story can no longer import one
+         and the work-list is empty. The number stays so that R3 to R5 keep
+         the names that [[measured-token-rows]] gives them.
 
      R3  No row hands in a value. `value`, `swatch` and `verdict` are computed
          BY the primitive; a row that receives one is asserting on the story's
@@ -66,11 +65,9 @@ const STORIES_DIR = join(ROOT, "src/components/ui");
 
 /** The measured row — the only shape that can disagree with the component. */
 const MEASURED_ROW = "MeasuredRow";
-/** The legacy rows: they take the value from the story. R2's work-list. */
-const LEGACY_ROWS = new Set(["RoleRow", "RenderedRow"]);
 /** Every token-row primitive, for the attribute rules. `NoteRow` is prose — a length, a keyword,
  *  a layout fact — and makes no colour claim, so it is not a token row for this guard. */
-const ROW_ELEMENTS = new Set([MEASURED_ROW, ...LEGACY_ROWS]);
+const ROW_ELEMENTS = new Set([MEASURED_ROW]);
 /** Attributes that hand a computed answer to the row instead of letting it measure one. */
 const HANDED_IN = new Set(["value", "swatch", "verdict"]);
 /** Elements that, by themselves, constitute a token surface (R1). */
@@ -85,7 +82,7 @@ const HEX_LITERAL = /#[0-9a-f]{3,8}\b/i;
 /** A `var(--token)` reference inside an inline style value. */
 const VAR_REF = /var\(\s*(--[\w-]+)/g;
 
-type Rule = "R1" | "R2" | "R3" | "R4" | "R5";
+type Rule = "R1" | "R3" | "R4" | "R5";
 
 interface Violation {
   file: string;
@@ -230,19 +227,6 @@ function scanFile(file: string): Violation[] {
         const attrs = attrsOf(open, sf);
         const line = at(open);
 
-        // R2 — the conversion work-list.
-        if (LEGACY_ROWS.has(tag)) {
-          const subject = literalText(attrs.get("role")?.initializer)[0]
-            ?? literalText(attrs.get("token")?.initializer)[0]
-            ?? literalText(attrs.get("part")?.initializer)[0]
-            ?? literalText(attrs.get("label")?.initializer)[0]
-            ?? "";
-          out.push({
-            file: rel, line, rule: "R2",
-            detail: `<${tag}${subject ? ` ${subject}` : ""}> resolves its own token instead of measuring the component — convert to <MeasuredRow select= prop= />`,
-          });
-        }
-
         // R3 — nothing is handed in; the primitive computes value, swatch and verdict.
         for (const name of attrs.keys()) {
           if (HANDED_IN.has(name)) {
@@ -280,7 +264,7 @@ function scanFile(file: string): Violation[] {
   return out;
 }
 
-/** Compact the work-list: R2/R3 repeat per row, so a file gets one line per rule plus the lines. */
+/** Compact the report: R3 repeats per row, so a file gets one line per rule plus the lines. */
 function report(violations: Violation[]): string {
   const byFile = new Map<string, Violation[]>();
   for (const v of violations) (byFile.get(v.file) ?? byFile.set(v.file, []).get(v.file)!).push(v);
@@ -290,9 +274,7 @@ function report(violations: Violation[]): string {
     for (const v of vs) (byRule.get(v.rule) ?? byRule.set(v.rule, []).get(v.rule)!).push(v);
     const lines: string[] = [];
     for (const [rule, rv] of [...byRule.entries()].sort()) {
-      if (rule === "R2") {
-        lines.push(`    [R2] ${rv.length} unmeasured row(s) at :${rv.map((v) => v.line).join(", :")}`);
-      } else if (rule === "R3") {
+      if (rule === "R3") {
         lines.push(`    [R3] ${rv.length} handed-in value(s) at :${rv.map((v) => v.line).join(", :")}`);
       } else {
         for (const v of rv) lines.push(`    :${v.line}  [${v.rule}]  ${v.detail}`);
@@ -300,7 +282,7 @@ function report(violations: Violation[]): string {
     }
     blocks.push(`  ${f}\n${lines.join("\n")}`);
   }
-  const tally = (["R1", "R2", "R3", "R4", "R5"] as Rule[])
+  const tally = (["R1", "R3", "R4", "R5"] as Rule[])
     .map((r) => [r, violations.filter((v) => v.rule === r).length] as const)
     .filter(([, n]) => n > 0)
     .map(([r, n]) => `${r}=${n}`)
@@ -317,7 +299,7 @@ test("token rows measure the component, and are never handed a value", () => {
     violations,
     violations.length
       ? `Token-row violations in ${new Set(violations.map((v) => v.file)).size} story file(s) — see DECISIONS [[measured-token-rows]].\n` +
-        `R2/R3 are the conversion work-list and are expected to fail until the rows are measured.\n${report(violations)}`
+        `The conversion work-list is empty: every violation above is a regression to fix.\n${report(violations)}`
       : "",
   ).toEqual([]);
 });
