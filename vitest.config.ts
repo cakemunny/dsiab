@@ -50,10 +50,16 @@ class BlockerAwareProvider extends PlaywrightBrowserProvider {
 const visual = process.env.DS_VISUAL === "update" || process.env.DS_VISUAL === "compare";
 const contextOptions = visual ? { viewport: { width: 1280, height: 16_000 } } : {};
 
-/** Server side of the image comparison: whether `name` has a reference image beside the running story file,
- *  at the default path of `toMatchScreenshot`. */
+/** Where a reference image lives: `__screenshots__/<page>/<appearance>-chromium-<platform>.png` beside the
+ *  story file. The page folder drops `.stories.tsx`, because a folder named `Callout.stories.tsx` matches
+ *  Storybook's story pattern, and the dev server then fails to index it. */
+function visualReferencePath(testDir: string, testFile: string, name: string, browser: string, platform: string) {
+  return join(testDir, "__screenshots__", testFile.replace(/\.stories\.tsx$/, ""), `${name}-${browser}-${platform}.png`);
+}
+
+/** Server side of the image comparison: whether `name` has a reference image for the running story file. */
 function visualReferenceExists({ testPath }: { testPath: string }, name: string): boolean {
-  return existsSync(join(dirname(testPath), "__screenshots__", basename(testPath), `${name}-chromium-${process.platform}.png`));
+  return existsSync(visualReferencePath(dirname(testPath), basename(testPath), name, "chromium", process.platform));
 }
 
 function provider() {
@@ -134,6 +140,12 @@ function lane(appearance: "light" | "dark") {
       ...(visual ? { exclude: [...configDefaults.exclude, "src/**/_*.stories.tsx"] } : {}),
       browser: {
         commands: { visualReferenceExists },
+        expect: {
+          toMatchScreenshot: {
+            resolveScreenshotPath: ({ root, testFileDirectory, testFileName, arg, browserName, platform }) =>
+              visualReferencePath(join(root, testFileDirectory), testFileName, arg, browserName, platform),
+          },
+        },
         enabled: true,
         headless: true,
         provider: provider(),

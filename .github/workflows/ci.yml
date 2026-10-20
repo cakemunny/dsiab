@@ -16,10 +16,10 @@
 #
 # The `visual` job compares the first story of each docs page against a reference image
 # (.storybook/visual.setup.ts). No image is committed. A push to `main` takes every image again and
-# uploads it as the artifact `visual-references`, kept 90 days. A pull request downloads the images of
-# the latest green push to `main` and compares against them, and on a mismatch it uploads the actual
-# image and the diff as the artifact `visual-diffs`. A page with no image is skipped. The job runs
-# beside `checks`, so a mismatch from an intended visual change does not hide the four checks.
+# uploads it as the artifact `visual-references`, kept 90 days. A pull request compares against the
+# images of its own base commit, skips a page with no image, and on a mismatch uploads the actual
+# image and the diff as the artifact `visual-diffs`. The job runs beside `checks`, so a mismatch from
+# an intended visual change does not hide the four checks.
 
 name: ci
 
@@ -74,7 +74,8 @@ jobs:
         run: npx vitest run
 
   visual:
-    runs-on: ubuntu-latest
+    # A fixed runner image, so a runner update cannot move a font and fail every page.
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     permissions:
       contents: read
@@ -95,14 +96,18 @@ jobs:
       - name: Install Playwright's Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Download the reference images of main
+      # The images come from the push run of the pull request's own base commit, so they show the same
+      # main the pull request is compared with. A base run that is unfinished, failed or expired holds no
+      # images, and every page is then skipped.
+      - name: Download the reference images of the base commit
         if: github.event_name == 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
-          run_id=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yml --branch main --event push --status success --limit 1 --json databaseId --jq '.[0].databaseId // empty')
+          run_id=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yml --commit "$BASE_SHA" --event push --limit 1 --json databaseId --jq '.[0].databaseId // empty')
           if [ -z "$run_id" ]; then
-            echo "::notice::No green push to main holds reference images yet, so every page is skipped."
+            echo "::notice::No push run exists for base commit $BASE_SHA, so every page is skipped."
             exit 0
           fi
           gh run download "$run_id" --repo "$GITHUB_REPOSITORY" -n visual-references -D src \
