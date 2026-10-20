@@ -90,13 +90,14 @@ Node `^20.19.0 || ^22.12.0 || >=24.0.0`.
 
 ```bash
 npm install                        # dependencies at the exact lockfile versions
-npx playwright install chromium    # once per machine, unless DS_BROWSER_PATH names a Chromium browser
 npm run storybook                  # the docs on :6006, the rendered source of truth
 npm run build                      # dist/: the JS, the types, the stylesheet, the roster, the ledger
 npm run pack                       # build, then npm pack, for a tarball you can install into an app
 ```
 
 The install is large, and slow on a cold cache, because it brings Storybook, TypeScript, the build toolchain and a browser test runner. `npm install` also runs a `prepare` step for the maintainer's git hooks. In a contributor clone that step installs nothing, and none of the four checks depends on it.
+
+The browser tests need a Chromium-family browser. They use `DS_BROWSER_PATH` when it names one, then Helium at `/Applications/Helium.app`. Do not install Playwright's Chromium on a local machine: only CI installs it.
 
 npm reports advisories after the install. They sit in devDependencies, which never reach `dist`. Compare the two graphs yourself:
 

@@ -8,7 +8,8 @@
 #   4. vitest run                  the story suite in the browser, light and dark, with axe
 #
 # The story suite drives Playwright's own Chromium. `scripts/browser.mjs` picks it when
-# DS_BROWSER_PATH is unset ([[test-browser-order]]), and that is the case on this runner.
+# DS_BROWSER_PATH is unset and Helium is absent ([[test-browser-order]]), and that is the case on this
+# runner.
 #
 # Step 4 calls `vitest run` and not `npm test`, because `npm test` runs `test:tokens` again as its
 # pretest hook, and step 3 already ran it.

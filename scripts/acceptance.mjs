@@ -183,7 +183,7 @@ async function main() {
     server = await serve(join(app, "dist"));
     const { chromium } = await import("playwright");
     // The browser comes from the resolver the story suite uses too (scripts/browser.mjs): the
-    // DS_BROWSER_PATH override, then Playwright's own Chromium. The wait runs before the page loads
+    // DS_BROWSER_PATH override, then Helium, then Playwright's own Chromium. The wait runs before the page loads
     // anything, because a Chromium build with uBlock Origin built in reloads a tab that loads while
     // the blocker is still starting. A reload in the middle of the reads below would measure a page
     // that is being torn down. In a browser with no blocker the wait returns at once.

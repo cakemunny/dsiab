@@ -7,8 +7,8 @@ import { browserLaunchOptions, waitForBlockerStartup } from "./scripts/browser.m
 // so tests run in a real browser rather than jsdom.
 //
 // WHICH BROWSER, AND WHEN IT IS READY, both live in scripts/browser.mjs, which the publish gate
-// (scripts/acceptance.mjs) imports too. The lookup order is DS_BROWSER_PATH, then Playwright's own
-// Chromium (`npx playwright install chromium`, once per machine). Read that file before changing
+// (scripts/acceptance.mjs) imports too. The lookup order is DS_BROWSER_PATH, then Helium at its macOS
+// install path, then Playwright's own Chromium, which only CI installs. Read that file before changing
 // either here.
 //
 // WHY THE PROVIDER WAITS BEFORE IT NAVIGATES. A Chromium build with uBlock Origin built in runs one copy per
