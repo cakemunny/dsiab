@@ -12,5 +12,7 @@ export default defineConfig({
   test: {
     include: ["src/**/*.node-check.ts", "src/**/*.logic.test.ts"],
     environment: "node",
+    // Runs only with `--coverage`. Its own folder, so the story suite's report survives (vitest.config.ts).
+    coverage: { provider: "v8", include: ["src/**"], reportsDirectory: "./coverage/node" },
   },
 });

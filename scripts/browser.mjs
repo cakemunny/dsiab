@@ -9,13 +9,15 @@
  * WHICH BROWSER
  * -----------------------------------------------------------------------------
  * The browser is looked up, never assumed. Any Chromium-family browser gives the same results for
- * these gates, so the lookup takes the first of two ([[test-browser-order]]):
+ * these gates, so the lookup takes the first of three ([[test-browser-order]]):
  *
  *   1. DS_BROWSER_PATH, if it is set and the file exists. An explicit override always wins, and it
  *      is how a machine names its own Chromium-family browser.
- *   2. Playwright's own Chromium, the same version on every machine. Install it once with
- *      `npx playwright install chromium`. A machine with neither gets Playwright's own launch error,
- *      which names that command.
+ *   2. Helium at its macOS install path, the default on a maintainer machine. Helium is a Chromium
+ *      build, and no local machine installs Playwright's Chromium.
+ *   3. Playwright's own Chromium, which CI installs (`npx playwright install --with-deps chromium`).
+ *      A machine with none of the three gets Playwright's own launch error, which names the install
+ *      command.
  *
  * -----------------------------------------------------------------------------
  * WHEN A PAGE IS SAFE TO LOAD: A BUILT-IN AD BLOCKER RELOADS EARLY TABS
@@ -52,6 +54,9 @@
  */
 import { existsSync } from "node:fs";
 
+/** Where Helium installs on macOS. */
+const HELIUM_PATH = "/Applications/Helium.app/Contents/MacOS/Helium";
+
 /** Playwright launch options for the browser the lookup above picks.
  *
  *  `--disable-features=HeliumNoiseCanvas` turns off the canvas fingerprint defence of Helium, which
@@ -62,7 +67,7 @@ import { existsSync } from "node:fs";
  *  Measured: with the flag, 0 of 8 launches moved any colour, and without it 6 of 8 did. A browser
  *  that does not know the feature ignores the flag. */
 export function browserLaunchOptions(env = process.env) {
-  const executablePath = env.DS_BROWSER_PATH && existsSync(env.DS_BROWSER_PATH) ? env.DS_BROWSER_PATH : undefined;
+  const executablePath = [env.DS_BROWSER_PATH, HELIUM_PATH].find((path) => path && existsSync(path));
   return {
     ...(executablePath ? { executablePath } : {}),
     headless: true,

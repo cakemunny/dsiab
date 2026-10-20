@@ -1,6 +1,10 @@
 node_modules
 dist
 storybook-static
+coverage
+# image comparison: reference images live only in CI artifacts, never in the repository
+__screenshots__/
+.vitest-attachments
 *.tgz
 *.log
 .DS_Store

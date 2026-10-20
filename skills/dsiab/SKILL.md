@@ -133,9 +133,8 @@ If you are working inside the system repo rather than consuming it, `ds-check` i
 Also run `./node_modules/.bin/tsc --noEmit` (the local binary, not `npx tsc`), `npm run test:tokens`
 for the source-scanning guards, and `npm test` for the story suite in vitest browser mode with axe on
 every story. That last one drives the first Chromium-family browser that [`scripts/browser.mjs`](https://github.com/cakemunny/dsiab/blob/main/scripts/browser.mjs) finds:
-the `DS_BROWSER_PATH` override if it is set, then Playwright's own Chromium, the same version on every
-machine. Install that once with `npx playwright install chromium`, or point `DS_BROWSER_PATH` at any
-Chromium-family binary.
+the `DS_BROWSER_PATH` override if it is set, then Helium at `/Applications/Helium.app`, then
+Playwright's own Chromium, which only CI installs.
 
 Then **look at it**. A visual claim is earned by observing rendered pixels and writing the diff
 sentence: *"Before: [what I saw]. After: [what I see]."* A passing type check and a quiet console are

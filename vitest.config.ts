@@ -1,4 +1,6 @@
-import { defineConfig } from "vitest/config";
+import { existsSync } from "node:fs";
+import { basename, dirname, join } from "node:path";
+import { configDefaults, defineConfig } from "vitest/config";
 import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
 import { PlaywrightBrowserProvider, playwright } from "@vitest/browser-playwright";
 import { browserLaunchOptions, waitForBlockerStartup } from "./scripts/browser.mjs";
@@ -7,8 +9,8 @@ import { browserLaunchOptions, waitForBlockerStartup } from "./scripts/browser.m
 // so tests run in a real browser rather than jsdom.
 //
 // WHICH BROWSER, AND WHEN IT IS READY, both live in scripts/browser.mjs, which the publish gate
-// (scripts/acceptance.mjs) imports too. The lookup order is DS_BROWSER_PATH, then Playwright's own
-// Chromium (`npx playwright install chromium`, once per machine). Read that file before changing
+// (scripts/acceptance.mjs) imports too. The lookup order is DS_BROWSER_PATH, then Helium at its macOS
+// install path, then Playwright's own Chromium, which only CI installs. Read that file before changing
 // either here.
 //
 // WHY THE PROVIDER WAITS BEFORE IT NAVIGATES. A Chromium build with uBlock Origin built in runs one copy per
@@ -41,8 +43,27 @@ class BlockerAwareProvider extends PlaywrightBrowserProvider {
 }
 
 // Each project gets its own provider, and therefore its own browser.
+// VISUAL MODE needs a tall browser window. A story page is taller than the test frame, and the frame paints
+// only its own viewport, so .storybook/visual.setup.ts grows the frame to the page before a capture. Vitest
+// scales a frame larger than the window down to fit, which shrinks the image, so the window here is as tall
+// as a capture may be. Chromium caps an image at 16,384 pixels a side.
+const visual = process.env.DS_VISUAL === "update" || process.env.DS_VISUAL === "compare";
+const contextOptions = visual ? { viewport: { width: 1280, height: 16_000 } } : {};
+
+/** Where a reference image lives: `__screenshots__/<page>/<appearance>-chromium-<platform>.png` beside the
+ *  story file. The page folder drops `.stories.tsx`, because a folder named `Callout.stories.tsx` matches
+ *  Storybook's story pattern, and the dev server then fails to index it. */
+function visualReferencePath(testDir: string, testFile: string, name: string, browser: string, platform: string) {
+  return join(testDir, "__screenshots__", testFile.replace(/\.stories\.tsx$/, ""), `${name}-${browser}-${platform}.png`);
+}
+
+/** Server side of the image comparison: whether `name` has a reference image for the running story file. */
+function visualReferenceExists({ testPath }: { testPath: string }, name: string): boolean {
+  return existsSync(visualReferencePath(dirname(testPath), basename(testPath), name, "chromium", process.platform));
+}
+
 function provider() {
-  const options = { launchOptions };
+  const options = { launchOptions, contextOptions };
   return {
     ...playwright(options),
     providerFactory: (project: ConstructorParameters<typeof PlaywrightBrowserProvider>[0]) =>
@@ -89,36 +110,47 @@ export default defineConfig({
     // which opens every ruling once and takes 7.1s on a laptop, passed 60s without any of its own 2s waits
     // timing out. On CI the limit is 180s. A local run keeps the 15s default, so a story that grows slow
     // still shows up locally.
-    ...(process.env.CI ? { testTimeout: 180_000 } : {}),
+    // The image capture runs in an afterEach hook, so hooks get the same limit as tests.
+    ...(process.env.CI ? { testTimeout: 180_000, hookTimeout: 180_000 } : {}),
+    // COVERAGE runs only with `--coverage`. `include` lists every file under src/, so a file no story loads
+    // still appears at 0%. Each Vitest config writes its own folder, because a run deletes its folder first.
+    coverage: { provider: "v8", include: ["src/**"], reportsDirectory: "./coverage/stories" },
     // `extends: true` reuses the plugins/resolve/optimizeDeps above; only the lane's
     // name + env differ. Each project gets its own browser instance.
-    projects: [
-      {
-        extends: true,
-        test: {
-          name: "light",
-          env: { VITE_SB_APPEARANCE: "light" },
-          browser: {
-            enabled: true,
-            headless: true,
-            provider: provider(),
-            instances: [{ browser: "chromium" }],
-          },
-        },
-      },
-      {
-        extends: true,
-        test: {
-          name: "dark",
-          env: { VITE_SB_APPEARANCE: "dark" },
-          browser: {
-            enabled: true,
-            headless: true,
-            provider: provider(),
-            instances: [{ browser: "chromium" }],
-          },
-        },
-      },
-    ],
+    //
+    // THE SIDEBAR "Run tests" WIDGET RUNS THE LIGHT LANE ONLY. The widget sets VITEST_STORYBOOK, and under
+    // that flag the storybookTest plugin renames every project it reaches to `storybook:<configDir>`
+    // (@storybook/addon-vitest 10.4.6, workspace-name-override) and then asks Vitest for that one name.
+    // Two lanes then share one name, and Vitest refuses to start: "Project name ... is not unique". The
+    // command line keeps both lanes.
+    projects: process.env.VITEST_STORYBOOK === "true" ? [lane("light")] : [lane("light"), lane("dark")],
   },
 });
+
+function lane(appearance: "light" | "dark") {
+  return {
+    extends: true,
+    test: {
+      name: appearance,
+      // DS_VISUAL ("update" or "compare") turns on the image comparison in .storybook/visual.setup.ts. Only
+      // the `visual` job of the CI workflow sets it.
+      env: { VITE_SB_APPEARANCE: appearance, DS_VISUAL: process.env.DS_VISUAL ?? "" },
+      setupFiles: ["./.storybook/visual.setup.ts"],
+      // The visual job captures pages only, so it skips the internal behaviour files.
+      ...(visual ? { exclude: [...configDefaults.exclude, "src/**/_*.stories.tsx"] } : {}),
+      browser: {
+        commands: { visualReferenceExists },
+        expect: {
+          toMatchScreenshot: {
+            resolveScreenshotPath: ({ root, testFileDirectory, testFileName, arg, browserName, platform }) =>
+              visualReferencePath(join(root, testFileDirectory), testFileName, arg, browserName, platform),
+          },
+        },
+        enabled: true,
+        headless: true,
+        provider: provider(),
+        instances: [{ browser: "chromium" as const }],
+      },
+    },
+  };
+}

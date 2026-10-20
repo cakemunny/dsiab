@@ -34,6 +34,10 @@ describe("parseValue — the <1e12 seconds-vs-ms heuristic", () => {
   it("parses ISO 8601 strings", () => {
     expect(parseValue("2026-02-19T17:00:00Z").getTime()).toBe(Date.parse("2026-02-19T17:00:00Z"));
   });
+  it("reads a date-only string as local midnight, so it formats as the same day in every time zone", () => {
+    const d = parseValue("2024-03-11");
+    expect([d.getFullYear(), d.getMonth(), d.getDate(), d.getHours()]).toEqual([2024, 2, 11, 0]);
+  });
 });
 
 describe("getRelativeParts — clock-skew clamps → 'now'", () => {

@@ -5,7 +5,7 @@
  * Most images are one demo screen from the docs, loaded alone through Storybook's iframe. One image is
  * the docs site itself, with its sidebar and toolbar and the addon panel hidden. Each is 1440 by 900 at
  * scale 1 and lands in docs/images/. The browser comes from scripts/browser.mjs, the resolver the story
- * suite and the publish test share: DS_BROWSER_PATH, then Playwright's own Chromium. Each page opens on
+ * suite and the publish test share: DS_BROWSER_PATH, then Helium, then Playwright's own Chromium. Each page opens on
  * about:blank and waits for a built-in ad blocker to finish starting before it loads the docs, because
  * such a blocker reloads a tab that loads early. Motion stays at the browser default: under a
  * reduced-motion preference a Skeleton paints no placeholder, so a loading card would capture as an

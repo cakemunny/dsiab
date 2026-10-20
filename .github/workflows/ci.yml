@@ -8,10 +8,18 @@
 #   4. vitest run                  the story suite in the browser, light and dark, with axe
 #
 # The story suite drives Playwright's own Chromium. `scripts/browser.mjs` picks it when
-# DS_BROWSER_PATH is unset ([[test-browser-order]]), and that is the case on this runner.
+# DS_BROWSER_PATH is unset and Helium is absent ([[test-browser-order]]), and that is the case on this
+# runner.
 #
 # Step 4 calls `vitest run` and not `npm test`, because `npm test` runs `test:tokens` again as its
 # pretest hook, and step 3 already ran it.
+#
+# The `visual` job compares the first story of each docs page against a reference image
+# (.storybook/visual.setup.ts). No image is committed. A push to `main` takes every image again and
+# uploads it as the artifact `visual-references`, kept 90 days. A pull request compares against the
+# images of its own base commit, skips a page with no image, and on a mismatch uploads the actual
+# image and the diff as the artifact `visual-diffs`. The job runs beside `checks`, so a mismatch from
+# an intended visual change does not hide the four checks.
 
 name: ci
 
@@ -64,3 +72,72 @@ jobs:
 
       - name: Story suite
         run: npx vitest run
+
+  visual:
+    # A fixed runner image, so a runner update cannot move a font and fail every page.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Install Playwright's Chromium
+        run: npx playwright install --with-deps chromium
+
+      # The images come from the push run of the pull request's own base commit, so they show the same
+      # main the pull request is compared with. A base run that is unfinished, failed or expired holds no
+      # images, and every page is then skipped.
+      - name: Download the reference images of the base commit
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          run_id=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yml --commit "$BASE_SHA" --event push --limit 1 --json databaseId --jq '.[0].databaseId // empty')
+          if [ -z "$run_id" ]; then
+            echo "::notice::No push run exists for base commit $BASE_SHA, so every page is skipped."
+            exit 0
+          fi
+          gh run download "$run_id" --repo "$GITHUB_REPOSITORY" -n visual-references -D src \
+            || echo "::notice::Run $run_id holds no reference images, so every page is skipped."
+
+      - name: Compare against the reference images
+        if: github.event_name == 'pull_request'
+        run: npx vitest run
+        env:
+          DS_VISUAL: compare
+
+      - name: Take the reference images
+        if: github.event_name == 'push'
+        run: npx vitest run --update
+        env:
+          DS_VISUAL: update
+
+      - name: Upload the reference images
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: visual-references
+          path: src/**/__screenshots__/**/*-chromium-linux.png
+          retention-days: 90
+          if-no-files-found: error
+
+      - name: Upload the image differences
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: visual-diffs
+          path: .vitest-attachments/**
+          if-no-files-found: ignore

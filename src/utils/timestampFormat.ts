@@ -57,6 +57,10 @@ export function parseValue(value: string | number): Date {
   if (typeof value === "number") {
     return new Date(value < 1e12 ? value * 1000 : value);
   }
+  // A date-only string such as "2024-03-11" names a calendar day. `new Date` reads that one ISO shape as
+  // midnight UTC, which formats as the day before anywhere west of UTC, so it is read as local midnight.
+  const day = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (day) return new Date(Number(day[1]), Number(day[2]) - 1, Number(day[3]));
   return new Date(value);
 }
 

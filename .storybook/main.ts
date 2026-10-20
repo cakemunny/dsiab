@@ -53,6 +53,6 @@ const config: StorybookConfig = {
 // addon-a11y runs axe-core on every story. The error-mode switch lives in
 // preview.tsx (parameters.a11y.test), not here. The Vitest browser provider is
 // 'playwright', and scripts/browser.mjs picks the browser it launches: the
-// DS_BROWSER_PATH override, then Playwright's own Chromium, which
-// `npx playwright install chromium` installs once per machine.
+// DS_BROWSER_PATH override, then Helium at its macOS install path, then
+// Playwright's own Chromium, which only CI installs.
 export default config;

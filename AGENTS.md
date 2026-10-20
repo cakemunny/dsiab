@@ -278,8 +278,8 @@ the output. A pass is a statement about the files it lists and nothing else. The
 - `npm test`, the story tests in vitest browser mode, with axe on every story bar the opt-outs
   registered in `AXE_EXEMPT` (`axe-scope.node-check.ts`, guarded in both directions). The suite drives
   the first Chromium-family browser that `scripts/browser.mjs` finds: the `DS_BROWSER_PATH` override if
-  it is set, then Playwright's own Chromium, the same version on every machine. Install that once with
-  `npx playwright install chromium`, or point `DS_BROWSER_PATH` at any Chromium-family binary.
+  it is set, then Helium at `/Applications/Helium.app`, then Playwright's own Chromium, which only CI
+  installs.
 - **Look at it.** A visual claim is earned by observing rendered pixels and writing the diff sentence:
   *"Before: [what I saw]. After: [what I see]."* A `className` in the markup, a passing type check and
   "no console errors" are not visual verification. The reply that makes the claim cites the baseline
