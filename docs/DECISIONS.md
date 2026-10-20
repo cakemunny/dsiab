@@ -246,7 +246,8 @@ This ledger records the rulings that shape the design system and the reason behi
 **Which browser.** The story suite and `test:publish` find the browser through one shared module, `scripts/browser.mjs`, in this order:
 
 - `DS_BROWSER_PATH`, when it names an existing file
-- Playwright's own Chromium, installed once per machine with `npx playwright install chromium`
+- Helium at `/Applications/Helium.app`, the default on a local machine
+- Playwright's own Chromium, which only CI installs ([test-browser-order](#test-browser-order))
 
 **Startup wait.** Both gates wait until the ad blocker that some Chromium builds include finishes its startup, because that blocker reloads tabs while it starts.
 
@@ -703,17 +704,17 @@ This ledger records the rulings that shape the design system and the reason behi
 
 **Not covered.** The gear menu keeps its "Onboarding guide" line. Storybook 10.4.6 has no flag for it, and the `menuOnboardingChecklist` flag of Storybook 10.6 needs an upgrade.
 
-**Open tasks.** Of the card's 20 tasks that apply to this setup, checked on 2026-09-28, the system met 10 by its own means, five do not apply, and publishing is a release step under [docs-hosting](#docs-hosting). Four stay open, on three topics:
+**Open tasks.** Of the card's 20 tasks that apply to this setup, checked on 2026-09-28, the system met 10 by its own means, five do not apply, and publishing is a release step under [docs-hosting](#docs-hosting). Four stayed open, on three topics, and all three closed after 0.9.0:
 
-- No workflow runs the gates in CI.
-- No test compares a rendered story against a stored image.
-- No coverage report is configured.
+- CI runs the four checks on every push to `main` and every pull request.
+- CI compares the first story of each docs page against a reference image, from 2026-10-19.
+- Both test lanes write a coverage report with `--coverage`, from 2026-10-19.
 
 **Deferred.**
 
 - The image comparison uses the `toMatchScreenshot` assertion of Vitest browser mode, with its built-in pixelmatch comparator and no hosted service. It lands after 0.9.0 as an enhancement, and it depends on the CI question, because its reference images differ by browser and operating system.
 - A coverage report lands after the image comparison, through `@vitest/coverage-v8` and a `coverage` block in both Vitest configurations.
-- The "Run tests" widget at the foot of the dev sidebar cannot start Vitest, and a click ends the dev server. It ships in 0.9.0 as a known defect, with its fix after 0.9.0. `npx vitest run` does not use the widget and is unaffected.
+- The "Run tests" widget runs the light lane only, because the addon renames every lane to one project name. Fixed 2026-10-19, and `npx vitest run` keeps both lanes.
 
 **Guidance.** The maintainer approved removing the card from the dev sidebar on 2026-09-28. After the task check that day, the maintainer ruled the image comparison and the coverage report enhancements after 0.9.0, deferred and not dropped, and accepted the "Run tests" widget in 0.9.0 as a known defect.
 
@@ -729,11 +730,11 @@ This ledger records the rulings that shape the design system and the reason behi
 
 **Tags.** `CONTRIBUTING`. **Ruled.** 2026-09-28.
 
-**The story suite and the publish gate run in the browser `DS_BROWSER_PATH` names, or else in Playwright's own Chromium, and no maintainer browser sits in the default order.**
+**The story suite and the publish gate run in the browser `DS_BROWSER_PATH` names, then Helium at its macOS install path, then Playwright's own Chromium, which only CI installs.**
 
-**What you see.** `scripts/browser.mjs` picks the browser for `npm test` and `npm run test:publish`: `DS_BROWSER_PATH` when it names an existing file, otherwise Playwright's own Chromium. `npx playwright install chromium` installs that browser once per machine.
+**What you see.** `scripts/browser.mjs` picks the browser for `npm test` and `npm run test:publish`: `DS_BROWSER_PATH` when it names an existing file, then Helium at `/Applications/Helium.app`, then Playwright's own Chromium. No local machine installs Playwright's Chromium. CI has no Helium, so it installs Playwright's Chromium and uses it.
 
-**Why.** Every machine then runs the same browser version, which the planned image comparison and CI need.
+**Why.** A local machine runs a browser it already has, and CI runs one Chromium version on every run, which the image comparison needs, because it runs only on CI.
 
 **Scope.**
 
@@ -743,9 +744,9 @@ This ledger records the rulings that shape the design system and the reason behi
 - The wait for a built-in uBlock Origin stays, as support for any Chromium build that bundles it, because `DS_BROWSER_PATH` may name such a build.
 - `AGENTS.md`, `README.md`, the skill, `vitest.config.ts`, `.storybook/main.ts` and `scripts/acceptance.mjs` state this order.
 
-**Not verified.** The fallback to Playwright's own Chromium was checked as the launch options it returns, with no executable path and no channel. As of 2026-09-28 no run in that browser was made on the maintainer's machine.
+**Verified 2026-10-19.** With `DS_BROWSER_PATH` unset, `npm test` passed 1,508 tests in Helium, and `npm run test:publish` passed 31 of 31. CI runs the suite in Playwright's own Chromium on every push to `main` and every pull request.
 
-**Guidance.** The maintainer approved this order on 2026-09-28.
+**Guidance.** The maintainer approved this order on 2026-09-28. On 2026-10-19 the maintainer ruled that no local machine installs Playwright's Chromium, and that Helium is the default local browser.
 
 **Changed from.** The order was `DS_BROWSER_PATH`, then Helium, then Playwright's Chrome channel ([story-tests-in-browser](#story-tests-in-browser)).
 
