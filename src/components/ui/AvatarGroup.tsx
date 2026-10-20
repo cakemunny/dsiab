@@ -1,6 +1,6 @@
 import { Children, type ComponentProps, type CSSProperties, type ReactNode } from "react";
 import { useResolvedAvatarSize, type AvatarSize } from "../../theme/SizeContext";
-import { Avatar } from "./Avatar";
+import { Avatar, AvatarHostSizedContext } from "./Avatar";
 import { VisuallyHidden } from "./VisuallyHidden";
 
 const cx = (...xs: (string | false | undefined)[]) => xs.filter(Boolean).join(" ");
@@ -23,8 +23,8 @@ export interface AvatarGroupProps extends Omit<ComponentProps<"span">, "children
 }
 
 /**
- * A tight, horizontally overlapped stack of avatars with a consistent --ds-bg-base ring so the overlaps
- * read. `max` caps the visible avatars and folds the remainder into a neutral "+N" counter that REUSES
+ * A tight, horizontally overlapped stack of avatars. Each disc keeps the 1px edge every avatar has, so the
+ * front disc's edge marks the overlap ([[avatar-group-seam]]). `max` caps the visible avatars and folds the remainder into a neutral "+N" counter that REUSES
  * `Avatar`, so the surplus indicator is the same diameter and circular shape as every other disc,
  * never a shorter pill. The counter occupies a slot in the same overlapped run as the faces, so a
  * different shape or diameter breaks the row's rhythm at its end, which is the one place the eye
@@ -34,7 +34,7 @@ export interface AvatarGroupProps extends Omit<ComponentProps<"span">, "children
  * announces the stack as ONE unit.
  *
  * Unset, the box comes off the PORTRAIT ramp (24 / 30 / 40) rather than the beside-text ramp a
- * standalone Avatar takes (16 / 20 / 24): the discs overlap by 40% of the box, so an inline-sized
+ * standalone Avatar takes (16 / 20 / 24): the discs overlap by 20% of the box, so an inline-sized
  * stack shows only a sliver of each person and reads as texture instead of as a set of faces.
  */
 export function AvatarGroup({ children, size, max, label, className, style, ...rest }: AvatarGroupProps) {
@@ -59,7 +59,7 @@ export function AvatarGroup({ children, size, max, label, className, style, ...r
       style={{ ...sizeVar, ...style }}
       {...rest}
     >
-      {shown}
+      <AvatarHostSizedContext.Provider value={true}>{shown}</AvatarHostSizedContext.Provider>
       {overflow > 0 && (
         // Reuse Avatar so the surplus counter is the SAME circular disc as the stack — identical
         // diameter/shape, overlapping like the rest (no gap). A STRONGER neutral fill (rt-ds-avatar-count

@@ -1,8 +1,10 @@
-import { useEffect, type ComponentProps, type CSSProperties } from "react";
+import { createContext, useContext, useEffect, type ComponentProps, type CSSProperties } from "react";
 import { Avatar as RadixAvatar } from "@radix-ui/themes";
 import { useResolvedAvatarSize, type AvatarSize } from "../../theme/SizeContext";
 import { accentColorProps, type AccentColor } from "../../theme/Provider";
+import { Buildings, User } from "@phosphor-icons/react";
 import { StatusDot, type StatusDotVariant } from "./StatusDot";
+import { VisuallyHidden } from "./VisuallyHidden";
 
 // Dev-only accessibility warnings, resolved once at module load. A `try` rather than
 // `typeof process !== "undefined" && …`: a bundler replaces the LITERAL `process.env.NODE_ENV`
@@ -19,6 +21,18 @@ const DEV_WARN = (() => {
 })();
 
 type RadixAvatarProps = ComponentProps<typeof RadixAvatar>;
+
+/** True where a host sizes the avatar through CSS, so the avatar's own unset `size` says nothing about its
+ *  box. AvatarGroup and the ChatMessage avatar slot provide it. Internal. */
+export const AvatarHostSizedContext = createContext(false);
+
+// INITIALS THAT CANNOT BE READ ARE NOT SHOWN ([[avatar-initials-floor]]). Two initials render at 0.44 of the
+// box (components.css), so they clear the 12px floor only in a box of 12 / 0.44 = 27.3px or more. An avatar
+// with no `size` takes the beside-text ramp, which is always 16, 20 or 24px, where they read 7.04, 8.8 or
+// 10.56px. So an avatar with no size and a string fallback shows an icon: a person on a round avatar, a building
+// on any other radius, the entity shape. The initials stay as hidden text, so a screen reader hears what it heard
+// before, and the name beside the avatar carries who it is. An explicit `size`, a node fallback (any icon the
+// caller picks) and a host-sized avatar keep what they had.
 
 /** Presence/status shown as a bottom-right dot — paired with a text label (never colour-alone). */
 export type AvatarStatus = "online" | "busy" | "away" | "offline";
@@ -50,6 +64,8 @@ export interface AvatarProps extends Omit<RadixAvatarProps, "size" | "variant" |
    * Avatar box size. A t-shirt name maps to the line-height ladder (xs 16 / sm 20 / md 24 / lg 30 /
    * xl 40); a raw number is a hero size in px (leaves the inline-with-text scale); unset tracks the
    * global uiSize (small→xs, medium→sm, large→md); "inherit" opts out (Radix's own default box).
+   * Unset, a text `fallback` shows an icon, a person on a round avatar and a building on any other radius,
+   * because two initials in those boxes render under 12px. Pass any icon as `fallback` to choose your own.
    */
   size?: AvatarSize | number | "inherit";
   /** Presence dot. Carries a visually-hidden accessible name; colour comes from accent-aware --ds-fill-*. */
@@ -63,8 +79,11 @@ export interface AvatarProps extends Omit<RadixAvatarProps, "size" | "variant" |
  * circle = person, rounded-square = entity/org/bot. `fallback` (Radix-required) is a documentation
  * convention: person → initials string; system/bot/team → a Phosphor icon node.
  */
-export function Avatar({ size, status, radius = "full", className, style, src, alt, color, ...rest }: AvatarProps) {
+export function Avatar({ size, status, radius = "full", className, style, src, alt, color, fallback, ...rest }: AvatarProps) {
   const resolved = useResolvedAvatarSize(size);
+  const hostSized = useContext(AvatarHostSizedContext);
+  const iconFallback = size === undefined && !hostSized && typeof fallback === "string";
+  const FallbackIcon = radius === "full" ? User : Buildings;
 
   // WCAG 1.1.1: an <img> avatar needs a text alternative. Warn (dev only) when `src` is set with no
   // `alt`; alt="" is the explicit decorative opt-out (redundant with adjacent text). Mirrors the
@@ -93,6 +112,20 @@ export function Avatar({ size, status, radius = "full", className, style, src, a
       radius={radius}
       src={src}
       alt={alt}
+      fallback={
+        iconFallback ? (
+          <>
+            <FallbackIcon aria-hidden className="rt-ds-avatar-icon" />
+            <VisuallyHidden>{fallback}</VisuallyHidden>
+          </>
+        ) : typeof fallback === "string" ? (
+          // A node fallback drops Radix's rt-one-letter / rt-two-letters size classes, so the span carries the
+          // letter count and components.css re-applies the same two font-size variables.
+          <span className="rt-ds-avatar-initials" data-letters={fallback.length}>{fallback}</span>
+        ) : (
+          fallback
+        )
+      }
       // With a status shell the size lives on the shell (so the sibling dot can read --ds-avatar-box);
       // without one it lives on the avatar itself.
       className={cx(base, status ? undefined : sizeClass, className)}

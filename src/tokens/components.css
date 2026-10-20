@@ -2459,6 +2459,28 @@
   --avatar-fallback-two-letters-font-size: calc(var(--ds-avatar-box) * 0.44);
 }
 
+/* INITIALS CENTRE ON THEIR CAPITALS ([[avatar-group-seam]]). Radix centres the text's line box, and two
+   capitals have no descender, so they rode 1.0–1.13px high in a 24px disc and 0.75–0.88px in a 30px one.
+   The span is trimmed to the cap height and the baseline, so the flex centring centres the letters
+   themselves: measured within 0.38px at every size. A browser without `text-box` keeps the old centring. */
+.radix-themes .rt-AvatarFallback .rt-ds-avatar-initials {
+  display: block;
+  text-box: trim-both cap alphabetic;
+}
+/* The span makes the fallback a node, which drops Radix's letter-count size classes, so it re-applies them. */
+.radix-themes .rt-AvatarFallback .rt-ds-avatar-initials[data-letters="1"] { font-size: var(--avatar-fallback-one-letter-font-size); }
+.radix-themes .rt-AvatarFallback .rt-ds-avatar-initials[data-letters="2"] {
+  font-size: var(--avatar-fallback-two-letters-font-size, var(--avatar-fallback-one-letter-font-size));
+}
+
+/* The person or building icon that replaces initials too small to read ([[avatar-initials-floor]]). Phosphor draws at
+   1em, so without a size it took the inherited text size, 14px in every box. 0.7 of the box keeps the
+   icon in proportion: 11.2 / 14 / 16.8px in the 16 / 20 / 24px boxes. */
+.radix-themes .rt-ds-avatar .rt-ds-avatar-icon {
+  width: calc(var(--ds-avatar-box) * 0.7);
+  height: calc(var(--ds-avatar-box) * 0.7);
+}
+
 /* THE AVATAR NEEDS A VISIBLE EDGE ([[avatar-shape-perceptibility]], ruled 2026-09-19).
    The avatar is locked to Radix's `soft` variant, because solid-fill initials failed the 3:1 floor
    that then held for text on a solid fill, which [[text-on-solid-fill-contrast]] later raised to 4.5:1
@@ -2556,8 +2578,10 @@
 .radix-themes .rt-ds-avatar-shell .rt-ds-avatar-status[data-variant="error"]   { box-shadow: inset 0 0 0 1px var(--ds-stroke-strong), inset 0 0 0 1px var(--error-dot-edge); }
 .radix-themes .rt-ds-avatar-shell .rt-ds-avatar-status[data-variant="accent"]  { box-shadow: inset 0 0 0 1px var(--ds-stroke-strong), inset 0 0 0 1px var(--accent-part-edge); }
 
-/* AvatarGroup — a tight, cohesive overlapped stack (single row, one avatar tall); a bg-base ring so
-   overlaps read. Every disc — including the "+N" overflow counter, which reuses Avatar so it is the
+/* AvatarGroup — a tight, cohesive overlapped stack (single row, one avatar tall). Each disc's own 1px edge
+   ([[avatar-shape-perceptibility]]) marks where the front disc overlaps the one behind; the 2px --ds-bg-base
+   ring that did that before the edge existed is gone ([[avatar-group-seam]]): it cut a pale band through the
+   edge behind and drew a halo on any tinted surface. Every disc — including the "+N" overflow counter, which reuses Avatar so it is the
    SAME diameter/shape — is forced to the group's --ds-avatar-box (uniform size), overriding any
    per-child size: the `inherit` (0,3,0) beats a child's own rt-ds-avatar-* (0,2,0). */
 .radix-themes .rt-ds-avatar-group { display: inline-flex; align-items: center; }
@@ -2567,7 +2591,6 @@
      --ds-avatar-box, so the measured 0.55/0.44 ratio stays the single source of truth (a duplicated
      0.5/0.4 here silently shrank grouped initials). */
   --ds-avatar-box: inherit;
-  box-shadow: 0 0 0 2px var(--ds-bg-base); /* the read-through ring */
 }
 /* OVERLAP IS DERIVED FROM THE INITIALS, NOT PICKED ([[avatar-group-overlap]]).
    This was `-0.4` — a 40% overlap chosen so the stack "reads as one cohesive unit". It ate the

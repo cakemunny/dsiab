@@ -6,6 +6,7 @@ import { Button } from "./Button";
 import { Dialog } from "./Dialog";
 import { toHex } from "./_storyKit";
 import { parseColor, resolveColor, themeRoot, withAccent } from "../../foundations/_assert";
+import { resetWarnings } from "../../theme/detectAndWarn";
 
 /* Test-only behavior for Toast — kept OUT of the docs stories (System/Toast) so viewing a docs page never
    spawns or auto-hides a toast on view (Storybook runs a story's play on view — that would flash the corner).
@@ -548,5 +549,61 @@ export const UnderModalPreexisting: Story = {
     if (preexistingUndo.runs !== 1) throw new Error(`one click at Undo must run Undo once; it ran ${preexistingUndo.runs} times`);
     if (!dialog.isConnected || dialog.getAttribute("data-state") !== "open")
       throw new Error(`a click at Undo must leave the modal open; the dialog is ${dialog.isConnected ? `data-state="${dialog.getAttribute("data-state")}"` : "unmounted"}`);
+  },
+};
+
+/** Spy on console.warn for one play. The warning is capped once per page, so the cap is reset first. */
+function captureWarnings() {
+  const original = console.warn;
+  const warnings: string[] = [];
+  console.warn = (...a: unknown[]) => { warnings.push(String(a[0])); };
+  resetWarnings();
+  return { warnings, restore: () => { console.warn = original; } };
+}
+
+/** A toast raised with a ToastProvider but no ToastViewport renders nothing, so development warns once and
+ *  names the viewport. Found by the consumer test of 2026-10-19, where the toast vanished in silence. */
+export const NoViewportWarns: Story = {
+  render: () => (
+    <ToastProvider>
+      <Box p="5">
+        <Spawner specs={[{ id: "spawn", label: "spawn", make: () => ({ body: "Settings saved.", tone: "success" }) }]} />
+      </Box>
+    </ToastProvider>
+  ),
+  play: async ({ canvasElement }) => {
+    const spy = captureWarnings();
+    try {
+      click(canvasElement, "spawn");
+      click(canvasElement, "spawn");
+      await waitFor(() => spy.warnings.length > 0).catch(() => {
+        throw new Error("a toast raised with no ToastViewport must warn in development");
+      });
+      await sleep(50);
+      const hits = spy.warnings.filter((m) => m.includes("<ToastViewport />"));
+      if (hits.length !== 1) throw new Error(`the warning must fire once and name <ToastViewport />; got ${hits.length}: ${spy.warnings.join(" | ")}`);
+    } finally {
+      spy.restore();
+    }
+  },
+};
+
+/** The control: with a ToastViewport mounted, the same toast renders and nothing warns. */
+export const ViewportPresentNoWarning: Story = {
+  render: () => (
+    <Sandbox>
+      <Spawner specs={[{ id: "spawn", label: "spawn", make: () => ({ body: "Settings saved.", tone: "success" }) }]} />
+    </Sandbox>
+  ),
+  play: async ({ canvasElement }) => {
+    const spy = captureWarnings();
+    try {
+      click(canvasElement, "spawn");
+      await waitFor(() => liveToasts().length === 1);
+      await sleep(50);
+      if (spy.warnings.some((m) => m.includes("ToastViewport"))) throw new Error("a toast with a mounted viewport must not warn");
+    } finally {
+      spy.restore();
+    }
   },
 };

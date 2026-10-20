@@ -468,6 +468,9 @@
       "AvatarProps",
       "Avatar"
     ],
+    "internalExports": [
+      "AvatarHostSizedContext"
+    ],
     "status": "ported",
     "wave": 1,
     "tier": "full",

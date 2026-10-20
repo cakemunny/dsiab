@@ -13,7 +13,7 @@
 // it exports first. The internal `_*.stories.tsx` files hold behaviour plays, not pages, so they take no
 // image. The Decisions page takes none either: it renders the whole ledger as text, far taller than the
 // 16,000-pixel window, and its capture never settled on the CI runner.
-import { afterEach, beforeEach, expect } from "vitest";
+import { afterEach, beforeEach, expect, vi } from "vitest";
 import type { RunnerTestCase, RunnerTestFile, RunnerTestSuite } from "vitest";
 import { commands, page } from "vitest/browser";
 
@@ -41,6 +41,9 @@ const takesImage = (task: RunnerTestCase) => {
 };
 
 if (env.DS_VISUAL === "update" || env.DS_VISUAL === "compare") {
+  // A page that renders a time built from Date.now() differs on every run, so the clock is frozen before any
+  // story module loads. Only Date is faked: timers and animation frames keep running.
+  vi.useFakeTimers({ toFake: ["Date"], now: new Date("2026-01-15T17:00:00Z") });
   // Every other story is skipped here. The `checks` job already runs them, and a flaky one must not turn the
   // image comparison red.
   beforeEach(({ task, skip }) => {

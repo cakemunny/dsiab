@@ -189,7 +189,7 @@ export const Anatomy: Story = {
             <Flex align="center" gap="4">
               <Avatar fallback="AL" />
               <Text as="p" size="2" style={{ color: "var(--ds-text-strong)", maxWidth: "var(--ds-text-measure)", lineHeight: 1.6 }}>
-                Leave <Code>size</Code> unset and the box <strong>tracks the global uiSize toolbar</strong> (the same mechanism as Button/Text) — <Code>small→16</Code> · <Code>medium→20</Code> · <Code>large→24px</Code>. Flip the <Code>uiSize</Code> toolbar (top) and watch this one resize; the pinned ladder above ignores it.
+                Leave <Code>size</Code> unset and the box <strong>tracks the global uiSize toolbar</strong> (the same mechanism as Button/Text) — <Code>small→16</Code> · <Code>medium→20</Code> · <Code>large→24px</Code>. Flip the <Code>uiSize</Code> toolbar (top) and watch this one resize; the pinned ladder above ignores it. At these boxes two initials would render at 7, 9 or 11px, so a text fallback shows an icon instead, a person on a round avatar and a building on an entity, and keeps the initials for a screen reader ([[avatar-initials-floor]]). Pass <Code>size="lg"</Code> or larger to show the initials, or pass any icon as the <Code>fallback</Code>.
               </Text>
             </Flex>
           </Box>
@@ -584,7 +584,7 @@ export const Usage: Story = {
       <HexThemeKey.Provider value={`${globals.accent}-${globals.appearance}-${globals.contrast}`}>
         <Section title="Tokens" lead="The box is a size lane rather than a colour, so it is stated; the presence dot IS a colour, so every one of its rows is read off a rendered avatar and checked against the token it claims — flip the accent or the appearance toolbar and the readings re-resolve.">
           <Flex direction="column" gap="4">
-            <TokenGroup label="BOX" specimen={<Avatar fallback="AL" />}>
+            <TokenGroup label="BOX" specimen={<Avatar size="lg" fallback="AL" />}>
               <NoteRow part="Box (xs → xl)" value="16 / 20 / 24 / 30 / 40" radix="--ds-text-*-leading" />
               <NoteRow part="Variant" value="soft (locked)" radix="--accent-3 / --accent-a11" />
               <NoteRow part="Radius" value="full (default) · medium (entity)" radix="--radius-*" />
@@ -659,7 +659,7 @@ export const Usage: Story = {
 };
 
 const AVATAR_PROPS: PropDef[] = [
-  { name: "size", type: `"xs" | "sm" | "md" | "lg" | "xl" | number | "inherit"`, def: "avatar lane (xs at small)", desc: <>Box size. A t-shirt name maps to the line-height ladder — <Code>xs</Code> 16 · <Code>sm</Code> 20 · <Code>md</Code> 24 · <Code>lg</Code> 30 · <Code>xl</Code> 40 — so an avatar drops in beside text without nudging. A raw number is a hero box in px (off the inline-with-text scale). Unset, it follows the global <Code>uiSize</Code> avatar lane (<Code>small</Code> → <Code>xs</Code>, 16px); <Code>inherit</Code> opts out entirely and lets Radix's own box govern.</>, source: "Avatar.tsx:36" },
+  { name: "size", type: `"xs" | "sm" | "md" | "lg" | "xl" | number | "inherit"`, def: "avatar lane (xs at small)", desc: <>Box size. A t-shirt name maps to the line-height ladder — <Code>xs</Code> 16 · <Code>sm</Code> 20 · <Code>md</Code> 24 · <Code>lg</Code> 30 · <Code>xl</Code> 40 — so an avatar drops in beside text without nudging. A raw number is a hero box in px (off the inline-with-text scale). Unset, it follows the global <Code>uiSize</Code> avatar lane (<Code>small</Code> → <Code>xs</Code>, 16px), where a text fallback shows an icon instead, a person on a round avatar and a building on an entity, at every <Code>uiSize</Code>, because the initials would render under 12px ([[avatar-initials-floor]]). An avatar inside <Code>AvatarGroup</Code> or a <Code>ChatMessage</Code> keeps its initials; <Code>inherit</Code> opts out entirely and lets Radix's own box govern.</>, source: "Avatar.tsx:36" },
   { name: "status", type: `"online" | "busy" | "away" | "offline"`, desc: <>Presence dot, bottom-right. It renders the <Code>StatusDot</Code> component — an accent-aware <Code>--ds-*</Code> fill plus a visually-hidden text label, so presence never reads by colour alone. The dot scales with the box and carries a <Code>--ds-bg-base</Code> cutout ring so it holds over a photo.</>, source: "Avatar.tsx:38" },
   { name: "fallback", type: "ReactNode", desc: <><strong>Required.</strong> What shows with no <Code>src</Code> (or while it loads). The convention: a person → initials (<Code>"AL"</Code>); a system, bot, or team → a glyph node.</>, source: "Radix" },
   { name: "src", type: "string", desc: <>Image URL. Absent or failed, the <Code>fallback</Code> shows instead.</>, source: "Radix" },
@@ -746,6 +746,12 @@ export const History: Story = {
             lowest reads 3.13:1 in light and 4.41:1 and Lc 32.7 in dark. The offline dot,{" "}
             <Code>--ds-icon-neutral</Code>, clears on its own fill and takes no edge.
           </Decision>
+          <Decision id="[[avatar-initials-floor]] · an icon in place of unreadable initials">
+            With no <Code>size</Code>, an avatar sits in a 16, 20 or 24px box, where two initials render at
+            7.04, 8.8 or 10.56px. There a text fallback shows an icon at 0.7 of the box, a person on a round avatar
+            and a building on an entity, and the initials stay as hidden text. An explicit size, a node fallback
+            (any icon the caller picks), an AvatarGroup member and a ChatMessage avatar keep what they had.
+          </Decision>
           <Decision id="1.1.1">
             An image <Code>src</Code> without <Code>alt</Code> warns in dev; <Code>alt=""</Code> is the
             explicit decorative opt-out for an avatar redundant with adjacent text.
@@ -755,6 +761,10 @@ export const History: Story = {
       <Rule />
       <Section title="Changelog" lead="Notable changes, newest first.">
         <Flex direction="column" gap="3">
+          <Decision id="0.9.1">
+            An avatar with no size shows a person or building icon where its initials would render under 12px,
+            found by the consumer test of 2026-10-19.
+          </Decision>
           <Decision id="0.9.0">
             Initial component — the line-height ladder + <Code>useResolvedAvatarSize</Code>, soft-lock,
             circle default, presence dot, dev alt-warning, and AvatarGroup. Token/size spec reads live from

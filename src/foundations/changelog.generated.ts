@@ -12,8 +12,40 @@ export type ChangelogEntry = {
 
 export const CHANGELOG: { generatedFrom: string; kept: number; entries: ChangelogEntry[] } = {
   "generatedFrom": "HEAD",
-  "kept": 21,
+  "kept": 25,
   "entries": [
+    {
+      "date": "2026-10-20",
+      "type": "fix",
+      "scope": "avatar",
+      "summary": "an icon for unreadable initials, no group ring, initials centred on their capitals",
+      "hash": "34820c4",
+      "refs": []
+    },
+    {
+      "date": "2026-10-19",
+      "type": "fix",
+      "scope": "toast",
+      "summary": "warn once when a toast is raised with no ToastViewport",
+      "hash": "064e16d",
+      "refs": []
+    },
+    {
+      "date": "2026-10-19",
+      "type": "fix",
+      "scope": "timestamp",
+      "summary": "show a date-only value on its own day in every time zone",
+      "hash": "4cf74e3",
+      "refs": []
+    },
+    {
+      "date": "2026-10-19",
+      "type": "fix",
+      "scope": "storybook",
+      "summary": "let the sidebar Run tests widget start Vitest",
+      "hash": "5f3b627",
+      "refs": []
+    },
     {
       "date": "2026-10-19",
       "type": "fix",

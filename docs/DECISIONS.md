@@ -2034,6 +2034,30 @@ The choice between a heavier ring, a stronger fill and the current state belongs
 
 > **The `Avatar` shape is imperceptible against the page, and the ruling that locked it to `soft` is why (2026-09-19).** The ruling that set the 3:1 floor for text on a solid fill locked `Avatar` to `variant="soft"` and stopped exposing `variant`, because solid-fill initials fail the AA large/bold guardrail. That solved the TEXT contrast and nobody measured the other half. **Measured 2026-09-19, compositing alpha over the page rather than rastering it opaque:** the fallback chip sits at **1.09:1 in light and 1.24:1 in dark** against the page behind it. The consequence: the element is not recognisable as an avatar, because at 20px the circle is invisible and only the initials read. **The initials themselves are fine and this is not a text-contrast defect:** measured across twelve accent and appearance combinations, 4.77:1 (tomato light) to 13.38:1 (gold light). **Nor is it cleanly a 1.4.11 failure**, because the letters carry the meaning and the circle is a decorative container, so the criterion's "graphical object required to understand the content" is arguable rather than settled. It is a perceptibility defect. **Why it is recorded rather than fixed: no option is free, and all of them repaint every avatar in the system.** Measured: a ring at `--ds-stroke-weak` reaches 1.66:1 dark and 1.41:1 light, at `--ds-stroke-strong` 3.02:1 dark but only 1.91:1 light — no shipped stroke token clears 3:1 in light. Strengthening the fill instead trades one floor for the other: `accent-a5` gives chip 1.67/1.34 with initials still at 5.38/5.10, `accent-a6` gives 1.99/1.53 with initials at 4.50/4.71, and `accent-a7` gets the chip to 2.43 dark but drops the initials to **3.69**, under the floor. **So a 3:1 avatar boundary is unreachable while the fill stays soft**, and choosing between a heavier ring, a stronger fill, and accepting the current state is a decision for the maintainer, with its own review. **Mechanism gap:** nothing measures a chip against the surface BEHIND it. Every contrast guard in this repo measures foreground against its own background, which is exactly why this survived — the pairing that failed is one no lane looks at.
 
+### avatar-initials-floor
+
+**Tags.** `ACCESSIBILITY`, `COMPONENTS`. **Ruled.** 2026-10-20.
+
+**An avatar with no size shows an icon in place of its initials, because in its 16, 20 or 24px box two initials render under 12px.**
+
+**What you see.** With no `size`, `Avatar` takes the beside-text ramp, which is always a 16, 20 or 24px box. There a string fallback shows a Phosphor icon at regular weight and 0.7 of the box, 11.2, 14 or 16.8px: `User` on a round avatar and `Buildings` on any other radius, the entity shape. The initials stay as visually hidden text, so a screen reader hears what it heard before.
+
+**Why.** The consumer test of 2026-10-19 rendered a team table whose avatars carried 7.04px initials. Two initials render at 0.44 of the box, so they clear 12px only in a box of 27.3px or more, and the beside-text ramp never reaches that.
+
+**Scope.** These keep what they had:
+
+- An explicit `size`. Pinning a size accepts initials under the floor.
+- A node fallback, so any icon the caller passes wins.
+- An `AvatarGroup` member and a `ChatMessage` avatar, whose host sizes the box through CSS (24 to 40px and 30px). The internal `AvatarHostSizedContext` marks them.
+
+**Not covered.** An `AvatarGroup` member at the small tier sits in a 24px box with 10.56px initials, under the floor. At a 16px box the regular icon's outline is 0.7px, so on a standard-density screen only 22% of its pixels reach 3:1. The colour itself reads 5.71:1 in light and 7.22:1 in dark.
+
+**Guidance.** On 2026-10-20 the maintainer chose an icon over one initial at 24px, a building for entity avatars, and the regular weight.
+
+**Changed from.** Two initials at every size.
+
+**Status.** Ruled 2026-10-20.
+
 ## Component layer
 
 ### system-wrapper-layer
@@ -5536,6 +5560,27 @@ The icon and the title move together because they are one visual unit, and a lar
 **Evidence.** The entry before the rewrite of 2026-10-01:
 
 > **The avatar-group overlap is derived from the initials, not chosen (2026-09-19).** The overlap was `-0.4` — 40% of the box — picked so the stack "reads as one cohesive unit". It ate the second letter of every two-letter pair. Measured at the large tier: a 40px disc with 16px of overlap leaves 24px visible, while the initials' ink is 23.2px centred, so its right edge lands at 31.6px and **7.6px sits under the next avatar**. "RK DM SO HB" rendered as "RI DI SC HI". It is proportional, so it was equally wrong at every tier; it was noticed at large because the glyphs are bigger, and reasonably read as the initials being off-centre. They were centred to within 0.3px — the overlap was covering them, which is a different defect with a different fix. **The derivation, so the number is not taste:** two letters at the measured `--avatar-fallback-two-letters-font-size` ratio of 0.44 occupy ~58% of the box, centred, so the ink runs from 21% to 79%. The next disc must start at or after 79%, capping overlap at 21%; 20% is that bound with a little room. Change the 0.44 ratio and this must move with it. **Cost accepted:** the stack is looser than it was. A stack whose initials cannot be read is not carrying information, so density loses.
+
+### avatar-group-seam
+
+**Tags.** `COMPONENTS`. **Ruled.** 2026-10-20.
+
+**A grouped avatar shows only its own 1px edge, with no ring, and every avatar centres its initials on their capitals.**
+
+**What you see.** Each disc in an `AvatarGroup` keeps the 1px `--ds-stroke-strong` edge that every avatar has ([avatar-shape-perceptibility](#avatar-shape-perceptibility)), so the front disc's edge marks where it overlaps the one behind. A string fallback sits in a span trimmed with `text-box: trim-both cap alphabetic`, and the fallback's flex centring then centres the capitals themselves. The span re-applies Radix's one-letter and two-letter font sizes, which a node fallback otherwise loses.
+
+**Why.** The maintainer reported both defects from a 24px group on 2026-10-20:
+
+- The 2px `--ds-bg-base` ring, from before the edge existed, cut a pale band through the edge of the disc behind and drew a halo on any surface other than `--ds-bg-base`.
+- Radix centres the text's line box, and two capitals have no descender, so the initials' ink centre sat 1.0 to 1.13px high in a 24px disc and 0.75 to 0.88px high in a 30px disc. With the trim it sits within 0.63px at every size.
+
+**Scope.** The trim applies to every avatar with string initials, not only a grouped one, including `size="inherit"`. A browser without `text-box`, Firefox among them on 2026-10-20, keeps the old centring. The trimmed span can move an avatar's baseline by up to 1.1px beside inline text at the small tier.
+
+**Guidance.** The maintainer approved removing the ring and trimming the initials on 2026-10-20. It is the second time a 1px stroke replaced a cutout ring in the Avatar family, after the presence dot ([status-dot-edges](#status-dot-edges)).
+
+**Changed from.** Each grouped disc carried `box-shadow: 0 0 0 2px var(--ds-bg-base)`, and the initials were centred on their line box.
+
+**Status.** Ruled 2026-10-20.
 
 ### chrome-heading-lane
 
