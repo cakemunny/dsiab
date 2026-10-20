@@ -140,4 +140,7 @@ jobs:
         with:
           name: visual-diffs
           path: .vitest-attachments/**
+          # Vitest writes the actual image and the diff into this dot-folder, and the action skips hidden
+          # files unless told otherwise.
+          include-hidden-files: true
           if-no-files-found: ignore
