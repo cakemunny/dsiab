@@ -2,6 +2,10 @@ node_modules
 dist
 storybook-static
 coverage
+# image comparison: only the CI references (`*-chromium-linux.png`) are committed
+__screenshots__/**/*-darwin.png
+__screenshots__/**/*-win32.png
+.vitest-attachments
 *.tgz
 *.log
 .DS_Store

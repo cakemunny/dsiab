@@ -41,8 +41,14 @@ class BlockerAwareProvider extends PlaywrightBrowserProvider {
 }
 
 // Each project gets its own provider, and therefore its own browser.
+// VISUAL MODE needs a tall browser window. A story page is taller than the test frame, and the frame paints
+// only its own viewport, so .storybook/visual.setup.ts grows the frame to the page before a capture. A frame
+// larger than the window is scaled down to fit, so the window here is as tall as a capture may be. Chromium
+// caps an image at 16,384 pixels a side, and a page taller than this window is cut at its foot.
+const contextOptions = process.env.DS_VISUAL === "1" ? { viewport: { width: 1280, height: 16_000 } } : {};
+
 function provider() {
-  const options = { launchOptions };
+  const options = { launchOptions, contextOptions };
   return {
     ...playwright(options),
     providerFactory: (project: ConstructorParameters<typeof PlaywrightBrowserProvider>[0]) =>
@@ -110,7 +116,9 @@ function lane(appearance: "light" | "dark") {
     extends: true,
     test: {
       name: appearance,
-      env: { VITE_SB_APPEARANCE: appearance },
+      // DS_VISUAL turns on the image comparison in .storybook/visual.setup.ts. CI sets it.
+      env: { VITE_SB_APPEARANCE: appearance, DS_VISUAL: process.env.DS_VISUAL ?? "" },
+      setupFiles: ["./.storybook/visual.setup.ts"],
       browser: {
         enabled: true,
         headless: true,
