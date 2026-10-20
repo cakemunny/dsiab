@@ -19,7 +19,8 @@
 # uploads it as the artifact `visual-references`, kept 90 days. A pull request compares against the
 # images of its own base commit, skips a page with no image, and on a mismatch uploads the actual
 # image and the diff as the artifact `visual-diffs`. The job runs beside `checks`, so a mismatch from
-# an intended visual change does not hide the four checks.
+# an intended visual change does not hide the four checks. After looking at the diffs, a reviewer adds
+# the label `visual-change-approved`, and the job reports the mismatch without failing.
 
 name: ci
 
@@ -27,6 +28,8 @@ on:
   push:
     branches: [main]
   pull_request:
+    # labeled and unlabeled rerun the run, so adding visual-change-approved turns the visual job green.
+    types: [opened, synchronize, reopened, labeled, unlabeled]
 
 permissions:
   contents: read
@@ -113,11 +116,21 @@ jobs:
           gh run download "$run_id" --repo "$GITHUB_REPOSITORY" -n visual-references -D src \
             || echo "::notice::Run $run_id holds no reference images, so every page is skipped."
 
+      # An intended visual change differs from main's images until it merges. The reviewer looks at the
+      # visual-diffs artifact and adds the label visual-change-approved; the mismatch is then reported and
+      # does not fail the job. Any other failure in this step is a mismatch too, since the step runs only
+      # the image stories.
       - name: Compare against the reference images
+        id: compare
         if: github.event_name == 'pull_request'
+        continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'visual-change-approved') }}
         run: npx vitest run
         env:
           DS_VISUAL: compare
+
+      - name: Report an approved visual change
+        if: github.event_name == 'pull_request' && steps.compare.outcome == 'failure' && contains(github.event.pull_request.labels.*.name, 'visual-change-approved')
+        run: echo "::warning::Pages differ from main's reference images, and the label visual-change-approved accepts them. The visual-diffs artifact holds each difference."
 
       - name: Take the reference images
         if: github.event_name == 'push'
@@ -135,7 +148,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload the image differences
-        if: failure() && github.event_name == 'pull_request'
+        if: always() && github.event_name == 'pull_request' && steps.compare.outcome == 'failure'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: visual-diffs
