@@ -1,4 +1,6 @@
-import { defineConfig } from "vitest/config";
+import { existsSync } from "node:fs";
+import { basename, dirname, join } from "node:path";
+import { configDefaults, defineConfig } from "vitest/config";
 import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
 import { PlaywrightBrowserProvider, playwright } from "@vitest/browser-playwright";
 import { browserLaunchOptions, waitForBlockerStartup } from "./scripts/browser.mjs";
@@ -42,10 +44,17 @@ class BlockerAwareProvider extends PlaywrightBrowserProvider {
 
 // Each project gets its own provider, and therefore its own browser.
 // VISUAL MODE needs a tall browser window. A story page is taller than the test frame, and the frame paints
-// only its own viewport, so .storybook/visual.setup.ts grows the frame to the page before a capture. A frame
-// larger than the window is scaled down to fit, so the window here is as tall as a capture may be. Chromium
-// caps an image at 16,384 pixels a side, and a page taller than this window is cut at its foot.
-const contextOptions = process.env.DS_VISUAL === "1" ? { viewport: { width: 1280, height: 16_000 } } : {};
+// only its own viewport, so .storybook/visual.setup.ts grows the frame to the page before a capture. Vitest
+// scales a frame larger than the window down to fit, which shrinks the image, so the window here is as tall
+// as a capture may be. Chromium caps an image at 16,384 pixels a side.
+const visual = process.env.DS_VISUAL === "update" || process.env.DS_VISUAL === "compare";
+const contextOptions = visual ? { viewport: { width: 1280, height: 16_000 } } : {};
+
+/** Server side of the image comparison: whether `name` has a reference image beside the running story file,
+ *  at the default path of `toMatchScreenshot`. */
+function visualReferenceExists({ testPath }: { testPath: string }, name: string): boolean {
+  return existsSync(join(dirname(testPath), "__screenshots__", basename(testPath), `${name}-chromium-${process.platform}.png`));
+}
 
 function provider() {
   const options = { launchOptions, contextOptions };
@@ -95,7 +104,8 @@ export default defineConfig({
     // which opens every ruling once and takes 7.1s on a laptop, passed 60s without any of its own 2s waits
     // timing out. On CI the limit is 180s. A local run keeps the 15s default, so a story that grows slow
     // still shows up locally.
-    ...(process.env.CI ? { testTimeout: 180_000 } : {}),
+    // The image capture runs in an afterEach hook, so hooks get the same limit as tests.
+    ...(process.env.CI ? { testTimeout: 180_000, hookTimeout: 180_000 } : {}),
     // COVERAGE runs only with `--coverage`. `include` lists every file under src/, so a file no story loads
     // still appears at 0%. Each Vitest config writes its own folder, because a run deletes its folder first.
     coverage: { provider: "v8", include: ["src/**"], reportsDirectory: "./coverage/stories" },
@@ -116,10 +126,14 @@ function lane(appearance: "light" | "dark") {
     extends: true,
     test: {
       name: appearance,
-      // DS_VISUAL turns on the image comparison in .storybook/visual.setup.ts. CI sets it.
+      // DS_VISUAL ("update" or "compare") turns on the image comparison in .storybook/visual.setup.ts. Only
+      // the `visual` job of the CI workflow sets it.
       env: { VITE_SB_APPEARANCE: appearance, DS_VISUAL: process.env.DS_VISUAL ?? "" },
       setupFiles: ["./.storybook/visual.setup.ts"],
+      // The visual job captures pages only, so it skips the internal behaviour files.
+      ...(visual ? { exclude: [...configDefaults.exclude, "src/**/_*.stories.tsx"] } : {}),
       browser: {
+        commands: { visualReferenceExists },
         enabled: true,
         headless: true,
         provider: provider(),
