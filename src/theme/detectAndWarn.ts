@@ -108,6 +108,11 @@ export const NO_STYLESHEET_MESSAGE =
   "once, at your app's entry point. It already contains Radix Themes' own sheet, so do not import that " +
   "one as well.";
 
+export const NO_TOAST_VIEWPORT_MESSAGE =
+  "a toast was raised with no <ToastViewport /> mounted, so it renders nothing. <ToastProvider> holds the " +
+  "toasts and <ToastViewport /> is where they appear. Place one <ToastViewport /> inside <ToastProvider>, " +
+  "next to your app.";
+
 /**
  * The canary. `semantic.css` declares the whole `--ds-*` role layer on
  * `.radix-themes`, so any one role answers the question; this is the same

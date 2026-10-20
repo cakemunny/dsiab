@@ -21,6 +21,7 @@ import { ButtonGroup } from "./ButtonGroup";
 import { Button } from "./Button";
 import { IconButton } from "./IconButton";
 import { useUISize } from "../../theme/SizeContext";
+import { warnOnce, NO_TOAST_VIEWPORT_MESSAGE } from "../../theme/detectAndWarn";
 import { useIsomorphicLayoutEffect } from "../../hooks/useIsomorphicLayoutEffect";
 
 /**
@@ -115,6 +116,8 @@ type ToastManager = {
   entries: Entry[];
   push: (options: ToastOptions) => DismissFn;
   dismiss: (id: string) => void;
+  /** A mounted ToastViewport calls this, and calls the function it returns on unmount. */
+  registerViewport: () => () => void;
 };
 
 const ToastManagerContext = createContext<ToastManager | null>(null);
@@ -173,7 +176,8 @@ export interface ToastProviderProps {
 }
 
 /** Owns the entry map + the manager logic and wraps the primitive's provider.
- *  Mount once at the app root, inside the system `<Provider>`. */
+ *  Mount once at the app root, inside the system `<Provider>`, and place one `<ToastViewport />` inside it.
+ *  Without the viewport a toast renders nothing, and a development build warns once. */
 export function ToastProvider({ children, label = "Notification", swipeDirection = "right" }: ToastProviderProps) {
   const [entries, setEntries] = useState<Entry[]>([]);
   const entriesRef = useRef<Entry[]>([]);
@@ -182,6 +186,13 @@ export function ToastProvider({ children, label = "Notification", swipeDirection
   const gcTimers = useRef<Map<string, number>>(new Map());
   const dismissingIds = useRef<Set<string>>(new Set()); // ids already mid-dismiss — makes dismiss() idempotent
   const idSeq = useRef(0);
+  const viewports = useRef(0);
+  const registerViewport = useCallback(() => {
+    viewports.current += 1;
+    return () => {
+      viewports.current -= 1;
+    };
+  }, []);
 
   const hardRemove = useCallback((id: string) => {
     dismissingIds.current.delete(id); // the entry is fully gone — a later genuine re-push of this id may dismiss again
@@ -266,6 +277,11 @@ export function ToastProvider({ children, label = "Notification", swipeDirection
         return [...prev, entry];
       });
 
+      // A viewport mounting in the same commit as this push registers in its effect, so the check waits a tick.
+      window.setTimeout(() => {
+        if (viewports.current === 0) warnOnce("toast-no-viewport", NO_TOAST_VIEWPORT_MESSAGE);
+      }, 0);
+
       return () => dismiss(id);
     },
     [dismiss],
@@ -273,7 +289,7 @@ export function ToastProvider({ children, label = "Notification", swipeDirection
 
   return (
     <RadixToast.Provider label={label} swipeDirection={swipeDirection} duration={DEFAULT_DURATION}>
-      <ToastManagerContext.Provider value={{ entries, push, dismiss }}>
+      <ToastManagerContext.Provider value={{ entries, push, dismiss, registerViewport }}>
         {children}
       </ToastManagerContext.Provider>
     </RadixToast.Provider>
@@ -312,7 +328,8 @@ export interface ToastViewportProps {
  *  (Radix #4115, the #4127 mechanism). "off" announces nothing itself, so Radix's own status node still
  *  speaks once. */
 export function ToastViewport({ position = "bottom-end", maxVisible = 5, hotkey, label, container }: ToastViewportProps) {
-  const { entries } = useManager();
+  const { entries, registerViewport } = useManager();
+  useEffect(registerViewport, [registerViewport]);
   const visible = entries.slice(-maxVisible); // window: only the newest maxVisible render
   // Eviction keeps focus off <body>, as dismissal does. The read happens during render, while the toast
   // that holds focus is still in the DOM: if windowing is about to drop it while it is still open, the
