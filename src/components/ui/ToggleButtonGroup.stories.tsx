@@ -362,7 +362,7 @@ export const History: Story = {
             <Code>--ds-stroke-accent-weak</Code> edge and a{" "}
             <Code>--ds-text-strong</Code> label at weight 600, inherited with no work. That ink is part of the
             inheritance and not an afterthought: a ghost Button's own accent ink is tuned to read on the page,
-            and over an accent tint of the same hue it failed WCAG AA on most brands (worst 3.13:1) until D11
+            and over an accent tint of the same hue it failed WCAG AA on most brands (worst 3.13:1) until the ToggleButton pressed rule
             declared it.
           </Decision>
           <Decision id="[[toggle-button-group]] · icon-only selection">
@@ -400,7 +400,7 @@ export const History: Story = {
             smaller button — glyph, box and pressed paint all the lower step's — and the smallest member
             anywhere is still a 24×24 pointer target ([[control-box-per-step]]'s floor is the member's own).
           </Decision>
-          <Decision id="uiSize · R10">
+          <Decision id="uiSize">
             <Code>size</Code> follows the global <Code>uiSize</Code> control lane (default <Code>small</Code>) via
             Button. The group resolves it once and seeds every member the step BELOW it
             (the shared <Code>CONTROL_MEMBER_STEP</Code> ramp in SizeContext) — the tray owns the row's box,

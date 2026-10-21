@@ -323,7 +323,7 @@ export const History: Story = {
             <Code>Toolbar.Button asChild</Code> over an IconButton that dropped its ref silently breaks
             arrow-navigation onto that item.
           </Decision>
-          <Decision id="uiSize · R10">
+          <Decision id="uiSize">
             <Code>size</Code> follows the global <Code>uiSize</Code> control lane (default <Code>small</Code>) and
             cascades to every composed control via the shared size context.
           </Decision>

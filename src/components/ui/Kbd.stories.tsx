@@ -290,7 +290,7 @@ export const History: Story = {
             Kbd is a <strong>wrapped</strong> Radix Themes component, so the Radix name wins — built on the
             Radix substrate + our <Code>--ds-*</Code> layer, not a from-scratch key cap.
           </Decision>
-          <Decision id="uiSize · R10">
+          <Decision id="uiSize">
             The size <strong>step</strong> follows the global <Code>uiSize</Code> <strong>text lane</strong> (the
             same lane as <Code>Text</Code>/<Code>Heading</Code>), pinning the system’s small default rather than
             carrying its own. The cap then renders at Radix’s <strong>0.8×</strong> optical shrink of that step,

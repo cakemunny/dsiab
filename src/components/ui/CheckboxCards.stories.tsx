@@ -304,7 +304,7 @@ export const History: Story = {
             whole content block, so the tint stays a wash: the content is the subject, the fill only says
             which ones are picked.
           </Decision>
-          <Decision id="uiSize · R10 · Global control lane">
+          <Decision id="uiSize · Global control lane">
             Card <Code>size</Code> follows the global control lane (our small default → <Code>1</Code>) unless set.
           </Decision>
           <Decision id="When to reach for cards">

@@ -240,7 +240,7 @@ export const History: Story = {
             pressed paint is the accent-aware <Code>--ds-fill-selected-subtle</Code> fill, a 1px inset{" "}
             <Code>--ds-stroke-accent-weak</Code> edge <strong>and</strong> a weight-600 label. The weight is the cue that needs no colour. An icon-only toggle has no visible text for it to act on, so <Code>pressedIcon</Code> swaps its glyph instead.
           </Decision>
-          <Decision id="D11 · the pressed label leaves the accent">
+          <Decision id="the pressed label leaves the accent">
             The pressed label takes <Code>--ds-text-strong</Code>, not the ghost button's inherited{" "}
             <Code>--accent-a11</Code> — the same ink every other committed-selection surface in the system
             already uses (the checked <Code>Select</Code> row, the active <Code>DateRangeInput</Code> preset,
@@ -266,7 +266,7 @@ export const History: Story = {
             <Code>pressedChangeAction</Code> + <Code>useOptimistic</Code> optimistic-update pattern — revisit if
             the app layer needs them.
           </Decision>
-          <Decision id="uiSize · R10 · Global control lane">
+          <Decision id="uiSize · Global control lane">
             <Code>size</Code> follows the global <Code>uiSize</Code> control lane (default <Code>small</Code>) via
             Button.
           </Decision>
