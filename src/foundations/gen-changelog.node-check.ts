@@ -13,7 +13,7 @@
    unrelated reason.
    ============================================================================= */
 import { execFileSync, spawnSync } from "node:child_process";
-import { copyFileSync, existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, expect, test } from "vitest";
@@ -68,4 +68,35 @@ test("REVERSE: in a repository of its own, the same copy writes both outputs", (
   expect(result.status, result.stderr).toBe(0);
   expect(existsSync(join(pkg, "CHANGELOG.md"))).toBe(true);
   expect(existsSync(join(pkg, "src/foundations/changelog.generated.ts"))).toBe(true);
+});
+
+/** A repository of its own with two release candidates of 1.0.0, and the final tag when `final` is set. */
+function stageReleases(final: boolean) {
+  const pkg = mkdtempSync(join(tmpdir(), "gen-changelog-fold-"));
+  temps.push(pkg);
+  stage(pkg, pkg);
+  git(pkg, "tag", "1.0.0-rc.1");
+  writeFileSync(join(pkg, "b.txt"), "b");
+  git(pkg, "add", "-A");
+  git(pkg, "commit", "-q", "-m", "fix: a fix in the second candidate");
+  git(pkg, "tag", "1.0.0-rc.2");
+  writeFileSync(join(pkg, "c.txt"), "c");
+  git(pkg, "add", "-A");
+  git(pkg, "commit", "-q", "-m", "chore(release): 1.0.0");
+  if (final) git(pkg, "tag", "1.0.0");
+  const result = run(pkg);
+  expect(result.status, result.stderr).toBe(0);
+  return readFileSync(join(pkg, "CHANGELOG.md"), "utf8");
+}
+
+test("once the final release is tagged, its release candidates fold into its section", () => {
+  const md = stageReleases(true);
+  expect(md).toMatch(/## 1\.0\.0\n\n### Added\n\n- a commit in this repository[\s\S]*### Fixed\n\n- a fix in the second candidate/);
+  expect(md).not.toMatch(/## 1\.0\.0-rc/);
+});
+
+test("REVERSE: before the final release is tagged, each candidate keeps its own section", () => {
+  const md = stageReleases(false);
+  expect(md).toMatch(/## 1\.0\.0-rc\.2\n\n### Fixed\n\n- a fix in the second candidate/);
+  expect(md).toMatch(/## 1\.0\.0-rc\.1\n\n### Added\n\n- a commit in this repository/);
 });

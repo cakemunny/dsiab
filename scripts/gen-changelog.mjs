@@ -24,6 +24,9 @@
  * (`1.2.3`, `1.2.3-rc.1`, or the same with a leading `v`) opens a section, and every commit newer
  * than it and older than the next such tag lands under it. Commits newer than every release tag
  * land under `Unreleased`. Release tags are the bare version with no `v`, for example `0.9.0-rc.1`.
+ * Once a final release is tagged, its release candidates fold into it: `0.9.1` lists everything
+ * `0.9.1-rc.1` to `0.9.1-rc.3` shipped, because that is what changed for someone upgrading from
+ * 0.9.0. A candidate keeps its own section only until its final release exists.
  * A tag that is not version-shaped, such as the `pre-rebase-8afa67c` safety marker, opens no
  * section, and the version pattern excludes it by construction rather than by a name list.
  *
@@ -245,11 +248,18 @@ function renderGroup(groupEntries) {
 }
 
 const tags = releaseTags();
+/* A candidate such as `0.9.1-rc.2` folds into `0.9.1` once that final tag is on this line of history,
+   so a reader upgrading between finals sees one section with every change. */
+const finals = new Set(tags.map((tag) => tag.name.replace(/^v/, "")).filter((name) => !name.includes("-")));
+const sectionOf = (tagName) => {
+  const base = tagName.replace(/^v/, "").split("-")[0];
+  return tagName.includes("-") && finals.has(base) ? base : tagName;
+};
 const grouped = new Map([["Unreleased", []]]);
-for (const tag of tags) grouped.set(tag.name, []);
+for (const tag of tags) grouped.set(sectionOf(tag.name), []);
 for (const entry of entries) {
   const tag = sectionFor(tags, entry.index);
-  grouped.get(tag ? tag.name : "Unreleased").push(entry);
+  grouped.get(tag ? sectionOf(tag.name) : "Unreleased").push(entry);
 }
 
 const md = [
@@ -266,7 +276,7 @@ const md = [
 ];
 
 // Newest section first: Unreleased, then releases newest -> oldest.
-const sectionsNewestFirst = ["Unreleased", ...[...tags].reverse().map((tag) => tag.name)];
+const sectionsNewestFirst = ["Unreleased", ...new Set([...tags].reverse().map((tag) => sectionOf(tag.name)))];
 for (const name of sectionsNewestFirst) {
   const groupEntries = grouped.get(name) ?? [];
   if (name === "Unreleased" && groupEntries.length === 0) continue;
