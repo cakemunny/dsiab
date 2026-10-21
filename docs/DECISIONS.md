@@ -2535,6 +2535,8 @@ The row checkbox is `CheckboxVisual`, extracted from `Checkbox`: Radix's checkbo
 - a 1px inset edge in `--ds-stroke-accent-weak`, the edge the pressed `Token` paints, so a pressed toggle never shows the flat soft look
 - a label in `--ds-text-strong` at weight 600, the cue that needs no colour
 
+An icon-only toggle has no label to bold, so it passes `pressedIcon` with the same glyph at a heavier weight, and development warns once when it does not.
+
 **Width.** A hidden, always-bold copy of the label reserves the pressed width, so a press never reflows the row.
 
 **API.** Controlled through `pressed` and `onPressedChange`, or uncontrolled through `defaultPressed`, a deliberate addition over the controlled-only Toggle of Astryx. An icon-only toggle requires `label`, which becomes its `aria-label`. Astryx documents a tooltip from `label` that its source does not contain, so the IconButton rule applies.
@@ -2551,6 +2553,7 @@ The row checkbox is `CheckboxVisual`, extracted from `Checkbox`: Radix's checkbo
 - [control-box-per-step](#control-box-per-step) stamps `data-icon-only` on an icon-only toggle and gives it the square IconButton box.
 - [published-aschild-props](#published-aschild-props) refuses `asChild` on ToggleButton, which rendered no `button` element with it.
 - Revised on 2026-10-02: the pressed state carries a 1px edge, because a bare tint on a control is the soft look that [soft-variant-scope](#soft-variant-scope) rules out.
+- Amended 2026-10-21: an icon-only toggle requires `pressedIcon`, held by a development warning and by `_internal/ToggleButton behavior`.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 
