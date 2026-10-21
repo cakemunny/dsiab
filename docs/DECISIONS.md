@@ -2358,16 +2358,16 @@ The choice between a heavier ring, a stronger fill and the current state belongs
 
 **Tags.** `COMPONENTS`, `COLOUR`. **Ruled.** 2026-06-26.
 
-**A selected row in the open `Select` panel takes Radix's solid accent fill with no check mark, and weight 600 is its non-colour cue.**
+**A selected row in the open `Select` panel takes the selected tint with no check mark, and weight 600 is its non-colour cue.**
 
 **What you see.**
 
-- The selected row takes `--ds-fill-selected` (accent-9), white `--on-accent` text and weight 600, with the gutter check mark hidden. It stays the solid fill whether or not it is also the active row.
+- The selected row takes `--ds-fill-selected-subtle`, a `--ds-text-strong` label and weight 600, with the gutter check mark hidden. It keeps the tint whether or not it is also the active row.
 - A non-selected active row takes the neutral `--ds-fill-hover`.
 - Rows and group labels take symmetric logical padding that matches the trigger's inline padding at each size. The group label reads `--ds-text-weak` and the separator `--ds-stroke-weak`.
 - A disabled current value keeps Radix's dimmed treatment.
 
-**Accessibility.** Weight 600 is the WCAG 1.4.1 non-colour cue the check mark left behind, asserted on the rendered weight. The selected label is gated as `--on-accent` on the opaque accent-9 fill at 4.5:1 or more.
+**Accessibility.** Weight 600 is the WCAG 1.4.1 non-colour cue the check mark left behind, asserted on the rendered weight. The `--ds-text-strong` label reads 13:1 or more on the tint in both appearances, at every accent.
 
 **Scope.** The rules use the compound selector `.radix-themes.rt-SelectContent`, because the portaled content node itself carries `.radix-themes` and a descendant selector never matches it. The re-skin is scoped `:where(:not(.rt-high-contrast))`, so a high-contrast `Select` keeps Radix's native check mark and accent-12 highlight.
 
@@ -2382,6 +2382,7 @@ The choice between a heavier ring, a stronger fill and the current state belongs
 - [multi-select-component](#multi-select-component) ships multiple values as the separate `MultiSelect` component, which this ruling first deferred.
 - [toggle-button](#toggle-button) extends the weight-600 cue to the pressed `ToggleButton`.
 - [focus-ring](#focus-ring) gives the active row the system focus ring as its edge.
+- Amended 2026-10-21: the selected row moved off the solid accent-9 fill onto `--ds-fill-selected-subtle` with a `--ds-text-strong` label. White `--on-accent` on accent-9 measured 3.00:1 on cyan and 3.03:1 on grass at 12px, under the 4.5:1 that [text-on-solid-fill-contrast](#text-on-solid-fill-contrast) requires, and the tint is the one List, the CommandPalette picker, DateRangeInput presets and the current Pagination page already use.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 
