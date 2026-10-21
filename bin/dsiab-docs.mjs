@@ -20,7 +20,7 @@
  */
 import { createServer } from "node:http";
 import { readFile, stat } from "node:fs/promises";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, extname, join, normalize, resolve, sep } from "node:path";
 import { openBrowser } from "./docs-url.mjs";
@@ -150,78 +150,6 @@ if (!ROOT) {
   );
   process.exit(2);
 }
-/* =============================================================================
-   THE EJECTION MARKER
-   -----------------------------------------------------------------------------
-   `dsiab eject` copies a component into the consumer's repo and records it in
-   `dsiab.json`. From that moment the page documenting that component describes
-   the PACKAGED version rather than the copy the app actually renders, and the
-   failure mode is somebody six months later reading documentation for markup
-   that no longer exists in their product.
-
-   THE BUNDLE CANNOT BE PATCHED, which is what makes injection the answer rather
-   than a workaround. It is compiled output living in `node_modules`, so editing
-   it is both futile — the next install rewrites it — and wrong, because one
-   project's ejections are not another's. But the SERVER is ours, and it reads
-   the manifest from the project it was launched in. So the bundle stays byte-
-   identical, the marking is per-project, and it all still works offline.
-
-   Injected into the two HTML documents only, as one script tag before </head>.
-   No page rewriting, no DOM surgery on 500 compiled files.
-   ============================================================================= */
-
-/** Components this project has ejected, read from the launch directory. */
-function ejectedHere() {
-  const path = join(process.cwd(), "dsiab.json");
-  if (!existsSync(path)) return {};
-  try {
-    return JSON.parse(readFileSync(path, "utf8")).ejected ?? {};
-  } catch (err) {
-    // ONLY a bad manifest is tolerated. A malformed dsiab.json is not worth failing the docs over,
-    // and `dsiab eject` is where that gets reported and fixed. Anything else is a defect in THIS
-    // file and must be loud: a blanket catch here already swallowed a missing `readFileSync`
-    // import once and silently disabled the whole marker, which looked exactly like "no
-    // components are ejected".
-    if (err instanceof SyntaxError) return {};
-    throw err;
-  }
-}
-
-const EJECTED = ejectedHere();
-
-/**
- * The marker script. Runs in the Storybook manager AND in the story iframe, so
- * it works whichever frame a reader is looking at: it flags the sidebar entry in
- * one and banners the page in the other.
- */
-function markerScript() {
-  return (
-    `<script>(function(){var E=${JSON.stringify(EJECTED)};` +
-    `var names=Object.keys(E);if(!names.length)return;` +
-    `function slug(n){return n.replace(/([a-z0-9])([A-Z])/g,"$1-$2").toLowerCase()}` +
-    `function banner(){` +
-    `var id=(location.search.match(/[?&]id=([^&]+)/)||[])[1]||"";` +
-    `var hit=names.filter(function(n){return id.indexOf(slug(n))===0||id.indexOf("-"+slug(n)+"-")>-1});` +
-    `if(!hit.length||document.getElementById("dsiab-ejected"))return;` +
-    `var e=E[hit[0]];var d=document.createElement("div");d.id="dsiab-ejected";` +
-    `d.setAttribute("role","note");` +
-    `d.style.cssText="position:sticky;top:0;z-index:2147483647;padding:10px 14px;` +
-    `font:600 13px/1.45 ui-sans-serif,system-ui,sans-serif;color:#582d1d;background:#ffe0c2;` +
-    `border-bottom:1px solid #f3b391";` +
-    `d.textContent="Ejected in this project \\u2014 your copy at "+e.path+" is what renders. ` +
-    `This page documents the packaged "+hit[0]+" from dsiab "+e.version+".";` +
-    `document.body.insertBefore(d,document.body.firstChild)}` +
-    `function sidebar(){names.forEach(function(n){` +
-    `document.querySelectorAll('[data-item-id],[id]').forEach(function(el){` +
-    `var k=el.getAttribute("data-item-id")||el.id||"";` +
-    `if(k.indexOf(slug(n))>-1&&!el.dataset.dsiabEjected){el.dataset.dsiabEjected="1";` +
-    `el.title="Ejected in this project";el.style.opacity="0.75"}})})}` +
-    `function go(){try{banner();sidebar()}catch(_){}}` +
-    `if(document.readyState!=="loading")go();else document.addEventListener("DOMContentLoaded",go);` +
-    `setTimeout(go,1200);setTimeout(go,3000)})();</script>`
-  );
-}
-
 
 const server = createServer(async (req, res) => {
   const filePath = resolveRequestPath(req.url ?? "/");
@@ -233,19 +161,8 @@ const server = createServer(async (req, res) => {
   try {
     const info = await stat(filePath);
     const target = info.isDirectory() ? join(filePath, "index.html") : filePath;
-    let body = await readFile(target);
+    const body = await readFile(target);
     const type = TYPES[extname(target).toLowerCase()] ?? "application/octet-stream";
-
-    // HTML only, and only when this project has ejected something. Everything
-    // else is served byte-for-byte off disk.
-    if (type.startsWith("text/html") && Object.keys(EJECTED).length) {
-      const html = body.toString("utf8");
-      const marker = markerScript();
-      body = Buffer.from(
-        html.includes("</head>") ? html.replace("</head>", `${marker}</head>`) : `${marker}${html}`,
-        "utf8",
-      );
-    }
 
     res.writeHead(200, {
       "content-type": type,
