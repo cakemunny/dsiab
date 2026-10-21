@@ -5,7 +5,7 @@
    `className` by concatenation and `style` shallowly and chains handlers, so
    the paint always survives the swap. Everything else is taken from the CHILD.
    That combination is what makes this seam dangerous: a swap that voids
-   keyboard operability, the focus hairline, the disabled state, the pointer
+   keyboard operability, the focus ring, the disabled state, the pointer
    floor or a declared `role` still paints correctly, type-checks, and reports
    nothing anywhere.
 

@@ -114,7 +114,11 @@ function AnatomyDiagram() {
     const ro = new ResizeObserver(() => { cancelAnimationFrame(raf); raf = requestAnimationFrame(measure); });
     ro.observe(f);
     ro.observe(s);
-    return () => { cancelAnimationFrame(raf); ro.disconnect(); };
+    // A web font that lands after the first measure moves the parts inside a specimen whose own box stays the
+    // same, so the observer never fires (the PowerSearch anatomy measured this).
+    let live = true;
+    void document.fonts.ready.then(() => { if (live) measure(); });
+    return () => { live = false; cancelAnimationFrame(raf); ro.disconnect(); };
   }, []);
 
   return (
@@ -648,7 +652,7 @@ export const Usage: Story = {
 const CALLOUT_PROPS: PropDef[] = [
   { name: "urgency", type: `"passive" | "attention"`, def: `"passive"`, desc: <>How hard the callout presses for attention → Radix <Code>soft</Code> (passive, an ambient fill) / <Code>surface</Code> (attention, a fill + hairline border). No <Code>solid</Code>, <Code>outline</Code>, or <Code>radius</Code> — none exist for Callout in the system.</>, source: "Callout.tsx:49" },
   { name: "tone", type: `"error" | "warning" | "success" | "info"`, desc: <>Semantic status. Paints fill/text/border from the accent-aware <Code>--ds-*</Code> family tokens via a <Code>[data-tone]</Code> bridge (so status colour follows the brand-collision shift) and selects the tone’s fixed icon.</>, source: "Callout.tsx:51" },
-  { name: "size", type: `"1" | "2" | "3" | "inherit"`, desc: <>Radix Callout size. Unset, it resolves from the global <Code>uiSize</Code> (text lane, default <Code>small</Code> → <Code>1</Code>); pass <Code>inherit</Code> to opt out of the global size.</>, source: "Callout.tsx:53 · Radix" },
+  { name: "size", type: `"1" | "2" | "3" | "inherit"`, def: `text lane (1 at small)`, desc: <>Radix Callout size. Unset, it resolves from the global <Code>uiSize</Code> (text lane, default <Code>small</Code> → <Code>1</Code>); pass <Code>inherit</Code> to opt out of the global size.</>, source: "Callout.tsx:53 · Radix" },
   { name: "icon", type: "ReactNode", desc: <>Override the default per-tone glyph; <Code>null</Code> suppresses the icon entirely. Every tone otherwise carries a fixed icon so colour is never the only signal (WCAG 1.4.1).</>, source: "Callout.tsx:55" },
   { name: "title", type: "ReactNode", desc: <>An optional bold lead line above the body — a paragraph, not a heading, so a callout can nest at any depth without injecting a jump into the document outline.</>, source: "Callout.tsx:57" },
   { name: "children", type: "ReactNode", desc: <>The message body. Rides the 65-char reading measure (<Code>--ds-text-measure</Code>) so long copy stays legible. Inside a resizable panel (<Code>[data-resizable]</Code>) the cap lifts and the body fills the pane.</>, source: "Radix" },

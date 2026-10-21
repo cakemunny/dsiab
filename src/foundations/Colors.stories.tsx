@@ -456,7 +456,7 @@ export const Swatches: Story = {
       for (const appearance of ["light", "dark"] as const) {
         probe.classList.toggle("dark", appearance === "dark");
         fails.push(...colourMatrixFails(probe, sRGB));
-        // APCA foreground drift guard runs light-mode only (Phase 1).
+        // APCA foreground drift guard runs light-mode only, because tokens/contrast.css has no dark override.
         if (appearance === "light") fails.push(...apcaForegroundFails(probe));
       }
     } finally {
@@ -521,7 +521,7 @@ function colourMatrixFails(root: HTMLElement, checkContrast = true): string[] {
           }
         }
       }
-      // Accent-dependent WCAG: on-fill (3.0) + status/link text on bg.
+      // Accent-dependent WCAG: on-fill (4.5, SOLID_TEXT_MIN) + status/link text on bg.
       if (checkContrast) for (const p of [...ON_FILL, ...TEXT_ON_BG.filter(accentDependent)]) {
         try { assertPairing(root, p.fg, p.bg, p.min); } catch (e) { fails.push(`[${accent}] ${(e as Error).message}`); }
       }
@@ -549,7 +549,7 @@ const APCA_ON_SOLID: [string, string][] = [
     foreground must match the polarity APCA prefers on its fill (apcaBestForeground)
     — exactly what tokens/contrast.css overrides. So the override layer and the live
     APCA computation can't drift, the same guarantee COLLISION_TABLE has. Light mode
-    (Phase 1); dark-mode foreground is Phase 2 (see tokens/contrast.css). */
+    (tokens/contrast.css has no dark-mode override, so dark mode is not checked). */
 function apcaForegroundFails(root: HTMLElement): string[] {
   const fails: string[] = [];
   const prev = root.getAttribute("data-contrast");

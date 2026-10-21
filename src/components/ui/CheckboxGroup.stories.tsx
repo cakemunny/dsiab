@@ -485,7 +485,7 @@ export const Usage: Story = {
 /* ---- Properties — full prop reference (PropTable / PropDef live in _storyKit) - */
 
 const ROOT_PROPS: PropDef[] = [
-  { name: "size", type: `"1" | "2" | "3"`, def: `"1"`, desc: <>Control size. Unset, it resolves from the global <Code>uiSize</Code> (default <Code>small</Code> → <Code>1</Code>); Radix’s own default is <Code>2</Code>.</>, source: "CheckboxGroup.tsx:21 · Radix" },
+  { name: "size", type: `"1" | "2" | "3"`, def: `control lane (1 at small)`, desc: <>Control size. Unset, it resolves from the global <Code>uiSize</Code> (default <Code>small</Code> → <Code>1</Code>); Radix’s own default is <Code>2</Code>.</>, source: "CheckboxGroup.tsx:21 · Radix" },
   { name: "variant", type: `"surface"`, def: `"surface"`, locked: true, desc: <>Hard-set to <Code>surface</Code> and stripped from the public type — like every input, an item must separate from the page (border + fill + hover); <Code>soft</Code> and <Code>classic</Code> aren’t exposed.</>, source: "CheckboxGroup.tsx:20,25" },
   { name: "color", type: `<Radix accent>`, desc: <>Semantic override; otherwise the group inherits the theme accent.</>, source: "Radix" },
   { name: "highContrast", type: "boolean", def: "false", desc: <>Bumps the checked fill and border to Radix’s high-contrast step.</>, source: "Radix" },

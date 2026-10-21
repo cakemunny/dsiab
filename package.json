@@ -2,7 +2,7 @@
   "name": "dsiab",
   "private": false,
   "type": "module",
-  "version": "0.9.1-rc.2",
+  "version": "0.9.1-rc.3",
   "description": "dsiab, Design System In A Box: a brand-themeable component and token layer over Radix Themes.",
   "license": "(MIT AND OFL-1.1)",
   "author": "cakemunny",

@@ -401,7 +401,7 @@ const PROPS: PropDef[] = [
   { name: "hasSeconds", type: "boolean", def: "false", desc: <>Parse, display, and seed the time half at second precision.</>, source: "DateTimeInput.tsx" },
   { name: "label", type: "ReactNode", desc: <>Required group name — the FieldGroup label the <Code>role="group"</Code> is <Code>aria-labelledby</Code>.</>, source: "DateTimeInput.tsx" },
   { name: "timeLabel", type: "string", def: `"Time"`, desc: <>The embedded time field’s accessible name (its <Code>aria-label</Code>). The date field is always “Date”.</>, source: "DateTimeInput.tsx" },
-  { name: "size", type: `"1" | "2" | "3"`, def: `"1"`, desc: <>Control size for both sub-fields. Unset, it resolves from the global <Code>uiSize</Code> control lane.</>, source: "DateTimeInput.tsx" },
+  { name: "size", type: `"1" | "2" | "3"`, def: `control lane (1 at small)`, desc: <>Control size for both sub-fields. Unset, it resolves from the global <Code>uiSize</Code> control lane.</>, source: "DateTimeInput.tsx" },
   { name: "disabled", type: "boolean", def: "false", desc: <>Disables both sub-fields (native — unless paired with a reason).</>, source: "DateTimeInput.tsx" },
   { name: "disabledReason", type: "string", desc: <>A non-empty reason SOFT-disables both sub-fields (aria-disabled + readOnly + reason tooltip + glyph).</>, source: "DateTimeInput.tsx" },
   { name: "info / endSlot / description / validation", type: "FieldGroup props", desc: <>The shared <Code>FieldGroup</Code> shell. <Code>validation</Code> is the COMPOSITE standing channel; on a boundary date the window hint takes the <Code>description</Code>’s place.</>, source: "DateTimeInput.tsx" },

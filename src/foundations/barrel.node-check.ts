@@ -5,7 +5,7 @@
    node lane (vitest.node.config.ts / `npm run test:tokens` / the pretest hook),
    same harness, same AST idiom — read through the generator rather than around it.
 
-   WHAT IT PROTECTS. Since D2, registry.json is the truth of what SHIPS as well as
+   WHAT IT PROTECTS. Since [[component-registry]] and [[registry-module-paths]], registry.json is the truth of what SHIPS as well as
    what exists: each entry carries `module` (the file its names come from) and
    `exports` (the exact names it publishes), and scripts/gen-barrel.mjs turns those
    two fields into src/components/ui/index.ts — the component surface the package

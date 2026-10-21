@@ -232,7 +232,12 @@ function AnatomyDiagram() {
     // the observer alone would leave callouts 4 and 5 pointing at where those parts USED to be.
     const track = s.querySelector<HTMLElement>(".rt-ds-carousel-track");
     track?.addEventListener("scroll", schedule, { passive: true });
+    // A web font that lands after the first measure moves the parts inside a specimen whose own box stays the
+    // same, so the observer never fires (the PowerSearch anatomy measured this).
+    let live = true;
+    void document.fonts.ready.then(() => { if (live) measure(); });
     return () => {
+      live = false;
       cancelAnimationFrame(raf);
       ro.disconnect();
       track?.removeEventListener("scroll", schedule);

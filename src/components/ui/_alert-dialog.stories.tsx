@@ -33,7 +33,7 @@ type Story = StoryObj<typeof AlertDialog.Root>;
  *  --ds-fill-error, buttonOrder anchors the primary first (default), and Escape dismisses. */
 export const Confirm: Story = {
   // The open dialog's solid-danger Action entered this exclusion at white on the red-9 fill #e5484d,
-  // 3.91, under the retired 3:1 floor for text on a solid fill. [[text-on-solid-fill-contrast]] replaced
+  // 3.91 in both appearances, under the retired 3:1 floor for text on a solid fill. [[text-on-solid-fill-contrast]] replaced
   // that floor with 4.5:1 and APCA Lc 60 and moved the danger fill to --error-solid, and no current
   // ruling excuses this button. Excluded as an ELEMENT now
   // rather than switching color-contrast off for the whole fixture: the dialog's title, description and

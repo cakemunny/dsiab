@@ -564,7 +564,7 @@ const KEYS: KeyBinding[] = [
 const PROPS: PropDef[] = [
   { name: "label", type: "string", desc: <>Accessible name. Spreading <Code>getHandleProps(id)</Code> supplies one that states the held position, so pass this only for a grip you drive yourself. It wins over a spread <Code>aria-label</Code>.</>, source: "DragHandle.tsx" },
   { name: "orientation", type: `"vertical" | "horizontal"`, def: `"vertical"`, desc: <>Grip axis: <Code>DotsSixVertical</Code> for a stacked list, <Code>DotsSix</Code> for a row. Both declare <Code>weight="bold"</Code> ([[optical-icon-weight]]).</>, source: "DragHandle.tsx" },
-  { name: "size", type: `"1" | "2" | "3"`, desc: <>Explicit control step. Unset, it rides the global <Code>uiSize</Code> control lane (24 / 32 / 40px), which is what keeps the 24×24 floor at the smallest tier.</>, source: "IconButton.tsx" },
+  { name: "size", type: `"1" | "2" | "3"`, def: `control lane (1 at small)`, desc: <>Explicit control step. Unset, it rides the global <Code>uiSize</Code> control lane (24 / 32 / 40px), which is what keeps the 24×24 floor at the smallest tier.</>, source: "IconButton.tsx" },
   { name: "disabled", type: "boolean", def: "false", desc: <>Native button disabled. A locked row keeps its grip visible and inert rather than losing it.</>, source: "IconButton.tsx" },
   { name: "className", type: "string", desc: <>Appended after <Code>rt-ds-drag-handle</Code>.</>, source: "DragHandle.tsx" },
   { name: "priority", type: "—", locked: true, desc: <>Locked to <Code>tertiary</Code> (ghost). A grip is chrome, and a surface or solid one would read as the row's primary action.</>, source: "DragHandle.tsx" },

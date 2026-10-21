@@ -615,7 +615,7 @@ const PROPS: PropDef[] = [
   { name: "clearable", type: "boolean", def: "true", desc: <>The trailing clear ✕ (out of tab order); Backspace-to-empty clears too.</>, source: "Typeahead.tsx" },
   { name: "icon", type: "ReactNode", desc: <>Leading glyph. <Code>undefined</Code> shows a search glyph (Typeahead’s identity is search); <Code>null</Code> removes it; a node overrides.</>, source: "Typeahead.tsx" },
   { name: "placeholder", type: "string", desc: <>Greyed hint while empty. Let it carry the object (“Search customers…”), not restate “Search”.</>, source: "Typeahead.tsx" },
-  { name: "size", type: `"1" | "2" | "3"`, def: `"1"`, desc: <>Control size. Unset, it resolves from the global <Code>uiSize</Code> control lane (default <Code>small</Code> → <Code>1</Code>).</>, source: "Typeahead.tsx" },
+  { name: "size", type: `"1" | "2" | "3"`, def: `control lane (1 at small)`, desc: <>Control size. Unset, it resolves from the global <Code>uiSize</Code> control lane (default <Code>small</Code> → <Code>1</Code>).</>, source: "Typeahead.tsx" },
   { name: "disabled", type: "boolean", def: "false", desc: <>Dims the input and makes it inert.</>, source: "Typeahead.tsx" },
   { name: "debounceMs", type: "number", def: "150", desc: <>Delay before firing <Code>source.search</Code>. Set <Code>0</Code> for synchronous / local sources.</>, source: "Typeahead.tsx" },
   { name: "onOpenChange / onQueryChange", type: "(x) => void", desc: <>Observe the panel open state / the live query (logging, analytics).</>, source: "Typeahead.tsx" },

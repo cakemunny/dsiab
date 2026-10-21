@@ -553,7 +553,7 @@ const PROPS: PropDef[] = [
   { name: "tokenOverflowBehavior", type: '"none" | "unfocusedInline"', def: '"none"', desc: <><Code>unfocusedInline</Code> collapses trailing chips into "+N" while blurred (OverflowList); <Code>none</Code> always wraps.</>, source: "PowerSearch" },
   { name: "endContent", type: "ReactNode", desc: "Content pinned at the end of the row (action buttons, etc.).", source: "PowerSearch" },
   { name: "resultCount", type: "number | string", desc: <>A number → <Code>"N results"</Code> (announced politely on change); a string is shown as-is.</>, source: "PowerSearch" },
-  { name: "size", type: '"1" | "2" | "3"', def: "small", desc: "The control + token size; unset tracks the global uiSize control lane.", source: "PowerSearch" },
+  { name: "size", type: '"1" | "2" | "3"', def: `control lane (1 at small)`, desc: "The control + token size; unset tracks the global uiSize control lane.", source: "PowerSearch" },
   { name: "components", type: "PowerSearchComponents", desc: <><strong>Load-bearing.</strong> A per-operator-value-type <Code>{"{ Token?, Editor? }"}</Code> map — swap the whole chip or the whole editor body for a type.</>, source: "PowerSearch" },
   { name: "handleRef", type: "Ref<PowerSearchHandle>", desc: <>Imperative handle: <Code>focusTypeahead()</Code> / <Code>blurTypeahead()</Code>.</>, source: "PowerSearch" },
   { name: "width", type: "number | string", desc: "Constrain the field width.", source: "PowerSearch" },

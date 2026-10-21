@@ -56,7 +56,7 @@ what's relevant at the start of any task, and never quote a ruling, token, or AP
   re-duplicate: `Page` · `PageHeader` · `Section` · `Rule` · `Caption` · `Muted` · `Decision` ·
   `Scenario` · `DoDont` / `DODONT_LABEL` · `AnatomyLegend` (+ `dotStyle`/`tick`/`hLine`) ·
   `MeasuredSpec` / `MeasuredRow` · `NoteRow` · `LiteTokenSpec` · `TokenGroup` · `PropTable`/`PropDef` ·
-  `KeyRow`/`Kbd`/`SrcTag`. `RoleRow` and `RenderedRow` are **legacy** since [[measured-token-rows]]. The file's own comments
+  `KeyRow`/`Kbd`/`SrcTag`. `RoleRow` and `RenderedRow` were removed on 2026-10-20 ([[measured-token-rows]]). The file's own comments
   record why each shape is what it is — read them before calling a shape wrong.
 - **`src/components/ui/_comparisons.tsx`** — the shared "which one do I reach for?" tables. One
   `Comparison` per confusable cluster (`MESSAGING_COMPARISON`, `BOOLEAN_CHOICE_COMPARISON`,
@@ -118,8 +118,7 @@ flags taste nor a rubber stamp.
 **Catch — DOC-LIE (rank 1): the page asserts something the code contradicts.**
 - **The token row that claims one token and paints another.** The first [[measured-token-rows]]-converted table found one on
   its first render: Collapsible's trigger label claimed `--ds-text-strong` and measured `#60646c`, the
-  component having moved to `--ds-text-weak`. The old resolving row could not have seen it. Where a page
-  still uses a legacy `RoleRow`/`RenderedRow`, its rows are **unverified by construction** — say so.
+  component having moved to `--ds-text-weak`. The old resolving row could not have seen it.
 - **The note that asserts more than the row proved.** A colour-in-shadow row proves a colour and nothing
   else; the kit prints `matches — colour only; geometry (…) not compared` for exactly that reason. A
   caption beside it claiming the hairline is 1px or inset has asserted what no row measured.

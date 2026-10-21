@@ -1,5 +1,5 @@
-/* Shared Storybook template kit — the System/* per-component story spine (History / Anatomy /
- * Usage / Props). Component stories import these primitives; component-specific bits (the
+/* Shared Storybook template kit — the System/* per-component story spine (Anatomy / Usage /
+ * Keyboard / Props / History, in that order; the lite tier is Usage then History). Component stories import these primitives; component-specific bits (the
  * anatomy diagram, the token roles, the scenarios) stay in each *.stories.tsx. See DECISIONS [[docs-page-spine]]. */
 import type { AnchorHTMLAttributes, ComponentProps, CSSProperties, ReactElement, ReactNode } from "react";
 import { cloneElement, createContext, createElement, Fragment, isValidElement, useCallback, useContext, useLayoutEffect, useMemo, useRef, useState } from "react";
@@ -8,8 +8,6 @@ import { Check, X } from "@phosphor-icons/react";
 // The ruling ledger, read live so a citation can tell a real ruling name from a typo.
 import decisionsMd from "../../../docs/DECISIONS.md?raw";
 // Token-spec aliases are parsed from the real token CSS, so the table can't drift from the code.
-import semanticCss from "../../tokens/semantic.css?raw";
-import themeCss from "../../tokens/theme.css?raw";
 import { ButtonGroup } from "./ButtonGroup";
 import { Code as SystemCode } from "./Code";
 import { Link } from "./Link";
@@ -17,16 +15,6 @@ import { Link } from "./Link";
  * a frozen 12px `<kbd>`, which is how docs chrome ends up contradicting the components it documents
  * the moment the global uiSize moves. Its registry status is `ported`, so the kit uses it. */
 import { Kbd } from "./Kbd";
-
-/* ---- token alias map (parsed from the CSS source of truth) --------------- */
-/* Kept for prose and for the legacy RoleRow/RenderedRow rows. The MEASURED row (below) treats the
-   Radix alias as secondary context, not evidence — see the MEASURED TOKEN ROW block. */
-export const TOKEN_ALIAS: Record<string, string> = {};
-for (const css of [semanticCss, themeCss]) {
-  for (const m of css.matchAll(/(--(?:ds|on)-[\w-]+)\s*:\s*var\((--[\w-]+)\)/g)) {
-    if (!(m[1] in TOKEN_ALIAS)) TOKEN_ALIAS[m[1]] = m[2];
-  }
-}
 
 /* ---- ruling citations ------------------------------------------------------
  * Outside the ledger a ruling is cited as `[[name]]`. Every string the kit renders on a story's
@@ -363,9 +351,9 @@ export function HexValue({ token }: { token: string }) {
  * a colour without saying where it came from, documents nothing. [[docs-page-spine]] (read it live,
  * never hand-type it) governs HOW the value is obtained; [[token-row-shape]] governs where it sits.
  *
- * Enforced two ways: `token-rows.node-check.ts` (static — R2 name-the-token,
- * R3 keep-the-value-a-value, R4 no-typed-hex) and `assertTokenRowShape` in
- * foundations/_assert.ts (runtime — the named token is what actually paints).
+ * Enforced by `token-rows.node-check.ts` (static — R1 a token surface, R3 no handed-in
+ * value, R4 no story paint under a claim, R5 no typed hex) and, at runtime, by
+ * `assertMeasuredRows` in foundations/_assert.ts (the measured element is what paints).
  * `data-token-row` is what the runtime half keys on, so it lives HERE, on the one
  * shell every row renders through, rather than in each story.
  */
@@ -396,19 +384,6 @@ export function TokenRow({
   return <Box data-token-row={kind} style={style ? { ...grid, ...style } : grid}>{children}</Box>;
 }
 
-// A row backed by a live design token: swatch + role name + Radix alias (parsed) + hex (resolved from the DOM).
-export const RoleRow = ({ part, role }: { part: string; role: string }) => (
-  <TokenRow>
-    <Text size="1" style={{ color: "var(--ds-text-strong)" }}>{linkRulings(part)}</Text>
-    <Flex align="center" gap="2">
-      <Box style={{ width: 14, height: 14, borderRadius: 3, background: `var(${role})`, boxShadow: "inset 0 0 0 1px var(--ds-stroke-weak)", flexShrink: 0 }} />
-      <Mono>{role}</Mono>
-    </Flex>
-    <Mono muted>{TOKEN_ALIAS[role] ?? "—"}</Mono>
-    <Box style={{ textAlign: "right" }}><HexValue token={role} /></Box>
-  </TokenRow>
-);
-
 /* A row that states rather than proves: a radius or size lane, a transparent rest, a paint no row can
  * measure (a colour inside a gradient, a literal with no token behind it).
  *
@@ -430,82 +405,6 @@ export const NoteRow = ({ part, value, radix }: { part: string; value: string; r
   </TokenRow>
 );
 
-/* ---- RenderedRow: the same row, for a value read off the DOM --------------
- * A component that borrows another component's SKIN (Kbd, Code, Separator, Spinner,
- * Popover, Skeleton…) declares no `--ds-*` role of its own, so there is no role to
- * hand to RoleRow — the value has to be read from the rendered element instead. The
- * reading (which element, which property) is component-specific and stays in the
- * story, keyed on HexThemeKey so it re-resolves on every toolbar flip.
- *
- * What it is NOT is a licence for a nameless row. "It reuses a Radix skin" still has
- * an answer to "which colour is this?" — it's the RADIX token the skin paints from
- * (`--color-panel-solid`, `--accent-a11`, `--gray-a3`). So `token` is REQUIRED
- * whenever the row shows a swatch, and the type enforces it: the two arms below are
- * disjoint, so `<RenderedRow label swatch value />` with no `token` does not compile.
- * That is deliberately stronger than the guard — a rule you can't type wrong beats a
- * rule you get told about later.
- *
- * Renders on SPEC_GRID, so a mixed table (RoleRow + RenderedRow, as List / Pagination
- * / Token have) lines up on ONE column rhythm:
- *
- *   label            │ ▪ --color-panel-solid │ = │        #fcfcfd
- *   └ part           └ token, link ink       └ verdict   └ value, muted, last
- */
-export type RenderedRowProps = {
-  /** The part being measured — "ON track fill", "Panel surface", "Thumb face". */
-  label: string;
-  /** The LIVE-READ value: a resolved hex for a colour row, a px/keyword for a note
-   *  row. The value ONLY — the token name and the verdict have their own slots, and
-   *  the guard's R3 rejects either one spliced in here. */
-  value: ReactNode;
-  /** Optional bound/unbound mark — "=" when the rendered colour matches the named
-   *  token, "≠ (--other)" when it doesn't. Its own column; never concatenated. */
-  verdict?: ReactNode;
-} & (
-  /** COLOUR row — it shows a swatch, so it MUST name the token that colour comes
-   *  from. `swatch` stays nullable because it is read in an effect and is undefined
-   *  on the first paint; what the type insists on is that the NAME is there. */
-  | { swatch: string | undefined; token: string }
-  /** NOTE row — no colour, so no swatch. May still name a token.
-   *  The literal type on `swatch` is not decorative: it is what TypeScript prints
-   *  when a story passes a swatch and forgets the token, so the error says what to
-   *  do instead of "string is not assignable to undefined". */
-  | { swatch?: "MISSING `token` — a swatch row must name the token it paints from"; token?: string }
-);
-
-export function RenderedRow(props: RenderedRowProps) {
-  const { label, value, verdict } = props;
-  const { token, swatch } = props;
-  // No token to name → the row is prose, laid out exactly like NoteRow (see the note there on why
-  // prose rows share the measured grid and how they stay distinguishable from a measured one).
-  if (token === undefined) {
-    return (
-      <TokenRow kind="note" grid={MEASURED_GRID}>
-        <Text size="1" style={{ color: "var(--ds-text-strong)" }}>{linkRulings(label)}</Text>
-        <Box style={{ minWidth: 0 }}>{verdict ? <Mono muted>{verdict}</Mono> : null}</Box>
-        <Box><Mono muted>—</Mono></Box>
-        <Box style={{ overflowWrap: "anywhere" }}><Muted>stated · {value}</Muted></Box>
-      </TokenRow>
-    );
-  }
-  return (
-    <TokenRow kind={swatch === undefined ? "note" : "colour"}>
-      <Text size="1" style={{ color: "var(--ds-text-strong)" }}>{linkRulings(label)}</Text>
-      <Flex align="center" gap="2" style={{ minWidth: 0 }}>
-        {swatch ? <Box style={{ width: 14, height: 14, borderRadius: 3, background: swatch, boxShadow: "inset 0 0 0 1px var(--ds-stroke-weak)", flexShrink: 0 }} /> : null}
-        <Mono>{token}</Mono>
-      </Flex>
-      {verdict ? <Mono muted>{verdict}</Mono> : null}
-      {/* With no verdict the value spans the last TWO tracks — same right edge as a
-          RoleRow hex, but room for a longer reading (a shadow, a font stack) without
-          wrapping into a 84px column. */}
-      <Box style={{ textAlign: "right", overflowWrap: "anywhere", ...(verdict ? null : { gridColumn: "3 / 5" }) }}>
-        <Mono muted>{value}</Mono>
-      </Box>
-    </TokenRow>
-  );
-}
-
 /* ===========================================================================
    THE MEASURED TOKEN ROW — part · token · value · verdict
    ---------------------------------------------------------------------------
@@ -513,8 +412,8 @@ export function RenderedRow(props: RenderedRowProps) {
    that the system obeys its own rules. Both jobs need the same thing: the row
    must be able to DISAGREE with the component.
 
-   WHAT WENT WRONG. `RoleRow` and `RenderedRow` (above, now legacy) take the
-   value from the story. The usual shape paints a hidden probe with the very
+   WHAT WENT WRONG. The earlier row primitives, `RoleRow` and `RenderedRow`
+   (since deleted), took the value from the story. Their usual shape paints a hidden probe with the very
    token the row names, reads that probe back, and prints the hex — so the row
    agrees by construction. It proves the token layer resolves, which nobody
    doubted, and proves nothing about what the component paints. HoverCard and
@@ -1444,7 +1343,7 @@ export type MeasuredRowProps = {
   /* The three cells a story may NOT supply. They are declared — as literal string types nothing
    * real can satisfy — rather than simply omitted, because the literal is what TypeScript PRINTS
    * when someone tries: the error says what to do instead of "property does not exist". Same idiom
-   * as `RenderedRowProps.swatch` above, and the reason 52 bad rows became 52 compile errors then. */
+   * as the deleted `RenderedRowProps.swatch`, and the reason 52 bad rows became 52 compile errors then. */
   value?: "MEASURED ROWS READ THE VALUE — drop `value`, and give `select` + `prop` instead";
   swatch?: "MEASURED ROWS DERIVE THE SWATCH from what they measured — drop `swatch`";
   verdict?: "MEASURED ROWS COMPUTE THE VERDICT by comparing — drop `verdict`";
@@ -1654,7 +1553,7 @@ export function MeasuredRow({ part, token, select, prop, pseudo, state, at, note
 // collapses to mostly-prose over a single row and reads broken (flagged in review on Link, where the two-
 // column "specimen | prose" header balloons across the widened band). This renders it clean: a one-
 // line reuse rationale left-aligned to the grid's first column, above EXACTLY ONE labeled binding row
-// (a RoleRow, or a RenderedRow for the tokenless skin-reusers). No embedded specimen — the component
+// (a MeasuredRow, or a NoteRow for a tokenless skin-reuser). No embedded specimen — the component
 // already renders in the Specimen section above; the single row still reads live off the DOM so the
 // drift guard is intact. Multi-token components keep the fuller TokenGroup card untouched.
 export function LiteTokenSpec({ rationale, children }: { rationale: ReactNode; children: ReactNode }) {

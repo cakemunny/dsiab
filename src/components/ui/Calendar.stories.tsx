@@ -716,7 +716,7 @@ const PROPS: PropDef[] = [
   { name: "hasWeekNumbers", type: "boolean", def: "false", desc: <>Prefix each week row with its ISO week number.</>, source: "Calendar.tsx" },
   { name: "defaultView", type: `"day" | "month" | "year"`, def: `"day"`, desc: <>Which view the calendar opens on. Initial-only and uncontrolled: a birth-date field can land straight on the year grid instead of making the user page there. Opening on a grid moves no focus, exactly like opening on the day view.</>, source: "Calendar.tsx" },
   { name: "focusDate / onFocusDateChange", type: "ISO", desc: <>Controlled focused day for the roving tab stop.</>, source: "Calendar.tsx" },
-  { name: "size", type: `"1" | "2" | "3"`, def: `"1"`, desc: <>Control size lane; unset follows the global <Code>uiSize</Code> (default small → <Code>1</Code>).</>, source: "Calendar.tsx" },
+  { name: "size", type: `"1" | "2" | "3"`, def: `control lane (1 at small)`, desc: <>Control size lane; unset follows the global <Code>uiSize</Code> (default small → <Code>1</Code>).</>, source: "Calendar.tsx" },
   { name: "dir", type: `"ltr" | "rtl"`, desc: <>Reading direction; unset auto-detects from the DOM. RTL mirrors the chevrons and swaps arrow-nav.</>, source: "Calendar.tsx" },
 ];
 

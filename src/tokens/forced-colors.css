@@ -252,13 +252,13 @@
   }
 
   /* A pressed Token ([[token-pressed-state]]). The tint is forced to Canvas, so without this a pressed
-     chip differs from a chip at rest by its check and weight alone. The check takes the label's ink.
+     chip differs from a chip at rest by its weight alone. A pressed Token draws no check mark.
      Gated on `[data-interactive]` as in components.css, which a disabled chip never carries.
 
      This is the one label in the file that sits on a Highlight fill, and Chromium paints a Canvas
      backplate behind any text whose `forced-color-adjust` is `auto`. Measured under emulation: the
      HighlightText label sat on that backplate, white on white in the light palette, invisible. So the
-     chip opts out with `forced-color-adjust: none`, which the body and the check inherit, and every
+     chip opts out with `forced-color-adjust: none`, which the body inherits, and every
      colour it then paints is a system colour: Highlight, HighlightText, and no box-shadow, so the
      ::after edge above is the only edge. */
   .radix-themes .rt-ds-token[data-interactive]:has(> .rt-ds-token-body[aria-pressed="true"]) {

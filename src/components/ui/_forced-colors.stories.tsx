@@ -42,7 +42,7 @@ import { contrastRatio, flatten, parseColor, type RGBA } from "../../foundations
    - every Pagination dot keeps its 1px ring, and the current dot is a wider pill filled at 3:1
      against Canvas while the other dots stay unfilled ([[neutral-part-stacks]])
    - a Token toggle keeps its 1px edge at rest and pressed, and a pressed Token paints a fill at 3:1
-     against Canvas with its label and check at 3:1 against that fill ([[token-pressed-state]])
+     against Canvas with its label and remove ✕ at 3:1 against that fill ([[token-pressed-state]])
 
    Outside Vitest (Storybook's own UI) there is no CDP handle, so the play reports that and stops.
 

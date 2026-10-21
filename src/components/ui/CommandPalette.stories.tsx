@@ -387,7 +387,11 @@ function AnatomyDiagram() {
     const ro = new ResizeObserver(() => { cancelAnimationFrame(raf); raf = requestAnimationFrame(measure); });
     ro.observe(f);
     ro.observe(s);
-    return () => { cancelAnimationFrame(raf); ro.disconnect(); };
+    // A web font that lands after the first measure moves the parts inside a specimen whose own box stays the
+    // same, so the observer never fires (the PowerSearch anatomy measured this).
+    let live = true;
+    void document.fonts.ready.then(() => { if (live) measure(); });
+    return () => { live = false; cancelAnimationFrame(raf); ro.disconnect(); };
   }, []);
 
   return (
@@ -607,7 +611,7 @@ const PROPS: PropDef[] = [
   { name: "showFooter", type: "boolean", def: "true", desc: <>The aria-hidden Kbd-hint footer.</>, source: "CommandPalette.tsx" },
   { name: "maxItems", type: "number", def: "50", desc: <>Cap the rendered result count.</>, source: "CommandPalette.tsx" },
   { name: "debounceMs", type: "number", def: "0", desc: <>Delay before firing <Code>source.search</Code>. <Code>0</Code> filters synchronously.</>, source: "CommandPalette.tsx" },
-  { name: "size", type: `"1" | "2" | "3"`, def: `"1"`, desc: <>Control size; unset, resolves from the global <Code>uiSize</Code> control lane (default small → 1).</>, source: "CommandPalette.tsx" },
+  { name: "size", type: `"1" | "2" | "3"`, def: `control lane (1 at small)`, desc: <>Control size; unset, resolves from the global <Code>uiSize</Code> control lane (default small → 1).</>, source: "CommandPalette.tsx" },
   { name: "isInline", type: "boolean", def: "false", desc: <>Docs/preview mode — a plain bounded box (no dialog, backdrop, trap, autofocus, or mount-scroll).</>, source: "CommandPalette.tsx" },
 ];
 

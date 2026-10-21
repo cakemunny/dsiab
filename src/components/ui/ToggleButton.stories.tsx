@@ -85,7 +85,7 @@ const PROPS: PropDef[] = [
   { name: "onPressedChange", type: "(pressed: boolean) => void", desc: <>Fires on every state change, controlled or uncontrolled.</>, source: "ToggleButton.tsx" },
   { name: "pressedIcon", type: "ReactNode", desc: <>Optional icon shown while pressed — swaps the rest content. Omit it and the same content renders in both states.</>, source: "ToggleButton.tsx" },
   { name: "label", type: "string", desc: <>Accessible name → <Code>aria-label</Code>. <strong>Required</strong> for an icon-only toggle — there is no auto-tooltip.</>, source: "ToggleButton.tsx" },
-  { name: "size", type: `"1" | "2" | "3" | "inherit"`, desc: <>Passed through to Button. Unset, it follows the global <Code>uiSize</Code> control lane (default <Code>small</Code> → <Code>1</Code>).</>, source: "ToggleButton.tsx" },
+  { name: "size", type: `"1" | "2" | "3" | "inherit"`, def: `control lane (1 at small)`, desc: <>Passed through to Button. Unset, it follows the global <Code>uiSize</Code> control lane (default <Code>small</Code> → <Code>1</Code>).</>, source: "ToggleButton.tsx" },
   { name: "disabled", type: "boolean", desc: <>Disables the toggle — keeps Radix's dimmed treatment; the pressed paint is gated off (<Code>:not([data-disabled])</Code>).</>, source: "Radix" },
 ];
 

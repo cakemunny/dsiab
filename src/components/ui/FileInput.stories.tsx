@@ -157,7 +157,11 @@ function PinFrame({ pins, width, children }: { pins: PinSpec[]; width: number; c
     const ro = new ResizeObserver(() => { cancelAnimationFrame(raf); raf = requestAnimationFrame(measure); });
     ro.observe(f);
     ro.observe(b);
-    return () => { cancelAnimationFrame(raf); ro.disconnect(); };
+    // A web font that lands after the first measure moves the parts inside a specimen whose own box stays the
+    // same, so the observer never fires (the PowerSearch anatomy measured this).
+    let live = true;
+    void document.fonts.ready.then(() => { if (live) measure(); });
+    return () => { live = false; cancelAnimationFrame(raf); ro.disconnect(); };
   }, [pins]);
 
   return (
@@ -452,7 +456,7 @@ const PROPS: PropDef[] = [
   { name: "maxFiles", type: "number", desc: <>Maximum number of files (only when <Code>isMultiple</Code>). Extra files are sliced off with a status.</>, source: "FileInput.tsx" },
   { name: "mode", type: `"dropzone" | "input"`, def: `"dropzone"`, desc: <>The visual surface. Dropzone (default) is the large drag-and-drop target; input is the compact Button row.</>, source: "FileInput.tsx" },
   { name: "placeholder", type: "string", desc: <>Overrides the resting prompt (dropzone) / the empty hint (compact).</>, source: "FileInput.tsx" },
-  { name: "size", type: `"1" | "2" | "3"`, def: `"1"`, desc: <>Control size. Unset, it resolves from the global <Code>uiSize</Code> control lane (default <Code>small</Code> → <Code>1</Code>).</>, source: "FileInput.tsx" },
+  { name: "size", type: `"1" | "2" | "3"`, def: "control lane (1 at small)", desc: <>Control size. Unset, it resolves from the global <Code>uiSize</Code> control lane (default <Code>small</Code> → <Code>1</Code>).</>, source: "FileInput.tsx" },
   { name: "isRequired", type: "boolean", def: "false", desc: <>Sets <Code>required</Code>/<Code>aria-required</Code> + a subtle <Code>*</Code>. Does NOT paint an error at rest — a form owns submit-time validation.</>, source: "FileInput.tsx" },
   { name: "disabled", type: "boolean", def: "false", desc: <>Dims the control and makes it inert (native disabled — unless paired with a reason).</>, source: "FileInput.tsx" },
   { name: "disabledReason", type: "string", desc: <>A non-empty reason SOFT-disables (aria-disabled + reason tooltip + glyph) so the reason stays perceivable on hover and focus.</>, source: "FileInput.tsx" },

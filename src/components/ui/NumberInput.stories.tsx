@@ -285,7 +285,7 @@ const PROPS: PropDef[] = [
   { name: "isIntegerOnly", type: "boolean", def: "false", desc: <>Reject any non-integer on commit.</>, source: "NumberInput.tsx" },
   { name: "units", type: "string", desc: <>A decorative trailing suffix (“kg”, “%”). <Code>aria-hidden</Code> in the slot, folded into <Code>aria-describedby</Code> so AT still announces it.</>, source: "NumberInput.tsx" },
   { name: "placeholder", type: "string", def: `"Enter a number"`, desc: <>Greyed hint while empty.</>, source: "NumberInput.tsx" },
-  { name: "size", type: `"1" | "2" | "3"`, def: `"1"`, desc: <>Control size. Unset, it resolves from the global <Code>uiSize</Code> control lane (default <Code>small</Code> → <Code>1</Code>).</>, source: "NumberInput.tsx" },
+  { name: "size", type: `"1" | "2" | "3"`, def: `control lane (1 at small)`, desc: <>Control size. Unset, it resolves from the global <Code>uiSize</Code> control lane (default <Code>small</Code> → <Code>1</Code>).</>, source: "NumberInput.tsx" },
   { name: "disabled", type: "boolean", def: "false", desc: <>Dims the input and makes it inert (native disabled — unless paired with a reason).</>, source: "NumberInput.tsx" },
   { name: "disabledReason", type: "string", desc: <>A non-empty reason SOFT-disables (aria-disabled + readOnly + reason tooltip + glyph) so the reason stays perceivable on hover and focus.</>, source: "NumberInput.tsx" },
   { name: "label / info / endSlot / description / validation", type: "Field props", desc: <>The shared <Code>Field</Code> shell. <Code>validation</Code> is the STANDING channel; ephemeral parse failures announce + revert instead. Pass none of label / description / validation to keep the control bare.</>, source: "NumberInput.tsx" },
