@@ -20,7 +20,7 @@ import {
 /* DateTimeInput — a date AND a time under one group label, on the shared FieldGroup shell.
  *
  * Ported from Astryx (facebook/astryx `@astryxdesign/core` v0.1.4, commit 88c95e4) onto our system
- * (DECISIONS [[catalog-as-specification]], wave-3 [[light-and-dark-token-set]], [[date-time-input]]). It is a COMPOSITE (a GROUP of two sub-controls), NOT a single Field:
+ * (DECISIONS [[catalog-as-specification]], [[date-time-input]]). It is a COMPOSITE (a GROUP of two sub-controls), NOT a single Field:
  * it EMBEDS the already-shipped `DateInput` ([[date-input]]) + `TimeInput` ([[time-input]]) in their BARE mode (no own label /
  * description / validation) inside a `FieldGroup.Root`, so the pair reads as one named group. Zero date/time
  * math is re-implemented here — split/combine at the `'T'` is the only new logic; parsing, formatting,

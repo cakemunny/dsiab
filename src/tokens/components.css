@@ -658,7 +658,7 @@
   z-index: var(--ds-z-panel);
 }
 /* The listbox scrolls (max-height ~300px), so the error row (a sibling, outside the listbox) never
-   scrolls out of reach. Highlighted row auto-scrolls into view (scrollIntoView, [[one-accent]]). */
+   scrolls out of reach. Highlighted row auto-scrolls into view (scrollIntoView). */
 .radix-themes .rt-ds-typeahead-listbox {
   outline: none;
   display: flex;
@@ -1280,8 +1280,9 @@
 
 /* D11 — ToggleButton pressed state. @radix-ui/react-toggle merges data-state="on"|"off" onto the ghost
    Button root (via asChild), so a pressed toggle is the .rt-variant-ghost node carrying
-   [data-state="on"]. Paint the accent-aware selected tint (--ds-fill-selected-subtle) inside a 1px --ds-stroke-accent-weak edge and bold the label
-   to 600 — the non-colour cue ([[select-selected-row]]), so "on" reads without relying on colour alone. Same compound
+   [data-state="on"]. Paint the accent-aware selected tint (--ds-fill-selected-subtle) inside a 1px --ds-stroke-accent-weak edge, set the label
+   in --ds-text-strong and bold it to 600 — the non-colour cue ([[select-selected-row]]). A labelled toggle reads "on" by weight as
+   well as colour. An icon-only toggle has no label to bold, so it relies on the edge and on a `pressedIcon` swap. Same compound
    same-element selector + [data-disabled] guard as the danger blocks above (data-state rides the node
    that carries .rt-BaseButton), scoped under .radix-themes so the (0,5,0) selector beats Radix's ghost
    variant/hover/active rules; no !important — and no @media (hover) or :active step needed, the pressed
@@ -5281,7 +5282,7 @@
 }
 
 /* ============================================================================
-   AppShell (System/Layout/AppShell · [[one-accent]] · D7) — the top-level page shell. It
+   AppShell (System/Layout/AppShell) — the top-level page shell. It
    COMPOSES Layout, owns the responsive mode-swap, and provides the app-shell
    contexts. Descendant selectors (the shell is the page frame itself, not a
    portaled panel). Paints from --ds-* surfaces only: the `variant` surface
