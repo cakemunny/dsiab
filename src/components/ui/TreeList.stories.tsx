@@ -600,7 +600,7 @@ export const History: Story = {
           </Decision>
           <Decision id="[[tree-list]] · zero net-new tokens">
             Paint reuses shipped <Code>--ds-*</Code> roles (the Item vocabulary, the <Code>--ds-fill-selected-subtle</Code>{" "}
-            selected tint, the inset focus ring ([[focus-ring]]) (<Code>--ds-stroke-focus</Code>), the shared motion ladder). Chevron{" "}
+            selected tint, the inset focus ring ([[focus-ring]], <Code>--ds-stroke-focus</Code>), the shared motion ladder). Chevron{" "}
             <Code>CaretRight</Code> (Phosphor); the branch guide-lines are deferred as pure decoration. No new tokens; no{" "}
             <Code>!important</Code>.
           </Decision>

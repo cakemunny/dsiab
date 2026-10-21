@@ -480,7 +480,7 @@ export const History: Story = {
           <Decision id="[[item-row-primitive]] · zero net-new tokens">
             All paint reuses shipped <Code>--ds-*</Code> roles (text, the <Code>--ds-fill-hover</Code>/
             <Code>--ds-fill-selected-subtle</Code> Select-menu highlight vocabulary, <Code>--ds-stroke-weak</Code>
-            dividers, the focus ring ([[focus-ring]]) (<Code>--ds-stroke-focus</Code>), the motion ladder). No new tokens; no{" "}
+            dividers, the focus ring ([[focus-ring]], <Code>--ds-stroke-focus</Code>), the motion ladder). No new tokens; no{" "}
             <Code>!important</Code>.
           </Decision>
           <Decision id="[[status-dot-edges]] · strong description on a selected row">

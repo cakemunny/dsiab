@@ -362,7 +362,7 @@ export const History: Story = {
             <Code>--ds-stroke-accent-weak</Code> edge and a{" "}
             <Code>--ds-text-strong</Code> label at weight 600, inherited with no work. That ink is part of the
             inheritance and not an afterthought: a ghost Button's own accent ink is tuned to read on the page,
-            and over an accent tint of the same hue it failed WCAG AA on most brands (worst 3.13:1) until the ToggleButton pressed rule
+            and over an accent tint of the same hue it failed WCAG AA on most brands (worst 3.13:1) until [[toggle-button]]
             declared it.
           </Decision>
           <Decision id="[[toggle-button-group]] · icon-only selection">
