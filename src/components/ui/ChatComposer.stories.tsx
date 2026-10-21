@@ -101,7 +101,11 @@ function AnatomyDiagram() {
     const ro = new ResizeObserver(() => { cancelAnimationFrame(raf); raf = requestAnimationFrame(measure); });
     ro.observe(f);
     ro.observe(s);
-    return () => { cancelAnimationFrame(raf); ro.disconnect(); };
+    // A web font that lands after the first measure moves the parts inside a specimen whose own box stays the
+    // same, so the observer never fires (the PowerSearch anatomy measured this).
+    let live = true;
+    void document.fonts.ready.then(() => { if (live) measure(); });
+    return () => { live = false; cancelAnimationFrame(raf); ro.disconnect(); };
   }, []);
 
   return (
