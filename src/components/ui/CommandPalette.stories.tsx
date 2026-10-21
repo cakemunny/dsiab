@@ -771,7 +771,7 @@ export const History: Story = {
             spinner, an aria-hidden Kbd-hint footer, and an <Code>isInline</Code> docs mode. Stories:
             History · Anatomy · Usage · Keyboard · Props.
           </Decision>
-          <Decision id="Deferred">
+          <Decision id="[[command-palette]] · Deferred">
             <strong>Global ⌘K hotkey</strong> (opening stays consumer-controlled via <Code>open</Code> /{" "}
             <Code>onOpenChange</Code>), <strong>frecency ranking</strong>, and <strong>nested / sub-command
             pages</strong> — named parks, revisited when a consumer needs them.

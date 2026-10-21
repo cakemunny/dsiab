@@ -281,7 +281,7 @@ export const History: Story = {
             <Code>string[]</Code>. This is the card-shaped cousin of <Code>CheckboxGroup</Code> (its radio
             counterpart, <Code>RadioCards</Code>, is single-select).
           </Decision>
-          <Decision id="Selected skin">
+          <Decision id="[[choice-controls]] · Selected skin">
             A checked card carries the <strong>same selected treatment as <Code>RadioCards</Code></strong> — a
             slight accent fill (<Code>--ds-fill-accent-weak</Code>) under a 2px accent edge
             (<Code>--accent-indicator</Code>) — so the two card pickers read as one family. Left bare, only the
@@ -296,7 +296,7 @@ export const History: Story = {
             focused card differs from a selected card at rest by 3:1 over that strip on 27 colours in both
             appearances. Every other ring in the system stays 2px.
           </Decision>
-          <Decision id="Why the weak tint, not the a5 selected tint">
+          <Decision id="[[choice-controls]] · Why the weak tint, not the a5 selected tint">
             The fill is the <Code>--ds-fill-accent-weak</Code> step, not the deeper{" "}
             <Code>--ds-fill-selected-subtle</Code> one a selected <em>row</em> takes. Measured on the card
             specimens, the deeper tint drops a card's muted description line to <strong>4.43:1</strong> in
@@ -304,7 +304,7 @@ export const History: Story = {
             whole content block, so the tint stays a wash: the content is the subject, the fill only says
             which ones are picked.
           </Decision>
-          <Decision id="uiSize · Global control lane">
+          <Decision id="[[choice-controls]] · uiSize · Global control lane">
             Card <Code>size</Code> follows the global control lane (our small default → <Code>1</Code>) unless set.
           </Decision>
           <Decision id="When to reach for cards">

@@ -307,13 +307,13 @@ export const History: Story = {
             Separator is a <strong>wrapped</strong> Radix Themes component — the Radix name wins; built on the
             Radix substrate + our <Code>--ds-*</Code> layer, not a hand-rolled rule.
           </Decision>
-          <Decision id="Stroke role">
+          <Decision id="[[separator-wrap]] · Stroke role">
             The default separator colour (<Code>--gray-a6</Code>) is exactly what <Code>--ds-stroke-weak</Code>{" "}
             aliases — the subtle-divider role — so it binds to the system with <strong>no new CSS and no new
             token</strong>. <Code>color</Code> is deliberately not exposed: a divider stays on the neutral
             stroke, never a raw Radix scale.
           </Decision>
-          <Decision id="Semantic vs decorative">
+          <Decision id="[[separator-wrap]] · Semantic vs decorative">
             Decorative by default (no role, a bare visual span) — most rules are visual grouping the layout
             already conveys, so they stay out of the accessibility tree. When a rule genuinely marks a
             boundary between regions, <Code>decorative={false}</Code> exposes <Code>role="separator"</Code>.

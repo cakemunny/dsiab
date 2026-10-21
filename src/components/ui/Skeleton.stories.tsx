@@ -296,19 +296,19 @@ export const History: Story = {
             paint or size, so it is re-surfaced as a documented <strong>re-export</strong> (like Grid /
             AspectRatio), not a forwardRef shell that would imply an override it doesn't have.
           </Decision>
-          <Decision id="Mirrors children">
+          <Decision id="[[feedback-set]] · Mirrors children">
             While <Code>loading</Code> the placeholder is <strong>sized to its children</strong> — Radix merges
             the skeleton skin onto the child element and hides it — so the gray box is the exact shape that will
             load and nothing reflows when it arrives. It therefore rides <strong>no size lane</strong>: a
             skeleton has no scale of its own, it takes the size of whatever it stands in for.
           </Decision>
-          <Decision id="Gray skin, tokenless">
+          <Decision id="[[feedback-set]] · Gray skin, tokenless">
             It reuses Radix's own skeleton skin — a neutral placeholder whose pulse breathes between{" "}
             <Code>--gray-a3</Code> and <Code>--gray-a4</Code> — so a bare skeleton already matches the system's
             loading look with <strong>no new CSS and no new token</strong>. It declares no <Code>--ds-*</Code>
             roles of its own.
           </Decision>
-          <Decision id="Ambient pulse + reduced-motion">
+          <Decision id="[[feedback-set]] · Ambient pulse + reduced-motion">
             The pulse is a ~1s gray breathe with no start or end — an <em>ambient</em> loop, so its duration is a
             deliberate literal rather than a value off the intent-named <Code>--ds-duration</Code> ladder (the
             StatusDot precedent). Radix ships the animation unconditionally, so a{" "}

@@ -318,7 +318,7 @@ export const History: Story = {
           <Decision id="[[catalog-as-specification]] · Wrapped Radix component">A wrapped Radix Themes component — the Radix name wins; built on the Radix Popover substrate + our <Code>--ds-*</Code> layer, not a from-scratch floating panel. Radix already portals, positions, dismisses, and returns focus.</Decision>
           <Decision id="[[floating-surface-fill]] · Opaque panel skin">Content reuses Radix's own opaque, elevated panel skin (<Code>--color-panel-solid</Code> + an elevation shadow) — no translucent variant is exposed (the floating-surface opacity rule). The wrap declares no <Code>--ds-*</Code> paint roles.</Decision>
           <Decision id="[[collapsible-and-accordion]] · Inherited popper motion">Motion is inherited, not declared: the panel carries the shared <Code>.rt-PopperContent</Code> base class, retimed to <Code>--ds-duration-overlay</Code> (150ms) / <Code>--ds-ease-entry</Code> in and the <strong>slower</strong> <Code>--ds-duration-emphasis</Code> (260ms) / <Code>--ds-ease-standard</Code> out — floating surfaces arrive quickly and leave unhurriedly, so a panel you have finished with eases off instead of being yanked away. Same motion as every other floating surface; the wrap adds zero motion CSS, and reduced motion collapses it for free.</Decision>
-          <Decision id="uiSize · Global control lane">Content <Code>size</Code> follows the global control lane (our small default) unless set.</Decision>
+          <Decision id="[[floating-surface-wraps]] · uiSize · Global control lane">Content <Code>size</Code> follows the global control lane (our small default) unless set.</Decision>
         </Flex>
       </Section>
       <Rule />

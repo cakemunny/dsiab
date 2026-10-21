@@ -578,12 +578,12 @@ export const History: Story = {
             the drop surface is wrapped in a <Code>&lt;label&gt;</Code> so a pointer click opens the picker and the
             input's focus lights the zone's ring via <Code>:focus-within</Code>.
           </Decision>
-          <Decision id="Dropzone default">
+          <Decision id="[[file-input]] · Dropzone default">
             <strong><Code>mode="dropzone"</Code> is the default</strong> — the drop surface is the richer, more
             discoverable affordance. <Code>mode="input"</Code> is the compact Button row; the focus mechanism differs by mode
             (input-is-tab-stop in dropzone vs Button-is-tab-stop in compact).
           </Decision>
-          <Decision id="Three feedback surfaces">
+          <Decision id="[[file-input]] · Three feedback surfaces">
             <strong>Three surfaces, never crossed.</strong> (1) A clean selection announces{" "}
             <strong>politely</strong> via the shared <Code>useAnnounce</Code> (“Added report.pdf, 2.4 MB”). (2)
             Rejections + <strong>partial acceptance</strong> surface in a component-local{" "}
@@ -594,7 +594,7 @@ export const History: Story = {
             rejection on (2) — never double-announcing (the local region self-announces; <Code>useAnnounce</Code>{" "}
             owns only clean-success + clear-all).
           </Decision>
-          <Decision id="Replace + clear-all">
+          <Decision id="[[file-input]] · Replace + clear-all">
             <strong>Replace-never-append; a single clear-all.</strong> Every selection/drop REPLACES value (the
             native input's <Code>.value</Code> is reset so re-picking the same file re-fires). Per-file remove isn't
             built yet; the clear-all ✕ is <strong>NEUTRAL</strong> (not <Code>tone="danger"</Code> —
@@ -602,7 +602,7 @@ export const History: Story = {
             the only way to clear, so unlike the date/time ✕ it earns the tab order — the same logic that puts
             DateInput's calendar button in the tab order).
           </Decision>
-          <Decision id="Drag = pointer-only">
+          <Decision id="[[file-input]] · Drag = pointer-only">
             <strong>Drag-and-drop is a pointer-only enhancement.</strong> The zone toggles a{" "}
             <Code>data-drop-target</Code> attribute on <Code>dragenter/over/leave/drop</Code>; keyboard users are
             fully served by the same input, so there is <strong>no second tab stop</strong> (WCAG 2.1.1).
@@ -626,7 +626,7 @@ export const History: Story = {
             clear-all, the compact <Code>mode="input"</Code> Button row, and full Field-shell validation +{" "}
             <Code>disabledReason</Code>. Stories: History · Anatomy · Usage · Keyboard · Props.
           </Decision>
-          <Decision id="Deferred → per-file rows">
+          <Decision id="[[file-input]] · Deferred → per-file rows">
             <strong>Per-file removable rows + per-file progress</strong> — not built yet; a single
             clear-all is the whole remove story for now.
           </Decision>

@@ -609,7 +609,7 @@ export const History: Story = {
       <PageHeader title="Slider · History" standfirst={DEFINITION} />
       <Section title="Decisions" lead="The rulings this component encodes.">
         <Flex direction="column" gap="3">
-          <Decision id="Primitive + borrowed skin">
+          <Decision id="[[slider-composition]] · Primitive + borrowed skin">
             Radix Themes' <Code>Slider</Code> accepts <strong>no children</strong> — its type omits them and it
             hardcodes track, range and one thumb per value. Marks, a per-thumb name and a paired input are
             therefore structurally impossible through it. So this composes the <strong>raw Radix slider
@@ -618,13 +618,13 @@ export const History: Story = {
             the additions are ours. This is the same trick <Code>CheckboxVisual</Code> uses to wear the
             Checkbox's box without re-drawing it.
           </Decision>
-          <Decision id="Accent-aware fill">
+          <Decision id="[[slider-composition]] · Accent-aware fill">
             The filled range still paints <Code>--accent-track</Code>, the shade every part without text
             paints, so it follows a brand's collision shift with no override,
             and the wrap declares no colour role for the track, range or thumb. Only the detent layer is ours,
             and it borrows the neutral chrome roles.
           </Decision>
-          <Decision id="Detents">
+          <Decision id="[[slider-composition]] · Detents">
             A tick — with an optional label — per mark. Positions use <strong>Radix's own thumb-offset
             maths</strong>, not a raw <Code>left: X%</Code>: Radix insets each thumb by half its width so its
             centre stays on the track at the extremes, and a percentage-positioned tick therefore drifts half
@@ -636,13 +636,13 @@ export const History: Story = {
             contrast floor a non-text UI component owes. Marks outside the scale are dropped and the set is
             capped at 500, past which a tick is noise, not a stop.
           </Decision>
-          <Decision id="Snap to marks">
+          <Decision id="[[slider-composition]] · Snap to marks">
             <Code>step={"{null}"}</Code> snaps to the nearest mark rather than a fixed grid, for scales whose
             stops are irregular (shutter speeds, ISO). Keyboard stepping is taken over in that mode so the
             arrows walk stop-to-stop; a fixed ±step would land between detents and snap straight back, which
             reads as a dead control.
           </Decision>
-          <Decision id="Paired numeric box">
+          <Decision id="[[slider-composition]] · Paired numeric box">
             <Code>showInput</Code> pairs the track with an editable box per bound — the point being that an
             exact value can be <strong>typed</strong>, never pixel-hunted. Typing is free while focused; a
             valid, in-range, on-step number commits live; blur and Enter commit. It is suppressed where it
@@ -650,7 +650,7 @@ export const History: Story = {
             Radix TextField, not our <Code>NumberInput</Code> — NumberInput owns its own field shell, so
             nesting it would grow a second label, description and message tree inside this one.
           </Decision>
-          <Decision id="One value display">
+          <Decision id="[[slider-composition]] · One value display">
             <strong>The box IS the readout.</strong> Where there is a box it both reports and edits, so a
             second copy of the value — a label-row readout, a tooltip bubble over the thumb — is printing the
             same number twice a few pixels apart: two things to reconcile, and nothing to do with the second.
@@ -658,7 +658,7 @@ export const History: Story = {
             a range has two bounds, so two boxes, still one each. This is also why the value bubble is not
             built: a bubble is the answer only when there is nothing else reporting the value.
           </Decision>
-          <Decision id="A box that never resizes">
+          <Decision id="[[slider-composition]] · A box that never resizes">
             The box is sized once, for the <strong>widest value its scale can legally hold</strong> — not for
             the value it currently shows. A box that grew as <Code>9</Code> ticked over to <Code>10</Code>{" "}
             would twitch under every drag, and one sized to the current value would truncate the moment the
@@ -666,7 +666,7 @@ export const History: Story = {
             are laid out by the browser in the box's own type and the result read back, so the box follows a
             change of font family, size lane, scale or letter-spacing instead of being tuned to one of them.
           </Decision>
-          <Decision id="Clamp, not reject">
+          <Decision id="[[slider-composition]] · Clamp, not reject">
             A typed value outside the bounds is <strong>clamped</strong> to the bound and announced
             assertively ("150 was corrected to 100"); an unparseable or empty box reverts, also announced.
             Neither touches the validation channel, which is reserved for standing problems. That is a{" "}
@@ -676,7 +676,7 @@ export const History: Story = {
             yields <Code>max</Code>. Typing past the end does what dragging past the end does. A bare
             number field has no visible bound, which is exactly why reject-and-revert is right there.
           </Decision>
-          <Decision id="Names for every thumb">
+          <Decision id="[[slider-composition]] · Names for every thumb">
             The primitive names the two thumbs of a range in hardcoded English and leaves a{" "}
             <strong>single thumb nameless entirely</strong>. Every thumb gets a name here, and inside a{" "}
             <Code>Field.Root</Code> that name is announced together with the field's label ("Minimum, Price").
@@ -684,13 +684,13 @@ export const History: Story = {
             <Code>span</Code>, and <Code>htmlFor</Code> only names a labelable element — pointing it at a span
             is a silent no-op. The field shell grew a <Code>labelId</Code> for exactly this.
           </Decision>
-          <Decision id="Neighbour-constrained bounds">
+          <Decision id="[[slider-composition]] · Neighbour-constrained bounds">
             On a range, the primitive reports the <em>global</em> min and max on both thumbs — which tells
             assistive tech the lower thumb may travel past the upper one. Each thumb here reports its{" "}
             <strong>neighbour</strong> as its bound instead, which is what the multi-thumb pattern requires,
             and the wrapper carries <Code>role="group"</Code> so the pair announces as one control.
           </Decision>
-          <Decision id="Gap blocks, never pushes">
+          <Decision id="[[slider-composition]] · Gap blocks, never pushes">
             <Code>minStepsBetweenThumbs</Code> <strong>blocks</strong> a move that would close the gap: the
             dragged thumb simply stops. It does not push its neighbour along, which is what some other slider
             libraries do and is a genuinely different feel — worth knowing before you reach for it. Thumbs can

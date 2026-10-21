@@ -302,7 +302,7 @@ export const History: Story = {
             Kbd is <strong>display-only</strong>, so <Code>variant="soft"</Code> is permitted here — the soft
             ban applies to interactive controls, not decorative UI.
           </Decision>
-          <Decision id="Docs · §6">
+          <Decision id="[[docs-page-spine]] · Docs · §6">
             The <strong>lite docs-tier</strong> ratification prototype: a skin-reusing component with no{" "}
             <Code>--ds-*</Code> roles, documented by the lite spine (specimen · live rendered-values readout ·
             do/don’t · Props). Every component — lite stubs included — still carries this History page.

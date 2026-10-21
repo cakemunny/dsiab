@@ -240,7 +240,7 @@ export const History: Story = {
             pressed paint is the accent-aware <Code>--ds-fill-selected-subtle</Code> fill, a 1px inset{" "}
             <Code>--ds-stroke-accent-weak</Code> edge <strong>and</strong> a weight-600 label. The weight is the cue that needs no colour. An icon-only toggle has no visible text for it to act on, so <Code>pressedIcon</Code> swaps its glyph instead.
           </Decision>
-          <Decision id="the pressed label leaves the accent">
+          <Decision id="[[toggle-button]] · the pressed label leaves the accent">
             The pressed label takes <Code>--ds-text-strong</Code>, not the ghost button's inherited{" "}
             <Code>--accent-a11</Code> — the same ink every other committed-selection surface in the system
             already uses (the checked <Code>Select</Code> row, the active <Code>DateRangeInput</Code> preset,
@@ -256,17 +256,17 @@ export const History: Story = {
             <Code>defaultPressed</Code>. Radix's primitive gives uncontrolled state for free, and it's the platform
             convention for a form-ish control.
           </Decision>
-          <Decision id="Docs · label">
+          <Decision id="[[toggle-button]] · Docs · label">
             An icon-only ToggleButton does <strong>not</strong> get an automatic <strong>tooltip</strong> from{" "}
             <Code>label</Code>. Follow the IconButton rule: an icon-only toggle <strong>requires</strong>{" "}
             <Code>label</Code> (→ <Code>aria-label</Code>) for an accessible name.
           </Decision>
-          <Decision id="Deferred">
+          <Decision id="[[toggle-button]] · Deferred">
             Deferred: an event-arg <Code>preventDefault</Code> opt-out, and the async{" "}
             <Code>pressedChangeAction</Code> + <Code>useOptimistic</Code> optimistic-update pattern — revisit if
             the app layer needs them.
           </Decision>
-          <Decision id="uiSize · Global control lane">
+          <Decision id="[[toggle-button]] · uiSize · Global control lane">
             <Code>size</Code> follows the global <Code>uiSize</Code> control lane (default <Code>small</Code>) via
             Button.
           </Decision>

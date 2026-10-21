@@ -426,13 +426,13 @@ export const History: Story = {
             Radix substrate + our <Code>--ds-*</Code> layer, a documented re-export rather than a hand-rolled
             block.
           </Decision>
-          <Decision id="Vertical padding">
+          <Decision id="[[surface-wraps]] · Vertical padding">
             <Code>size</Code> is a <strong>vertical-padding</strong> scale — the block's top/bottom breathing
             room (24 / 40 / 64 / 80px for <Code>1</Code>–<Code>4</Code>) — <em>not</em> a type-size lane. It is
             passed through <strong>untouched</strong>: unlike a control or a container, a Section does not ride
             the global size resolver, so its rhythm stays independent of the ambient type size.
           </Decision>
-          <Decision id="No paint">
+          <Decision id="[[surface-wraps]] · No paint">
             Section owns <strong>no <Code>--ds-*</Code> roles</strong> and paints nothing — it contributes
             vertical rhythm only. Background, text and border come from whatever it wraps, so there is no
             colour spec. Its token spec is a <strong>spacing</strong> one instead: steps <Code>1</Code>–

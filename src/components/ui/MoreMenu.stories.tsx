@@ -272,13 +272,13 @@ export const History: Story = {
       <PageHeader title="MoreMenu · History" standfirst={DEFINITION} />
       <Section title="Decisions" lead="The rulings this component encodes.">
         <Flex direction="column" gap="3">
-          <Decision id="Composition">
+          <Decision id="[[floating-surface-wraps]] · Composition">
             MoreMenu is a <strong>composition, not a new component</strong> — it reuses <Code>IconButton</Code>{" "}
             (the ghost trigger) and <Code>DropdownMenu</Code> (the surface) exactly as they ship, adding no new
             component, token, or CSS. Repeating the two existing patterns is the point: an overflow menu is a
             named arrangement of parts the system already owns.
           </Decision>
-          <Decision id="Required label">
+          <Decision id="[[floating-surface-wraps]] · Required label">
             The trigger is icon-only, so <Code>label</Code> is <strong>required</strong> and becomes its{" "}
             <Code>aria-label</Code>. Without a text alternative an icon button is invisible to assistive tech
             (WCAG 4.1.2) — the API makes the accessible name unskippable rather than optional.
@@ -292,13 +292,13 @@ export const History: Story = {
             pairing any icon-button-triggered dropdown renders, not a mismatch. The clamp is explicit because
             an out-of-range step is otherwise swapped for the panel's own default, silently.
           </Decision>
-          <Decision id="Target floor">
+          <Decision id="[[control-box-per-step]] · Target floor">
             The trigger clears <strong>24×24</strong> at every step — the minimum pointer target (WCAG 2.5.8),
             which the quiet ghost step-1 button misses by 2px on its own. The floor is held once, for every
             ghost icon-button in the system's stylesheet, rather than by bumping this trigger a size: the glyph
             keeps its own size and only the pressable box grows.
           </Decision>
-          <Decision id="Overflow only">
+          <Decision id="[[floating-surface-wraps]] · Overflow only">
             The ⋯ holds <strong>secondary actions only</strong>. The item's primary action stays visible beside
             it — never buried in the overflow. A destructive item follows the DropdownMenu contract: isolated
             below a <Code>Separator</Code>, with a trash glyph, a verb label, and <Code>tone="danger"</Code>{" "}

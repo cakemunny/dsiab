@@ -321,12 +321,12 @@ export const History: Story = {
             Switch is a <strong>wrapped</strong> Radix Themes component — the Radix name wins; built on the
             Radix substrate + our <Code>--ds-*</Code> layer, not a hand-rolled toggle.
           </Decision>
-          <Decision id="Control lane">
+          <Decision id="[[choice-controls]] · Control lane">
             An unset <Code>size</Code> follows the global <Code>uiSize</Code> control lane (default{" "}
             <Code>small</Code> → <Code>1</Code>), so a switch renders at the same tier as the controls beside
             it. Radix's own default is <Code>2</Code>.
           </Decision>
-          <Decision id="Skin reuse">
+          <Decision id="[[choice-controls]] · Skin reuse">
             The checked track paints from <Code>--accent-track</Code>, the shade every part without text
             paints, so the ON state is already accent-aware and tracks the brand collision shift. It declares
             no <Code>--ds-*</Code> roles of its own; focus is the system ring, the accent with a stacked alpha ([[focus-ring]]), not a

@@ -502,12 +502,12 @@ export const History: Story = {
             rather than something the component prevents, and the gap holds at 8px while the controls
             around it grow.
           </Decision>
-          <Decision id="Where it is already wired">
+          <Decision id="[[button-cluster]] · Where it is already wired">
             The cluster is the channel the system's own action rows run through, so they inherit{" "}
             <Code>buttonOrder</Code> without re-implementing it: a Dialog's footer, an EmptyState's
             actions, and a Toast's action-plus-dismiss pair are all a ButtonGroup underneath.
           </Decision>
-          <Decision id="asChild · the cluster as your element">
+          <Decision id="[[aschild-or-type-error]] · asChild · the cluster as your element">
             <strong>The consumer's element can BE the cluster.</strong> Under <Code>asChild</Code> the
             controls arrive as that element's children, so the cluster reads them from there, anchors the
             primary, and hands Radix's <Code>Slot</Code> the one element it requires. The classes and the

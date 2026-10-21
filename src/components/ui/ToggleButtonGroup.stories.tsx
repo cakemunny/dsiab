@@ -400,7 +400,7 @@ export const History: Story = {
             smaller button — glyph, box and pressed paint all the lower step's — and the smallest member
             anywhere is still a 24×24 pointer target ([[control-box-per-step]]'s floor is the member's own).
           </Decision>
-          <Decision id="uiSize">
+          <Decision id="[[toggle-group-box]] · uiSize">
             <Code>size</Code> follows the global <Code>uiSize</Code> control lane (default <Code>small</Code>) via
             Button. The group resolves it once and seeds every member the step BELOW it
             (the shared <Code>CONTROL_MEMBER_STEP</Code> ramp in SizeContext) — the tray owns the row's box,

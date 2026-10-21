@@ -469,7 +469,7 @@ export const History: Story = {
             primitive, and the mega panel gets <strong>arrow-key roving</strong> — full keyboard navigation
             across the mega grid.
           </Decision>
-          <Decision id="Hover-intent (useMenuHover)">
+          <Decision id="[[top-nav]] · Hover-intent (useMenuHover)">
             Menus open on <strong>sustained hover</strong> (150ms show / 200ms hide), gated to fine pointers
             (<Code>(hover:hover)</Code>) so touch falls back to click; a <strong>click latches</strong> the
             menu open. The trigger is a <Code>Popover.Anchor</Code> (not a <Code>Trigger</Code>, which would
@@ -481,17 +481,17 @@ export const History: Story = {
             single-open coordination would add behaviour the pattern does not need, so it is deliberately
             left out (add it only if a product asks).
           </Decision>
-          <Decision id="MegaMenu · aria-controls + full-width">
+          <Decision id="[[top-nav]] · MegaMenu · aria-controls + full-width">
             The mega trigger carries <Code>aria-controls</Code>. The panel is anchored{" "}
             <strong>full-width to the bar</strong> (not the trigger) via a fixed anchor measured to the bar's
             rect, so it spans the bar rather than the button — JS measurement, since CSS anchor-positioning is
             not used here yet.
           </Decision>
-          <Decision id="No built-in 'More' overflow menu">
+          <Decision id="[[top-nav]] · No built-in 'More' overflow menu">
             There is <strong>no built-in overflow "More" menu</strong> on the bar. If a real overflow need
             arises, compose one on the <Code>useOverflow</Code> engine.
           </Decision>
-          <Decision id="FeaturedCard · a real icon">
+          <Decision id="[[top-nav]] · FeaturedCard · a real icon">
             The featured card is <strong>presentational</strong> (or a routed link card). Its hard-appended{" "}
             <Code>→</Code> text glyph is replaced with a proper Phosphor <Code>ArrowRight</Code> icon.
           </Decision>

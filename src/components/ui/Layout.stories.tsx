@@ -491,17 +491,17 @@ export const History: Story = {
             padding. The scan is <strong>synchronous</strong> — an SSR-safe approach that avoids a mount-time
             registration effect, which would race divider placement and flash on hydration.
           </Decision>
-          <Decision id="Documented API">
+          <Decision id="[[layout-primitive]] · Documented API">
             <Code>contentWidth</Code>, <Code>padding</Code>, and <Code>defaultHasDividers</Code> are <strong>real
             API the source hides</strong> — this component documents them (see Properties). They constrain the
             content measure, set slot-aware padding, and toggle the area dividers respectively.
           </Decision>
-          <Decision id="Forward rest · [[layout-primitive]]">
+          <Decision id="[[layout-primitive]] · Forward rest">
             The root <strong>forwards</strong> <Code>…rest</Code> + <Code>data-testid</Code> (and{" "}
             <Code>className</Code>/<Code>style</Code>/<Code>id</Code>/aria). The rule here is <strong>forward
             honestly or omit from the type</strong> — never declare a prop surface and silently discard it.
           </Decision>
-          <Decision id="Landmarks · opt-in">
+          <Decision id="[[layout-primitive]] · Landmarks · opt-in">
             <Code>banner</Code>/<Code>contentinfo</Code>/<Code>complementary</Code> are <strong>opt-in</strong>
             per slot (the <Code>landmark</Code> prop), never auto-emitted: a Layout can be nested, and multiple
             same-type landmarks are invalid. Slots render generic containers by default; <Code>main</Code> is
@@ -523,7 +523,7 @@ export const History: Story = {
             every step of the <Code>padding</Code> prop, so the number in the docs described nothing you could
             measure on screen.
           </Decision>
-          <Decision id="Resizable · shared engine">
+          <Decision id="[[layout-primitive]] · Resizable · shared engine">
             A resizable <Code>Layout.Panel</Code> reuses the shared <Code>useResizable</Code> engine +
             <Code>ResizeHandle</Code> (the WAI window-splitter contract), rather than a bespoke splitter. The
             handle <strong>is</strong> the panel↔content seam (it suppresses the auto-divider there); the hook is

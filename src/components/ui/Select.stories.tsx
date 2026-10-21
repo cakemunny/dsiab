@@ -1069,7 +1069,7 @@ export const History: Story = {
             the checkmark left behind (no <Code>!important</Code>; high-contrast keeps Radix’s native checkmark
             treatment).
           </Decision>
-          <Decision id="Text never rides the solid accent">
+          <Decision id="[[status-dot-edges]] · Text never rides the solid accent">
             A menu row label is 12px at the default size — the smallest type in the system — and the fill step a
             solid accent row would use is a UI-component background with no text-contrast commitment behind it.
             Measured off rendered pixels, a white label on that fill lands at 3.00–3.91:1 on the accents that

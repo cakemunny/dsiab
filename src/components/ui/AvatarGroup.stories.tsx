@@ -701,7 +701,7 @@ export const History: Story = {
             2px <Code>--ds-bg-base</Code> ring that did that before the edge existed cut a pale band through
             the disc behind and drew a halo on any tinted surface, so it was removed.
           </Decision>
-          <Decision id="Overlap">
+          <Decision id="[[avatar-group-overlap]] · Overlap">
             Discs overlap 20% of the box ([[avatar-group-overlap]]), the most that leaves both letters of
             every two-letter pair readable. The figure is <strong>derived from the box</strong>, so a stack
             stays proportional at every size step instead of needing a table of pitches.

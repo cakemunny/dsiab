@@ -485,22 +485,22 @@ export const History: Story = {
             <Code>clearable</Code>, and full Field-shell validation + <Code>disabledReason</Code>. Stories:
             History · Anatomy · Usage · Keyboard · Props.
           </Decision>
-          <Decision id="Deferred → shared stepper + Intl">
+          <Decision id="[[number-input]] · Deferred → shared stepper + Intl">
             <strong>Custom +/- stepper buttons and <Code>Intl.NumberFormat</Code> display</strong> — the
             stepper is the same deferral as <Code>TimeInput</Code>’s: built once and shared when the system earns
             it, never as a NumberInput-only control. Locale grouping is parked (it fights raw-value editing).
           </Decision>
-          <Decision id="Deferred → spoken unitsLabel">
+          <Decision id="[[number-input]] · Deferred → spoken unitsLabel">
             <strong>A separately-spoken <Code>unitsLabel</Code></strong> — the visible <Code>units</Code> already
             travels via aria-describedby; a distinct spoken form (“kilograms” for a “kg” suffix) is parked until a
             caller needs it.
           </Decision>
-          <Decision id="Deferred → server actions / InputGroup">
+          <Decision id="[[number-input]] · Deferred → server actions / InputGroup">
             <strong>The <Code>changeAction</Code> async-optimistic layer</strong> (<Code>isLoading</Code> / a
             Spinner) and <strong>InputGroup composition</strong> — not built yet; revisit with the app
             layer / when InputGroup ships.
           </Decision>
-          <Decision id="Known native wart">
+          <Decision id="[[number-input]] · Known native wart">
             <strong>Scroll-wheel mutate.</strong> A focused native <Code>type=number</Code> changes on mouse-wheel
             scroll — a browser behaviour, not guarded here; a shared wheel guard, if wanted, belongs on the
             primitive.

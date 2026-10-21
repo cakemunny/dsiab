@@ -428,7 +428,7 @@ export const History: Story = {
             <Code>Alt+ArrowDown</Code> opens it from the input without moving focus out (their APG
             combobox-with-dialog wiring). Stated so nobody “fixes” it back to a listbox.
           </Decision>
-          <Decision id="Tab-stop divergence">
+          <Decision id="[[date-input]] · Tab-stop divergence">
             <strong>The calendar button is a REAL tab stop.</strong> Unlike the Select / Typeahead clear ✕ (which
             sit at <Code>tabIndex=-1</Code>), the trailing calendar <Code>IconButton</Code> is tabbable — it opens
             a whole picking surface, so it earns a place in the tab order. Documented so it isn’t normalized back
@@ -463,12 +463,12 @@ export const History: Story = {
             and full Field-shell validation + <Code>disabledReason</Code>. Stories: History · Anatomy · Usage ·
             Keyboard · Props.
           </Decision>
-          <Decision id="Deferred → server actions">
+          <Decision id="[[date-input]] · Deferred → server actions">
             <strong>The <Code>changeAction</Code> async-optimistic layer</strong> (<Code>isLoading</Code> / an
             inset Spinner while a server action settles) — a react-server-action optimistic-UI affordance not
             built yet; revisit if the app layer needs it.
           </Decision>
-          <Decision id="Deferred → InputGroup">
+          <Decision id="[[date-input]] · Deferred → InputGroup">
             <strong>InputGroup composition</strong> (attaching the field to an adjacent addon) — parked until{" "}
             <Code>InputGroup</Code> ships.
           </Decision>

@@ -290,13 +290,13 @@ export const History: Story = {
             Progress is a <strong>wrapped</strong> Radix Themes component — the Radix name wins; built on
             the Radix substrate + our <Code>--ds-*</Code> layer, not a hand-rolled track and fill.
           </Decision>
-          <Decision id="Control size lane">
+          <Decision id="[[feedback-set]] · Control size lane">
             An unset <Code>size</Code> follows the global <Code>uiSize</Code> through the{" "}
             <strong>control</strong> lane (default small → step <Code>1</Code>), the same lane a Button or
             Slider rides, so a progress bar and the controls beside it share a size. An explicit step still
             wins.
           </Decision>
-          <Decision id="Accent-aware fill">
+          <Decision id="[[feedback-set]] · Accent-aware fill">
             The track and filled indicator <strong>reuse Radix's own Progress skin</strong>, so the wrap
             declares <strong>no <Code>--ds-*</Code> roles of its own</strong>. The indicator paints{" "}
             <Code>--accent-track</Code>, the shade every part without text paints,
@@ -309,7 +309,7 @@ export const History: Story = {
             known-length job, paired with a percentage. <strong>Indeterminate</strong> (<Code>value</Code>{" "}
             omitted): an animated sweep for a task of unknown length, with no percentage to state.
           </Decision>
-          <Decision id="Ambient sweep + reduced motion">
+          <Decision id="[[feedback-set]] · Ambient sweep + reduced motion">
             The indeterminate sweep is an <em>ambient</em> loop — its cadence lives on Radix's own{" "}
             <Code>--progress-duration</Code> (default <Code>5s</Code>), a deliberate literal outside the
             intent-named <Code>--ds-duration</Code> ladder, the <Code>StatusDot</Code> ambient-pulse

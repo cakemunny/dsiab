@@ -575,11 +575,11 @@ export const History: Story = {
             <Code>role="alert"</Code> and the composite <Code>aria-invalid</Code>, so a screen reader that lands on the
             date or the time hears why the pair is invalid.
           </Decision>
-          <Decision id="Deferred → server actions">
+          <Decision id="[[date-time-input]] · Deferred → server actions">
             <strong>The <Code>changeAction</Code> async-optimistic layer</strong> (<Code>isLoading</Code> / an inset
             Spinner while a server action settles) — not built yet; revisit if the app layer needs it.
           </Decision>
-          <Decision id="Deferred → InputGroup">
+          <Decision id="[[date-time-input]] · Deferred → InputGroup">
             <strong>InputGroup composition</strong> — parked until <Code>InputGroup</Code> ships.
           </Decision>
         </Flex>

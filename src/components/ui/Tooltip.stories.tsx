@@ -238,7 +238,7 @@ export const History: Story = {
             decelerating <Code>--ds-ease-standard</Code> — so it settles out instead of blinking away while the
             pointer is still travelling. Reduced motion collapses both for free.
           </Decision>
-          <Decision id="The exit that never ran">
+          <Decision id="[[motion-retiming]] · The exit that never ran">
             Radix declares the tooltip's slide-and-fade <strong>only</strong> for its delayed-open state: the
             closed state carried timing but no animation to run, and the panel doesn't inherit the popper
             family's exit either. It vanished instantly, no matter what the CSS said. Both gaps are closed

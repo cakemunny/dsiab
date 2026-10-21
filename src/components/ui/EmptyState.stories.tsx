@@ -298,7 +298,7 @@ export const History: Story = {
             primitive, so it stacks existing System roles (<Code>Heading</Code>, <Code>Text</Code>,{" "}
             <Code>ButtonGroup</Code>) rather than inventing new skin.
           </Decision>
-          <Decision id="Icon role">
+          <Decision id="[[feedback-set]] · Icon role">
             The icon is a <strong>regular-weight</strong> glyph painted <Code>--ds-icon-neutral</Code> — the
             muted neutral-icon role — and sized modestly, so it sets the scene without competing with the
             title. Decorative, so it renders <Code>aria-hidden</Code>.
@@ -308,16 +308,16 @@ export const History: Story = {
             <Code>buttonOrder</Code> and the DOM/tab order follows the visual order. <strong>At most one solid
             primary</strong> — an empty state is a single clear next step, not a menu. Actions are optional.
           </Decision>
-          <Decision id="Layout">
+          <Decision id="[[feedback-set]] · Layout">
             Vertically stacked, <strong>centre-aligned</strong>, and <strong>max-width capped</strong> so the
             copy reads as a calm column and never spans the whole container — the description is further held
             to the reading measure.
           </Decision>
-          <Decision id="Blameless copy">
+          <Decision id="[[feedback-set]] · Blameless copy">
             Copy orients, it never accuses — “No projects yet”, never “You haven’t created any projects.” The
             wrapper can’t enforce tone, but every specimen models the blameless voice.
           </Decision>
-          <Decision id="asChild · the block as your element">
+          <Decision id="[[aschild-or-type-error]] · asChild · the block as your element">
             <strong>One root to hand over, and a child that is only ever the slot target.</strong> The
             block owns a single styled box and composes its content from props, so{" "}
             <Code>asChild</Code> can give that box away without losing anything: Radix's{" "}

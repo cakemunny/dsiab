@@ -689,30 +689,30 @@ export const History: Story = {
             OUR Field-shell inputs. The <Code>nested</Code> type (the only TreeList consumer) is deferred —
             the evaluator treats it as passthrough — so v1 has no blocking dependency on it.
           </Decision>
-          <Decision id="One renderer">
+          <Decision id="[[power-search]] · One renderer">
             <strong>A single `formatFilterValue`.</strong> ONE fixed formatter in the model layer renders every
             value type — so a <Code>date_range</Code> chip reads{" "}
             <Code>Jan 25, 2026 – Feb 10, 2026</Code> and a <Code>date_relative</Code> chip reads{" "}
             <Code>7 days ago</Code> (not a raw <Code>7d_ago</Code> code), with no risk of two renderers drifting apart.
           </Decision>
-          <Decision id="Non-dialog popover">
+          <Decision id="[[power-search]] · Non-dialog popover">
             <strong>The edit popover is not a modal dialog.</strong> The same pattern as our Typeahead:{" "}
             <Code>Popover.Content role="none"</Code> + auto-focus prevented + the anchor surface exempt from
             outside-dismiss. Focus is ours to place (the editor's first field), the field combobox stays
             live behind it, and a chip re-click swaps the editor instead of closing it.
           </Decision>
-          <Decision id="Two-level Escape">
+          <Decision id="[[power-search]] · Two-level Escape">
             <strong>No hand-rolled escapeStack.</strong> The two-level Escape rests on Radix's DismissableLayer
             stack — a nested Select/dropdown is the inner layer (Escape #1 closes it), the edit popover the
             outer (Escape #2 cancels). Enter-to-save stays an explicit handler (Radix doesn't own Enter).
           </Decision>
-          <Decision id="Assembly">
+          <Decision id="[[power-search]] · Assembly">
             <strong>Composed from shipped parts.</strong> The chip row IS the <Code>.rt-ds-tokenizer</Code>{" "}
             surface holding <Code>Token</Code> chips + an embedded <Code>Typeahead</Code> — reusing the
             fill, hairline, focus-ring hoist ([[focus-ring]]), validation paint, and disabled skin. The value
             editors are our existing inputs; nothing was re-skinned. ZERO net-new tokens.
           </Decision>
-          <Decision id="Every prop documented">
+          <Decision id="[[power-search]] · Every prop documented">
             <strong>Every live prop is documented</strong> — the
             load-bearing <Code>components</Code> override map, <Code>startIcon</Code>, <Code>onFocus</Code>,{" "}
             <Code>onBlur</Code>, and <Code>tokenOverflowBehavior</Code> included. <Code>disabledMessage</Code> maps

@@ -228,7 +228,7 @@ export const History: Story = {
             Link is a <strong>wrapped</strong> Radix Themes component, so the Radix name wins — built on
             the Radix substrate + our <Code>--ds-*</Code> layer, not a from-scratch anchor.
           </Decision>
-          <Decision id="Tokens · the reused link ink">
+          <Decision id="[[link-and-link-provider]] · Tokens · the reused link ink">
             The text colour <strong>reuses Radix's Link skin</strong>, which paints the accent's{" "}
             <em>alpha</em> step-11 (<Code>--accent-a11</Code>). Composited on the page background that is
             exactly <Code>--accent-11</Code>, the step <Code>--ds-text-link</Code> aliases — so an inline
@@ -243,20 +243,20 @@ export const History: Story = {
             and deepens it past 3:1 and APCA Lc 30. It is 2px wide and 2px out, the same on every control.
             It replaces the first neutral focus ring, a 1px hairline.
           </Decision>
-          <Decision id="Underline · a11y">
+          <Decision id="[[link-and-link-provider]] · Underline · a11y">
             Default <Code>underline="always"</Code>. Radix's own default (<Code>auto</Code>) underlines
             only on hover, leaving an inline link with no rest-state distinction — and accent-11 vs body
             text is under 3:1, so axe's <Code>link-in-text-block</Code> rightly fails. A{" "}
             <strong>persistent underline</strong> is the accessible default; callers can still force{" "}
             <Code>auto</Code>/<Code>hover</Code>/<Code>none</Code> for standalone links.
           </Decision>
-          <Decision id="LinkProvider">
+          <Decision id="[[link-and-link-provider]] · LinkProvider">
             The <strong>pluggable-Link seam</strong>: <Code>LinkProvider component={"{"}NextLink{"}"}</Code>{" "}
             supplies the app's framework Link, and <Code>useLinkComponent()</Code> reads it — defaulting to
             the native <Code>{"<a>"}</Code> tag when no provider is present. This lets nav route client-side
             with zero config out of the box.
           </Decision>
-          <Decision id="Item routing">
+          <Decision id="[[link-and-link-provider]] · Item routing">
             The shared <Code>Item</Code> row primitive renders its <Code>href</Code> body through{" "}
             <Code>useLinkComponent()</Code> (an explicit <Code>linkComponent</Code> prop wins, else the
             ambient provider, else a native <Code>{"<a>"}</Code>) — so SideNav / TopNav / Breadcrumbs rows
