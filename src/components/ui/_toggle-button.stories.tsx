@@ -4,6 +4,7 @@ import { TextAlignLeft, TextAlignCenter, TextB } from "@phosphor-icons/react";
 import { ToggleButton } from "./ToggleButton";
 import { ToggleButtonGroup } from "./ToggleButtonGroup";
 import { toHex } from "./_storyKit";
+import { resetWarnings } from "../../theme/detectAndWarn";
 import {
   ALL_ACCENTS, contrastRatio, flatten, parseColor, themeRoot, withAccent, type RGBA,
 } from "../../foundations/_assert";
@@ -239,5 +240,59 @@ export const PressedIconSwapsGlyph: Story = {
       throw new Error(
         `pressedIcon must render a DIFFERENT glyph while pressed — both states drew the same path data (${dOff.slice(0, 56)}…)`,
       );
+  },
+};
+
+/** Spy on console.warn for one play. The warning is capped once per page, so the cap is reset first. */
+function captureWarnings() {
+  const original = console.warn;
+  const warnings: string[] = [];
+  console.warn = (...a: unknown[]) => { warnings.push(String(a[0])); };
+  resetWarnings();
+  return { warnings, restore: () => { console.warn = original; } };
+}
+
+/** An icon-only toggle (given `label`) with no `pressedIcon` changes only colour when pressed, so
+ *  development warns once and names the prop. The render mounts it after the spy is in place. */
+export const IconOnlyWithoutPressedIconWarns: Story = {
+  render: () => <Flex p="4" data-mount="" />,
+  play: async ({ canvasElement }) => {
+    const spy = captureWarnings();
+    try {
+      const { createRoot } = await import("react-dom/client");
+      const host = canvasElement.querySelector("[data-mount]")!;
+      const root = createRoot(host);
+      root.render(<><ToggleButton label="Bold"><TextB /></ToggleButton><ToggleButton label="Centre"><TextAlignCenter /></ToggleButton></>);
+      await sleep(50);
+      root.unmount();
+      const hits = spy.warnings.filter((m) => m.includes("pressedIcon"));
+      if (hits.length !== 1) throw new Error(`an icon-only toggle with no pressedIcon must warn once and name pressedIcon; got ${hits.length}: ${spy.warnings.join(" | ")}`);
+    } finally {
+      spy.restore();
+    }
+  },
+};
+
+/** The controls: an icon-only toggle WITH pressedIcon, and a toggle with a visible text label, stay quiet. */
+export const PressedIconOrTextLabelNoWarning: Story = {
+  render: () => <Flex p="4" data-mount="" />,
+  play: async ({ canvasElement }) => {
+    const spy = captureWarnings();
+    try {
+      const { createRoot } = await import("react-dom/client");
+      const root = createRoot(canvasElement.querySelector("[data-mount]")!);
+      root.render(
+        <>
+          <ToggleButton label="Bold" pressedIcon={<TextB weight="bold" />}><TextB /></ToggleButton>
+          <ToggleButton><TextAlignLeft /> Left</ToggleButton>
+        </>,
+      );
+      await sleep(50);
+      root.unmount();
+      const hits = spy.warnings.filter((m) => m.includes("pressedIcon"));
+      if (hits.length !== 0) throw new Error(`no toggle here should warn; got: ${hits.join(" | ")}`);
+    } finally {
+      spy.restore();
+    }
   },
 };

@@ -113,6 +113,11 @@ export const NO_TOAST_VIEWPORT_MESSAGE =
   "toasts and <ToastViewport /> is where they appear. Place one <ToastViewport /> inside <ToastProvider>, " +
   "next to your app.";
 
+export const NO_PRESSED_ICON_MESSAGE =
+  "an icon-only <ToggleButton> has no pressedIcon, so its pressed state differs from rest by colour alone. " +
+  "A labelled toggle bolds its label when pressed, and an icon-only one has no label to bold. Pass " +
+  "pressedIcon with the same glyph at a heavier weight, for example pressedIcon={<TextB weight=\"bold\" />}.";
+
 /**
  * The canary. `semantic.css` declares the whole `--ds-*` role layer on
  * `.radix-themes`, so any one role answers the question; this is the same
