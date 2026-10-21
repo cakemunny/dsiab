@@ -235,8 +235,8 @@ and `.claude/skills/` with all four skills, and `.claude/agents/` with the three
 is untracked and git-ignored. Edit a skill in `skills/`, never a generated copy, then run the command
 again. It never touches this file.
 
-Three reviewers, and each one reviews and reports instead of implementing. Their findings are worth a
-second look, because some come back overstated.
+Three reviewers. Each one reviews and reports, and `design-system-steward` also builds when a dispatch
+asks it to. Their findings are worth a second look, because some come back overstated.
 
 - **`design-system-steward`**: before any done-claim on UI. It owns tokens, accessibility, reuse, the
   cascade and visual proof.

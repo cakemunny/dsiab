@@ -29,7 +29,7 @@ They hold different files, and most of this page assumes the second.
   projection carrying each component's `name`, `status`, `tier`, `exports[]` and `wraps`. Step 1
   below works here, with the consumer form of the lookup. `dist/index.d.ts` stays the authority on
   exact type signatures.
-- **The system repo itself** — a fork, or the folder the zip unpacked to. Everything here runs:
+- **The system repo itself** — a fork, or a clone of this repository. Everything here runs:
   `registry.json` at the root, Storybook on :6006, `npm run barrel`, the guards, the story suite.
 
 Every `npm run …` command below assumes the second. `npx ds-check` is the one gate that holds in
@@ -143,8 +143,8 @@ not visual verification.
 ## Step 4 — dispatch the right steward
 
 The `design-system-steward` review agent ships with the package, and `npx ds-check --init` installs it
-in `.claude/agents/` and `.agents/skills/`. It reviews and reports. It is not an implementer, and its
-findings are worth re-checking yourself, because some come back overstated. The other two reviewers
+in `.claude/agents/` and `.agents/skills/`. It reviews and reports, and when a dispatch asks it to, it
+also builds on the system or contributes to it. Its findings are worth re-checking yourself, because some come back overstated. The other two reviewers
 serve contributors to the dsiab repository, where `npm run agents` generates them.
 
 - **`design-system-steward`** — before any done-claim on UI. It owns system fidelity: tokens,
