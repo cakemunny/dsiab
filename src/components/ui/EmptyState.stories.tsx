@@ -343,7 +343,7 @@ export const History: Story = {
           </Decision>
           <Decision id="0.9.0">
             Initial <Code>System/EmptyState</Code> — a net-new composition over System <Code>Heading</Code> /{" "}
-            <Code>Text</Code> / <Code>ButtonGroup</Code>; a muted <Code>--ds-icon-neutral</Code> icon; a
+            <Code>Text</Code> / <Code>ButtonGroup</Code>; a muted <Code>--ds-icon-neutral</Code> icon; a{" "}
             <Code>buttonOrder</Code>-aware action row holding one solid primary; centred and measure-capped
             layout; History page added so every component has one.
           </Decision>

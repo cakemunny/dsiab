@@ -548,7 +548,7 @@ export const History: Story = {
             mirroring <Code>TextField</Code>.
           </Decision>
           <Decision id="0.9.0">
-            Initial component — surface-locked wrapper over Radix Checkbox, size driven by the global
+            Initial component — surface-locked wrapper over Radix Checkbox, size driven by the global{" "}
             <Code>uiSize</Code> control lane, with <Code>CheckboxGroup</Code> for multi-select. Stories on
             the standard template: History · Anatomy · Usage · Props.
           </Decision>

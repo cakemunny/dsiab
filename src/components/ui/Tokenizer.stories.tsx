@@ -419,7 +419,7 @@ export const History: Story = {
         <Flex direction="column" gap="3">
           <Decision id="0.9.0">
             The dropdown-only model on the embedded Typeahead engine, the
-            chip-row surface + roving controller, three-layer dedupe, <Code>maxEntries</Code>, overflow collapse,
+            chip-row surface + roving controller, three-layer dedupe, <Code>maxEntries</Code>, overflow collapse,{" "}
             <Code>htmlName</Code> form participation, soft-disable-with-reason, and the parity announce.
           </Decision>
         </Flex>

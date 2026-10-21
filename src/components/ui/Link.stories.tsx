@@ -9,7 +9,7 @@ import { assertMeasuredRows } from "../../foundations/_assert";
 
 /* Link reuses Radix Themes' own Link skin, so it declares no paint role of its own. It has ≤1 paint
    token, so the token spec uses the low-token shape: one binding row + a one-line reuse rationale. The
-   reused underline skin and the [[focus-ring]] focus ring are documented in History, not as extra token rows.
+   reused underline skin and the focus ring ([[focus-ring]]) are documented in History, not as extra token rows.
 
    MEASURED ([[measured-token-rows]]), and the measurement corrected the claim. The row it replaces resolved
    --ds-text-link and printed that back, so it could only ever agree. Reading `color` off a rendered

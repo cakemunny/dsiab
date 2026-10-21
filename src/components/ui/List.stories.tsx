@@ -467,20 +467,20 @@ export const History: Story = {
             through the same guard.
           </Decision>
           <Decision id="[[item-row-primitive]] · passive, not a menu">
-            List is <strong>passive</strong> — a semantic collection, not an actions surface. Menus (roving focus,
+            List is <strong>passive</strong> — a semantic collection, not an actions surface. Menus (roving focus,{" "}
             <Code>menuitem</Code>) are <Code>DropdownMenu</Code>; trees are <Code>TreeList</Code>. Overusing List for
             those loses the right roles and keyboard model.
           </Decision>
           <Decision id="[[item-row-primitive]] · Safari role=list + markers">
             Custom markers replace native <Code>list-style-type</Code> (so they align to the first text line and paint
             from <Code>--ds-text-strong</Code>). Because <Code>list-style:none</Code> makes Safari drop list
-            semantics, a marker-less <Code>&lt;ul&gt;</Code> re-adds <Code>role="list"</Code>; a numbered list is a real
+            semantics, a marker-less <Code>&lt;ul&gt;</Code> re-adds <Code>role="list"</Code>; a numbered list is a real{" "}
             <Code>&lt;ol&gt;</Code> with a CSS counter (seeded from <Code>start</Code>).
           </Decision>
           <Decision id="[[item-row-primitive]] · zero net-new tokens">
             All paint reuses shipped <Code>--ds-*</Code> roles (text, the <Code>--ds-fill-hover</Code>/
             <Code>--ds-fill-selected-subtle</Code> Select-menu highlight vocabulary, <Code>--ds-stroke-weak</Code>
-            dividers, the [[focus-ring]] focus ring (<Code>--ds-stroke-focus</Code>), the motion ladder). No new tokens; no
+            dividers, the focus ring ([[focus-ring]]) (<Code>--ds-stroke-focus</Code>), the motion ladder). No new tokens; no{" "}
             <Code>!important</Code>.
           </Decision>
           <Decision id="[[status-dot-edges]] · strong description on a selected row">

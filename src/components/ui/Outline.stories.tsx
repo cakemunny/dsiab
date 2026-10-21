@@ -446,7 +446,7 @@ export const History: Story = {
           <Decision id="[[outline-scrollspy]] · rAF scroll-spy">
             The active entry is chosen by a <strong>passive scroll listener + <Code>requestAnimationFrame</Code></strong>
             {" "}(not an <Code>IntersectionObserver</Code>): the active id is the <strong>last</strong> heading whose
-            top has passed its activation line (its own <Code>scroll-margin-top</Code> + 1px), with an
+            top has passed its activation line (its own <Code>scroll-margin-top</Code> + 1px), with an{" "}
             <Code>atBottom</Code> guard (the final section wins at page end even if it's too short to reach its
             line) and a top-edge guard (nothing active above the first heading). The pick logic is a pure,
             node-tested function; the component wires the DOM half.
@@ -485,8 +485,8 @@ export const History: Story = {
         <Flex direction="column" gap="3">
           <Decision id="0.9.0">
             Initial <Code>System/Outline</Code>: the scroll-spy TOC on <Code>useScrollSpy</Code> +
-            <Code>useOutlineFromDOM</Code> + the pluggable <Code>Link</Code>; JS-measured sliding indicator;
-            <Code>aria-current="location"</Code>; explicit + DOM-driven entry sources; controlled
+            <Code>useOutlineFromDOM</Code> + the pluggable <Code>Link</Code>; JS-measured sliding indicator;{" "}
+            <Code>aria-current="location"</Code>; explicit + DOM-driven entry sources; controlled{" "}
             <Code>activeId</Code> disables the spy. Zero net-new tokens.
           </Decision>
         </Flex>

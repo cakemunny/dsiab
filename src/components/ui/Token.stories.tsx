@@ -641,19 +641,19 @@ export const History: Story = {
           <Decision id="[[token-chip]] · reuse">
             Token <strong>reskins nothing</strong>. Its container <em>is</em> a <Code>.rt-Badge</Code> (surface
             variant + categorical <Code>color</Code>), so Badge's chip skin, the <Code>[data-interactive]</Code>
-            paint (hover/press gradient, the [[focus-ring]] focus ring), and the inset ✕'s ghost skin all apply
+            paint (hover/press gradient, the focus ring ([[focus-ring]])), and the inset ✕'s ghost skin all apply
             <strong> verbatim</strong>. What Token adds on top is <em>geometry, never paint</em>: the body and
             the ✕ each grow to the 24×24 pointer-target floor and hand the growth straight back as an equal
             negative margin, so the chip still renders pixel-for-pixel as a Badge does. Pressed paint is the one
             exception: a toggle given <Code>pressed</Code> takes the look the system gives every pressed toggle,
             the selected tint under strong ink at weight 600 ([[token-pressed-state]]).
             The <strong>only net-new</strong> is the invisible-button body — a container
-            span + an <Code>all:unset</Code> body + a <strong>sibling</strong> ✕ + the focus ring hoisted via
+            span + an <Code>all:unset</Code> body + a <strong>sibling</strong> ✕ + the focus ring hoisted via{" "}
             <Code>:has(:focus-visible)</Code> + <Code>stopPropagation</Code>. <strong>Zero net-new tokens.</strong>
           </Decision>
           <Decision id="[[token-chip]] · sibling-remove">
-            The remove ✕ is a <strong>real sibling button</strong> of the body — never nested inside the
-            <Code>&lt;a&gt;</Code> or <Code>&lt;button&gt;</Code> (a ✕ nested inside an interactive
+            The remove ✕ is a <strong>real sibling button</strong> of the body — never nested inside the{" "}
+            <Code>&lt;a&gt;</Code> or <Code>&lt;button&gt;</Code> (a ✕ nested inside an interactive{" "}
             <Code>&lt;a&gt;</Code>/<Code>&lt;button&gt;</Code> is invalid HTML). It sits beside the body in
             <strong> every</strong> mode, so removal coexists with a link cleanly.
           </Decision>
@@ -697,7 +697,7 @@ export const History: Story = {
           </Decision>
           <Decision id="0.9.0">
             Initial <Code>System/Token</Code> — the interactive chip: a container that reuses Badge's surface
-            skin + <Code>[data-interactive]</Code> paint + the inset ✕'s skin verbatim, the net-new
+            skin + <Code>[data-interactive]</Code> paint + the inset ✕'s skin verbatim, the net-new{" "}
             <Code>all:unset</Code> invisible-button body + sibling ✕ + the <Code>:has(:focus-visible)</Code> ring
             hoist; both hit targets grown to the 24×24 floor on a cancelling negative margin (paint unchanged);
             three modes; Backspace/Delete removal; no tone. Token spec reads live where it borrows Badge's skin.

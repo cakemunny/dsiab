@@ -571,7 +571,7 @@ export const History: Story = {
             hint), and <Code>disabledReason</Code> on both. Stories: History · Anatomy · Usage · Props.
           </Decision>
           <Decision id="[[date-time-input]] · describedby into subfields">
-            Each sub-input’s <Code>aria-describedby</Code> carries the id of the composite message, beside the
+            Each sub-input’s <Code>aria-describedby</Code> carries the id of the composite message, beside the{" "}
             <Code>role="alert"</Code> and the composite <Code>aria-invalid</Code>, so a screen reader that lands on the
             date or the time hears why the pair is invalid.
           </Decision>

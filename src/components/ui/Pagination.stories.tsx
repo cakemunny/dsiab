@@ -700,7 +700,7 @@ export const History: Story = {
             stop; arrowing to a dot selects its page (Safari focus-on-click workaround kept).
           </Decision>
           <Decision id="[[pagination-control]] · accent-aware paint">
-            The active dot paints the accent indicator (<Code>--accent-indicator</Code>, [[textless-part-fills]]), and the current page paints
+            The active dot paints the accent indicator (<Code>--accent-indicator</Code>, [[textless-part-fills]]), and the current page paints{" "}
             <Code>--ds-fill-selected-subtle</Code> (the committed-selection band), so they follow the brand collision
             shift. Since [[neutral-part-stacks]] the active dot is a 20px pill with <Code>--accent-mark-edge</Code> on its edge and the rest
             dots are 1px neutral rings with a clear centre, so the current dot differs by shape as well as colour.{" "}

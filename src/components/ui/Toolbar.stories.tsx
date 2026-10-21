@@ -300,7 +300,7 @@ export const History: Story = {
           <Decision id="[[toolbar-slots]] · slot layout">
             <Code>Toolbar.Root</Code> lays out three regions — <Code>start</Code> / <Code>center</Code> /{" "}
             <Code>end</Code>. With a center slot the layout is a CSS grid <Code>1fr auto 1fr</Code> (center truly
-            centered); without one it is <Code>justify-content: space-between</Code> (start leads, end trails).
+            centered); without one it is <Code>justify-content: space-between</Code> (start leads, end trails).{" "}
             <Code>orientation="vertical"</Code> stacks the same regions down the block axis.
           </Decision>
           <Decision id="[[toolbar-slots]] · children">

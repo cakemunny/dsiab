@@ -628,7 +628,7 @@ export const History: Story = {
             A tick — with an optional label — per mark. Positions use <strong>Radix's own thumb-offset
             maths</strong>, not a raw <Code>left: X%</Code>: Radix insets each thumb by half its width so its
             centre stays on the track at the extremes, and a percentage-positioned tick therefore drifts half
-            a thumb away from the thumb it marks at both ends. The layer is <Code>aria-hidden</Code> and
+            a thumb away from the thumb it marks at both ends. The layer is <Code>aria-hidden</Code> and{" "}
             <Code>pointer-events: none</Code> — the detent already reaches assistive tech through{" "}
             <Code>aria-valuetext</Code>, so a second silent copy would only add noise, and a geometry layer
             must never eat a drag. Silent is not the same as decorative: on a bare ruler the tick is the only

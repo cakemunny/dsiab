@@ -639,7 +639,7 @@ export const History: Story = {
           <Decision id="[[app-shell]] · JS mode-swap">
             The responsive change is a <strong>JS mode-swap, not a CSS collapse</strong>: below the breakpoint
             the <Code>sideNav</Code>/<Code>topNav</Code> <strong>re-render</strong> into the mobile drawer via
-            render-mode contexts (<Code>SideNavRenderProvider</Code> / <Code>TopNavRenderProvider</Code>, modes
+            render-mode contexts (<Code>SideNavRenderProvider</Code> / <Code>TopNavRenderProvider</Code>, modes{" "}
             <Code>default</Code> / <Code>mobile-bar</Code> / <Code>drawer</Code>). The breakpoint rides the
             SSR-safe <Code>useMediaQuery</Code> engine (matchMedia inside a <Code>useSyncExternalStore</Code>
             snapshot) — never touched during render.
@@ -650,10 +650,10 @@ export const History: Story = {
             hydration. Omit it and the server assumes desktop (the common case).
           </Decision>
           <Decision id="[[app-shell]] · skip-link fix">
-            AppShell owns a <strong>skip-to-content link</strong> targeting the <Code>main</Code> — <strong>with
+            AppShell owns a <strong>skip-to-content link</strong> targeting the <Code>main</Code> — <strong>with{" "}
             <Code>tabIndex={"{-1}"}</Code> added</strong> so focus lands there deterministically. Fragment
             navigation alone does not move focus in every browser, so the explicit <Code>tabIndex</Code> is
-            what makes it reliable. <Code>main</Code> is the
+            what makes it reliable. <Code>main</Code> is the{" "}
             <strong>only landmark AppShell auto-emits</strong>; banner/contentinfo/complementary stay opt-in on
             Layout's slots.
           </Decision>
@@ -685,10 +685,10 @@ export const History: Story = {
           <Decision id="0.9.0">
             Initial <Code>System/Layout/AppShell</Code> — the top-level page shell composing <Code>Layout</Code>
             with the responsive mode-swap (SSR-safe <Code>useMediaQuery</Code>, <Code>defaultIsMobile</Code> hint),
-            the guaranteed <Code>main</Code> landmark + skip link (<Code>tabIndex={"{-1}"}</Code>), the
+            the guaranteed <Code>main</Code> landmark + skip link (<Code>tabIndex={"{-1}"}</Code>), the{" "}
             <Code>hidden</Code>-based keep-mounted rail, the tri-modal <Code>mobileNav</Code> +
-            <Code>MobileNavConfig</Code>, the <Code>variant</Code> surface ladder, and the
-            <Code>--ds-appshell-header-height</Code> var via the shared ResizeObserver. Painted from
+            <Code>MobileNavConfig</Code>, the <Code>variant</Code> surface ladder, and the{" "}
+            <Code>--ds-appshell-header-height</Code> var via the shared ResizeObserver. Painted from{" "}
             <Code>--ds-*</Code> surfaces — no new design tokens. Stories split History · Anatomy · Usage ·
             Props.
           </Decision>

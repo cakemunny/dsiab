@@ -208,7 +208,7 @@ const TEXTAREA_PROPS: PropDef[] = [
   { name: "rows", type: "number", desc: <>Visible text lines — sets the field’s initial height (rows × line-height), independent of <Code>resize</Code>. The native default is <Code>2</Code> when unset.</>, source: "Radix" },
 ];
 
-/** Usage: textarea vs. input, the [[focus-ring]] focus ring, the one-sentence-message rule, and the live
+/** Usage: textarea vs. input, the focus ring ([[focus-ring]]), the one-sentence-message rule, and the live
  *  token spec that closes the page. */
 export const Usage: Story = {
   // Semantic step-11 error text on the invalid-field wash: #ce2c31 on #fbe8ea = 4.42, under axe's 4.5.
