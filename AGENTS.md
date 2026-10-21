@@ -217,7 +217,11 @@ guarantees. The repository has no pre-commit gate.
 Two workflows run on GitHub. `.github/workflows/ci.yml` runs the four commands on every push to `main`
 and on every pull request, on a Linux runner with Playwright's own Chromium, so a failing commit shows
 red. It builds the package before the source-scanning guards, because one guard reads the built
-package. `.github/workflows/docs.yml` runs on a release tag or by hand: it builds the Storybook, scans
+package. A second job in the same workflow, `visual`, compares the first story of each docs page, in
+light and dark, against reference images. No image is committed: a push to `main` takes the images and
+keeps them as a 90-day CI artifact, and a pull request compares against the images of its base commit.
+An intended visual change fails `visual` on its own pull request until a reviewer looks at the
+`visual-diffs` artifact and adds the label `visual-change-approved`. `.github/workflows/docs.yml` runs on a release tag or by hand: it builds the Storybook, scans
 the built pages for terms that must not ship, and deploys them to the docs site.
 
 The package ships no agent gate, and `dsiab init` installs none. It writes the consumer rules, the

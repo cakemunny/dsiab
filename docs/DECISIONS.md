@@ -2028,7 +2028,9 @@ The choice between a heavier ring, a stronger fill and the current state belongs
 
 **Changed from.** No earlier ruling covered the circle. The lock to `soft` came from the 3:1 floor of that date for text on a solid fill, which [text-on-solid-fill-contrast](#text-on-solid-fill-contrast) later raised.
 
-**Status.** Ruled 2026-09-19. No later ruling amends it.
+**Status.** Ruled 2026-09-19.
+
+- The CSS draws a 1px `--ds-stroke-strong` ring on `.rt-ds-avatar::after` as a perceptibility fix, not a 3:1 claim, and [avatar-group-seam](#avatar-group-seam) relies on it. No ruling recorded when it shipped.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 
@@ -3639,7 +3641,7 @@ Double-click toggles between 1x and 2x. While zoomed, a drag, the keypad in the 
 - the solid panel of [floating-surface-fill](#floating-surface-fill)
 - the hint-tier motion of [motion-retiming](#motion-retiming), 120ms in and 180ms out
 
-**Skin.** Radix's tooltip skin, unchanged and with no token of its own. The docs page reads the rendered panel live through `RenderedRow`.
+**Skin.** Radix's tooltip skin, unchanged and with no token of its own. The docs page reads the rendered panel live through `MeasuredRow`.
 
 **Disabled reason.** `DisabledReasonTooltip` in `Field.tsx` composes this wrap, where it used a raw Radix `<Tooltip>` under the gap rule of [component-registry](#component-registry). Its plays did not change.
 
@@ -4295,13 +4297,13 @@ Double-click toggles between 1x and 2x. While zoomed, a drag, the keypad in the 
 
 **A token row names its token, and the resolved value is a muted footnote after the name.**
 
-**The rule.** The token name leads the row. The value comes after it in muted ink, and the verdict takes a cell of its own and never joins the value. `NoteRow` and a `RenderedRow` with no token stay prose rows, for lengths, keywords and layout facts.
+**The rule.** The token name leads the row. The value comes after it in muted ink, and the verdict takes a cell of its own and never joins the value. `NoteRow` stays a prose row, for lengths, keywords and layout facts.
 
 **Why.** A hex identifies nothing. It cannot be searched for, reused in a second component, compared against the token file or checked for drift. It is only evidence that the named token resolved.
 
 **Vendor skins.** A wrap that reuses another component's skin still names a token: the Radix token the skin paints from, such as `--color-panel-solid`, `--accent-a11` or `--gray-a3`. Where the vendor hardcodes a keyword and no token exists, the row states that literal, such as the `white` face of the Radix slider thumb.
 
-**Enforced.** The props of `RenderedRow` in `_storyKit.tsx` are a discriminated union, so a row that passes `swatch` without `token` does not compile. `src/foundations/token-rows.node-check.ts` rejects a hand-typed hex in any row.
+**Enforced.** `src/foundations/token-rows.node-check.ts` rejects a hand-typed hex in any row.
 
 **Colour wall.** The Foundations colour wall renders through the shared `TokenRow` shell at a second density, `SWATCH_GRID`, with a 40px specimen chip. It shares one column rhythm with the component tables and carries the same `data-token-row` marker.
 
@@ -4309,7 +4311,7 @@ Double-click toggles between 1x and 2x. While zoomed, a drag, the keypad in the 
 
 **Status.** Ruled 2026-07-26.
 
-- [measured-token-rows](#measured-token-rows) replaces the columns and the primitives: the cells are part, token, value and verdict under a header row, the Radix alias column is gone, `MeasuredRow` reads the value off the element that paints it, and `RoleRow` and `RenderedRow` are legacy. It keeps this ruling's core, that the name outranks the value.
+- [measured-token-rows](#measured-token-rows) replaces the columns and the primitives: the cells are part, token, value and verdict under a header row, the Radix alias column is gone, `MeasuredRow` reads the value off the element that paints it, and `RoleRow` and `RenderedRow` were legacy, and were deleted on 2026-10-20 with the unused `assertTokenRowShape`. It keeps this ruling's core, that the name outranks the value.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 

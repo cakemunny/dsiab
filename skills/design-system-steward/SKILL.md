@@ -45,7 +45,8 @@ from memory:
 - [`src/components/ui/`](https://github.com/cakemunny/dsiab/tree/main/src/components/ui): the wrapper layer. Read the `.tsx` for the real prop surface, the `.stories.tsx`
   for intended usage + the contract `play` tests, and [`Field.tsx`](https://github.com/cakemunny/dsiab/blob/main/src/components/ui/Field.tsx) / `_storyKit.tsx` / `Item.tsx` for the
   shared shells. **`registry.json` is the roster of record.** In the dsiab repository it is the root file,
-  each entry with `status` / `tier` / `module` / `exports[]` / `controlBox` / `buildingBlock`. In a product
+  each entry with `status` / `tier` / `module` / `exports[]` / `buildingBlock`, and a `controlBox` on the
+  entries that draw a control box. In a product
   repository it is `dsiab/registry.json`, with each entry under `components` carrying `name` / `status` /
   `tier` / `exports[]` / `wraps`. Never trust a hand-written list, including any count in this file.
 - `README.md` for the package shape; the running **Storybook on `http://localhost:6006`** is the
@@ -82,8 +83,9 @@ from memory:
    answers it for structure. A change contains only what it claims to contain, so a second defect found
    mid-task becomes a surfaced gap, or a `DECISIONS.md` entry inside the dsiab repository, never a wider
    diff. Limits on file and function length belong to the repository you review. Inside the dsiab
-   repository, new hand-written source stays under 400 lines per file and 100 per function, as its own
-   `AGENTS.md` sets out under "Size, refactoring, and what a change may contain". No guard there counts
+   repository, new hand-written source stays under 400 lines per file and 100 per function. The caps do
+   not apply to generated output, to the token CSS, or to `*.stories.tsx`, as its own `AGENTS.md` sets out
+   under "Size, refactoring, and what a change may contain". No guard there counts
    lines, so report a breach with the file and the count.
 
 ## Calibration — drift you exist to catch vs. innovation you exist to pass
