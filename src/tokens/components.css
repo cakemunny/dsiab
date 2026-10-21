@@ -3292,8 +3292,8 @@
 .radix-themes .rt-ds-tokenizer-create-row svg { color: var(--ds-icon-interactive); flex-shrink: 0; }
 
 /* ---- CommandPalette ([[command-palette]]) — raw Radix Dialog + a filter listbox --------------
-   A ⌘K search-to-act / search-to-pick surface: a top-anchored modal (the RAW Radix Themes Dialog, since
-   System/Dialog is status:planned — [[component-registry]] agent-gap rule) holding a chrome-less search input over a grouped
+   A ⌘K search-to-act / search-to-pick surface: a top-anchored modal (the RAW Radix Themes Dialog, chosen
+   when System/Dialog was not yet ported — [[component-registry]] agent-gap rule) holding a chrome-less search input over a grouped
    listbox. The SURFACE is the SAME opaque overlay treatment as the Typeahead / Select / MultiSelect /
    DateInput menus (opaque --ds-bg-overlay [[floating-surface-fill]], --ds-radius-3, --ds-shadow-overlay elevation), so every
    floating surface reads as one family. Modal enter/exit motion is INHERITED from the .rt-BaseDialogContent
@@ -4651,7 +4651,7 @@
 
 /* ============================================================================
    === Lightbox ===  (System/Lightbox — src/components/ui/Lightbox.tsx)
-   A fullscreen media viewer on the RAW Radix Themes Dialog ([[lightbox-viewer]] · D18; System/Dialog planned → [[component-registry]]
+   A fullscreen media viewer on the RAW Radix Themes Dialog ([[lightbox-viewer]]; chosen when System/Dialog was not yet ported → [[component-registry]]
    agent-gap, like AlertDialog). Radix Dialog owns focus-trap + scroll-lock + Escape + backdrop-dismiss;
    modal enter/exit motion is INHERITED from the [[toast-feedback-tier]] .rt-BaseDialogContent / .rt-BaseDialogOverlay bindings
    — NO per-component override here. The backdrop paints from --ds-scrim. The viewer content lives in a
@@ -5155,8 +5155,8 @@
 /* ============================================================================
    MobileNav (B2 · D4) — a slide-in drawer on the RAW Radix Themes Dialog
    ----------------------------------------------------------------------------
-   Reuses the CommandPalette / Lightbox raw-Dialog precedent (System/Dialog is
-   status:planned → [[component-registry]] agent-gap). The centered modal Content is repositioned to
+   Reuses the CommandPalette / Lightbox raw-Dialog precedent (chosen when
+   System/Dialog was not yet ported → [[component-registry]] agent-gap). The centered modal Content is repositioned to
    PIN to a viewport edge at full height, and its inherited scale+fade motion is
    swapped for an edge SLIDE — still on the modal/emphasis motion tier, so
    reduced-motion collapses free through the duration tokens. The panel surface is
