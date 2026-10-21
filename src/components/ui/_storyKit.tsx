@@ -1567,8 +1567,8 @@ export function LiteTokenSpec({ rationale, children }: { rationale: ReactNode; c
   );
 }
 
-// A labelled group card: the label, the specimen when one is given, then the live token table
-// (`children`).
+// A labelled group card: the label, the specimen when one is given, the description, then the live
+// token table (`children`).
 export function TokenGroup({ label, blurb, specimen, children }: { label: string; blurb?: string; specimen?: ReactNode; children: ReactNode }) {
   return (
     <Box style={{ borderRadius: "var(--ds-radius-4)", border: "1px solid var(--ds-stroke-weak)", overflow: "hidden", background: "var(--ds-bg-subtle)" }}>
@@ -1579,9 +1579,10 @@ export function TokenGroup({ label, blurb, specimen, children }: { label: string
           {blurb && <Text size="1" style={{ color: "var(--ds-text-weak)" }}>{linkRulings(blurb)}</Text>}
         </Flex>
       ) : (
-        <Box style={{ padding: "14px 20px" }}>
+        <Flex direction="column" align="start" gap="2" style={{ padding: "14px 20px" }}>
           <Text size="1" weight="bold" style={{ color: "var(--ds-text-weak)", letterSpacing: "0.06em" }}>{label}</Text>
-        </Box>
+          {blurb && <Text size="1" style={{ color: "var(--ds-text-weak)" }}>{linkRulings(blurb)}</Text>}
+        </Flex>
       )}
       <Box style={{ padding: "0 0 8px" }}>{children}</Box>
     </Box>
