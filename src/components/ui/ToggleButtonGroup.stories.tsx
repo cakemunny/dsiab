@@ -87,6 +87,13 @@ function SelectedFillSpec() {
           prop="background-color"
         />
         <MeasuredRow
+          part="Selected edge"
+          note="The 1px inset ring a pressed ToggleButton draws as a shadow, inherited by the selected item, so the tint never reads as the flat soft look."
+          token="--ds-stroke-accent-weak"
+          select='.rt-BaseButton[data-state="on"]'
+          prop="box-shadow"
+        />
+        <MeasuredRow
           part="Selected ink"
           note="Also inherited from ToggleButton's rule — the committed-selection ink, not the ghost button's accent, which is tuned for the page and not for a tint of its own hue."
           token="--ds-text-strong"
@@ -245,8 +252,8 @@ export const Usage: Story = {
     // The token row's EVIDENCE: the row measured a real selected item, resolved its claim on a different
     // node, and the two agree.
     const rows = assertMeasuredRows(canvasElement);
-    if (rows.measured !== 3 || rows.unproven !== 0) {
-      throw new Error(`expected 3 measured / 0 unproven token rows, got ${rows.measured} / ${rows.unproven}`);
+    if (rows.measured !== 4 || rows.unproven !== 0) {
+      throw new Error(`expected 4 measured / 0 unproven token rows, got ${rows.measured} / ${rows.unproven}`);
     }
 
     // The [[toggle-group-box]] box: the group is ONE control, so its OUTER box is the step box the Select beside it holds.
