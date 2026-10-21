@@ -648,7 +648,7 @@ This ledger records the rulings that shape the design system and the reason behi
 - The Vercel free tier is for non-commercial use only, and puts the username in preview URLs.
 - Chromatic charges for a custom domain.
 
-**Changed from.** An earlier plan held that hosting was not needed and shipped the docs as a separate `dsiab-docs` package. `dsiab docs` from an install ran `npx dsiab-docs@<version>` and printed the npm 404, and a build script of its own, run by `npm run pack:docs` and `npm run build:docs`, built that package, all retired by this ruling.
+**Changed from.** An earlier plan held that hosting was not needed and shipped the docs as a separate `dsiab-docs` package. `dsiab docs` from an install ran `npx dsiab-docs@<version>` and printed the npm 404. This ruling retired that package together with its build script, `npm run pack:docs` and `npm run build:docs`.
 
 **Status.** Ruled 2026-09-24. No later ruling amends it.
 
