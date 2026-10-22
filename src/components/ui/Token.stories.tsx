@@ -181,15 +181,15 @@ function TokenTokens() {
     <Flex direction="column" gap="4">
       <TokenGroup
         label="STATIC CHIP (surface — pixel-identical to Badge's removable chip)"
-        blurb="Token reskins nothing at rest — the container IS a Radix Badge (surface variant), so its fill, border and label colour ARE Badge's. Pressed paint is the one exception, measured in the PRESSED group below ([[token-pressed-state]]). Each row is read off the rendered chip, so the table reports what the chip paints."
+        blurb="At rest the container IS a Radix Badge (surface variant), so its fill and border ARE Badge's, and so is its label colour except on five light accents, where the label stacks a 5% black to clear 4.5:1 ([[contrast-by-alpha-stacking]]). Pressed paint is the other exception, measured in the PRESSED group below ([[token-pressed-state]]). Each row is read off the rendered chip, so the table reports what the chip paints."
         specimen={<Token leadingIcon={<Tag weight="bold" />} onRemove={() => {}} data-size-lesson="the chip's remove ✕ holds step 1 — it garnishes the chip, it doesn't join the ambient row">Design</Token>}
       >
         <MeasuredSpec render={() => <Token leadingIcon={<Tag weight="bold" />} onRemove={() => {}}>Design</Token>}>
           <MeasuredRow part="Container fill" token="--accent-surface" select=".rt-ds-token" prop="background-color" />
           <MeasuredRow
             part="Label + icon"
-            note="One ink for both — the body is all:unset, so it inherits the container's colour."
-            token="--accent-a11"
+            note="One ink for both — the body is all:unset, so it inherits the container's colour. Radix's --accent-a11, with a 5% black stacked on light orange, teal, yellow, amber and jade."
+            token="--accent-token-ink"
             select=".rt-ds-token"
             prop="color"
           />
