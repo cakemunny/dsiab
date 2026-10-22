@@ -88,7 +88,7 @@ function SelectedFillSpec() {
         />
         <MeasuredRow
           part="Selected edge"
-          note="The 1px inset ring a pressed ToggleButton draws as a shadow, inherited by the selected item, so the tint never reads as the flat soft look."
+          note="The 1px inset ring a pressed ToggleButton draws as a shadow, inherited by the selected item, so the tint never reads as the flat soft look [[soft-variant-scope]] keeps off controls."
           token="--ds-stroke-accent-weak"
           select='.rt-BaseButton[data-state="on"]'
           prop="box-shadow"
