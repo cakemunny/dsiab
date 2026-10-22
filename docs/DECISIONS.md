@@ -1594,6 +1594,7 @@ Both clear WCAG 1.4.3 AA at 4.5:1. The two scrims are opposites, and white on `-
 - the scrim ring ([light-scrim-focus-ring](#light-scrim-focus-ring))
 - the focus ring ([focus-ring](#focus-ring))
 - every later fix to a part without text
+- the rest label of an unpressed Token on light orange, teal, yellow, amber and jade, held to the text floor of WCAG 4.5:1 and APCA Lc 60, written as `color-mix(in srgb, ink, black 5%)` because text has no layer to stack on
 
 **Floor.** A part without text clears WCAG 3:1 and APCA Lc 30.
 
@@ -1608,7 +1609,7 @@ Both clear WCAG 1.4.3 AA at 4.5:1. The two scrims are opposites, and white on `-
 
 **Changed from.** No earlier ruling covered this.
 
-**Status.** Ruled 2026-09-25. No later ruling amends it.
+**Status.** Ruled 2026-09-25. Amended 2026-10-22: the Token rest label, the first text the stack reaches, measured 4.25 to 4.48:1 before and 4.63 to 4.87:1 after, held by `_internal/Token behavior` → RestInkClearsAA.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 
