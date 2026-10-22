@@ -2214,6 +2214,13 @@
   outline-offset: 2px;
 }
 
+/* (2a) Rest ink — the label paints --accent-token-ink, Radix's own --accent-a11 except on the five light
+   colours where it reads under 4.5:1 on the tint (theme.css, [[contrast-by-alpha-stacking]]). Declared before
+   the disabled and pressed rules, which keep their own ink. A high-contrast Token keeps Radix's accent-12. */
+.radix-themes .rt-ds-token.rt-variant-surface:where(:not(.rt-high-contrast)) {
+  color: var(--accent-token-ink);
+}
+
 /* (3) Disabled dim — Radix Badge has no disabled state, so reuse Radix's OWN button-disabled skin
    (gray-a8 text over gray-a3 fill, border dropped — verbatim from base-button.css `[data-disabled]`),
    the deliberate "reuse a Radix component's own skin" exception. The body inherits the gray-a8 text
