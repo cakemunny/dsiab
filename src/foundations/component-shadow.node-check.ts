@@ -48,6 +48,15 @@ const ROOT = join(import.meta.dirname, "..", "..");
 /** Directories whose files may legitimately declare a shipped component's name. */
 const ALLOWED_PREFIXES = ["src/components/ui/", "src/foundations/"];
 
+/** A registered module outside `src/components/ui/`, such as `theme/Contrast`, IS the shipped component,
+ *  so its own file declares the name by right ([[registry-module-paths]]). */
+const REGISTERED_MODULE_FILES: ReadonlySet<string> = new Set(
+  (JSON.parse(readFileSync(join(ROOT, "registry.json"), "utf8")) as { module?: string | null }[])
+    .map((e) => e.module)
+    .filter((m): m is string => !!m && m.includes("/"))
+    .flatMap((m) => [`src/${m}.ts`, `src/${m}.tsx`]),
+);
+
 type RegistryEntry = { name: string; status: string; exports?: string[] };
 
 /** Every name the system publishes as a component, plus its exported symbols. */
@@ -90,7 +99,7 @@ function shadows(): { file: string; line: number; name: string }[] {
   const shipped = shippedNames();
   const found: { file: string; line: number; name: string }[] = [];
   for (const file of sourceFiles()) {
-    if (ALLOWED_PREFIXES.some((p) => file.startsWith(p))) continue;
+    if (ALLOWED_PREFIXES.some((p) => file.startsWith(p)) || REGISTERED_MODULE_FILES.has(file)) continue;
     const src = stripNonCode(readFileSync(join(ROOT, file), "utf8"));
     for (const m of src.matchAll(/^\s*(?:export\s+)?(?:function|const|class)\s+([A-Z][A-Za-z0-9_]*)/gm)) {
       if (shipped.has(m[1])) found.push({ file, line: src.slice(0, m.index).split("\n").length, name: m[1] });

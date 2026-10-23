@@ -152,7 +152,9 @@ const NOT_YET_COVERED: string[] = [
   // CHANGED 2026-10-02: ToggleButton RE-ENTERED this list. The analytics comparison is a persistent
   // report setting, so it became a surface Select (ToggleButton's Usage page reserves it for a
   // transient, in-context tool such as Bold), and no recreation has a formatting toolbar yet.
-  "CommandPalette", "Tokenizer", "DragHandle", "ToggleButton",
+  // ADDED 2026-10-23: Contrast entered the registry from the hand-listed theme section, and no
+  // recreation has an inverted section yet.
+  "CommandPalette", "Tokenizer", "DragHandle", "ToggleButton", "Contrast",
   "Typeahead", "DateTimeInput", "TopNavMegaMenu", "TopNavMegaMenuFeaturedCard",
   "TopNavMegaMenuItem", "TopNavMenu",
   // Rendered on scenario pages, but imported from Radix or the story kit rather than from the
