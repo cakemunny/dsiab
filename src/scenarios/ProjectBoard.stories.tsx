@@ -772,15 +772,13 @@ function ProjectBoardScreen() {
         <BoardFilters />
         {/* Fixed-width columns on a horizontally scrolling canvas — a board keeps its card width and
             lets the canvas run off the edge, rather than squeezing four columns into what is left. */}
-        <Box style={{ flex: 1, minWidth: 0 }}>
+        <Box style={{ flex: 1, minWidth: 0, containerType: "size" }}>
           <ScrollArea type="auto" scrollbars="horizontal" style={{ height: "100%" }}>
-            {/* KNOWN, 11px: a horizontally scrolling ScrollArea reserves its scrollbar gutter
-                INSIDE the viewport, so the viewport is 11px shorter than the root and the
-                columns' natural height overruns it by exactly that. Removing this height was
-                tried and measured as a no-op — the overrun is the columns' own content, not this
-                declaration — so the honest fix is bounding the column height, which is a layout
-                change rather than a tweak. Cosmetic at the bottom edge; left recorded. */}
-            <Box style={{ height: "100%" }}>
+            {/* The ScrollArea wraps its content in a table-display box, so a percentage height here
+                resolves to the columns' natural height and they ran under the horizontal scrollbar,
+                75px at the small tier and more at each larger one. The Box above is a size container,
+                so 100cqh is the board's own height and each column scrolls its cards inside it. */}
+            <Box style={{ height: "100cqh" }}>
               <Flex gap="4" p="4" align="stretch" style={{ height: "100%" }}>
                 {BOARD.map((column) => (
                   <BoardColumn
