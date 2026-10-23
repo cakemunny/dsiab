@@ -45,8 +45,10 @@
    DO NOT consolidate this with `_assert.ts` in a later normalize pass. NOTE that
    this comment is the WEAKEST rung of the enforcement ladder (unrepresentable >
    guarded > documented > remembered): nothing currently stops a normalize pass
-   from merging them. A cross-check test asserting the two agree to 1e-6 is the
-   named follow-up that would make the drift impossible without merging the code.
+   from merging them. The test that closes this gap is `oklch-assert-agreement.logic.test.ts`.
+   It runs both conversions over every 5th byte value per channel and all 256 grays,
+   and fails when any component differs by more than 1e-6. It makes drift between
+   the two copies fail without merging the code.
    ============================================================================= */
 
 /** Linear-light [0,1] from an 8-bit sRGB channel. The sRGB transfer function. */
