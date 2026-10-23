@@ -56,9 +56,10 @@ export function RulingLink({ name, lead = "", trail = "" }: { name: string; lead
   );
 }
 
-/** Opening punctuation that touches a citation from the left, and closing punctuation from the right. */
+/** Opening punctuation that touches a citation from the left, and from the right a possessive `'s` or `’s`
+ *  followed by any closing punctuation. */
 const LEAD = /[(\[“‘]+$/;
-const TRAIL = /^[)\]”’.,;:!?]+/;
+const TRAIL = /^(?:['’]s\b)?[)\]”’.,;:!?]*/;
 
 const CITATION = /\[\[([^[\]\n]+)\]\]/g;
 const warned = new Set<string>();
