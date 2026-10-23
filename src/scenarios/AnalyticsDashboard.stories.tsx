@@ -163,8 +163,10 @@ function SessionsChart() {
           the area under the line as well as the card, so the whole line reads in the stacked shade. It
           paints nothing on the colours whose line clears both on its fill alone. */}
       <path d={current} fill="none" stroke="var(--accent-mark-edge)" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
-      <circle cx={x1} cy={endY} r="4" fill="var(--accent-indicator)" stroke="var(--ds-bg-base)" strokeWidth="2" />
-      {/* The point's own 1px edge, inside the ring the page colour draws, as the StatusDot carries it. */}
+      {/* The ring is a gap, so it paints the surface under it: the card, --ds-bg-raised, which in dark is
+          lighter than the page and would show a page-coloured ring as a dark outline. */}
+      <circle cx={x1} cy={endY} r="4" fill="var(--accent-indicator)" stroke="var(--ds-bg-raised)" strokeWidth="2" />
+      {/* The point's own 1px edge, inside that ring, as the StatusDot carries it. */}
       <circle cx={x1} cy={endY} r="2.5" fill="none" stroke="var(--accent-part-edge)" strokeWidth="1" />
       {DAY_LABELS.map(([i, label]) => (
         <text key={label} x={x0 + i * step} y={y1 + 26} textAnchor="middle" fontSize="12" fill="var(--ds-text-weak)">
