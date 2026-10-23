@@ -613,7 +613,7 @@ This ledger records the rulings that shape the design system and the reason behi
 **Gap.**
 
 - `useResizable` is internal, but the published `ResizeHandle` takes its `separatorProps` and `onDragStart` from that hook, so a consumer has no supported way to use `ResizeHandle` outside `Layout` and `SideNav`. The hook's `SeparatorProps` type also shares a name with the published `Separator` props. Publishing the hook or narrowing `ResizeHandle` is a separate decision.
-- `theme/Contrast` and `theme/ButtonOrderContext` publish names through hand-written lines in `src/index.ts` with no registry entry.
+- `theme/ButtonOrderContext` publishes its `ButtonOrder` type through a hand-written line in the theme section of `src/index.ts`, as `Provider` and its types do. `Contrast` moved from that section into the registry on 2026-10-23.
 - Whether the `Field` and `FieldGroup` shell ships stays an open gap.
 
 **Changed from.** Three of the five hooks carried no record either way, and arm D walked only `src/components/ui`, so sixteen of the eighteen modules under `src/hooks` had no decision behind them.
