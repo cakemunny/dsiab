@@ -940,7 +940,7 @@ export const History: Story = {
             multi’s checkbox column returns, so the two look different the instant they open.
           </Decision>
           <Decision id="[[multi-select-component]] · live-apply, stay-open">
-            <strong>Live-apply, stay-open.</strong> Each toggle commits to <Code>value: string[]</Code>
+            <strong>Live-apply, stay-open.</strong> Each toggle commits to <Code>value: string[]</Code>{" "}
             immediately (the count stays live) and the panel stays open; Escape / Tab / outside-click close
             without reverting — there is no transactional buffer. The clear ✕ clears all.
           </Decision>

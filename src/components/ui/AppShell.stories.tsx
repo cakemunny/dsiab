@@ -641,7 +641,7 @@ export const History: Story = {
             the <Code>sideNav</Code>/<Code>topNav</Code> <strong>re-render</strong> into the mobile drawer via
             render-mode contexts (<Code>SideNavRenderProvider</Code> / <Code>TopNavRenderProvider</Code>, modes{" "}
             <Code>default</Code> / <Code>mobile-bar</Code> / <Code>drawer</Code>). The breakpoint rides the
-            SSR-safe <Code>useMediaQuery</Code> engine (matchMedia inside a <Code>useSyncExternalStore</Code>
+            SSR-safe <Code>useMediaQuery</Code> engine (matchMedia inside a <Code>useSyncExternalStore</Code>{" "}
             snapshot) — never touched during render.
           </Decision>
           <Decision id="[[app-shell]] · SSR hint">
@@ -672,7 +672,7 @@ export const History: Story = {
           <Decision id="[[app-shell]] · tri-modal mobileNav">
             <Code>mobileNav</Code> is honestly <strong>tri-modal</strong>: <Code>false</Code> disables the drawer;
             a <Code>MobileNavConfig</Code> object tunes it (breakpoint / side / width / label / header /
-            includeTopNav — <strong>six knobs, all documented here</strong>); a <Code>ReactNode</Code>
+            includeTopNav — <strong>six knobs, all documented here</strong>); a <Code>ReactNode</Code>{" "}
             supplies fully custom drawer contents.
           </Decision>
         </Flex>
@@ -683,7 +683,7 @@ export const History: Story = {
       <Section title="Changelog" lead="Notable changes, newest first.">
         <Flex direction="column" gap="3">
           <Decision id="0.9.0">
-            Initial <Code>System/Layout/AppShell</Code> — the top-level page shell composing <Code>Layout</Code>
+            Initial <Code>System/Layout/AppShell</Code> — the top-level page shell composing <Code>Layout</Code>{" "}
             with the responsive mode-swap (SSR-safe <Code>useMediaQuery</Code>, <Code>defaultIsMobile</Code> hint),
             the guaranteed <Code>main</Code> landmark + skip link (<Code>tabIndex={"{-1}"}</Code>), the{" "}
             <Code>hidden</Code>-based keep-mounted rail, the tri-modal <Code>mobileNav</Code> +

@@ -686,9 +686,9 @@ export const History: Story = {
       <Section title="Decisions" lead="The rulings this component encodes.">
         <Flex direction="column" gap="3">
           <Decision id="[[pagination-control]] · generatePageRange">
-            The pure <Code>generatePageRange(current, total, siblingCount)</Code> and the <Code>pageSize</Code>
+            The pure <Code>generatePageRange(current, total, siblingCount)</Code> and the <Code>pageSize</Code>{" "}
             coercion guard live in <Code>src/utils/generatePageRange.ts</Code> with a node-lane suite. The slot
-            budget is <Code>5 + 2·siblingCount</Code>; the coercion floors/clamps a non-finite <Code>pageSize</Code>
+            budget is <Code>5 + 2·siblingCount</Code>; the coercion floors/clamps a non-finite <Code>pageSize</Code>{" "}
             to protect the <Code>dots</Code> <Code>Array.from(&#123;length&#125;)</Code> from Infinity/NaN.
           </Decision>
           <Decision id="[[pagination-control]] · the dots-focus hook">

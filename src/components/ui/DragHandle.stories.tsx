@@ -1040,7 +1040,7 @@ export const History: Story = {
             Reordering lives in <Code>useReorder</Code>, a headless hook over items grouped by container id, and{" "}
             <Code>DragHandle</Code> is the one net-new surface it needed. Registered on its own ([[registry-module-paths]]'s path
             module), it follows the <Code>useResizable</Code> precedent: the hook is the engine and the handle
-            renders it. Items are ids in groups, so reordering <em>within</em> a list and moving <em>between</em>
+            renders it. Items are ids in groups, so reordering <em>within</em> a list and moving <em>between</em>{" "}
             lists are the same call, and a settings list uses one axis where a board uses two.
           </Decision>
           <Decision id="[[reorder-capability]] · the ITEM is the drag source, the handle is optional">

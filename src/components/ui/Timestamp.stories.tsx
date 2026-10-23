@@ -355,7 +355,7 @@ export const History: Story = {
             the render clock lagging, not a real event — so it never flashes a confusing "in a few seconds").
           </Decision>
           <Decision id="[[relative-timestamp]] · live interval ladder">
-            <Code>isLive</Code> re-renders relative time on a distance-aware ladder — every <strong>1s</strong>
+            <Code>isLive</Code> re-renders relative time on a distance-aware ladder — every <strong>1s</strong>{" "}
             under a minute, <strong>30s</strong> under an hour, <strong>60s</strong> under a day, else
             <strong> 5min</strong> — fine near the event, cheap when it's distant. It ticks only while the effective
             format is relative. <strong>Tabular figures</strong> keep the tick from reflowing.

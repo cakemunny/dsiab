@@ -804,7 +804,7 @@ export const History: Story = {
             a brand's collision shifts like every other system surface.
           </Decision>
           <Decision id="[[calendar-grid]] · Three visual channels">
-            <strong>Three visual channels, one per meaning.</strong> Selection owns the <em>fill</em>
+            <strong>Three visual channels, one per meaning.</strong> Selection owns the <em>fill</em>{" "}
             channel (<Code>--ds-fill-selected-subtle</Code>, the accent tint, under a{" "}
             <Code>--ds-text-strong</Code> numeral at weight 600 — the Select selected-row treatment);
             focus owns the <em>outline</em> channel; so <strong>today</strong> takes a <em>third</em> — a

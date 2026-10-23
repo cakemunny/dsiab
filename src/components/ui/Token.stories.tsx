@@ -640,7 +640,7 @@ export const History: Story = {
           </Decision>
           <Decision id="[[token-chip]] · reuse">
             Token <strong>reskins nothing</strong>. Its container <em>is</em> a <Code>.rt-Badge</Code> (surface
-            variant + categorical <Code>color</Code>), so Badge's chip skin, the <Code>[data-interactive]</Code>
+            variant + categorical <Code>color</Code>), so Badge's chip skin, the <Code>[data-interactive]</Code>{" "}
             paint (hover/press gradient, the focus ring per [[focus-ring]]), and the inset ✕'s ghost skin all apply
             <strong> verbatim</strong>. What Token adds on top is <em>geometry, never paint</em>: the body and
             the ✕ each grow to the 24×24 pointer-target floor and hand the growth straight back as an equal

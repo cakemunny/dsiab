@@ -7,10 +7,13 @@
    separate lines, so 42 of these shipped before this guard.
 
    The guard fails on a line that ends in a word or punctuation when the next
-   line opens a tag whose content starts with a character, not a space. To keep
-   the space, end the line with {" "}. To join on purpose, end the line with a
-   JSX comment in braces that says so, which ends the line in a brace and so
-   passes.
+   line opens a tag whose content starts with a character, not a space. It
+   also fails the reverse join: a line that ends on a closing tag when the next
+   line starts with a letter or digit, so "<em>between</em>" + newline + "lists"
+   renders "betweenlists". Punctuation after a closing tag stays flush on
+   purpose. To keep the space, end the line with {" "}. To join on purpose, end
+   the line with a JSX comment in braces that says so, which ends the line in a
+   brace and so passes.
    Lines inside a block comment are skipped, since they never render.
    ============================================================================= */
 import { readFileSync, readdirSync } from "node:fs";
@@ -30,6 +33,8 @@ function tsxFiles(dir: string): string[] {
 const ENDS_IN_TEXT = /[A-Za-z0-9,.;:!?)'"’”]$/;
 const OPENS_TAG_ON_TEXT = /^<[A-Za-z][^>]*>[^\s<]/;
 const CODE_ENDING = /[=(]\s*$/;
+const ENDS_ON_CLOSING_TAG = /<\/[A-Za-z][\w.]*>$/;
+const STARTS_WITH_WORD = /^[A-Za-z0-9]/;
 
 export function lostSpaces(source: string): number[] {
   const lines = source.split("\n");
@@ -49,6 +54,7 @@ export function lostSpaces(source: string): number[] {
     const end = line.trimEnd();
     const next = lines[i + 1].trimStart();
     if (ENDS_IN_TEXT.test(end) && OPENS_TAG_ON_TEXT.test(next) && !CODE_ENDING.test(end)) found.push(i + 1);
+    else if (ENDS_ON_CLOSING_TAG.test(end) && STARTS_WITH_WORD.test(next)) found.push(i + 1);
   }
   return found;
 }
@@ -65,4 +71,9 @@ test("the guard catches a lost space and passes the two sanctioned endings", () 
   expect(lostSpaces('<p>\n  a real{" "}\n  <Code>ol</Code>\n</p>')).toEqual([]);
   expect(lostSpaces("<p>\n  word{/* no space */}\n  <em>s</em>\n</p>")).toEqual([]);
   expect(lostSpaces("/*\n  the SAME\n<span>, in a comment\n*/")).toEqual([]);
+  // The reverse join, its fix, a deliberate join and the punctuation that stays flush.
+  expect(lostSpaces("<p>\n  moving <em>between</em>\n  lists\n</p>")).toEqual([2]);
+  expect(lostSpaces('<p>\n  moving <em>between</em>{" "}\n  lists\n</p>')).toEqual([]);
+  expect(lostSpaces("<p>\n  <Kbd>Esc</Kbd>{/* a flex gap is the space */}\n  close\n</p>")).toEqual([]);
+  expect(lostSpaces("<p>\n  the <Code>x</Code>\n  . And on\n</p>")).toEqual([]);
 });

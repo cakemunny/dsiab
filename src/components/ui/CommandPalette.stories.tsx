@@ -735,7 +735,7 @@ export const History: Story = {
             Two engine deltas are turned ON here (opt-in, off for Typeahead): <strong>optimistic
             narrowing</strong> (client-filter the shown rows while the async source resolves) and{" "}
             <strong>committed-query empty text</strong> (“No commands match …” echoes the COMMITTED query, so
-            it holds steady while a no-result search is pending). There is <strong>no letter-jump</strong>
+            it holds steady while a no-result search is pending). There is <strong>no letter-jump</strong>{" "}
             path — typing in the search field is the only way to narrow.
           </Decision>
           <Decision id="[[command-palette]] · shell">

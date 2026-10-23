@@ -191,7 +191,7 @@ export const SEARCH_SURFACES_COMPARISON: Comparison = {
   footnote: (
     <>
       If the outcome is a <em>value in a form</em>, it is a <strong>Typeahead</strong>. If it is an{" "}
-      <em>action or a jump</em>, it is a <strong>CommandPalette</strong>. If the user is <em>building a query</em>
+      <em>action or a jump</em>, it is a <strong>CommandPalette</strong>. If the user is <em>building a query</em>{" "}
       out of several conditions, it is <strong>PowerSearch</strong>.
     </>
   ),
