@@ -12,8 +12,48 @@ export type ChangelogEntry = {
 
 export const CHANGELOG: { generatedFrom: string; kept: number; entries: ChangelogEntry[] } = {
   "generatedFrom": "HEAD",
-  "kept": 25,
+  "kept": 30,
   "entries": [
+    {
+      "date": "2026-10-23",
+      "type": "feat",
+      "scope": "registry",
+      "summary": "list Contrast in the roster",
+      "hash": "c58a5fc",
+      "refs": []
+    },
+    {
+      "date": "2026-10-22",
+      "type": "fix",
+      "scope": "datetimeinput",
+      "summary": "fit a 12-hour time with seconds",
+      "hash": "417b461",
+      "refs": []
+    },
+    {
+      "date": "2026-10-22",
+      "type": "fix",
+      "scope": "datetimeinput",
+      "summary": "show \"Time\" in the empty time field",
+      "hash": "35084a0",
+      "refs": []
+    },
+    {
+      "date": "2026-10-22",
+      "type": "fix",
+      "scope": "token",
+      "summary": "clear 4.5:1 on the unpressed label for five light accents",
+      "hash": "f050e02",
+      "refs": []
+    },
+    {
+      "date": "2026-10-21",
+      "type": "feat",
+      "scope": "toggle-button",
+      "summary": "warn once when an icon-only toggle has no pressedIcon",
+      "hash": "64d4a0a",
+      "refs": []
+    },
     {
       "date": "2026-10-20",
       "type": "fix",
