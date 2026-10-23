@@ -24,20 +24,7 @@ import { Button } from "./Button";
 import { Calendar } from "./Calendar";
 import type { DateRange, ISODateString } from "../../dates/dateTypes";
 import { plainDateFromISO, plainDateToDate, plainDateFormat, DATE_FORMAT_LONG } from "../../dates/plainDate";
-
-// Dev-only accessibility warnings, resolved once at module load. A `try` rather than
-// `typeof process !== "undefined" && …`: a bundler replaces the LITERAL `process.env.NODE_ENV`
-// without defining a `process` global, so the typeof form reads "undefined" and silences the
-// warning in exactly the dev build it exists for (measured here: typeof process = "undefined",
-// literal replaced with "test"). The catch fires only when NOTHING replaced the literal and no
-// `process` exists — the browser bundle that used to throw a ReferenceError — and stays silent.
-const DEV_WARN = (() => {
-  try {
-    return process.env.NODE_ENV !== "production";
-  } catch {
-    return false;
-  }
-})();
+import { DEV_WARN } from "../../theme/detectAndWarn";
 
 /* DateRangeInput — a range date picker: a single button trigger opening a DIALOG that hosts a preset
  * sidebar beside a two-month range Calendar ([[date-range-input]]). It is the range sibling of DateInput ([[date-input]]) but takes a

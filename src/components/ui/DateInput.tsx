@@ -35,20 +35,7 @@ import {
   plainDateFormat,
   DATE_FORMAT_LONG,
 } from "../../dates/plainDate";
-
-// Dev-only accessibility warnings, resolved once at module load. A `try` rather than
-// `typeof process !== "undefined" && …`: a bundler replaces the LITERAL `process.env.NODE_ENV`
-// without defining a `process` global, so the typeof form reads "undefined" and silences the
-// warning in exactly the dev build it exists for (measured here: typeof process = "undefined",
-// literal replaced with "test"). The catch fires only when NOTHING replaced the literal and no
-// `process` exists — the browser bundle that used to throw a ReferenceError — and stays silent.
-const DEV_WARN = (() => {
-  try {
-    return process.env.NODE_ENV !== "production";
-  } catch {
-    return false;
-  }
-})();
+import { DEV_WARN } from "../../theme/detectAndWarn";
 
 /* DateInput — a free-text date field with a calendar-dialog popover, on the shared Field shell.
  *
