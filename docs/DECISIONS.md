@@ -608,12 +608,12 @@ This ledger records the rulings that shape the design system and the reason behi
 | `useListFocus` | Withheld | Its three callers shaped its API, and Astryx ([catalog-as-specification](#catalog-as-specification)) publishes a different hook under the same name. Under right-to-left, a horizontal list moves to the next item on ArrowLeft. An explicit `dir` option wins over the computed `direction` of the list, and vertical lists ignore direction. Added 2026-10-09. |
 | `useScrollOverflow` | Deferred | It is generic, and `Carousel` ships the pattern it serves. It is published the first time a consumer needs edge-overflow state on a scroller of their own, as the hook and `ScrollOverflowState` only. |
 
-**Guard.** Arm D of `src/foundations/barrel.node-check.ts` walks `src/components/ui` and `src/hooks` from one `WALKED_DIRS` list. `INTERNAL_MODULES` maps each internal module, keyed by a path such as `hooks/useGridFocus`, to a one-line reason. A new module under `src/hooks` with no registry entry and no line fails, and the failure prints a registry entry ready to paste. Arm C fails a line whose file is gone, whose module is now registered, whose reason is empty, or whose directory arm D does not walk.
+**Guard.** Arm D of `src/foundations/barrel.node-check.ts` walks `src/components/ui`, `src/hooks`, `src/utils`, `src/dates`, `src/palette`, `src/powersearch` and `src/theme` from one `WALKED_DIRS` list. `INTERNAL_MODULES` maps each internal module, keyed by a path such as `hooks/useGridFocus`, to a one-line reason. A new module under `src/hooks` with no registry entry and no line fails, and the failure prints a registry entry ready to paste. Arm C fails a line whose file is gone, whose module is now registered, whose reason is empty, or whose directory arm D does not walk.
 
 **Gap.**
 
 - `useResizable` is internal, but the published `ResizeHandle` takes its `separatorProps` and `onDragStart` from that hook, so a consumer has no supported way to use `ResizeHandle` outside `Layout` and `SideNav`. The hook's `SeparatorProps` type also shares a name with the published `Separator` props. Publishing the hook or narrowing `ResizeHandle` is a separate decision.
-- Arm D does not walk `src/utils`, `src/dates`, `src/palette`, `src/powersearch` or `src/theme` yet.
+- `theme/Contrast` and `theme/ButtonOrderContext` publish names through hand-written lines in `src/index.ts` with no registry entry.
 - Whether the `Field` and `FieldGroup` shell ships stays an open gap.
 
 **Changed from.** Three of the five hooks carried no record either way, and arm D walked only `src/components/ui`, so sixteen of the eighteen modules under `src/hooks` had no decision behind them.
@@ -821,7 +821,7 @@ This ledger records the rulings that shape the design system and the reason behi
 
 **File headers.** Each source file derived from Astryx names its upstream path and commit, as [catalog-as-specification](#catalog-as-specification) requires. The headers cite four upstream commits, and section 1 of `THIRD-PARTY-NOTICES` lists them with their full hashes.
 
-**Gap.** Review alone checks the headers. A guard would read each `Portions derived from facebook/astryx` line and confirm that the named path exists at the named commit, and no such guard exists yet.
+**Guard.** `src/foundations/astryx-attribution.node-check.ts` checks every `Portions derived from facebook/astryx` header for a path and a commit, and checks each commit against `THIRD-PARTY-NOTICES`. The check that the path exists at that commit runs only where a clone of facebook/astryx is found, and is skipped otherwise.
 
 **Guidance.** The maintainer approved this licence arrangement on 2026-10-01.
 
@@ -1734,6 +1734,7 @@ Both clear WCAG 1.4.3 AA at 4.5:1. The two scrims are opposites, and white on `-
 - axe over every story in the light and the dark appearance lane, apart from the registered opt-outs
 - the contrast assertions in `src/foundations/_assert.ts`
 - the guard lane
+- Non-text contrast (1.4.11) is not an axe rule. The rendered parts are measured in `_internal/Non-text contrast`, where PartsWithoutText, ColourPropAndHighContrast and FocusRingOnParts gate them on 27 accents in both appearances.
 
 **Not verified.**
 
@@ -2012,7 +2013,7 @@ The rule in [support-text-slot](#support-text-slot) that a message steers toward
 
 **Tags.** `ACCESSIBILITY`, `COMPONENTS`. **Ruled.** 2026-09-19.
 
-**The soft `Avatar` circle reads far under 3:1 against the page, and the gap stays recorded and unfixed, because every fix repaints every avatar.**
+**The soft `Avatar` circle reads far under 3:1 against the page, so a 1px `--ds-stroke-strong` ring marks its edge for perceptibility, and a 3:1 edge stays out of reach while the fill is soft.**
 
 **What you see.** Measured on 2026-09-19, the fallback circle read 1.09:1 against the page in light and 1.24:1 in dark. At 20px the circle disappears and only the initials read, so the element is not recognisable as an avatar.
 
@@ -4419,6 +4420,22 @@ Double-click toggles between 1x and 2x. While zoomed, a drag, the keypad in the 
 
 > **A modal surface is measured by mounting it, reading it, and taking it down again; the connectivity check changes tense with it (2026-07-28).** [measured-token-rows](#measured-token-rows) rules that a token row reads the value off the element that paints it. Twelve rows could not obey it, and all twelve failed on the same thing: **the surface cannot be left mounted.** Radix Themes hardcodes `modal: true` on `Dialog.Root` and `AlertDialog.Root` *after* the prop spread (`Root = (p) => createElement(Primitive.Root, {...p, modal: true})`, and `DialogRootProps` omits `modal` from the type outright), so no caller can opt out; a mounted modal puts `data-scroll-locked` on `<body>` and `aria-hidden` on **9 of 12** body children. Measured on the Dialog docs page with the panel force-mounted, a real 600px wheel moved `scrollTop` **0 → 0** — the page could not be scrolled at all. **The lifecycle: `MeasuredSpec transient` — mount · measure · unmount.** The instance goes up, every row beneath it reads, and it comes down; the lock exists for the few frames of the reading. Three parts make that safe. **(1) A barrier.** Rows `join()` in their layout effect and release when they have recorded evidence; children's effects run before the parent's, so by the time the host's own effect runs the participant count is final, and it will not unmount until every joined row has released (plus four frames of grace for a row rendered behind a conditional, and a 4s hard cap so a row that never releases cannot leave the page locked). Unmounting early is worse than not measuring: the rows would read a torn-down tree and print it as a fact about the component. **(2) An annex.** A modal Content portals to `document.body`, not into its React parent, so it lands outside the measurement host; Radix's portal is `asChild`, so the node that lands there *is* the overlay rather than a wrapper around it. Every body child that appears while the instance is mounted is therefore taken into the measurement scope (the root itself is matched, not only its descendants) and hidden. Radix's portal primitive renders null on its first pass and opens the portal from its own layout effect — a commit later than the host's — so the hiding is done by a body watcher whose callback is a microtask, which still lands before the browser paints. Sampled in the pre-paint animation frame, every portaled surface reads `visibility: hidden`: the reader never sees a flash. **(3) A re-run.** The cycle restarts on every appearance/accent flip, so a transient table re-resolves like every other one (Dialog panel `#ffffff` → `#18191b` on a live flip, with the page unlocked again afterwards). **The connectivity check changes tense, and does not weaken.** `assertMeasuredRows` asked `node.isConnected` — *is it in the document now* — which is the wrong question for a surface that is torn down on purpose: it would reject every honest modal row. The row now stamps `connectedAtRead` inside `measure()`, from `isConnected`, at the instant of the read, and the assert checks that instead. A node built in a detached fragment reads `false` there and is still rejected; there is no prop a story can pass to set it. Proven in the Dialog play, which takes the kit's own evidence, points it at a never-rendered element and captures the refusal, then shows the same evidence with the stamp intact being accepted. **Two smaller rules fall out.** An *enter transition* is not an animation with no resting value: a modal panel plays one on mount, and for its ~200ms the element is 'animated' even though the surface colour being read is a plain resting declaration the transition never touches. A row now waits out a **finite** animation and refuses only an endless one — the pulse/sweep rule is unchanged. And a *flyout* is not a prop: a collapsed rail's panel and a nav menu's panel are opened by a trigger the component owns, so `OpenedByClick` clicks that real control inside the measurement host rather than a story rebuilding the panel's markup and measuring itself. **The waiting lives in one place, and is bounded.** `awaitMeasuredRows` now also waits for any mount cycle to close (so a play cannot assert on scrolling, focus or 'nothing is portaled' against a page mid-measurement) and, given the row count a story declares, waits for the table to *exist* — a table gated on something asynchronous has no rows at the instant the story renders, and a check that only asks 'does every row I can see have evidence?' is trivially satisfied by an empty one. On timeout it names the frames waited and the rows still silent, so it fails loudly instead of hanging. Thirteen plays that hand-rolled a copy of that poll now call it; Calendar, which called the synchronous form with no wait at all, was failing in both appearance lanes and is fixed by the same move. **Landed:** the twelve rows are measured — Dialog panel/elevation/scrim, MobileNav ×3, Lightbox ×2, AppShell drawer scrim, SideNav flyout, TopNav menu panel, CommandPalette selected row (a picker seats its cursor on the preselected row, where the neutral highlight wins, so the selected tint is read after one real ArrowDown). Every converted page was checked with a real 600px wheel: `scrollTop` **0 → 600** with `data-scroll-locked` absent and **zero** aria-hidden body children. **The cheaper route was evaluated and rejected:** `Dialog.Root modal={false}` would need the raw dialog primitive in place of the System `Dialog.Root`, which measures a hand-assembled stand-in rather than the component being documented — and it is unavailable outright for MobileNav, Lightbox and the AppShell drawer, which construct their own `Dialog.Root` internally and expose no `modal`. **Extends [measured-token-rows](#measured-token-rows)**; supersedes only its clause that the measured node must be connected when the assertion runs.
 
+### motion-library-not-adopted
+
+**Tags.** `MOTION`. **Ruled.** 2026-10-22.
+
+**The system takes no JavaScript animation library, because CSS and Radix cover every current motion need.**
+
+**Why.** Every shipped surface animates from the `--ds-duration-*` and `--ds-ease-*` tokens in CSS, with no duration or curve written outside the token file, and reduced motion is handled once, in that file. A library would add a JavaScript runtime and a dependency for no motion the system needs today.
+
+**Reopens on.** A real use for a shared-element morph, drag reordering, a drag gesture or interruptible motion.
+
+**If a library comes in.** It sits behind one wrapper that turns on reduced motion by default and reads its durations and curves from the `--ds-duration-*` and `--ds-ease-*` tokens, so the tokens stay the source of every value.
+
+**Changed from.** No earlier ruling covered this.
+
+**Status.** Ruled 2026-10-22.
+
 ### motion-retiming
 
 **Tags.** `MOTION`. **Ruled.** 2026-07-28.
@@ -5354,7 +5371,7 @@ The icon and the title move together because they are one visual unit, and a lar
 
 **Lesson.** A probe not tested against a known-good page measures its own bug. The first seam probe reported 116 doubled seams, and once it required the two strokes to overlap vertically, 7 remained, all of them page composition.
 
-**Gap.** Recorded on 2026-09-18 and not fixed here: the project board recreation clips 11px at its bottom, where a horizontally scrolling ScrollArea reserves its scrollbar gutter inside the viewport and the columns' natural height overruns it. The fix bounds the column height, which is a layout change.
+**Fixed 2026-10-22.** The project board's columns overran its horizontal ScrollArea by 75px at the small tier, because the ScrollArea's table-display wrapper gave them no definite height. A size container now bounds them, and each column scrolls its own cards.
 
 **Changed from.** The ScrollArea Root kept the `content-box` default, and a padded one overflowed its parent by its padding.
 
@@ -6837,7 +6854,7 @@ On a scrim only the stack changes, to `--accent-ring-stack-scrim` on the dark sc
 
 **Not covered.** The classic and soft variants and a disabled thumb keep Radix's paint. A seeded brand keeps the base value of the thumb stack, as [part-fill-edge](#part-fill-edge) records.
 
-**Guidance.** The maintainer approved, on 2026-09-26, the wider scope of the dots, the Slider thumb, the selected segment and the ScrollArea thumb. The maintainer judged a pill 20px long at every size clearly identifiable, and accepted an edge on the pill that reuses the [mark-on-tint-edge](#mark-on-tint-edge) step although it reads one step darker than it needs.
+**Guidance.** The maintainer approved, on 2026-09-26, the wider scope of the dots, the Slider thumb, the selected segment and the ScrollArea thumb. The maintainer judged a pill 20px long at every size clearly identifiable, and accepted an edge on the pill that reuses the [mark-on-tint-edge](#mark-on-tint-edge) step although it reads one to three steps heavier than the surfaces alone need, three on dark gray, pink and plum (measured 2026-10-22).
 
 **Changed from.** An inactive dot was a `--ds-fill-press` fill that read as low as 1.29:1 against its surface, the current dot differed from it by colour alone, and under forced colours every dot painted Canvas on Canvas. The Slider thumb, the selected segment and the ScrollArea thumb read under 3:1 against their range, track or lane.
 
