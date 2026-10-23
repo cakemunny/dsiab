@@ -34,8 +34,16 @@ const RULING_NAMES: ReadonlySet<string> = new Set(
   [...decisionsMd.matchAll(/^### ([a-z0-9]+(?:-[a-z0-9]+)*)\s*$/gm)].map((m) => m[1]),
 );
 
+/** A ruling name is one word to the reader, so it moves to the next line whole rather than breaking at a
+ *  hyphen. As an inline-block capped at its container's width, it breaks inside only when the container is
+ *  narrower than the name, where `nowrap` would overflow instead. Measured over every docs story on
+ *  2026-10-23: at 1280px, 26 of 685 links broke across two lines before this. */
 export function RulingLink({ name }: { name: string }) {
-  return <Link href={rulingHref(name)} target="_top">{name}</Link>;
+  return (
+    <Link href={rulingHref(name)} target="_top" style={{ display: "inline-block", maxWidth: "100%" }}>
+      {name}
+    </Link>
+  );
 }
 
 const CITATION = /\[\[([^[\]\n]+)\]\]/g;
