@@ -347,3 +347,25 @@ export const LargeRowFitsTheDate: Story = {
     if (getComputedStyle(row(390)).flexDirection !== "column") throw new Error("at 25rem and below the large row must stack");
   },
 };
+
+/** Leaves the panel open so axe scans it in its open state (checklist item 56). */
+export const OpenForAxe: Story = {
+  render: () => (
+    <Box p="4" data-testid="dt-axe" style={{ maxWidth: 420 }}>
+      <DateTimeInput label="Appointment" defaultValue={dt("2026-07-15T09:30")} onValueChange={() => {}} />
+    </Box>
+  ),
+  play: async ({ canvasElement }) => {
+    const scope = canvasElement.querySelector<HTMLElement>('[data-testid="dt-axe"]')!;
+    const input = dateField(scope);
+    if (!input) throw new Error("the date field must render");
+    input.focus();
+    press(input, "ArrowDown");
+    const day = await waitFor(() => {
+      const a = document.activeElement as HTMLElement | null;
+      return a?.classList?.contains("rt-ds-calendar-day") ? a : null;
+    });
+    if (!day.isConnected) throw new Error("the calendar popover must still be open when the play ends");
+    await sleep(300);
+  },
+};

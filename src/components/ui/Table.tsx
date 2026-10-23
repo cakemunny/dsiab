@@ -3,16 +3,7 @@ import { Table as RadixTable } from "@radix-ui/themes";
 import { useResolvedSize } from "../../theme/SizeContext";
 import { useOverflowStop } from "../../hooks/useOverflowStop";
 import { VisuallyHidden } from "./VisuallyHidden";
-
-// Dev-only accessibility warning, resolved once at module load — the Avatar/Badge pattern verbatim
-// (see Avatar.tsx for why this is a `try` rather than a `typeof process` guard).
-const DEV_WARN = (() => {
-  try {
-    return process.env.NODE_ENV !== "production";
-  } catch {
-    return false;
-  }
-})();
+import { DEV_WARN } from "../../theme/detectAndWarn";
 
 /* Table — a STYLING wrap for simple, static tables (D14). A thin compound wrapper over Radix Themes'
  * Table that adds the system's table conventions and NOTHING else — deliberately no sorting, selection,

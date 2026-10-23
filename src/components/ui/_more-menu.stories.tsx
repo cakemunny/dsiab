@@ -196,3 +196,25 @@ export const AssistiveClick: Story = {
     await close();
   },
 };
+
+/** Leaves the panel open so axe scans it in its open state (checklist item 56). */
+export const OpenForAxe: Story = {
+  render: () => (
+    <Flex p="4">
+      <MoreMenu label="More actions" modal={false}>
+        <DropdownMenu.Item><PencilSimple /> Rename</DropdownMenu.Item>
+        <DropdownMenu.Item><Copy /> Duplicate</DropdownMenu.Item>
+        <DropdownMenu.Separator />
+        <DropdownMenu.Item tone="danger"><Trash /> Delete project</DropdownMenu.Item>
+      </MoreMenu>
+    </Flex>
+  ),
+  play: async ({ canvasElement }) => {
+    const btn = canvasElement.querySelector<HTMLElement>('button[aria-label="More actions"]');
+    if (!btn) throw new Error("the ⋯ trigger must render");
+    btn.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, cancelable: true, button: 0, pointerType: "mouse" }));
+    const menu = await waitFor(() => document.querySelector<HTMLElement>('[role="menu"][data-state="open"]'));
+    if (!menu.isConnected) throw new Error("the overflow menu must still be open when the play ends");
+    await sleep(300);
+  },
+};

@@ -84,3 +84,16 @@ export const Behavior: Story = {
     });
   },
 };
+
+/** Leaves the panel open so axe scans it in its open state (checklist item 56). */
+export const OpenForAxe: Story = {
+  render: () => <SharePopover />,
+  play: async ({ canvasElement }) => {
+    const trigger = canvasElement.querySelector<HTMLElement>("button");
+    if (!trigger) throw new Error("the Popover trigger must render");
+    trigger.click();
+    const dialog = await waitFor(() => document.querySelector<HTMLElement>('[role="dialog"][data-state="open"]'));
+    if (!dialog.isConnected) throw new Error("the popover must still be open when the play ends");
+    await sleep(300);
+  },
+};

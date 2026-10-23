@@ -89,11 +89,15 @@ const MECHANISMS = [
     body: (
       <>
         axe runs after a story renders — <Mono muted>play</Mono> or no <Mono muted>play</Mono> — and a violation fails
-        the build. Not literally every story: seven files switch it off wholesale, exempting <strong>18</strong>{" "}
-        — the four <Mono muted>_internal</Mono> geometry and focus fixtures, whose bare specimens trip label
-        rules nothing is asserting there, plus the icon gallery, the elevation swatches and the fail-loud
-        probe. That set is registered in <Mono muted>AXE_EXEMPT</Mono> and a guard fails if a file joins it
-        unregistered, leaves it, or if a meta-level exemption silently grows. The suite runs twice, light and
+        the build. Not literally every story: eight files switch it off wholesale, exempting <strong>25</strong>{" "}
+        — the five <Mono muted>_internal</Mono> geometry, focus and layered-dismiss fixtures, whose bare
+        specimens trip label rules nothing is asserting there, plus the icon gallery, the elevation swatches
+        and the fail-loud probe. That set is registered in <Mono muted>AXE_EXEMPT</Mono> and a guard fails if a file joins it
+        unregistered, leaves it, or if a meta-level exemption silently grows. axe also scans a portaled panel
+        when a story leaves it open at the end of its <Mono muted>play</Mono>. Stories that do: DropdownMenu,
+        Select, MultiSelect, CommandPalette, Dialog, AlertDialog, TopNav, DateInput, DateRangeInput and Toast,
+        plus an <Mono muted>OpenForAxe</Mono> story each for ContextMenu, MoreMenu, Popover, HoverCard,
+        Tooltip, Lightbox, MobileNav, SideNav and DateTimeInput. The suite runs twice, light and
         dark. It does NOT sweep the brand: every story is scanned
         at the default accent only. Two limits worth knowing before you lean on it. axe returns{" "}
         <em>incomplete</em> when it cannot resolve a target's real actionable area, and an incomplete cannot

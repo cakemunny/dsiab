@@ -68,3 +68,22 @@ export const OpensAndCloses: Story = {
     await waitForGone(() => document.querySelector('[role="tooltip"]'));
   },
 };
+
+/** Leaves the panel open so axe scans it in its open state (checklist item 56). */
+export const OpenForAxe: Story = {
+  render: () => (
+    <Tooltip content="Saved to your workspace" delayDuration={0}>
+      <Button priority="secondary" data-testid="tt-axe-trigger">Save</Button>
+    </Tooltip>
+  ),
+  play: async () => {
+    const trigger = await waitFor(() => document.querySelector<HTMLElement>('[data-testid="tt-axe-trigger"]'));
+    trigger.focus();
+    const tip = await waitFor(() => {
+      const t = document.querySelector<HTMLElement>('[role="tooltip"]');
+      return t && t.textContent?.includes("Saved to your workspace") ? t : null;
+    });
+    if (!tip.isConnected) throw new Error("the tooltip must still be open when the play ends");
+    await sleep(300);
+  },
+};

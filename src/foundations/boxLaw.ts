@@ -653,6 +653,11 @@ export const TEXT_SPACING_STORIES: ReadonlyMap<string, string> = new Map([
     "[[text-spacing-control-box]] — asserts the box GROWS for a wrapped label under the 1.4.12 overrides, which is a taller " +
       "box than the step by design. The growth is asserted by the story's own play.",
   ],
+  [
+    "internal-control-box--manifest-under-text-spacing",
+    "[[text-spacing-control-box]] — every manifest control under the 1.4.12 overrides, where a box taller than its step is " +
+      "allowed. The story's own play asserts that no text leaves its control.",
+  ],
 ]);
 
 /* ---------------------------------------------------------------------------------------------- */

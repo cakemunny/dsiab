@@ -111,3 +111,33 @@ export const Behavior: Story = {
     await waitFor(() => !document.querySelector('[role="menu"]'));
   },
 };
+
+/** Leaves the panel open so axe scans it in its open state (checklist item 56). */
+export const OpenForAxe: Story = {
+  render: () => (
+    <Box p="6">
+      <ContextMenu.Root modal={false}>
+        <ContextMenu.Trigger>
+          <Box data-testid="ctx-axe-target" style={{ display: "inline-flex", padding: "var(--space-3) var(--space-4)" }}>
+            <Text size="2">Orbit brief.pdf</Text>
+          </Box>
+        </ContextMenu.Trigger>
+        <ContextMenu.Content>
+          <ContextMenu.Item><PencilSimple /> Rename</ContextMenu.Item>
+          <ContextMenu.Item tone="danger"><Trash /> Delete file</ContextMenu.Item>
+        </ContextMenu.Content>
+      </ContextMenu.Root>
+    </Box>
+  ),
+  play: async ({ canvasElement }) => {
+    const target = canvasElement.querySelector<HTMLElement>('[data-testid="ctx-axe-target"]');
+    if (!target) throw new Error("the right-click target must render");
+    const rect = target.getBoundingClientRect();
+    target.dispatchEvent(new MouseEvent("contextmenu", {
+      bubbles: true, cancelable: true, clientX: rect.left + rect.width / 2, clientY: rect.top + rect.height / 2,
+    }));
+    const menu = await waitFor(() => document.querySelector<HTMLElement>('[role="menu"][data-state="open"]'));
+    if (!menu.isConnected) throw new Error("the context menu must still be open when the play ends");
+    await sleep(300); // let the entry animation settle so axe measures the final paint
+  },
+};
