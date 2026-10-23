@@ -195,11 +195,9 @@ const INTERNAL_MODULES: Readonly<Record<string, string>> = {
   "powersearch/usePowerSearchConfig": "the config helper that powersearch/index.ts exports. src/index.ts does not re-export that folder, so nothing publishes it yet.",
   "powersearch/usePowerSearchSource": "PowerSearch's suggestion source, and PowerSearch is its only caller.",
 
-  // src/theme. Provider and SizeContext are registry entries. These are the rest of the folder.
+  // src/theme. Provider, SizeContext and Contrast are registered modules. These are the rest of the folder.
   "theme/ButtonOrderContext":
     "the button-order context under Provider and ButtonGroup. Its `ButtonOrder` type ships through the hand-listed line in section 1 of src/index.ts, not the registry.",
-  "theme/Contrast":
-    "the `Contrast` component ships through the hand-listed line in section 1 of src/index.ts, not the registry. OPEN GAP: the registry has no entry for it.",
   "theme/customBrand": "the brand-seed pipeline that Provider calls.",
   "theme/detectAndWarn": "the one-time development warnings that components and Provider call.",
   "theme/typefaces": "the typeface stacks that Provider writes.",

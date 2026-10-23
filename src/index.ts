@@ -65,7 +65,6 @@
    the union types those props take: a consumer writing a wrapper needs to name
    them, and re-deriving them by hand is how a private copy starts drifting. */
 export { Provider, type ProviderProps, type ContrastMode } from "./theme/Provider";
-export { Contrast } from "./theme/Contrast";
 export { type UISize } from "./theme/SizeContext";
 export { type ButtonOrder } from "./theme/ButtonOrderContext";
 
@@ -208,6 +207,7 @@ export {
   type CommandPaletteProps,
   ContextMenu,
   type ContextMenuItemProps,
+  Contrast,
   DataList,
   type DataListOverflow,
   type DataListRootProps,

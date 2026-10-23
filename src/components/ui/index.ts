@@ -277,6 +277,7 @@ export {
   type UseReorderReturn,
   useReorder,
 } from "../../hooks/useReorder";
+export { Contrast } from "../../theme/Contrast";
 export { type AccentColor } from "../../theme/Provider";
 export { type SizeLane, useSizeLane, useUISize } from "../../theme/SizeContext";
 export { type AnnouncePoliteness, useAnnounce } from "./useAnnounce";

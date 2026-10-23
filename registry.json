@@ -1796,6 +1796,20 @@
     "priorArt": "Radix Themes color.prop (https://github.com/radix-ui/themes/blob/main/packages/radix-ui-themes/src/props/color.prop.ts): TOOK the 26-colour accentColors union as the base of the type, and the data-accent-color attribute as the one hook every part's colour rides; Radix Themes extract-props (https://github.com/radix-ui/themes/blob/main/packages/radix-ui-themes/src/helpers/extract-props.ts): REJECTED widening Radix's own colour list at runtime so extractProps would keep oxblood, because the list is not exported by the package and a global mutation of a vendor module is invisible at the call site. The helper writes the attribute Radix writes for the other 26 instead ([[part-colour-parity]])."
   },
   {
+    "name": "Contrast",
+    "module": "theme/Contrast",
+    "exports": [
+      "Contrast"
+    ],
+    "status": "ported",
+    "wave": 5,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix Theme",
+    "note": "An inverted section: a nested Radix Theme set to the opposite of the resolved appearance, so its children paint from the same --ds-* roles and flip with the page ([[content-on-solid-fills]]). It lives in src/theme beside Provider and published through a hand-written line in section 1 of src/index.ts until 2026-10-23, when it moved here so the roster lists it. The rest of the theme section (Provider, ProviderProps, ContrastMode, UISize, ButtonOrder) stays hand-listed and is accounted for under other entries or in the barrel guard.",
+    "priorArt": "Radix Themes, Theme (https://www.radix-ui.com/themes/docs/components/theme): ADOPTED a nested Theme that changes the configuration of one subtree, which is the whole mechanism; Primer React, ThemeProvider (https://github.com/primer/react/blob/main/packages/react/src/internal/hooks/useThemeProvider.ts): READ that a nested ThemeProvider takes props.colorMode or else the parent's colorMode, so a subtree can carry its own mode. ADOPTED the nested provider as the scope of the change. REJECTED a named fixed mode such as night, because an inverted section must flip when the page flips, so Contrast resolves the parent's appearance and takes the opposite."
+  },
+  {
     "name": "useReorder",
     "module": "hooks/useReorder",
     "exports": [

@@ -54,7 +54,7 @@ import { ENTRY_PATH, ENTRY_BEGIN, ENTRY_END } from "../../scripts/gen-barrel.mjs
 const REGISTERED: Record<string, readonly string[]> = {
   "1. theme + package": [
     "Provider", "ProviderProps", "ContrastMode",
-    "Contrast",
+    // Contrast left this list on 2026-10-23, when it became a registry entry published by the barrel.
     "UISize",
     "ButtonOrder",
     // Added 2026-09-02 so a bug report can name the artifact it came from.

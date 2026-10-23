@@ -34,9 +34,32 @@ const RULING_NAMES: ReadonlySet<string> = new Set(
   [...decisionsMd.matchAll(/^### ([a-z0-9]+(?:-[a-z0-9]+)*)\s*$/gm)].map((m) => m[1]),
 );
 
-export function RulingLink({ name }: { name: string }) {
-  return <Link href={rulingHref(name)} target="_top">{name}</Link>;
+/** A ruling name is one word to the reader, so it moves to the next line whole rather than breaking at a
+ *  hyphen. As an inline-block capped at its container's width, it breaks inside only when the container is
+ *  narrower than the name, where `nowrap` would overflow instead. An inline-block also lets the line break
+ *  on either side of it, so the punctuation that touches a citation, `(` before it and `)` or `.` after,
+ *  rides inside the same block and never sits alone at a line end. Only the name is the link. Measured
+ *  over every docs story on 2026-10-23: at 1280px, 26 of 685 links broke across two lines before this. */
+export function RulingLink({ name, lead = "", trail = "" }: { name: string; lead?: string; trail?: string }) {
+  const link = (
+    <Link href={rulingHref(name)} target="_top" style={lead || trail ? undefined : { display: "inline-block", maxWidth: "100%" }}>
+      {name}
+    </Link>
+  );
+  if (!lead && !trail) return link;
+  return (
+    <span style={{ display: "inline-block", maxWidth: "100%" }}>
+      {lead}
+      {link}
+      {trail}
+    </span>
+  );
 }
+
+/** Opening punctuation that touches a citation from the left, and from the right a possessive `'s` or `’s`
+ *  followed by any closing punctuation. */
+const LEAD = /[(\[“‘]+$/;
+const TRAIL = /^(?:['’]s\b)?[)\]”’.,;:!?]*/;
 
 const CITATION = /\[\[([^[\]\n]+)\]\]/g;
 const warned = new Set<string>();
@@ -49,17 +72,24 @@ function linkString(text: string): ReactNode {
   let last = 0;
   for (const m of text.matchAll(CITATION)) {
     const name = m[1].trim();
-    if (m.index > last) out.push(text.slice(last, m.index));
+    if (m.index < last) continue;
+    const end = m.index + m[0].length;
     if (RULING_NAMES.has(name)) {
-      out.push(<RulingLink name={name} />);
-    } else {
-      if (import.meta.env.DEV && !warned.has(name)) {
-        warned.add(name);
-        console.warn(`[dsiab] [[${name}]] names no ruling in docs/DECISIONS.md, so it renders as plain text.`);
-      }
-      out.push(name);
+      const before = text.slice(last, m.index);
+      const lead = before.match(LEAD)?.[0] ?? "";
+      const trail = text.slice(end).match(TRAIL)?.[0] ?? "";
+      if (before.length > lead.length) out.push(before.slice(0, before.length - lead.length));
+      out.push(<RulingLink name={name} lead={lead} trail={trail} />);
+      last = end + trail.length;
+      continue;
     }
-    last = m.index + m[0].length;
+    if (m.index > last) out.push(text.slice(last, m.index));
+    if (import.meta.env.DEV && !warned.has(name)) {
+      warned.add(name);
+      console.warn(`[dsiab] [[${name}]] names no ruling in docs/DECISIONS.md, so it renders as plain text.`);
+    }
+    out.push(name);
+    last = end;
   }
   if (last === 0) return text;
   if (last < text.length) out.push(text.slice(last));
