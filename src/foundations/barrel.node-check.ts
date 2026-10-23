@@ -61,7 +61,8 @@
         no reason, and one in a directory arm D does not walk. The exemption list is
         the thing most likely to outlive its reason, so it is checked like everything
         else rather than trusted.
-     D  UNREGISTERED MODULE. A module under src/components/ui or src/hooks that is
+     D  UNREGISTERED MODULE. A module under src/components/ui, src/hooks, src/utils, src/dates,
+        src/palette, src/powersearch or src/theme that is
         neither registered nor allowlisted fails, and the failure prints a paste-ready
         registry entry carrying the names it actually exports. A guard that blocks
         without teaching the fix is a locked door. src/hooks is walked because [[registry-module-paths]] let
@@ -74,7 +75,8 @@
    fail on all of them and teach an author to widen the exemption instead of declaring
    an export. Arm D is the direction that covers the rest of each walked directory.
    The other directories [[registry-module-paths]] made publishable (src/utils, src/dates, src/palette,
-   src/powersearch, src/theme) are not walked yet. [[internal-hooks]] records that gap.
+   src/powersearch, src/theme) are walked too, from the same WALKED_DIRS list. The build has one entry,
+   src/index.ts, so any module reachable from it ships, and these five folders hold code that does.
 
    TWO WAYS TO BE INTERNAL, AND THEY ARE NOT INTERCHANGEABLE. A module publishing
    NOTHING goes on INTERNAL_MODULES here (one key, one reason, arm C keeps it honest).
@@ -169,12 +171,61 @@ const INTERNAL_MODULES: Readonly<Record<string, string>> = {
     "drop-indicator geometry for useReorder ([[reorder-capability]]). DragHandle's docs fixture also paints a frozen group with it.",
   "hooks/reorderKeyboard": "the keyboard route of useReorder ([[reorder-capability]]), called only by useReorder and useReorderProps.",
   "hooks/reorderGesture": "the pointer gesture of useReorder ([[reorder-capability]]), called only by useReorder and useReorderProps.",
+  // src/dates. The engines behind Calendar and the date and time inputs. [[internal-hooks]] records that arm D did not walk this folder before.
+  "dates/dateParser": "DateInput's typed-date parser, and DateInput is its only caller.",
+  "dates/dateTypes": "the date value types that Calendar and the four date inputs share. The components publish the types a consumer needs.",
+  "dates/dayCellUtils": "Calendar's day-cell helpers, and Calendar is its only caller.",
+  "dates/plainDate": "the calendar-date arithmetic under Calendar and the date inputs, with no timezone.",
+  "dates/timeParser": "the typed-time parser that TimeInput, DateTimeInput and PowerSearch share.",
+  "dates/useCalendarConstraints": "Calendar's min, max and disabled-day logic, and Calendar is its only caller.",
+  "dates/useCalendarDays": "Calendar's visible-day grid, and Calendar is its only caller.",
+
+  // src/palette. The brand-colour maths behind customBrand and Provider.
+  "palette/collision": "the brand and status collision check that customBrand runs.",
+  "palette/collisionTable": "the status-colour table that collision reads.",
+  "palette/generate": "the step generator that customBrand calls.",
+  "palette/oklch": "the OKLab maths under the palette modules. Kept apart from foundations/_assert.ts on purpose, and its header says why.",
+  "palette/parseSeed": "the brand seed parser that Provider and customBrand call.",
+
+  // src/powersearch. The model layer behind PowerSearch. src/powersearch/index.ts is a folder barrel that src/index.ts does not re-export.
+  "powersearch/formatFilterValue": "PowerSearch's filter-value formatter, and PowerSearch is its only caller.",
+  "powersearch/PowerSearchValueEditor": "the value editor inside PowerSearch's edit popover, and PowerSearch is its only caller.",
+  "powersearch/types": "the PowerSearch model types. The PowerSearch component publishes the ones its props use.",
+  "powersearch/useInternalConfig": "PowerSearch's internal config builder, called only inside powersearch/.",
+  "powersearch/usePowerSearchConfig": "the config helper that powersearch/index.ts exports. src/index.ts does not re-export that folder, so nothing publishes it yet.",
+  "powersearch/usePowerSearchSource": "PowerSearch's suggestion source, and PowerSearch is its only caller.",
+
+  // src/theme. Provider and SizeContext are registry entries. These are the rest of the folder.
+  "theme/ButtonOrderContext":
+    "the button-order context under Provider and ButtonGroup. Its `ButtonOrder` type ships through the hand-listed line in section 1 of src/index.ts, not the registry.",
+  "theme/Contrast":
+    "the `Contrast` component ships through the hand-listed line in section 1 of src/index.ts, not the registry. OPEN GAP: the registry has no entry for it.",
+  "theme/customBrand": "the brand-seed pipeline that Provider calls.",
+  "theme/detectAndWarn": "the one-time development warnings that components and Provider call.",
+  "theme/typefaces": "the typeface stacks that Provider writes.",
+
+  // src/utils. Pure helpers, each called by the component or hook named.
+  "utils/computeVisibleCount": "the visible-count maths of useOverflow, and useOverflow is its only caller.",
+  "utils/formatFileSize": "the size formatter of FileInput and validateFiles.",
+  "utils/generatePageRange": "Pagination's page-range maths, and Pagination is its only caller.",
+  "utils/parseNumberInput": "NumberInput's typed-number parser, and NumberInput is its only caller.",
+  "utils/reorderMath": "the pure model of useReorder ([[reorder-capability]]). useReorder re-exports the model types it publishes.",
+  "utils/resizableMath": "the pure half of useResizable ([[resize-handle]]), called by useResizable and ResizeHandle.",
+  "utils/sharedResizeObserver": "the one ResizeObserver that AppShell, SideNav, TopNav, ChatComposer and four hooks share.",
+  "utils/timestampFormat": "Timestamp's formatter, and Timestamp is its only caller.",
+  "utils/truncation": "the text-truncation helper that Item and Outline call.",
+  "utils/validateFiles": "FileInput's file validator, and FileInput is its only caller.",
 };
 
 /** The directories arm D walks, and the prefix that turns a file there into a registry `module`. */
 const WALKED_DIRS: readonly { dir: string; prefix: string }[] = [
   { dir: UI_DIR, prefix: "" },
   { dir: join(SRC_DIR, "hooks"), prefix: "hooks/" },
+  { dir: join(SRC_DIR, "utils"), prefix: "utils/" },
+  { dir: join(SRC_DIR, "dates"), prefix: "dates/" },
+  { dir: join(SRC_DIR, "palette"), prefix: "palette/" },
+  { dir: join(SRC_DIR, "powersearch"), prefix: "powersearch/" },
+  { dir: join(SRC_DIR, "theme"), prefix: "theme/" },
 ];
 
 /** Files in a walked directory that are not modules at all. */
@@ -413,7 +464,7 @@ test("the internal-module allowlist cannot rot", () => {
 });
 
 /* ---- D: unregistered module ------------------------------------------------ */
-test("every module under src/components/ui and src/hooks is registered or declared internal", () => {
+test("every module under a walked source folder is registered or declared internal", () => {
   const failures: string[] = [];
   const registeredModules = new Set(declaredByModule.keys());
 
