@@ -229,7 +229,7 @@ function DateTimeInputBody({
             disabledReason={disabledReason}
           />
         </div>
-        <div className="rt-ds-datetimeinput-time">
+        <div className="rt-ds-datetimeinput-time" data-seconds={hasSeconds ? "" : undefined}>
           {/* "Time", not TimeInput's default "Select a time": the field is 9ch wide, sized to a value such
               as "12:45 PM", and the longer hint clipped at every size. */}
           <TimeInput

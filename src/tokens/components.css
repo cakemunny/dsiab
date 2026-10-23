@@ -880,6 +880,9 @@
    nothing clips at any size down to 22rem, except the large date in Verdana below 400px. So the large row stacks
    below 25rem rather than 22rem. */
 .radix-themes .rt-ds-datetimeinput-time .rt-TextFieldInput { width: 9ch; flex: none; }
+/* With seconds a 12-hour time is three characters longer, and "10:45:30 PM" overran 9ch at every size (82.9px
+   against 79px at medium, measured 2026-10-22), so the field takes 11ch only when seconds show. */
+.radix-themes .rt-ds-datetimeinput-time[data-seconds] .rt-TextFieldInput { width: 11ch; }
 @container (max-width: 25rem) {
   .radix-themes .rt-ds-datetimeinput-row:has(.rt-TextFieldRoot.rt-r-size-3) { flex-direction: column; }
   .radix-themes .rt-ds-datetimeinput-row:has(.rt-TextFieldRoot.rt-r-size-3) > :is(.rt-ds-datetimeinput-date, .rt-ds-datetimeinput-time) { width: 100%; }
