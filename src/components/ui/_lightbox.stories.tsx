@@ -269,3 +269,14 @@ export const AnnouncesOnIndexChange: Story = {
     await gone(".rt-ds-lightbox");
   },
 };
+
+/** Leaves the panel open so axe scans it in its open state (checklist item 56). */
+export const OpenForAxe: Story = {
+  render: () => <Harness media={GALLERY} />,
+  play: async ({ canvasElement }) => {
+    (canvasElement.querySelector('[data-testid="open"]') as HTMLButtonElement).click();
+    const dialog = await waitFor(() => document.querySelector<HTMLElement>(".rt-ds-lightbox"));
+    if (!dialog.isConnected) throw new Error("the lightbox must still be open when the play ends");
+    await new Promise((r) => setTimeout(r, 300));
+  },
+};

@@ -247,3 +247,14 @@ export const ToggleAriaTracksState: Story = {
     await waitFor(() => toggle.getAttribute("aria-expanded") === "false");
   },
 };
+
+/** Leaves the panel open so axe scans it in its open state (checklist item 56). */
+export const OpenForAxe: Story = {
+  render: () => <Harness side="start" />,
+  play: async ({ canvasElement }) => {
+    openDrawer(canvasElement);
+    const panel = await waitFor(() => document.querySelector<HTMLElement>(".rt-ds-mobilenav"));
+    if (!panel.isConnected) throw new Error("the drawer must still be open when the play ends");
+    await sleep(400);
+  },
+};

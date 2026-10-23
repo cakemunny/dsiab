@@ -566,3 +566,17 @@ export const CollapsedChildFlyout: Story = {
     await gone(".rt-ds-sidenav-flyout-panel");
   },
 };
+
+/** Leaves the panel open so axe scans it in its open state (checklist item 56). */
+export const OpenForAxe: Story = {
+  render: () => <Rail collapsed testid="sn" />,
+  play: async ({ canvasElement }) => {
+    const rail = q(canvasElement, '[data-testid="sn"]')!;
+    const trigger = q<HTMLElement>(rail, ".rt-ds-sidenav-railtrigger");
+    if (!trigger) throw new Error("the collapsed rail must render a flyout trigger");
+    trigger.click();
+    const panel = await waitFor(() => q<HTMLElement>(document, ".rt-ds-sidenav-flyout-panel"));
+    if (!panel.isConnected) throw new Error("the flyout must still be open when the play ends");
+    await sleep(300);
+  },
+};

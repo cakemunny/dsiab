@@ -152,10 +152,13 @@ const preview: Preview = {
       //   (1) addon-a11y builds `{ include: document.body, exclude: [".sb-wrapper", "#storybook-docs",
       //       "#storybook-highlights-root"] }`, and a story's `parameters.a11y.context` carrying only
       //       `exclude` (like the one below) merely APPENDS to that list — `include` stays document.body.
-      //       Portaled panels are therefore already scanned, and measurably so: with the menu open, 58 of
-      //       162 passing nodes on DropdownMenu Playground sit inside the portal (56 of 90 on ContextMenu,
-      //       57 of 116 on MoreMenu). Real findings do come out of them — a `region` hit inside the panel
-      //       was among the results before that rule's default disable was applied.
+      //       Portaled panels are therefore already scanned, but only if a story's play leaves the panel
+      //       open when it ends, because axe runs in an afterEach and a panel closed by then is not in
+      //       the document. Each portaled surface has a story that does that: DropdownMenu Usage,
+      //       and an `OpenForAxe` story for ContextMenu, MoreMenu, Popover, HoverCard, Tooltip, Lightbox,
+      //       MobileNav, SideNav (the collapsed-child flyout) and DateTimeInput (checklist item 56).
+      //       Real findings do come out of them — a `region` hit inside a panel was among the results
+      //       before that rule's default disable was applied.
       //   (2) The reference RESOLVES. Live on the open menu: `document.getElementById(aria-controls)`
       //       returns a node with `role="menu"` that is the very menu the trigger opened. axe still
       //       reports incomplete because `aria-valid-attr-value`'s `aria-controls` pre-check is
