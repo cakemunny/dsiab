@@ -579,9 +579,12 @@ export const ON_TOKENS = ["--on-accent", "--on-error", "--on-warning", "--on-suc
 // Non-text contrast (WCAG 1.4.11) is scoped to UI COMPONENTS and STATES, not raw
 // border tokens. Radix's gray-a8 borders are subtle by design and conformant in
 // context (components also carry bg/label/shadow as identifiers); asserting 3:1 on
-// the bare token is a misapplication. Generic component-border contrast is verified
-// per-component in Phase 2. The one non-text token we DO assert now is the focus ring
-// (a specific indicator concern) — see FOCUS_RING below.
+// the bare token is a misapplication, so this token-level list stays empty. axe checks
+// nothing for 1.4.11. The rendered parts are measured instead, in `_internal/Non-text
+// contrast` (`_non-text-contrast.stories.tsx`): Census measures every pairing and gates
+// none, and PartsWithoutText, ColourPropAndHighContrast and FocusRingOnParts gate the real
+// parts on 27 accents in both appearances. The focus ring is also asserted at the token
+// level — see FOCUS_RING below.
 export const NON_TEXT: Pairing[] = [];
 
 // Focus ring — WCAG non-text contrast and focus visibility (1.4.11 / 2.4.7; [[focus-criterion-numbers]] corrected an
