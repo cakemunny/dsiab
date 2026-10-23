@@ -647,3 +647,68 @@ export const ControlBoxUnderTextSpacing: Story = {
     }
   },
 };
+
+/* =====================================================================================
+   EVERY SINGLE-ROW CONTROL UNDER THE SAME OVERRIDES
+
+   ControlBoxUnderTextSpacing above measures Button, the one control whose label can wrap. This story
+   mounts the whole manifest under the same WCAG 1.4.12 overrides at every tier and asserts the one
+   thing that holds for all of them, wrapping or not: no text sits outside its control's box, and an
+   input is at least one overridden line tall, so its value is never clipped top or bottom. A control
+   added to the manifest is covered here with no second registration.
+   ===================================================================================== */
+export const ManifestUnderTextSpacing: Story = {
+  render: () => (
+    <>
+      <style>{TEXT_SPACING_CSS}</style>
+      <div className="text-spacing-scope">
+        <ManifestGrid />
+      </div>
+    </>
+  ),
+  play: async ({ canvasElement }) => {
+    await settle();
+    const probe = canvasElement.querySelector<HTMLElement>("[data-cb]");
+    if (!probe || !getComputedStyle(probe).letterSpacing.match(/^[12]\./)) {
+      throw new Error("fixture fault: the 1.4.12 overrides are not applying, so this story would assert nothing.");
+    }
+    const escaped: string[] = [];
+    let measured = 0;
+    for (const tier of TIERS) {
+      for (const spec of CONTROL_BOX_MANIFEST) {
+        const slot = canvasElement.querySelector(`[data-cb-tier="${tier}"][data-cb="${spec.name}"]`);
+        const el = slot?.querySelector<HTMLElement>(spec.selector);
+        if (!el) {
+          escaped.push(`${tier} / ${spec.name}: selector "${spec.selector}" matched nothing`);
+          continue;
+        }
+        measured++;
+        const box = el.getBoundingClientRect();
+        const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+        for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+          if (!node.textContent?.trim()) continue;
+          const range = document.createRange();
+          range.selectNodeContents(node);
+          const r = range.getBoundingClientRect();
+          if (r.height === 0) continue;
+          const over = Math.max(box.top - r.top, r.bottom - box.bottom);
+          if (over > 0.5) escaped.push(`${tier} / ${spec.name}: "${node.textContent.trim().slice(0, 24)}" sits ${over.toFixed(1)}px outside the box`);
+        }
+        for (const input of el.querySelectorAll<HTMLInputElement>("input")) {
+          // A file input is visually hidden by design (FileInput presses it through a button), so it
+          // has no line to clip.
+          if (input.type === "file" || input.type === "hidden") continue;
+          const line = parseFloat(getComputedStyle(input).fontSize) * 1.5;
+          const h = input.getBoundingClientRect().height;
+          if (h > 0 && h + 0.5 < line) escaped.push(`${tier} / ${spec.name}: input is ${h.toFixed(1)}px for a ${line.toFixed(1)}px line`);
+        }
+      }
+    }
+    if (measured !== TIERS.length * CONTROL_BOX_MANIFEST.length || escaped.length) {
+      throw new Error(
+        `[[text-spacing-control-box]] — under the WCAG 1.4.12 overrides, ${escaped.length} reading(s) left text outside a control ` +
+          `(${measured} controls measured):\n` + escaped.join("\n"),
+      );
+    }
+  },
+};

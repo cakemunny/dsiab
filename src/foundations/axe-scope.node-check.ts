@@ -45,7 +45,7 @@ export const AXE_EXEMPT: Record<string, { stories: number; why: string }> = {
   "src/components/ui/_focus.stories.tsx":
     { stories: 7, why: "meta — focus-ring probes and specimens the plays clone off-screen ([[focus-ring]]'s token, scrim and drawn-ring sweeps), and [[button-focus-ring-offset]]'s RingGapOutsideEdge and [[tab-panel-focus-clearance]]'s TabPanelRingClearsList turn axe back on for themselves" },
   "src/components/ui/_control-box.stories.tsx":
-    { stories: 3, why: "meta — geometry census, bare controls (third story is [[text-spacing-control-box]]'s text-spacing guard)" },
+    { stories: 4, why: "meta — geometry census, bare controls (the third and fourth stories are [[text-spacing-control-box]]'s text-spacing guards, Button and the whole manifest)" },
   "src/components/ui/_regressions.stories.tsx":
     { stories: 1, why: "meta — one specimen per fixed defect, several mounted in contexts that REPRODUCE a defect rather than model good use" },
   "src/components/ui/_escape-stack.stories.tsx":
