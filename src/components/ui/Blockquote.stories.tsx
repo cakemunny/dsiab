@@ -422,7 +422,7 @@ export const History: Story = {
             <Code>Citation</Code>, which is a numbered reference marker — it requires an ordinal and announces
             itself as “Citation N: title”, so a person credited that way is read out as a source document.
           </Decision>
-          <Decision id="Skin reuse">
+          <Decision id="[[content-typography]] · Skin reuse">
             The quote reuses Radix's own skin — a left rule painted from the accent scale
             (<Code>--accent-a6</Code>) plus the default prose text — and declares no <Code>--ds-*</Code> role of
             its own. That rule already resolves to <Code>--ds-stroke-accent-weak</Code> (the accent-stroke role,
@@ -431,7 +431,7 @@ export const History: Story = {
             deliberate tone. The <Code>attribution</Code> caption is the one thing the wrap paints, and it takes
             an existing role (<Code>--ds-text-weak</Code>) rather than adding one.
           </Decision>
-          <Decision id="Size passthrough">
+          <Decision id="[[content-typography]] · Size passthrough">
             <Code>size</Code> (1–9) passes through <strong>untouched</strong>. A quotation is prose sized by the
             passage that hosts it — like <Code>Section</Code>, it stays off the global UI size lane and is never
             resolved through the size context.

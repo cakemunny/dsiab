@@ -739,6 +739,31 @@
 }
 
 /* -------------------------------------------------------------------------------------
+   THE INK OF AN UNPRESSED TOKEN ([[contrast-by-alpha-stacking]])
+   An unpressed Token paints Radix's --accent-a11 on its own surface tint. Measured 2026-10-22 on the Token
+   Usage page, composited over the tint and the page, five light colours read under WCAG 4.5:1: orange
+   4.25, teal 4.34, yellow 4.41, amber 4.43 and jade 4.48. Each stacks the lightest Radix black alpha that
+   clears, --black-a1 (5%), and reads 4.63 to 4.87:1 and APCA Lc 68.9 or more. Text has no layer to stack
+   on, so the stack is written as color-mix(in srgb, ink, black 5%), which renders the same pixels as a 5%
+   black laid over the label. Green reads 4.50:1 on the ink alone and keeps it. Dark clears on every
+   colour, so the dark arm returns the base value.
+   ------------------------------------------------------------------------------------- */
+.radix-themes,
+.radix-themes :where([data-accent-color]:not([data-accent-color=""])) {
+  --accent-token-ink: var(--accent-a11);
+}
+.radix-themes:is([data-accent-color="amber"], [data-accent-color="jade"], [data-accent-color="orange"], [data-accent-color="teal"], [data-accent-color="yellow"]),
+.radix-themes :is([data-accent-color="amber"], [data-accent-color="jade"], [data-accent-color="orange"], [data-accent-color="teal"], [data-accent-color="yellow"]) {
+  --accent-token-ink: color-mix(in srgb, var(--accent-a11), black 5%);
+}
+.radix-themes:where(.dark, .dark-theme):is([data-accent-color="amber"], [data-accent-color="jade"], [data-accent-color="orange"], [data-accent-color="teal"], [data-accent-color="yellow"]),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)):is([data-accent-color="amber"], [data-accent-color="jade"], [data-accent-color="orange"], [data-accent-color="teal"], [data-accent-color="yellow"]),
+.radix-themes:where(.dark, .dark-theme) :is([data-accent-color="amber"], [data-accent-color="jade"], [data-accent-color="orange"], [data-accent-color="teal"], [data-accent-color="yellow"]):where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)),
+:is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)) :is([data-accent-color="amber"], [data-accent-color="jade"], [data-accent-color="orange"], [data-accent-color="teal"], [data-accent-color="yellow"]):where(:not(.light, .light-theme, :is(.dark, .dark-theme) :is(.light, .light-theme) *)) {
+  --accent-token-ink: var(--accent-a11);
+}
+
+/* -------------------------------------------------------------------------------------
    THE EDGE ON PARTS WITHOUT TEXT ([[part-fill-edge]], [[status-dot-edges]])
    Six colours kept a part fill under WCAG 3:1 against the page after [[textless-part-fills]]: light amber
    (1.54), lime (1.31), mint (1.39), sky (1.45) and yellow (1.32), and dark oxblood (2.06).

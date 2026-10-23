@@ -57,8 +57,8 @@ const DEV_WARN = (() => {
  *   • Size pins OUR default via `useResolvedSize("control")` (small), never Astryx's `md` (R10).
  *
  * LIFTED verbatim-in-spirit (with attribution): the monotonic async-generation guard
- * (searchGenRef/resultsGenRef), the aria-activedescendant keyboard machine ([[one-accent]]), and the singleton
- * live-region announcer ([[one-accent]]).
+ * (searchGenRef/resultsGenRef), the aria-activedescendant keyboard machine, and the singleton
+ * live-region announcer.
  *
  * ENGINE EXTRACTION ([[command-palette]]): the async-search pipeline and the roving aria-activedescendant machine now
  * live in `useComboboxEngine.ts` (`useAsyncSearch` + `useListboxNavigation`) so CommandPalette rides the

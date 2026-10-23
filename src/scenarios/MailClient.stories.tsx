@@ -89,6 +89,9 @@ const CLAMP = {
   WebkitBoxOrient: "vertical",
   overflow: "hidden",
 } as const;
+// The same clamp around a Skeleton. A clamped box paints its "…" in its own ink, and Radix's Skeleton
+// makes only its own text transparent, so a skeleton long enough to clamp left a stray "…" beside it.
+const SKELETON_CLAMP = { ...CLAMP, color: "transparent" } as const;
 // A list row is ONE line at every tier, so its cells centre on that line. Radix sets `vertical-align:
 // top` on the table and `inherit` on the rows and cells, so this one declaration on the row re-aims all
 // of them — and it is what keeps the checkbox, the star, the clip and the timestamp on one axis.
@@ -394,12 +397,12 @@ function LoadingRow({ sender, subject }: { sender: string; subject: string }) {
         </Flex>
       </Table.Cell>
       <Table.Cell style={CELL_SENDER}>
-        <Box style={CLAMP}>
+        <Box style={SKELETON_CLAMP}>
           <Skeleton><Text>{sender}</Text></Skeleton>
         </Box>
       </Table.Cell>
       <Table.Cell style={DENSE}>
-        <Box style={CLAMP}>
+        <Box style={SKELETON_CLAMP}>
           <Skeleton><Text>{subject}</Text></Skeleton>
         </Box>
       </Table.Cell>

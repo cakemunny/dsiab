@@ -87,6 +87,13 @@ function SelectedFillSpec() {
           prop="background-color"
         />
         <MeasuredRow
+          part="Selected edge"
+          note="The 1px inset ring a pressed ToggleButton draws as a shadow, inherited by the selected item, so the tint never reads as the flat soft look [[soft-variant-scope]] keeps off controls."
+          token="--ds-stroke-accent-weak"
+          select='.rt-BaseButton[data-state="on"]'
+          prop="box-shadow"
+        />
+        <MeasuredRow
           part="Selected ink"
           note="Also inherited from ToggleButton's rule — the committed-selection ink, not the ghost button's accent, which is tuned for the page and not for a tint of its own hue."
           token="--ds-text-strong"
@@ -245,8 +252,8 @@ export const Usage: Story = {
     // The token row's EVIDENCE: the row measured a real selected item, resolved its claim on a different
     // node, and the two agree.
     const rows = assertMeasuredRows(canvasElement);
-    if (rows.measured !== 3 || rows.unproven !== 0) {
-      throw new Error(`expected 3 measured / 0 unproven token rows, got ${rows.measured} / ${rows.unproven}`);
+    if (rows.measured !== 4 || rows.unproven !== 0) {
+      throw new Error(`expected 4 measured / 0 unproven token rows, got ${rows.measured} / ${rows.unproven}`);
     }
 
     // The [[toggle-group-box]] box: the group is ONE control, so its OUTER box is the step box the Select beside it holds.
@@ -362,7 +369,7 @@ export const History: Story = {
             <Code>--ds-stroke-accent-weak</Code> edge and a{" "}
             <Code>--ds-text-strong</Code> label at weight 600, inherited with no work. That ink is part of the
             inheritance and not an afterthought: a ghost Button's own accent ink is tuned to read on the page,
-            and over an accent tint of the same hue it failed WCAG AA on most brands (worst 3.13:1) until D11
+            and over an accent tint of the same hue it failed WCAG AA on most brands (worst 3.13:1) until [[toggle-button]]
             declared it.
           </Decision>
           <Decision id="[[toggle-button-group]] · icon-only selection">
@@ -400,7 +407,7 @@ export const History: Story = {
             smaller button — glyph, box and pressed paint all the lower step's — and the smallest member
             anywhere is still a 24×24 pointer target ([[control-box-per-step]]'s floor is the member's own).
           </Decision>
-          <Decision id="uiSize · R10">
+          <Decision id="[[toggle-group-box]] · uiSize">
             <Code>size</Code> follows the global <Code>uiSize</Code> control lane (default <Code>small</Code>) via
             Button. The group resolves it once and seeds every member the step BELOW it
             (the shared <Code>CONTROL_MEMBER_STEP</Code> ramp in SizeContext) — the tray owns the row's box,

@@ -435,11 +435,11 @@ export const History: Story = {
             page", so it is reserved for cards that genuinely do (dragged, or over a busy canvas). A wall of
             elevated cards is noise, not hierarchy.
           </Decision>
-          <Decision id="Container size">
+          <Decision id="[[surface-wraps]] · Container size">
             Card rides the <strong>container</strong> size lane (<Code>small</Code> → <Code>2</Code>) — a
             surface reads a notch roomier than a control, the same lane the Dialog panel uses.
           </Decision>
-          <Decision id="Container, not control">
+          <Decision id="[[card-variants]] · Container, not control">
             A Card holds content. A card that <em>navigates</em> is <Code>ClickableCard</Code> (one link, one
             tab stop); a card that <em>submits a value</em> is <Code>RadioCards</Code> /{" "}
             <Code>CheckboxCards</Code>. Never wrap a whole Card in an anchor.

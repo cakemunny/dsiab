@@ -41,7 +41,7 @@
 import { readFileSync } from "node:fs";
 import { test, expect } from "vitest";
 import { findLineageMatches } from "./lineageTerms";
-import { buildDistRegistry, SOURCE_PATH, OUT_OF_SCOPE_REASONS } from "../../scripts/dist-registry.mjs";
+import { buildDistRegistry, SOURCE_PATH, OUT_OF_SCOPE_REASONS, PLANNED_REASON } from "../../scripts/dist-registry.mjs";
 
 interface SourceEntry {
   name: string;
@@ -178,4 +178,14 @@ test("no out-of-scope reason outlives the entry it describes", () => {
       `${name} is available now — remove its entry from OUT_OF_SCOPE_REASONS`,
     ).not.toBe("ported");
   }
+});
+
+test("an accepted proposal entered as `planned` reaches the roster with the planned reason", () => {
+  // CONTRIBUTING.md and [[contribution-threshold]] enter an accepted proposal as `planned`. Before
+  // this mapping, the first such entry stopped the build.
+  const planned = { name: "Example", status: "planned", tier: "lite", buildingBlock: "Radix Box", exports: [] };
+  const projected = buildDistRegistry([planned]).components[0];
+  expect(projected.status).toBe("planned");
+  expect(projected.reason).toBe(PLANNED_REASON);
+  expect(() => buildDistRegistry([{ ...planned, status: "proposed" }])).toThrow(/no consumer-facing/);
 });

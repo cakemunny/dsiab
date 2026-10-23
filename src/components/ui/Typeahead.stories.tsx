@@ -749,7 +749,7 @@ export const History: Story = {
             Built on <Code>@radix-ui/react-popover</Code> (the same primitive as <Code>MultiSelect</Code>)
             for portal + positioning + dismiss — so a native-popover pointerdown light-dismiss race never applies here.
           </Decision>
-          <Decision id="R10 · size">
+          <Decision id="uiSize">
             Size resolves to the system’s small default via <Code>useResolvedSize("control")</Code>, following the
             global sizing lanes rather than a per-component default.
           </Decision>

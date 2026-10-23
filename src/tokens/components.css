@@ -658,7 +658,7 @@
   z-index: var(--ds-z-panel);
 }
 /* The listbox scrolls (max-height ~300px), so the error row (a sibling, outside the listbox) never
-   scrolls out of reach. Highlighted row auto-scrolls into view (scrollIntoView, [[one-accent]]). */
+   scrolls out of reach. Highlighted row auto-scrolls into view (scrollIntoView). */
 .radix-themes .rt-ds-typeahead-listbox {
   outline: none;
   display: flex;
@@ -1280,8 +1280,9 @@
 
 /* D11 — ToggleButton pressed state. @radix-ui/react-toggle merges data-state="on"|"off" onto the ghost
    Button root (via asChild), so a pressed toggle is the .rt-variant-ghost node carrying
-   [data-state="on"]. Paint the accent-aware selected tint (--ds-fill-selected-subtle) inside a 1px --ds-stroke-accent-weak edge and bold the label
-   to 600 — the non-colour cue ([[select-selected-row]]), so "on" reads without relying on colour alone. Same compound
+   [data-state="on"]. Paint the accent-aware selected tint (--ds-fill-selected-subtle) inside a 1px --ds-stroke-accent-weak edge, set the label
+   in --ds-text-strong and bold it to 600 — the non-colour cue ([[select-selected-row]]). A labelled toggle reads "on" by weight as
+   well as colour. An icon-only toggle has no label to bold, so it relies on the edge and on a `pressedIcon` swap. Same compound
    same-element selector + [data-disabled] guard as the danger blocks above (data-state rides the node
    that carries .rt-BaseButton), scoped under .radix-themes so the (0,5,0) selector beats Radix's ghost
    variant/hover/active rules; no !important — and no @media (hover) or :active step needed, the pressed
@@ -2211,6 +2212,13 @@
   outline-style: solid;
   outline-color: var(--ds-stroke-focus);
   outline-offset: 2px;
+}
+
+/* (2a) Rest ink — the label paints --accent-token-ink, Radix's own --accent-a11 except on the five light
+   colours where it reads under 4.5:1 on the tint (theme.css, [[contrast-by-alpha-stacking]]). Declared before
+   the disabled and pressed rules, which keep their own ink. A high-contrast Token keeps Radix's accent-12. */
+.radix-themes .rt-ds-token.rt-variant-surface:where(:not(.rt-high-contrast)) {
+  color: var(--accent-token-ink);
 }
 
 /* (3) Disabled dim — Radix Badge has no disabled state, so reuse Radix's OWN button-disabled skin
@@ -3291,8 +3299,8 @@
 .radix-themes .rt-ds-tokenizer-create-row svg { color: var(--ds-icon-interactive); flex-shrink: 0; }
 
 /* ---- CommandPalette ([[command-palette]]) — raw Radix Dialog + a filter listbox --------------
-   A ⌘K search-to-act / search-to-pick surface: a top-anchored modal (the RAW Radix Themes Dialog, since
-   System/Dialog is status:planned — [[component-registry]] agent-gap rule) holding a chrome-less search input over a grouped
+   A ⌘K search-to-act / search-to-pick surface: a top-anchored modal (the RAW Radix Themes Dialog, chosen
+   when System/Dialog was not yet ported — [[component-registry]] agent-gap rule) holding a chrome-less search input over a grouped
    listbox. The SURFACE is the SAME opaque overlay treatment as the Typeahead / Select / MultiSelect /
    DateInput menus (opaque --ds-bg-overlay [[floating-surface-fill]], --ds-radius-3, --ds-shadow-overlay elevation), so every
    floating surface reads as one family. Modal enter/exit motion is INHERITED from the .rt-BaseDialogContent
@@ -4650,7 +4658,7 @@
 
 /* ============================================================================
    === Lightbox ===  (System/Lightbox — src/components/ui/Lightbox.tsx)
-   A fullscreen media viewer on the RAW Radix Themes Dialog ([[lightbox-viewer]] · D18; System/Dialog planned → [[component-registry]]
+   A fullscreen media viewer on the RAW Radix Themes Dialog ([[lightbox-viewer]]; chosen when System/Dialog was not yet ported → [[component-registry]]
    agent-gap, like AlertDialog). Radix Dialog owns focus-trap + scroll-lock + Escape + backdrop-dismiss;
    modal enter/exit motion is INHERITED from the [[toast-feedback-tier]] .rt-BaseDialogContent / .rt-BaseDialogOverlay bindings
    — NO per-component override here. The backdrop paints from --ds-scrim. The viewer content lives in a
@@ -5154,8 +5162,8 @@
 /* ============================================================================
    MobileNav (B2 · D4) — a slide-in drawer on the RAW Radix Themes Dialog
    ----------------------------------------------------------------------------
-   Reuses the CommandPalette / Lightbox raw-Dialog precedent (System/Dialog is
-   status:planned → [[component-registry]] agent-gap). The centered modal Content is repositioned to
+   Reuses the CommandPalette / Lightbox raw-Dialog precedent (chosen when
+   System/Dialog was not yet ported → [[component-registry]] agent-gap). The centered modal Content is repositioned to
    PIN to a viewport edge at full height, and its inherited scale+fade motion is
    swapped for an edge SLIDE — still on the modal/emphasis motion tier, so
    reduced-motion collapses free through the duration tokens. The panel surface is
@@ -5281,7 +5289,7 @@
 }
 
 /* ============================================================================
-   AppShell (System/Layout/AppShell · [[one-accent]] · D7) — the top-level page shell. It
+   AppShell (System/Layout/AppShell) — the top-level page shell. It
    COMPOSES Layout, owns the responsive mode-swap, and provides the app-shell
    contexts. Descendant selectors (the shell is the page frame itself, not a
    portaled panel). Paints from --ds-* surfaces only: the `variant` surface

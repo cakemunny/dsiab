@@ -359,7 +359,7 @@ export const History: Story = {
             The width is honestly <Code>min(100vw, width)</Code> — the drawer never exceeds the viewport, and
             never claims a fixed cap it doesn't enforce.
           </Decision>
-          <Decision id="Motion · modal tier">
+          <Decision id="[[mobile-nav]] · Motion · modal tier">
             The drawer slides on the <strong>modal</strong> motion tier, and it <strong>arrives faster than it
             leaves</strong> (enter <Code>--ds-duration-moderate</Code> 180ms / <Code>--ds-ease-entry</Code>, exit
             the longer <Code>--ds-duration-expressive</Code> 320ms / <Code>--ds-ease-standard</Code>) — an edge
@@ -367,7 +367,7 @@ export const History: Story = {
             decelerating curve slow enough to read as leaving rather than being cut. Reduced motion collapses the
             slide to an instant swap through the duration tokens.
           </Decision>
-          <Decision id="State · AppShell or standalone">
+          <Decision id="[[mobile-nav]] · State · AppShell or standalone">
             When an <Code>AppShell</Code> is present, it owns the open state machine and MobileNav reads it via{" "}
             <Code>useAppShellMobile()</Code> (the panel carries <Code>id={"{drawerId}"}</Code> so the toggle's{" "}
             <Code>aria-controls</Code> resolves). Standalone, MobileNav is controlled (<Code>open</Code> /{" "}

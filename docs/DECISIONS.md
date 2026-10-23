@@ -648,7 +648,7 @@ This ledger records the rulings that shape the design system and the reason behi
 - The Vercel free tier is for non-commercial use only, and puts the username in preview URLs.
 - Chromatic charges for a custom domain.
 
-**Changed from.** An earlier plan held that hosting was not needed and shipped the docs as a separate `dsiab-docs` package. `dsiab docs` from an install ran `npx dsiab-docs@<version>` and printed the npm 404, and a build script of its own, run by `npm run pack:docs` and `npm run build:docs`, built that package, all retired by this ruling.
+**Changed from.** An earlier plan held that hosting was not needed and shipped the docs as a separate `dsiab-docs` package. `dsiab docs` from an install ran `npx dsiab-docs@<version>` and printed the npm 404. This ruling retired that package together with its build script, `npm run pack:docs` and `npm run build:docs`.
 
 **Status.** Ruled 2026-09-24. No later ruling amends it.
 
@@ -1594,6 +1594,7 @@ Both clear WCAG 1.4.3 AA at 4.5:1. The two scrims are opposites, and white on `-
 - the scrim ring ([light-scrim-focus-ring](#light-scrim-focus-ring))
 - the focus ring ([focus-ring](#focus-ring))
 - every later fix to a part without text
+- the rest label of an unpressed Token on light orange, teal, yellow, amber and jade, held to the text floor of WCAG 4.5:1 and APCA Lc 60, written as `color-mix(in srgb, ink, black 5%)` because text has no layer to stack on
 
 **Floor.** A part without text clears WCAG 3:1 and APCA Lc 30.
 
@@ -1608,7 +1609,7 @@ Both clear WCAG 1.4.3 AA at 4.5:1. The two scrims are opposites, and white on `-
 
 **Changed from.** No earlier ruling covered this.
 
-**Status.** Ruled 2026-09-25. No later ruling amends it.
+**Status.** Ruled 2026-09-25. Amended 2026-10-22: the Token rest label, the first text the stack reaches, measured 4.25 to 4.48:1 before and 4.63 to 4.87:1 after, held by `_internal/Token behavior` → RestInkClearsAA.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 
@@ -2358,16 +2359,16 @@ The choice between a heavier ring, a stronger fill and the current state belongs
 
 **Tags.** `COMPONENTS`, `COLOUR`. **Ruled.** 2026-06-26.
 
-**A selected row in the open `Select` panel takes Radix's solid accent fill with no check mark, and weight 600 is its non-colour cue.**
+**A selected row in the open `Select` panel takes the selected tint with no check mark, and weight 600 is its non-colour cue.**
 
 **What you see.**
 
-- The selected row takes `--ds-fill-selected` (accent-9), white `--on-accent` text and weight 600, with the gutter check mark hidden. It stays the solid fill whether or not it is also the active row.
+- The selected row takes `--ds-fill-selected-subtle`, a `--ds-text-strong` label and weight 600, with the gutter check mark hidden. It keeps the tint whether or not it is also the active row.
 - A non-selected active row takes the neutral `--ds-fill-hover`.
 - Rows and group labels take symmetric logical padding that matches the trigger's inline padding at each size. The group label reads `--ds-text-weak` and the separator `--ds-stroke-weak`.
 - A disabled current value keeps Radix's dimmed treatment.
 
-**Accessibility.** Weight 600 is the WCAG 1.4.1 non-colour cue the check mark left behind, asserted on the rendered weight. The selected label is gated as `--on-accent` on the opaque accent-9 fill at 4.5:1 or more.
+**Accessibility.** Weight 600 is the WCAG 1.4.1 non-colour cue the check mark left behind, asserted on the rendered weight. The `--ds-text-strong` label reads 13:1 or more on the tint in both appearances, at every accent.
 
 **Scope.** The rules use the compound selector `.radix-themes.rt-SelectContent`, because the portaled content node itself carries `.radix-themes` and a descendant selector never matches it. The re-skin is scoped `:where(:not(.rt-high-contrast))`, so a high-contrast `Select` keeps Radix's native check mark and accent-12 highlight.
 
@@ -2382,6 +2383,7 @@ The choice between a heavier ring, a stronger fill and the current state belongs
 - [multi-select-component](#multi-select-component) ships multiple values as the separate `MultiSelect` component, which this ruling first deferred.
 - [toggle-button](#toggle-button) extends the weight-600 cue to the pressed `ToggleButton`.
 - [focus-ring](#focus-ring) gives the active row the system focus ring as its edge.
+- Amended 2026-10-21: the selected row moved off the solid accent-9 fill onto `--ds-fill-selected-subtle` with a `--ds-text-strong` label. White `--on-accent` on accent-9 measured 3.00:1 on cyan and 3.03:1 on grass at 12px, under the 4.5:1 that [text-on-solid-fill-contrast](#text-on-solid-fill-contrast) requires, and the tint is the one List, the CommandPalette picker, DateRangeInput presets and the current Pagination page already use.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 
@@ -2534,6 +2536,8 @@ The row checkbox is `CheckboxVisual`, extracted from `Checkbox`: Radix's checkbo
 - a 1px inset edge in `--ds-stroke-accent-weak`, the edge the pressed `Token` paints, so a pressed toggle never shows the flat soft look
 - a label in `--ds-text-strong` at weight 600, the cue that needs no colour
 
+An icon-only toggle has no label to bold, so it passes `pressedIcon` with the same glyph at a heavier weight, and development warns once when it does not.
+
 **Width.** A hidden, always-bold copy of the label reserves the pressed width, so a press never reflows the row.
 
 **API.** Controlled through `pressed` and `onPressedChange`, or uncontrolled through `defaultPressed`, a deliberate addition over the controlled-only Toggle of Astryx. An icon-only toggle requires `label`, which becomes its `aria-label`. Astryx documents a tooltip from `label` that its source does not contain, so the IconButton rule applies.
@@ -2550,6 +2554,7 @@ The row checkbox is `CheckboxVisual`, extracted from `Checkbox`: Radix's checkbo
 - [control-box-per-step](#control-box-per-step) stamps `data-icon-only` on an icon-only toggle and gives it the square IconButton box.
 - [published-aschild-props](#published-aschild-props) refuses `asChild` on ToggleButton, which rendered no `button` element with it.
 - Revised on 2026-10-02: the pressed state carries a 1px edge, because a bare tint on a control is the soft look that [soft-variant-scope](#soft-variant-scope) rules out.
+- Amended 2026-10-21: an icon-only toggle requires `pressedIcon`, held by a development warning and by `_internal/ToggleButton behavior`.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 

@@ -293,26 +293,26 @@ export const History: Story = {
             <Code>resizableMath</Code>); ResizeHandle itself is the thin <strong>presentational</strong> shell
             that renders it. Built on that engine + our <Code>--ds-*</Code> layer, not a from-scratch splitter.
           </Decision>
-          <Decision id="API · consumer-owned engine">
+          <Decision id="[[resize-handle]] · API · consumer-owned engine">
             ResizeHandle takes the engine's <Code>separatorProps</Code> + <Code>onDragStart</Code> as props and
             spreads them onto its root — the <strong>consumer</strong> calls <Code>useResizable</Code> and reads
             its <Code>size</Code>/<Code>isCollapsed</Code> for the pane. This matches how Layout and SideNav
             wire it (they own the hook so the panel and its handle share one source of truth), rather than the
             handle hiding its own state where a panel can't read it.
           </Decision>
-          <Decision id="Window-splitter contract">
+          <Decision id="[[resize-handle]] · Window-splitter contract">
             The handle is a WAI <strong>window splitter</strong>: <Code>role="separator"</Code>,{" "}
             <Code>tabIndex=0</Code>, and live <Code>aria-valuenow</Code>/<Code>aria-valuemin</Code>. Arrow keys
             step ±10px, Shift+arrow ±50px, Home/End jump to min/max. <Code>aria-valuemax</Code> is{" "}
             <strong>omitted</strong> when the pane is unbounded (max = ∞), and <Code>aria-valuenow</Code> reads{" "}
             <strong>0</strong> while collapsed — both per the spec.
           </Decision>
-          <Decision id="Collapse · restore-not-min">
+          <Decision id="[[resize-handle]] · Collapse · restore-not-min">
             When a collapsible pane is expanded again (Enter or double-click), it restores the size it had
             <strong> before</strong> collapsing — not the minimum. The engine remembers the pre-collapse size,
             so a toggle round-trips losslessly instead of snapping the pane down to its floor.
           </Decision>
-          <Decision id="Focus · [[focus-ring]]">
+          <Decision id="[[focus-ring]] · Focus">
             Focus shows the system ring: the accent fill (<Code>--ds-stroke-focus</Code>) with a Radix alpha
             stacked on top, 2px wide. The seam itself is 1px, too thin to hold a 2px ring, so the ring draws
             around the grab zone, the <Code>::before</Code> hit area either side of the seam. It sits{" "}

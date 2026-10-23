@@ -121,7 +121,7 @@ export interface ProviderProps extends Omit<ThemeProps, "accentColor"> {
    */
   uiSize?: UISize;
   /** Contrast model (default `wcag`). Sets `data-contrast` on the theme root. It changes one thing only:
-   *  the label on a solid warning fill on the gold, amber, yellow and lime brands, where one ink cannot
+   *  the label on a solid warning fill on the gold, amber, yellow and lime brands in the light appearance, where one ink cannot
    *  clear both WCAG 4.5:1 and APCA Lc 60 in the warning's own orange ([[apca-contrast-mode]]). */
   contrast?: ContrastMode;
   /**

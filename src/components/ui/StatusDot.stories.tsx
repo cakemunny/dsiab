@@ -373,7 +373,7 @@ export const History: Story = {
             The four semantic variants paint from the <strong>accent-aware</strong> <Code>--ds-fill-success</Code> /
             <Code>-warning</Code> / <Code>-error</Code> / <Code>-accent</Code> tokens (the same <Code>-9</Code>
             solids Badge and Callout use), so a dot <strong>follows the brand's collision shift</strong> — a grass
-            brand's success reads lime, a red brand's error reads oxblood. <Code>neutral</Code> takes the solid
+            brand's success reads lime, a red brand's error reads oxblood. <Code>neutral</Code> takes the solid{" "}
             <Code>--ds-icon-neutral</Code> (gray-11), visible in both modes. <strong>Zero net-new tokens.</strong>
           </Decision>
           <Decision id="[[status-dot]] · colour is redundant">
@@ -383,7 +383,7 @@ export const History: Story = {
           </Decision>
           <Decision id="[[status-dot]] · pulse + reduced-motion">
             <Code>isPulsing</Code> runs a 2s opacity breathe (1 → 0.5 → 1) — an <em>ambient</em> loop, so its
-            duration is a literal rather than a value off the intent-named transition ladder. A
+            duration is a literal rather than a value off the intent-named transition ladder. A{" "}
             <Code>prefers-reduced-motion: reduce</Code> media query sets <Code>animation: none</Code>.
           </Decision>
           <Decision id="[[status-dot]] · size on the text lane">

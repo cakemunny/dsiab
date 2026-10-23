@@ -450,17 +450,17 @@ export const History: Story = {
             display, optional seconds, the two-channel feedback model, <Code>hasClear</Code>, and full Field-shell
             validation + <Code>disabledReason</Code>. Stories: History · Anatomy · Usage · Keyboard · Props.
           </Decision>
-          <Decision id="Deferred → shared stepper">
+          <Decision id="[[time-input]] · Deferred → shared stepper">
             <strong>Touch-friendly +/- stepper buttons / a shared stepper primitive</strong> — the same deferral as{" "}
             <Code>NumberInput</Code>’s custom stepper; built once and shared when the system earns it, never as a
             TimeInput-only control.
           </Decision>
-          <Decision id="Deferred → server actions">
+          <Decision id="[[time-input]] · Deferred → server actions">
             <strong>The <Code>changeAction</Code> async-optimistic layer</strong> (<Code>isLoading</Code> / an inset
             Spinner while a server action settles) — a react-server-action optimistic-UI affordance; revisit if the
             app layer needs it.
           </Decision>
-          <Decision id="Deferred → InputGroup">
+          <Decision id="[[time-input]] · Deferred → InputGroup">
             <strong>InputGroup composition</strong> (attaching the field to an adjacent addon) — parked until{" "}
             <Code>InputGroup</Code> ships.
           </Decision>

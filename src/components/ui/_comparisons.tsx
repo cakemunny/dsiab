@@ -190,7 +190,7 @@ export const SEARCH_SURFACES_COMPARISON: Comparison = {
   ],
   footnote: (
     <>
-      If the outcome is a <em>value in a form</em>, it is a <strong>Typeahead</strong>. If it is an
+      If the outcome is a <em>value in a form</em>, it is a <strong>Typeahead</strong>. If it is an{" "}
       <em>action or a jump</em>, it is a <strong>CommandPalette</strong>. If the user is <em>building a query</em>
       out of several conditions, it is <strong>PowerSearch</strong>.
     </>
@@ -344,7 +344,7 @@ export const CHIPS_COMPARISON: Comparison = {
   ],
   footnote: (
     <>
-      <strong>Badge</strong> is display-only. The moment a chip is clickable, navigable, or removable it is a
+      <strong>Badge</strong> is display-only. The moment a chip is clickable, navigable, or removable it is a{" "}
       <strong>Token</strong> — the surface edge is the honest signal that it is a control, not a label. (Badge no
       longer carries a removable or interactive mode; those live on Token.)
     </>

@@ -815,7 +815,7 @@ export const History: Story = {
           </Decision>
           <Decision id="[[calendar-grid]] · A numeral never sits on a solid accent">
             <strong>The selected day is a tint, not a solid fill.</strong> The chip used to paint the solid
-            accent (<Code>--ds-fill-selected</Code>) under a white numeral. That step of a Radix scale is a
+            accent (<Code>--ds-fill-selected</Code>) under a white numeral. That step of a Radix scale is a{" "}
             <em>background</em> step and carries no text-contrast promise — only steps 11 and 12 do — and
             sampled off rendered pixels the white numeral measured <strong>3.00–4.12:1</strong> across 15 of
             27 brand colours, against the <strong>4.5:1</strong> a numeral that size owes. So the chip drops

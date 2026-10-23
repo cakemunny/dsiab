@@ -279,13 +279,13 @@ export const History: Story = {
             Code is a <strong>wrapped</strong> Radix Themes component, so the Radix name wins — built on the
             Radix substrate + our <RadixCode>--ds-*</RadixCode> layer, not a from-scratch chip.
           </Decision>
-          <Decision id="uiSize">
+          <Decision id="[[content-typography]] · uiSize">
             Size follows the global <RadixCode>uiSize</RadixCode> <strong>text lane</strong> (the same lane as{" "}
             <RadixCode>Text</RadixCode>/<RadixCode>Kbd</RadixCode>), pinning the system’s small default rather
             than carrying its own — inline code sits in running prose, so it tracks the text step and stays in
             rhythm with the sentence around it.
           </Decision>
-          <Decision id="Skin reuse">
+          <Decision id="[[content-typography]] · Skin reuse">
             The default <RadixCode>soft</RadixCode> skin is Radix’s accent-tinted chip — its fill resolves to{" "}
             <RadixCode>--accent-a3</RadixCode> (exactly what <RadixCode>--ds-fill-accent-weak</RadixCode> aliases)
             over <RadixCode>--accent-a11</RadixCode> text. That is already accent-aware and follows the brand
@@ -300,7 +300,7 @@ export const History: Story = {
             <RadixCode>color</RadixCode>, oxblood included, paints that pair in its own colour, the pair the same
             chip paints on a page of that colour ([[part-colour-parity]]). A <RadixCode>highContrast</RadixCode> chip keeps Radix's paint.
           </Decision>
-          <Decision id="Table exception">
+          <Decision id="[[content-typography]] · Table exception">
             One deliberate deviation lives elsewhere: the shared comparison tables repaint their in-table chips
             to a neutral <strong>gray</strong> (<RadixCode>--ds-fill-weak</RadixCode> / <RadixCode>--ds-text-weak</RadixCode>),
             scoped to <RadixCode>.ds-comparison</RadixCode>, so a chip stays legible on an accent-tinted cell.

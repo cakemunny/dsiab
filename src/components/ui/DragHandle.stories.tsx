@@ -1037,7 +1037,7 @@ export const History: Story = {
       <Section title="Decisions" lead="The rulings this component and its capability encode.">
         <Flex direction="column" gap="3">
           <Decision id="[[reorder-capability]] · the capability is the shipped thing">
-            Reordering lives in <Code>useReorder</Code>, a headless hook over items grouped by container id, and
+            Reordering lives in <Code>useReorder</Code>, a headless hook over items grouped by container id, and{" "}
             <Code>DragHandle</Code> is the one net-new surface it needed. Registered on its own ([[registry-module-paths]]'s path
             module), it follows the <Code>useResizable</Code> precedent: the hook is the engine and the handle
             renders it. Items are ids in groups, so reordering <em>within</em> a list and moving <em>between</em>
@@ -1081,7 +1081,7 @@ export const History: Story = {
           <Decision id="[[reorder-single-pointer-path]] · 2.5.7 is a single-pointer route, not a keyboard one">
             [[dragging-movement-gaps]] records two components failing <strong>2.5.7 Dragging Movements</strong> and states the reason a
             keyboard alternative does not close it. This capability ships the criterion as a real route: click an
-            item to lift, click a destination to place, no drag anywhere. The keyboard route earns
+            item to lift, click a destination to place, no drag anywhere. The keyboard route earns{" "}
             <strong>2.1.1</strong>, the announcements carry the state change, and <Code>aria-grabbed</Code> is
             deliberately unused — it was deprecated in WAI-ARIA 1.1 with no replacement, so a live region
             carries the state change instead.

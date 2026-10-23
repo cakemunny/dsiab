@@ -413,7 +413,7 @@ export const History: Story = {
       <Section title="Decisions" lead="The rulings this component encodes.">
         <Flex direction="column" gap="3">
           <Decision id="[[inline-citation]] · Inline leaf">
-            Citation is a <strong>pure inline leaf</strong> — no floating primitive. It renders an
+            Citation is a <strong>pure inline leaf</strong> — no floating primitive. It renders an{" "}
             <Code>&lt;a&gt;</Code> when <Code>source.url</Code> is present, else a plain <Code>&lt;span&gt;</Code>.
             Two variants: <Code>label</Code> (a bordered pill) and <Code>number</Code> (a superscript circle
             badge). Paint is from <Code>--ds-*</Code> semantic tokens; <strong>zero net-new tokens.</strong>

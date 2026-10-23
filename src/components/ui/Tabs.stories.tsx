@@ -371,14 +371,14 @@ export const History: Story = {
             Tabs is a <strong>wrapped</strong> Radix Themes component — the Radix name wins; built on the
             Radix substrate + our <Code>--ds-*</Code> layer, not a hand-rolled tablist.
           </Decision>
-          <Decision id="Dual surface">
+          <Decision id="[[floating-surface-wraps]] · Dual surface">
             <strong>One name, two surfaces.</strong> <Code>Root/List/Trigger/Content</Code> are{" "}
             <strong>panel</strong> tabs — peer views of one screen, content swapped <em>in place</em>.{" "}
             <Code>Nav</Code> (<Code>Nav.Root/Nav.Link</Code>) are <strong>link</strong> tabs that{" "}
             <em>navigate</em> to routes. Picking the wrong one is the classic tabs mistake; the Usage
             do/don't and the SegmentedControl cross-reference draw the line.
           </Decision>
-          <Decision id="Two-size lane — for the BOX">
+          <Decision id="[[floating-surface-wraps]] · Two-size lane — for the BOX">
             Radix's tab lists accept <Code>size</Code> <Code>1</Code>|<Code>2</Code> only (default{" "}
             <Code>2</Code>), so the usual control lane's <Code>large → 3</Code> is out of range and would
             drop the size class. The tab <strong>box</strong> is therefore a{" "}
@@ -386,7 +386,7 @@ export const History: Story = {
             clamps <Code>small/medium → 1</Code>, <Code>large → 2</Code> — an explicit <Code>size</Code>{" "}
             still wins. Applied on both the panel List and the Nav.
           </Decision>
-          <Decision id="Where the two boxes land">
+          <Decision id="[[floating-surface-wraps]] · Where the two boxes land">
             The vendor's two tab steps are <strong>32px</strong> and <strong>40px</strong> — the two boxes
             the control lane resolves at <Code>medium</Code> and <Code>large</Code> (steps 2 and 3 of
             24 / 32 / 40). There is no 24px tab step, so <Code>small</Code> is pinned to the lowest box
@@ -395,7 +395,7 @@ export const History: Story = {
             so a tab row placed beside a control matches its height at medium (32) and at large (40), and
             steps where it steps.
           </Decision>
-          <Decision id="The type is ours, not the vendor's">
+          <Decision id="[[floating-surface-wraps]] · The type is ours, not the vendor's">
             Radix welds the two knobs together: each tab size class sets <Code>--tab-height</Code>{" "}
             <em>and</em> the font size in one rule, and it pairs each tab box with a label{" "}
             <strong>one step below</strong> what the control lane pairs with that same box (12px where a
@@ -410,7 +410,7 @@ export const History: Story = {
             tab row equals the control row on <em>both</em> axes at medium and at large. An explicit{" "}
             <Code>size</Code> pins the box; the label stays on the text lane.
           </Decision>
-          <Decision id="Roving tabindex">
+          <Decision id="[[tabs-open-on-navigation]] · Roving tabindex">
             The <strong>roving tab stop</strong> comes from the Radix primitives: one Tab enters the tablist,
             arrow keys move focus between tabs, and the panel is one more Tab away. Which moves open a tab is
             the wrap's own, as [[tabs-open-on-navigation]] below records. The active-tab underline reuses Radix's own tab skin, so the
@@ -425,7 +425,7 @@ export const History: Story = {
             press that VoiceOver sends. A focus that no key moved opens nothing, and{" "}
             <Code>activationMode="manual"</Code> keeps manual.
           </Decision>
-          <Decision id="Nav routes">
+          <Decision id="[[floating-surface-wraps]] · Nav routes">
             A nav tab routes through <Code>useLinkComponent()</Code>, so an app's framework Link (Next /
             React Router) handles the click; with no provider it falls back to a plain <Code>&lt;a&gt;</Code>.
             The active link carries <Code>aria-current="page"</Code> — the accessible “you are here”.

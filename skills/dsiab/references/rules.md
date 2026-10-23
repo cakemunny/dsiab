@@ -206,5 +206,5 @@ Then, in this order:
 
 The `design-system-steward` reviewer ships with these rules. It owns system fidelity: tokens,
 accessibility, reuse, the cascade and visual proof. Dispatch it before any done-claim on a change a
-user can see. It reviews and reports and does not implement, and its findings are worth a second look,
-because some come back overstated.
+user can see. It reviews and reports, and when a dispatch asks it to, it also builds on the system or
+contributes to it. Its findings are worth a second look, because some come back overstated.

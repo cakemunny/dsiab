@@ -297,12 +297,12 @@ export const History: Story = {
             RadioCards is a <strong>wrapped</strong> Radix Themes component — the Radix name wins; built on the
             Radix substrate + our <Code>--ds-*</Code> layer, not a hand-rolled card grid.
           </Decision>
-          <Decision id="Size lane">
+          <Decision id="[[choice-controls]] · Size lane">
             <Code>size</Code> rides the global <Code>uiSize</Code> <strong>control</strong> lane (default{" "}
             <Code>small</Code> → <Code>1</Code>), so a card set sizes with the Buttons and inputs around it
             rather than as a roomier surface.
           </Decision>
-          <Decision id="Selected skin">
+          <Decision id="[[choice-controls]] · Selected skin">
             A selected card is a <strong>slight accent fill</strong> (<Code>--ds-fill-accent-weak</Code>) inside
             a 2px band in <Code>--accent-indicator</Code>, not white with a stroke. Both halves are
             accent-aware, so the selected cue follows the brand collision shift automatically, and{" "}
@@ -325,7 +325,7 @@ export const History: Story = {
             focused card differs from a selected card at rest by 3:1 over that strip on 27 colours in both
             appearances. Every other ring in the system stays 2px.
           </Decision>
-          <Decision id="Why the weak tint, not the a5 selected tint">
+          <Decision id="[[choice-controls]] · Why the weak tint, not the a5 selected tint">
             The fill is the <Code>--ds-fill-accent-weak</Code> step, not the deeper{" "}
             <Code>--ds-fill-selected-subtle</Code> one used for a selected <em>row</em>. Measured on this
             page's plan cards, the deeper tint drops the card's muted description line to{" "}

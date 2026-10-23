@@ -714,7 +714,7 @@ export const History: Story = {
             name a visual-only control, or to voice context sighted users read from layout alone. It is not a
             way to hide content people need to <strong>see</strong> — that is a conditional-render job.
           </Decision>
-          <Decision id="No paint, no size lane">
+          <Decision id="[[surface-wraps]] · No paint, no size lane">
             VisuallyHidden declares no <Code>--ds-*</Code> roles and rides no size lane: it never sets a fill,
             stroke, or text colour, and it never sizes a control — it only removes content from view. So it
             owns no token spec; there is nothing to read live because it never paints.

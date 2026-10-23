@@ -2,6 +2,9 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Flex } from "@radix-ui/themes";
 import { Tag } from "@phosphor-icons/react";
 import { Token } from "./Token";
+import {
+  ALL_ACCENTS, contrastRatio, flatten, parseColor, themeRoot, withAccent, type RGBA,
+} from "../../foundations/_assert";
 
 /* Test-only behavior for Token — kept OUT of the docs stories (System/Token) so viewing a docs page
    doesn't drive the chip (a play clicks / removes it). Underscore-prefixed file → registry- and
@@ -232,5 +235,65 @@ export const Disabled: Story = {
     await sleep(0);
     if (read(disabledSpy.click) !== 0) throw new Error("a disabled body must not fire onClick");
     if (read(disabledSpy.remove) !== 0) throw new Error("a disabled ✕ must not fire onRemove");
+  },
+};
+
+/** An unpressed Token's label clears WCAG 4.5:1 against its own composited surface, at every accent in both
+ *  appearances. Five light colours stack a 5% black on Radix's ink to get there ([[contrast-by-alpha-stacking]]).
+ *  Measured off the rendered node, composited bottom-up to the first opaque ancestor. Delete the rest-ink
+ *  rule in components.css and this fails on light orange, teal, yellow, amber and jade. */
+export const RestInkClearsAA: Story = {
+  render: () => (
+    <Flex gap="3" p="4" align="center">
+      <Token onClick={() => {}}>Clickable</Token>
+      <Token>Static</Token>
+    </Flex>
+  ),
+  play: async ({ canvasElement }) => {
+    const chips = [...canvasElement.querySelectorAll<HTMLElement>(".rt-ds-token")];
+    if (chips.length !== 2) throw new Error(`the sweep fixture must render exactly 2 Tokens; got ${chips.length}`);
+    const surfaceUnder = (el: Element): RGBA => {
+      const layers: RGBA[] = [];
+      for (let node: Element | null = el; node; node = node.parentElement) {
+        const paint = parseColor(getComputedStyle(node).backgroundColor);
+        if (paint.a === 0) continue;
+        layers.push(paint);
+        if (paint.a === 1) break;
+      }
+      if (!layers.length || layers[layers.length - 1].a !== 1) throw new Error("no opaque surface behind a Token");
+      return layers.reduceRight((under, over) => flatten(over, under));
+    };
+    const root = themeRoot(canvasElement);
+    const wasDark = root.classList.contains("dark");
+    const failures: string[] = [];
+    let worst = { at: "", ratio: Infinity };
+    try {
+      for (const mode of ["light", "dark"] as const) {
+        root.classList.toggle("dark", mode === "dark");
+        root.classList.toggle("light", mode === "light");
+        for (const accent of ALL_ACCENTS) {
+          const restore = withAccent(root, accent);
+          try {
+            for (const el of chips) {
+              const bg = surfaceUnder(el);
+              const ratio = contrastRatio(flatten(parseColor(getComputedStyle(el).color), bg), bg);
+              if (ratio < worst.ratio) worst = { at: `${mode}/${accent}`, ratio };
+              if (ratio < 4.5) failures.push(`${mode}/${accent}: ${ratio.toFixed(2)}:1`);
+            }
+          } finally {
+            restore();
+          }
+        }
+      }
+    } finally {
+      root.classList.toggle("dark", wasDark);
+      root.classList.toggle("light", !wasDark);
+    }
+    if (failures.length) {
+      throw new Error(
+        `an unpressed Token's label must clear 4.5:1 against its own composited surface — ${failures.length} of ` +
+          `${ALL_ACCENTS.length * 2 * chips.length} readings are under it, worst ${worst.at} at ${worst.ratio.toFixed(2)}:1:\n  ${failures.slice(0, 8).join("\n  ")}`,
+      );
+    }
   },
 };

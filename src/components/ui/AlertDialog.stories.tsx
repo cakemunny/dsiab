@@ -216,7 +216,7 @@ export const History: Story = {
           <Decision id="[[catalog-as-specification]] · Wrapped Radix component">A wrapped Radix Themes component — the Radix name wins; built on the Radix substrate + our <Code>--ds-*</Code> layer, not a from-scratch modal.</Decision>
           <Decision id="[[button-priority]] · Both-solid destructive confirm">The canonical destructive confirm: Cancel = <Code>priority="secondary"</Code>, Action = <Code>{`<Button priority="primary" tone="danger">`}</Code> — the both-solid model. A danger solid doesn't spend the one-solid-primary budget. Destructive copy is verb+object (“Delete project”), never “OK”.</Decision>
           <Decision id="[[floating-surface-fill]] · Opaque modal panel">Content is an opaque, elevated modal panel (Radix's solid dialog skin) — no translucent variant is exposed.</Decision>
-          <Decision id="uiSize · R10 · Global control lane">Content <Code>size</Code> follows the global control lane (our small default) unless set.</Decision>
+          <Decision id="[[standard-dialog]] · uiSize · Global control lane">Content <Code>size</Code> follows the global control lane (our small default) unless set.</Decision>
         </Flex>
       </Section>
       <Rule />

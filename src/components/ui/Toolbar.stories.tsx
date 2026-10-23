@@ -300,7 +300,7 @@ export const History: Story = {
           <Decision id="[[toolbar-slots]] · slot layout">
             <Code>Toolbar.Root</Code> lays out three regions — <Code>start</Code> / <Code>center</Code> /{" "}
             <Code>end</Code>. With a center slot the layout is a CSS grid <Code>1fr auto 1fr</Code> (center truly
-            centered); without one it is <Code>justify-content: space-between</Code> (start leads, end trails).
+            centered); without one it is <Code>justify-content: space-between</Code> (start leads, end trails).{" "}
             <Code>orientation="vertical"</Code> stacks the same regions down the block axis.
           </Decision>
           <Decision id="[[toolbar-slots]] · children">
@@ -317,23 +317,23 @@ export const History: Story = {
             delegates to the toolbar's single scope — use it when you want toggle items in the toolbar's own
             arrow flow.
           </Decision>
-          <Decision id="forwardRef">
+          <Decision id="[[toolbar-slots]] · forwardRef">
             Roving focus moves between items by DOM-node ref, so every composed control forwards its ref —{" "}
             <Code>Button</Code> (from ToggleButton's work) and now <Code>IconButton</Code>. Composing{" "}
             <Code>Toolbar.Button asChild</Code> over an IconButton that dropped its ref silently breaks
             arrow-navigation onto that item.
           </Decision>
-          <Decision id="uiSize · R10">
+          <Decision id="[[container-size-seeding]] · uiSize">
             <Code>size</Code> follows the global <Code>uiSize</Code> control lane (default <Code>small</Code>) and
             cascades to every composed control via the shared size context.
           </Decision>
-          <Decision id="Deferred">
+          <Decision id="[[toolbar-slots]] · Deferred">
             Deferred: a <Code>useListFocus</Code>-style any-focusable DOM-query roving engine (arbitrary
             inputs/selects as roving items) and a <Code>useKeyboardHint</Code> ("arrows to navigate" hint). The
             constrained-children model makes the caret-guard problem such an engine solves largely evaporate.
             Revisit if a real toolbar needs inputs/selects as roving items, or TreeList wants the engine.
           </Decision>
-          <Decision id="SegmentedControl vs group">
+          <Decision id="[[toggle-group-box]] · SegmentedControl vs group">
             <Code>SegmentedControl</Code> is a System component — reach for it when the cluster picks a{" "}
             <em>value</em> that persists (a filter, a view density). A toolbar's alignment cluster is a{" "}
             <Code>ToggleButtonGroup</Code> (<Code>type="single"</Code>): tool state, roving focus inside the

@@ -353,7 +353,7 @@ export const History: Story = {
             ScrollArea is a <strong>wrapped</strong> Radix Themes component — the Radix name wins; built on the
             Radix substrate + our <Code>--ds-*</Code> layer, not a hand-rolled scroll container.
           </Decision>
-          <Decision id="Control size lane">
+          <Decision id="[[surface-wraps]] · Control size lane">
             The scrollbar THICKNESS rides the <strong>control</strong> size lane (small → 1, medium → 2,
             large → 3), not the container lane its surface rides. ScrollArea's <Code>size</Code> range is only
             1–3, and the container lane tops out at <Code>"4"</Code> — out of range. An out-of-range size
@@ -363,7 +363,7 @@ export const History: Story = {
             deliberate deviation from the container scale: the scrollbar is a control-scale accent riding a
             surface, not a container-scale surface itself.
           </Decision>
-          <Decision id="Scrollbar skin">
+          <Decision id="[[neutral-part-stacks]] · Scrollbar skin">
             The thumb reuses Radix's own gray-alpha skin, <Code>--gray-a8</Code> (<Code>--gray-a9</Code> on
             hover), the neutral overlay-scrollbar treatment. ScrollArea declares no <Code>--ds-*</Code> role, and
             since [[neutral-part-stacks]] one rule stacks <Code>--neutral-thumb-stack</Code> (theme.css) on the thumb as a gradient

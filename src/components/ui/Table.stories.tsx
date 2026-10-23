@@ -445,18 +445,18 @@ export const History: Story = {
             A <strong>wrapped</strong> Radix Themes component — the Radix name wins; a thin styling layer over
             Radix's Table, not a hand-rolled grid.
           </Decision>
-          <Decision id="Styling only">
+          <Decision id="[[static-table]] · Styling only">
             A styling wrap for <strong>simple, static</strong> tables — it exposes <strong>no behaviour props</strong>{" "}
             (no sorting, selection, virtualization, or column resizing). A real data grid is an{" "}
             <strong>external component</strong> the system neither ships nor wraps: bring one in alongside when you
             need those behaviours, and keep this wrap for display.
           </Decision>
-          <Decision id="Header doesn't lie">
+          <Decision id="[[static-table]] · Header doesn't lie">
             The header is weight 600 (the strong ramp step) with <strong>no hover treatment and no sort
             affordance</strong>. A header that reads as interactive but isn't is a control that lies — so a
             static table's header stays visibly static.
           </Decision>
-          <Decision id="Numeric columns">
+          <Decision id="[[static-table]] · Numeric columns">
             A numeric column carries <Code>numeric</Code> on its header and cells → <Code>data-numeric</Code>,
             which right-aligns the column <strong>and</strong> sets{" "}
             <Code>font-variant-numeric: tabular-nums</Code> on it. Right-alignment alone still lets a column
@@ -465,11 +465,11 @@ export const History: Story = {
             figures give every digit one advance width, which is what makes a column of money read as a
             column.
           </Decision>
-          <Decision id="Skin + size">
+          <Decision id="[[static-table]] · Skin + size">
             The <Code>surface</Code> skin reuses Radix's own table treatment (no <Code>--ds-*</Code> roles); the
             cell text rides the control size lane; body rows wash on hover with the neutral <Code>--ds-fill-hover</Code>.
           </Decision>
-          <Decision id="The caption is the name">
+          <Decision id="[[table-accessible-name]] · The caption is the name">
             Radix renders <Code>&lt;div {"{...props}"}&gt;&lt;ScrollArea&gt;&lt;table&gt;</Code>, so every consumer prop
             lands on the scroll wrapper and the <Code>&lt;table&gt;</Code> stayed <strong>anonymous</strong> in the
             accessibility tree. The one element a prop can still reach is the table's own{" "}
@@ -479,7 +479,7 @@ export const History: Story = {
             visible one placed by <Code>captionSide</Code>. Vendor internals stay untouched: no class name is
             copied and no part of Radix's Table is reimplemented.
           </Decision>
-          <Decision id="aria-labelledby is refused, not ignored">
+          <Decision id="[[table-accessible-name]] · aria-labelledby is refused, not ignored">
             A <Code>&lt;caption&gt;</Code> cannot reference an id, so there is no honest way to honour{" "}
             <Code>aria-labelledby</Code> here. Rather than let it land on the wrapper and do nothing, the prop's
             declared type IS the refusal sentence, so the compiler prints the fix at the call site, and a

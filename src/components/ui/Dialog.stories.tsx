@@ -702,12 +702,12 @@ export const History: Story = {
             resolve; where both are earned, it is because they lead <em>different</em> places (commit the
             acknowledgement vs leave without it, keep the work vs abandon it).
           </Decision>
-          <Decision id="Container size">
+          <Decision id="[[standard-dialog]] · Container size">
             Content rides the <strong>container</strong> size lane (<Code>small</Code> → <Code>2</Code>) — a
             step roomier than the control lane, so a standard content dialog reads more spacious than a terse
             confirm. An explicit <Code>size</Code> always wins.
           </Decision>
-          <Decision id="Standard vs specialized">
+          <Decision id="[[standard-dialog]] · Standard vs specialized">
             System Dialog serves the <strong>standard</strong> title / description / body / footer modal. The
             specialized surfaces — a command palette, a lightbox, a mobile drawer — deliberately keep the raw
             Radix Dialog: they steer their own focus, skin their own content, and animate their own tiers. The

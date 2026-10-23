@@ -10,8 +10,9 @@
  *   node scripts/install-git-hooks.mjs
  *
  * Hooks are a CHECKOUT convenience, never a build requirement, so this exits 0 whenever there is no
- * checkout to install them into. The distributed zip (`git archive`) carries no .git, and `npm install`
- * fails the whole install if "prepare" exits non-zero — a consumer unpacking the zip must not be told
+ * checkout to install them into. An exported copy of the source (`git archive`, or GitHub's source
+ * download) carries no .git, and `npm install` fails the whole install if "prepare" exits non-zero — a
+ * person unpacking that copy must not be told
  * their install broke. `git rev-parse` also searches PARENT directories, so an unpacked copy sitting
  * inside an unrelated repository would otherwise write this repo's hooks into that one; requiring the
  * discovered toplevel to BE this package root rules that out (a worktree's toplevel is its own root,

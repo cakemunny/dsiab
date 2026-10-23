@@ -42,7 +42,8 @@ function PressedFillSpec() {
           its label to weight 600 — a non-colour cue, so <strong>on</strong> reads without relying on colour
           alone. The label also <strong>leaves the accent</strong>: it takes{" "}
           <Mono>--ds-text-strong</Mono>, the same committed-selection ink a checked{" "}
-          <strong>Select</strong> row and a current <strong>Pagination</strong> page carry. Accent ink on an
+          <strong>Select</strong> row and a current <strong>Pagination</strong> page carry. An icon inside the toggle
+          paints in <Mono>currentColor</Mono>, so it leaves the accent with the label. Accent ink on an
           accent tint is one hue arguing with itself — the two move together as the brand changes, and the
           pair fell under AA on 17 of the 54 accent × appearance combinations before the ink stepped out.
           The label reserves its bold width at all times, so the weight shift never reflows. Everything else
@@ -67,7 +68,7 @@ function PressedFillSpec() {
         />
         <MeasuredRow
           part="Pressed label ink"
-          note="The committed-selection ink over that tint — not the ghost button's accent, which is tuned for the page behind it."
+          note="The committed-selection ink over that tint — not the ghost button's accent, which is tuned for the page behind it. An icon paints in currentColor, so it takes the same ink."
           token="--ds-text-strong"
           select='.rt-BaseButton[data-state="on"]'
           prop="color"
@@ -83,7 +84,7 @@ const PROPS: PropDef[] = [
   { name: "pressed", type: "boolean", desc: <>Controlled pressed state. Pair with <Code>onPressedChange</Code>.</>, source: "ToggleButton.tsx" },
   { name: "defaultPressed", type: "boolean", def: "false", desc: <>Initial pressed state when uncontrolled.</>, source: "ToggleButton.tsx" },
   { name: "onPressedChange", type: "(pressed: boolean) => void", desc: <>Fires on every state change, controlled or uncontrolled.</>, source: "ToggleButton.tsx" },
-  { name: "pressedIcon", type: "ReactNode", desc: <>Optional icon shown while pressed — swaps the rest content. Omit it and the same content renders in both states.</>, source: "ToggleButton.tsx" },
+  { name: "pressedIcon", type: "ReactNode", desc: <>Content shown while pressed — swaps the rest content. Omit it and the same content renders in both states. An icon-only toggle needs it, because it has no label to bold, and development warns without it.</>, source: "ToggleButton.tsx" },
   { name: "label", type: "string", desc: <>Accessible name → <Code>aria-label</Code>. <strong>Required</strong> for an icon-only toggle — there is no auto-tooltip.</>, source: "ToggleButton.tsx" },
   { name: "size", type: `"1" | "2" | "3" | "inherit"`, def: `control lane (1 at small)`, desc: <>Passed through to Button. Unset, it follows the global <Code>uiSize</Code> control lane (default <Code>small</Code> → <Code>1</Code>).</>, source: "ToggleButton.tsx" },
   { name: "disabled", type: "boolean", desc: <>Disables the toggle — keeps Radix's dimmed treatment; the pressed paint is gated off (<Code>:not([data-disabled])</Code>).</>, source: "Radix" },
@@ -240,7 +241,7 @@ export const History: Story = {
             pressed paint is the accent-aware <Code>--ds-fill-selected-subtle</Code> fill, a 1px inset{" "}
             <Code>--ds-stroke-accent-weak</Code> edge <strong>and</strong> a weight-600 label. The weight is the cue that needs no colour. An icon-only toggle has no visible text for it to act on, so <Code>pressedIcon</Code> swaps its glyph instead.
           </Decision>
-          <Decision id="D11 · the pressed label leaves the accent">
+          <Decision id="[[toggle-button]] · the pressed label leaves the accent">
             The pressed label takes <Code>--ds-text-strong</Code>, not the ghost button's inherited{" "}
             <Code>--accent-a11</Code> — the same ink every other committed-selection surface in the system
             already uses (the checked <Code>Select</Code> row, the active <Code>DateRangeInput</Code> preset,
@@ -256,17 +257,17 @@ export const History: Story = {
             <Code>defaultPressed</Code>. Radix's primitive gives uncontrolled state for free, and it's the platform
             convention for a form-ish control.
           </Decision>
-          <Decision id="Docs · label">
+          <Decision id="[[toggle-button]] · Docs · label">
             An icon-only ToggleButton does <strong>not</strong> get an automatic <strong>tooltip</strong> from{" "}
             <Code>label</Code>. Follow the IconButton rule: an icon-only toggle <strong>requires</strong>{" "}
             <Code>label</Code> (→ <Code>aria-label</Code>) for an accessible name.
           </Decision>
-          <Decision id="Deferred">
+          <Decision id="[[toggle-button]] · Deferred">
             Deferred: an event-arg <Code>preventDefault</Code> opt-out, and the async{" "}
             <Code>pressedChangeAction</Code> + <Code>useOptimistic</Code> optimistic-update pattern — revisit if
             the app layer needs them.
           </Decision>
-          <Decision id="uiSize · R10 · Global control lane">
+          <Decision id="[[toggle-button]] · uiSize · Global control lane">
             <Code>size</Code> follows the global <Code>uiSize</Code> control lane (default <Code>small</Code>) via
             Button.
           </Decision>

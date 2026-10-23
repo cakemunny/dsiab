@@ -343,7 +343,7 @@ export const History: Story = {
             the Radix substrate, not a hand-rolled grid. Because it is pure layout there is nothing to
             override, so the wrap is a documented <Code>export</Code>, not a forwardRef shell.
           </Decision>
-          <Decision id="No paint, no size lane">
+          <Decision id="[[surface-wraps]] · No paint, no size lane">
             Grid declares no <Code>--ds-*</Code> roles and rides no size lane: it never sets a fill, stroke,
             or text colour, and it never sizes a control — it only positions. So it owns no{" "}
             <strong>colour</strong> spec, and colour stays the job of the components placed inside it. Its

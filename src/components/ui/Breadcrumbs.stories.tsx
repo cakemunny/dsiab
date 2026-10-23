@@ -598,22 +598,22 @@ export const History: Story = {
         <Flex direction="column" gap="3">
           <Decision id="[[breadcrumb-trail]] · Auto-current on the content element">
             When no item sets <Code>isCurrent</Code>, the <strong>last</strong> crumb's <strong>content
-            element</strong> (the link/button/span via a <Code>contentRef</Code> — <strong>never</strong> the
-            <Code>&lt;li&gt;</Code>) gets <Code>aria-current="page"</Code>, via a post-render DOM scan of the
+            element</strong> (the link/button/span via a <Code>contentRef</Code> — <strong>never</strong> the{" "}
+            <Code>&lt;li&gt;</Code>) gets <Code>aria-current="page"</Code>, via a post-render DOM scan of the{" "}
             <Code>&lt;ol&gt;</Code> children. This is the navigation-a11y fix:
             the current marker lands on the actual interactive element — including when the last crumb is a link —
             not a positional last child. (Chosen over the plan's early "children introspection" guess: the DOM
             scan needs no child cloning and is robust to any child structure.)
           </Decision>
           <Decision id="[[breadcrumb-trail]] · leading separators">
-            Each item renders its own <strong>leading</strong> <Code>aria-hidden</Code> separator, hidden on
+            Each item renders its own <strong>leading</strong> <Code>aria-hidden</Code> separator, hidden on{" "}
             <Code>:first-child</Code> via CSS. Separators are <strong>decorative</strong> — screen readers skip
             them; the crumbs carry the meaning.
           </Decision>
           <Decision id="[[breadcrumb-trail]] · muted links">
             Linked crumbs are styled from <Code>--ds-*</Code> tokens: muted secondary text
             (<Code>--ds-text-weak</Code>), underline on hover, the system focus ring ([[focus-ring]]), never the
-            raw Radix <Code>Link</Code>, whose accent skin would fight the muted trail. The element is a caller
+            raw Radix <Code>Link</Code>, whose accent skin would fight the muted trail. The element is a caller{" "}
             <Code>as</Code> component, else the app's <Code>LinkProvider</Code> link ([[link-and-link-provider]]),
             else a native <Code>&lt;a&gt;</Code>. Current text is <Code>--ds-text-strong</Code>. <strong>Zero
             net-new tokens.</strong>

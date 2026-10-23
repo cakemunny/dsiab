@@ -435,18 +435,18 @@ export const History: Story = {
             viewport is a <em>different axis</em>: the whole rail re-renders into the mobile drawer via{" "}
             <Code>useSideNavRenderMode()</Code> (a drawer render is always expanded).
           </Decision>
-          <Decision id="Resizable · the [[resize-handle]] engine">
+          <Decision id="[[resize-handle]] · Resizable · the engine">
             With <Code>resizable</Code>, the rail reads the shared <Code>useResizable</Code> engine and
             renders a <Code>ResizeHandle</Code> at its edge (the WAI window-splitter contract — drag, arrows,
             Home/End, double-click collapse).
           </Decision>
-          <Decision id="A11y">
+          <Decision id="[[side-nav]] · A11y">
             <strong>Deliberate accessibility choices:</strong> <Code>SideNavCollapseButton</Code> carries{" "}
             <Code>aria-expanded={"{!collapsed}"}</Code> + <Code>aria-controls</Code> at the nav so the
             collapsed state is announced; arrow keys rove the rows with a single roving tab stop; each{" "}
             <Code>nav</Code> landmark is labelled so multiple navs stay distinguishable.
           </Decision>
-          <Decision id="Deviation · parents disclose, leaves navigate">
+          <Decision id="[[side-nav]] · Deviation · parents disclose, leaves navigate">
             A parent is a <strong>single disclosure control</strong> (<Code>aria-expanded</Code> on the row
             button — the honest a11y for expand/collapse), not a split navigate-and-toggle row. Composing{" "}
             <Code>Item</Code> — whose interactivity lives on an inner body that can't carry{" "}

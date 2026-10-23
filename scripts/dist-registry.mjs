@@ -83,8 +83,9 @@ export const OUT_PATH = resolve(ROOT, "dist/registry.json");
  * uses vocabulary that only means something inside the repo. These say the same thing to somebody
  * who has only installed the package.
  *
- * Every entry whose status is not `ported` MUST have one. `buildDistRegistry` throws otherwise, so
- * a component excluded tomorrow cannot ship with an empty explanation.
+ * Every `out-of-scope` entry MUST have one. `buildDistRegistry` throws otherwise, so a component
+ * excluded tomorrow cannot ship with an empty explanation. A `planned` entry takes PLANNED_REASON
+ * instead, because "accepted and not built yet" reads the same for every one of them.
  */
 export const OUT_OF_SCOPE_REASONS = {
   Markdown:
@@ -94,9 +95,14 @@ export const OUT_OF_SCOPE_REASONS = {
   Icon: "Not included by design. Import icons directly from @phosphor-icons/react — this system does not wrap them.",
 };
 
+/** The reason every `planned` entry carries. CONTRIBUTING.md enters an accepted proposal as `planned`. */
+export const PLANNED_REASON =
+  "Accepted into the system and not built yet. Until it ships, build your own from the components that are available.";
+
 /** Root `status` values mapped to what they mean to somebody who has installed the package. */
 const STATUS = {
   ported: "available",
+  planned: "planned",
   "out-of-scope": "out-of-scope",
 };
 
@@ -138,7 +144,7 @@ export function buildDistRegistry(registry) {
     };
 
     if (status !== "available") {
-      const reason = OUT_OF_SCOPE_REASONS[entry.name];
+      const reason = status === "planned" ? PLANNED_REASON : OUT_OF_SCOPE_REASONS[entry.name];
       if (!reason) {
         throw new Error(
           `dist-registry: ${entry.name} is not available to consumers and has no reason. Add one to ` +

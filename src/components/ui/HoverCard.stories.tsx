@@ -293,7 +293,7 @@ export const History: Story = {
             portals, positions, and dismisses it; the wrap is the same compound shape as{" "}
             <Code>DropdownMenu</Code> (Root / Trigger pass through, Content is wrapped).
           </Decision>
-          <Decision id="uiSize · Global control lane">
+          <Decision id="[[floating-surface-wraps]] · uiSize · Global control lane">
             Content <Code>size</Code> follows the global <Code>uiSize</Code> <strong>control lane</strong>{" "}
             (our <Code>small</Code> default → <Code>1</Code>) unless set — so a preview card sizes with the
             Button and Text beside it, never offset from them.

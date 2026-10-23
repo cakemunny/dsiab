@@ -492,7 +492,7 @@ export const History: Story = {
             <Code>aria-label</Code> for its accessible name. The icon alone must read unambiguously in
             context, or reach for a text <Code>Button</Code> instead.
           </Decision>
-          <Decision id="Inset">
+          <Decision id="[[field-shell]] · Inset">
             The <Code>inset</Code> prop marks an in-field tertiary control (clear, reveal): it forces the
             ghost variant and guarantees a ≥24×24 hit target (WCAG 2.5.8). Its field-relative sizing is
             demonstrated in <Code>System/TextField</Code>, not here — an inset control’s meaning comes

@@ -491,17 +491,17 @@ export const History: Story = {
             padding. The scan is <strong>synchronous</strong> — an SSR-safe approach that avoids a mount-time
             registration effect, which would race divider placement and flash on hydration.
           </Decision>
-          <Decision id="Documented API">
+          <Decision id="[[layout-primitive]] · Documented API">
             <Code>contentWidth</Code>, <Code>padding</Code>, and <Code>defaultHasDividers</Code> are <strong>real
             API the source hides</strong> — this component documents them (see Properties). They constrain the
             content measure, set slot-aware padding, and toggle the area dividers respectively.
           </Decision>
-          <Decision id="Forward rest · [[layout-primitive]]">
-            The root <strong>forwards</strong> <Code>…rest</Code> + <Code>data-testid</Code> (and
+          <Decision id="[[layout-primitive]] · Forward rest">
+            The root <strong>forwards</strong> <Code>…rest</Code> + <Code>data-testid</Code> (and{" "}
             <Code>className</Code>/<Code>style</Code>/<Code>id</Code>/aria). The rule here is <strong>forward
             honestly or omit from the type</strong> — never declare a prop surface and silently discard it.
           </Decision>
-          <Decision id="Landmarks · opt-in">
+          <Decision id="[[layout-primitive]] · Landmarks · opt-in">
             <Code>banner</Code>/<Code>contentinfo</Code>/<Code>complementary</Code> are <strong>opt-in</strong>
             per slot (the <Code>landmark</Code> prop), never auto-emitted: a Layout can be nested, and multiple
             same-type landmarks are invalid. Slots render generic containers by default; <Code>main</Code> is
@@ -511,19 +511,19 @@ export const History: Story = {
             The rail is <Code>flex: 0 0 auto</Code> — a rail that narrows with the window stops being a rail —
             which leaves content as the <strong>only</strong> flexible region. Given no floor it gives up
             everything, and it does so <strong>silently</strong>: the shell still fits, so nothing scrolls; the
-            text just wraps to one character per line and then to nothing. The floor lives on the primitive as
+            text just wraps to one character per line and then to nothing. The floor lives on the primitive as{" "}
             <Code>--ds-layout-content-min</Code>, the sibling of <Code>--ds-layout-panel-width</Code>, and
             defaults to <Code>0</Code> — <strong>opt-in</strong>, so no existing shell moves, and no new token
-            or prop is minted for it. Layout does not impose an overflow mode of its own; what the overflow
+            or prop is minted for it. Layout does not impose an overflow mode of its own; what the overflow{" "}
             <em>does</em> is the shell's call. The responsive rail→drawer swap stays AppShell's job.
           </Decision>
           <Decision id="Areas are border-box">
-            A declared area width is the width it <strong>occupies</strong>. Under content-box the documented
+            A declared area width is the width it <strong>occupies</strong>. Under content-box the documented{" "}
             <Code>260px</Code> rail rendered <Code>292px</Code> at the default padding — and widened again with
             every step of the <Code>padding</Code> prop, so the number in the docs described nothing you could
             measure on screen.
           </Decision>
-          <Decision id="Resizable · shared engine">
+          <Decision id="[[layout-primitive]] · Resizable · shared engine">
             A resizable <Code>Layout.Panel</Code> reuses the shared <Code>useResizable</Code> engine +
             <Code>ResizeHandle</Code> (the WAI window-splitter contract), rather than a bespoke splitter. The
             handle <strong>is</strong> the panel↔content seam (it suppresses the auto-divider there); the hook is
@@ -547,8 +547,8 @@ export const History: Story = {
           <Decision id="0.9.0">
             Initial <Code>System/Layout/Layout</Code> — the page-shell primitive (<Code>Layout</Code> +
             <Code>Header</Code>/<Code>Footer</Code>/<Code>Panel</Code>/<Code>Content</Code> slots, via a namespace
-            or named exports). Synchronous slot-scan + divider resolution; documented
-            <Code>contentWidth</Code>/<Code>padding</Code>/<Code>defaultHasDividers</Code>; honest
+            or named exports). Synchronous slot-scan + divider resolution; documented{" "}
+            <Code>contentWidth</Code>/<Code>padding</Code>/<Code>defaultHasDividers</Code>; honest{" "}
             <Code>…rest</Code>/<Code>data-testid</Code> forwarding; opt-in landmark roles; a resizable panel on the
             shared engine. Painted from <Code>--ds-*</Code> surfaces + the System Separator — no new tokens.
             Stories split History · Anatomy · Usage · Props.

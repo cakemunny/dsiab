@@ -363,7 +363,7 @@ export const History: Story = {
           <Decision id="[[relative-timestamp]] · semantic time + tooltip">
             The root is a semantic <Code>&lt;time dateTime={"{ISO}"}&gt;</Code> (machine-readable), styled AS a
             Radix Text via <Code>asChild</Code> — one element, no wrapper span. In relative mode the full absolute
-            string is both the hover <strong>tooltip</strong> (composed from the raw Radix Tooltip) and the
+            string is both the hover <strong>tooltip</strong> (composed from the raw Radix Tooltip) and the{" "}
             <Code>aria-label</Code>. The pure time-math lives in a separately tested util
             (<Code>timestampFormat.logic.test.ts</Code>).
           </Decision>

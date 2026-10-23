@@ -1,6 +1,7 @@
-import { type CSSProperties, type ReactNode, useState } from "react";
+import { type CSSProperties, type ReactNode, useEffect, useState } from "react";
 import { Toggle } from "@radix-ui/react-toggle";
 import { Button, type ButtonProps } from "./Button";
+import { NO_PRESSED_ICON_MESSAGE, warnOnce } from "../../theme/detectAndWarn";
 
 /* ToggleButton — a binary on/off control (bold, mute, pin). Composes the @radix-ui/react-toggle
  * primitive `asChild` over our Button at `priority="tertiary"` (ghost), so it reuses the ENTIRE Button
@@ -30,7 +31,9 @@ export interface ToggleButtonProps extends Omit<ButtonProps, Reserved> {
   defaultPressed?: boolean;
   /** Fires when the pressed state changes — in both controlled and uncontrolled use. */
   onPressedChange?: (pressed: boolean) => void;
-  /** Optional icon shown while pressed — swaps the rest content. Omit it and the same content renders in both states. */
+  /** Content shown while pressed — swaps the rest content. Omit it and the same content renders in both
+   *  states. An icon-only toggle (one given `label`) needs it: the bold label is the pressed cue that does
+   *  not rely on colour, and an icon-only toggle has no label to bold, so development warns without it. */
   pressedIcon?: ReactNode;
   /** Accessible name → `aria-label`. REQUIRED for an icon-only toggle (there is no auto-tooltip). */
   label?: string;
@@ -87,6 +90,12 @@ export function ToggleButton({
   };
 
   const content = current && pressedIcon !== undefined ? pressedIcon : children;
+
+  // `label` is what marks a toggle icon-only (it stamps data-icon-only below), so the same test decides
+  // whether the pressed state has a cue beyond colour.
+  useEffect(() => {
+    if (label && pressedIcon === undefined) warnOnce("toggle-icon-only-no-pressed-icon", NO_PRESSED_ICON_MESSAGE);
+  }, [label, pressedIcon]);
 
   return (
     <Toggle asChild pressed={current} onPressedChange={handleChange} disabled={disabled}>

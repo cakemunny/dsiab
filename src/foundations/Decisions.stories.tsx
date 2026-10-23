@@ -1,4 +1,4 @@
-import { createContext, memo, useCallback, useContext, useEffect, useMemo, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
+import { createContext, memo, useCallback, useContext, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Box, Flex } from "@radix-ui/themes";
 import { MagnifyingGlass } from "@phosphor-icons/react";
@@ -215,26 +215,32 @@ function sorted(list: Ruling[], sort: Sort): Ruling[] {
 // A link to another ruling opens that row in place, so the renderer reaches the page's open action.
 const OpenRuling = createContext<(name: string) => void>(() => {});
 
-function RulingAnchor({ name, children }: { name: string; children: ReactNode }) {
+// A ruling name is one word to the reader, so it never breaks at its hyphens, except inside a table cell,
+// where a narrow column has no other place to break and the table would clip it.
+function RulingAnchor({ name, children, wrap = false }: { name: string; children: ReactNode; wrap?: boolean }) {
   const open = useContext(OpenRuling);
   const onClick = (e: MouseEvent<HTMLAnchorElement>) => {
     if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     e.preventDefault();
     open(name);
   };
-  return <Link href={rulingHref(name)} target="_top" onClick={onClick}>{children}</Link>;
+  return (
+    <Link href={rulingHref(name)} target="_top" onClick={onClick} style={wrap ? undefined : { whiteSpace: "nowrap" }}>
+      {children}
+    </Link>
+  );
 }
 
 const inlineCode = { fontFamily: "var(--code-font-family)", fontSize: "0.92em" } as const;
-const strong: CSSProperties = { color: "var(--ds-text-strong)", fontWeight: 600 };
+const strong: CSSProperties = { color: "var(--ds-text-strong)", fontWeight: "var(--ds-font-weight-strong)" };
 
 // Minimal inline markdown: **bold** (which may hold `code`), `code`, [links](url) and [[name]] citations.
 // Bare *italic* markers drop. A link renders with the system Link, and a link to a ruling opens its row.
 // Inside a row trigger a link would nest one control in another, so `bare` renders its text alone.
-function renderInline(text: string, bare = false): ReactNode[] {
+function renderInline(text: string, bare = false, inCell = false): ReactNode[] {
   return text.split(/(\*\*[^*]+\*\*|`[^`]+`|\[\[[a-z0-9-]+\]\]|\[[^\]]+\]\([^)\s]+\))/g).map((p, i) => {
     if (p.startsWith("**") && p.endsWith("**"))
-      return <strong key={i} style={strong}>{renderInline(p.slice(2, -2), bare)}</strong>;
+      return <strong key={i} style={strong}>{renderInline(p.slice(2, -2), bare, inCell)}</strong>;
     if (p.startsWith("`") && p.endsWith("`")) return <code key={i} style={inlineCode}>{p.slice(1, -1)}</code>;
     const cite = p.match(/^\[\[([a-z0-9-]+)\]\]$/);
     const link = p.match(/^\[([^\]]+)\]\(([^)\s]+)\)$/);
@@ -242,7 +248,7 @@ function renderInline(text: string, bare = false): ReactNode[] {
     if (label == null) return p.replace(/\*([^*]+)\*/g, "$1");
     if (bare) return label;
     const ruling = cite?.[1] ?? link?.[2].match(/^#(.+)$/)?.[1];
-    if (ruling && BY_NAME.has(ruling)) return <RulingAnchor key={i} name={ruling}>{label}</RulingAnchor>;
+    if (ruling && BY_NAME.has(ruling)) return <RulingAnchor key={i} name={ruling} wrap={inCell}>{label}</RulingAnchor>;
     return <Link key={i} href={link?.[2]}>{label}</Link>;
   });
 }
@@ -257,7 +263,7 @@ const typeStep = (step: string): CSSProperties => ({ fontSize: `var(--font-size-
 // as its content needs, and never wider than the column, so a cell wraps only when the column is full.
 const proseBase: CSSProperties = {
   fontFamily: "var(--default-font-family)",
-  fontWeight: 400,
+  fontWeight: "var(--ds-font-weight-base)",
   color: "var(--ds-text-weak)",
   maxWidth: "var(--ds-text-measure)",
   margin: "6px 0 0",
@@ -293,7 +299,7 @@ function BlockView({ block, name }: { block: Block; name: string }) {
         <Table.Header>
           <Table.Row>
             {block.head.map((cell, i) => (
-              <Table.ColumnHeaderCell key={i}>{renderInline(cell)}</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell key={i}>{renderInline(cell, false, true)}</Table.ColumnHeaderCell>
             ))}
           </Table.Row>
         </Table.Header>
@@ -301,7 +307,7 @@ function BlockView({ block, name }: { block: Block; name: string }) {
           {block.rows.map((row, i) => (
             <Table.Row key={i}>
               {row.map((cell, j) => (
-                <Table.Cell key={j}>{renderInline(cell)}</Table.Cell>
+                <Table.Cell key={j}>{renderInline(cell, false, true)}</Table.Cell>
               ))}
             </Table.Row>
           ))}
@@ -325,7 +331,7 @@ function SourcesView({ sources }: { sources: Source[] }) {
         {sources.map((source, i) => (
           <li key={i} style={{ margin: "6px 0 2px" }}>
             <Link href={source.url}>{source.name}</Link>
-            <ul style={{ margin: "2px 0 0", paddingLeft: 16, listStyle: "circle" }}>
+            <ul style={{ margin: "var(--ds-space-2) 0 0", paddingLeft: "var(--ds-space-16)", listStyle: "circle" }}>
               {verdictsOf(source.text).map((verdict, j) => (
                 <li key={j} style={{ margin: "1px 0" }}>
                   {verdict.label && (
@@ -366,7 +372,7 @@ function RulingBody({ ruling }: { ruling: Ruling }) {
 
 const headline: CSSProperties = {
   fontFamily: "var(--default-font-family)",
-  fontWeight: 400,
+  fontWeight: "var(--ds-font-weight-base)",
   color: "var(--ds-text-strong)",
   maxWidth: "var(--ds-text-measure)",
 };
@@ -374,12 +380,12 @@ const metaLine: CSSProperties = {
   display: "flex",
   flexWrap: "wrap",
   alignItems: "center",
-  gap: 6,
+  gap: "var(--ds-space-8)",
   fontFamily: "var(--default-font-family)",
-  fontWeight: 400,
+  fontWeight: "var(--ds-font-weight-base)",
   color: "var(--ds-text-weak)",
 };
-const nameStyle: CSSProperties = { fontFamily: "var(--code-font-family)", fontSize: "inherit", color: "var(--ds-text-weak)" };
+const nameStyle: CSSProperties = { fontFamily: "var(--code-font-family)", fontSize: "inherit", color: "var(--ds-text-weak)", whiteSpace: "nowrap" };
 const dateStyle: CSSProperties = { fontVariantNumeric: "tabular-nums" };
 
 // One row per ruling, on the system CollapsibleGroup: the headline, which is the ruling itself, then the
@@ -393,7 +399,7 @@ const RulingRow = memo(function RulingRow({ ruling }: { ruling: Ruling }) {
     <CollapsibleGroup.Item
       value={ruling.name}
       trigger={
-        <span style={{ display: "flex", flexDirection: "column", gap: 4, flex: 1, minWidth: 0, textAlign: "start" }}>
+        <span style={{ display: "flex", flexDirection: "column", gap: "var(--ds-space-4)", flex: 1, minWidth: 0, textAlign: "start" }}>
           <span data-headline="" style={{ ...headline, ...read }}>{renderInline(ruling.headline, true)}</span>
           <span style={{ ...metaLine, ...meta }}>
             <code data-ruling={ruling.name} style={nameStyle}>{ruling.name}</code>
@@ -442,6 +448,7 @@ function Rulings() {
   const [sort, setSort] = useState<Sort>("newest");
   const [open, setOpen] = useState<string[]>([]);
   const [reveal, setReveal] = useState<string | null>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
 
   const q = query.trim().toLowerCase();
   const visible = useMemo(
@@ -489,10 +496,20 @@ function Rulings() {
   }, [reveal, visible]);
 
   const toggleTag = (tag: string) => setTags((on) => (on.includes(tag) ? on.filter((t) => t !== tag) : [...on, tag]));
+  // The button that ran this leaves the page once nothing is filtered, so focus moves to the search field
+  // rather than falling to the body (WCAG 2.4.3).
   const clearFilters = () => {
     setQuery("");
     setTags([]);
+    searchRef.current?.focus();
   };
+  const filtered = tags.length > 0 || q !== "";
+  const emptyReason =
+    tags.length && q
+      ? "No ruling carries every pressed tag and the search words together."
+      : tags.length
+        ? "No ruling carries every pressed tag together."
+        : "No ruling matches the search words.";
   const summary =
     `${visible.length} of ${RULINGS.length} rulings` +
     (tags.length ? `, tagged ${tags.join(" and ")}` : "") +
@@ -509,7 +526,7 @@ function Rulings() {
       <Flex direction="column" gap="4" data-decisions-filters="">
         <Flex wrap="wrap" align="center" justify="between" gapX="4" gapY="2">
           <Box style={{ flex: "1 1 280px", maxWidth: 360 }}>
-            <TextField type="search" aria-label="Search rulings" placeholder="Search rulings" value={query} onChange={(e) => setQuery(e.target.value)}>
+            <TextField ref={searchRef} type="search" aria-label="Search rulings" placeholder="Search rulings" value={query} onChange={(e) => setQuery(e.target.value)}>
               <TextField.Slot>
                 <MagnifyingGlass aria-hidden />
               </TextField.Slot>
@@ -546,14 +563,23 @@ function Rulings() {
         </Flex>
       </Flex>
       <Flex direction="column" gap="2" data-decisions-results="">
-        <Text as="p" role="status" style={{ color: "var(--ds-text-weak)" }}>{summary}</Text>
+        {/* Clear filters closes the line that describes what it clears. It keeps its place while no filter
+            is on, hidden and out of the tab order, so showing it never moves the list. */}
+        <Flex align="center" gap="2" wrap="wrap">
+          <Text as="p" role="status" style={{ color: "var(--ds-text-weak)" }}>{summary}</Text>
+          <Box style={{ visibility: filtered && visible.length > 0 ? "visible" : "hidden" }} aria-hidden={!(filtered && visible.length > 0)}>
+            <Button priority="tertiary" onClick={clearFilters} tabIndex={filtered && visible.length > 0 ? undefined : -1}>
+              Clear filters
+            </Button>
+          </Box>
+        </Flex>
         {visible.length === 0 ? (
           <EmptyState
             data-decisions-empty=""
             size="2"
             icon={<MagnifyingGlass />}
             title="No ruling matches"
-            description="No ruling carries every pressed tag and the search words together. Clear the filters to see every ruling again."
+            description={`${emptyReason} Clear the filters to see every ruling again.`}
             actions={<Button onClick={clearFilters}>Clear filters</Button>}
             py="6"
           />

@@ -259,11 +259,11 @@ export const History: Story = {
       <PageHeader title="ClickableCard · History" standfirst={DEFINITION} />
       <Section title="Decisions" lead="The rulings this component encodes.">
         <Flex direction="column" gap="3">
-          <Decision id="Built on Card">
+          <Decision id="[[surface-wraps]] · Built on Card">
             A stretched-link build layered on <Code>Card</Code> — it inherits Card's container-lane size and
             reused skin, and adds only the navigation behaviour on top.
           </Decision>
-          <Decision id="Stretched link">
+          <Decision id="[[surface-wraps]] · Stretched link">
             <strong>The overlay link wraps the heading text; its <Code>::after</Code> covers the whole card</strong>,
             so a pointer click anywhere navigates while there is a <strong>single tab stop</strong> (the link)
             and one accessible name (the heading — name from content, no <Code>aria-labelledby</Code> indirection).
@@ -279,7 +279,7 @@ export const History: Story = {
             system focus ring ([[focus-ring]]) on the CARD box: the accent with a stacked Radix alpha, 2px wide, inside
             the card edge. The link's own ring is suppressed, because the visible ring belongs to the card.
           </Decision>
-          <Decision id="Navigation only">
+          <Decision id="[[surface-wraps]] · Navigation only">
             The overlay eats text selection, so ClickableCard is <strong>only</strong> for cards whose whole job
             is navigation (a heading + a short teaser). Never put selectable / copyable content in one — reach
             for a plain <Code>Card</Code> with an explicit link instead.

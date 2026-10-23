@@ -307,12 +307,12 @@ export const History: Story = {
             SegmentedControl is a <strong>wrapped</strong> Radix Themes component — the Radix name wins; built
             on the Radix substrate + our <Code>--ds-*</Code> layer, not a hand-rolled toggle row.
           </Decision>
-          <Decision id="Control size lane">
+          <Decision id="[[choice-controls]] · Control size lane">
             The row is a <strong>control</strong> — it sits alongside Buttons and inputs — so an unset{" "}
             <Code>size</Code> follows the global <Code>uiSize</Code> control lane (default <Code>small</Code> →{" "}
             <Code>1</Code>), the same step a Button beside it renders at. An explicit <Code>size</Code> wins.
           </Decision>
-          <Decision id="Skin reuse">
+          <Decision id="[[choice-controls]] · Skin reuse">
             The selected segment reuses Radix's own SegmentedControl skin — a raised surface tile that slides
             over the neutral track — so the wrap declares <strong>no <Code>--ds-*</Code> colour roles</strong>{" "}
             and one layer of its own: [[neutral-part-stacks]] stacks <Code>--neutral-ring-stack</Code> on the tile's 1px ring. The token spec confirms the tile's colour live off the DOM (the
@@ -327,7 +327,7 @@ export const History: Story = {
             a segmented row's job is to show the current value in words, so an icon-only segment needs an
             explicit <Code>aria-label</Code> and is the exception, not the shape to reach for.
           </Decision>
-          <Decision id="Value, not view">
+          <Decision id="[[floating-surface-wraps]] · Value, not view">
             SegmentedControl switches a <strong>value</strong> in place (a setting/mode/filter). Switching the{" "}
             <strong>view</strong> of one screen among peer panels is <Code>Tabs</Code> — a distinct component.
             The Usage do/don't and the comparison table both draw that line.

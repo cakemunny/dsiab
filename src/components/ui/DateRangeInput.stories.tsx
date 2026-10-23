@@ -452,7 +452,7 @@ export const History: Story = {
             <Code>isRangeEqual</Code> helper, and the <Code>Intl.formatRange</Code> display — zero date math is
             re-implemented, zero net-new tokens.
           </Decision>
-          <Decision id="MultiSelect-trigger · no caret">
+          <Decision id="[[date-range-input]] · MultiSelect-trigger · no caret">
             <strong>The trigger reuses the surface-trigger chrome — with no caret.</strong> A range is entered
             by <em>picking</em>, so the trigger is one <Code>.rt-SelectTrigger</Code> button (surface fill,
             border, and the system focus ring come free), a leading <Code>CalendarBlank</Code> glyph, and{" "}
@@ -466,7 +466,7 @@ export const History: Story = {
             <strong>inoperable</strong> (WCAG 2.1.1 — the exact bug the DateInput review caught). Escape and the
             Done button return focus to the trigger.
           </Decision>
-          <Decision id="Presets · aria-current · the committed-band tint">
+          <Decision id="[[date-range-input]] · Presets · aria-current · the committed-band tint">
             <strong>Presets are Tab-order buttons in a <Code>role="group"</Code> — not a listbox.</strong> They
             are <em>shortcuts</em>, not the selection surface (so no <Code>aria-selected</Code>/roving). The
             active preset (its <Code>getRange()</Code> equals the value) carries <Code>aria-current="true"</Code>{" "}
@@ -475,12 +475,12 @@ export const History: Story = {
             the solid step, which would shout over a calendar whose own endpoints are a tint. The band tier
             ties the preset to the range it produces.
           </Decision>
-          <Decision id="Keep-open divergence">
+          <Decision id="[[date-range-input]] · Keep-open divergence">
             <strong>A preset (or a completed calendar range) KEEPS THE DIALOG OPEN</strong> — a deliberate
             divergence from DateInput’s day-select-closes. A range benefits from confirm/refine, so a trailing{" "}
             <strong>Done</strong> button, Escape, or an outside click close it.
           </Decision>
-          <Decision id="Smart format + SR full form">
+          <Decision id="[[date-range-input]] · Smart format + SR full form">
             <strong>The trigger shows a smart, locale-correct range.</strong>{" "}
             <Code>Intl.DateTimeFormat.formatRange</Code> drops repeated parts — <strong>same-year drops the
             year, cross-year keeps it</strong>, <Code>start==end</Code> collapses to a single date, and the
@@ -511,13 +511,13 @@ export const History: Story = {
             (default on, Backspace/Delete parity), and full Field-shell validation +{" "}
             <Code>disabledReason</Code>. Stories: History · Anatomy · Usage · Keyboard · Props.
           </Decision>
-          <Decision id="Deferred → keyboard-first exact entry">
+          <Decision id="[[date-range-input]] · Deferred → keyboard-first exact entry">
             <strong>Keyboard-first exact-date range entry</strong> — reach for <strong>two{" "}
             <Code>DateInput</Code>s in a <Code>FieldGroup</Code></strong> (each a free-text field with its own
             calendar). DateRangeInput deliberately ships <em>no</em> bespoke range text-parser; picking is its
             primary path.
           </Decision>
-          <Decision id="Deferred → server actions / partial / InputGroup">
+          <Decision id="[[date-range-input]] · Deferred → server actions / partial / InputGroup">
             <strong>The <Code>changeAction</Code> async-optimistic layer</strong> (<Code>isLoading</Code> /
             Spinner), a <strong>live-partial-range</strong> echoed into the trigger while picking (would need
             exposing Calendar’s internal anchor — a net-new Calendar affordance), and <strong>InputGroup</strong>{" "}

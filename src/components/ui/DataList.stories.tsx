@@ -850,12 +850,12 @@ export const History: Story = {
             DataList is a <strong>wrapped</strong> Radix Themes component — the Radix name wins; built on
             the Radix substrate + our <Code>--ds-*</Code> layer, not a hand-rolled list.
           </Decision>
-          <Decision id="Control lane">
+          <Decision id="[[content-typography]] · Control lane">
             <Code>Root</Code> rides the uiSize <strong>control lane</strong> — a spec sheet reads at the
             same size step as the inputs and buttons beside it (small → <Code>1</Code>, medium →{" "}
             <Code>2</Code>, large → <Code>3</Code>). An explicit <Code>size</Code> still wins per instance.
           </Decision>
-          <Decision id="Skin reuse">
+          <Decision id="[[content-typography]] · Skin reuse">
             It reuses Radix's own DataList skin and declares <strong>no <Code>--ds-*</Code> roles</strong>:
             the value paints on the default strong text colour (<Code>--gray-12</Code>, exactly what{" "}
             <Code>--ds-text-strong</Code> aliases) and the label on Radix's muted label tint — no new CSS,
@@ -869,7 +869,7 @@ export const History: Story = {
             gutter only. It stays optional (unset = whatever <Code>size</Code> gives) and stays on the
             spacing scale, so the escape hatch can't introduce a loose pixel value.
           </Decision>
-          <Decision id="Metadata pairs">
+          <Decision id="[[content-typography]] · Metadata pairs">
             DataList renders a semantic <Code>&lt;dl&gt;</Code>/<Code>&lt;dt&gt;</Code>/<Code>&lt;dd&gt;</Code>{" "}
             — label/value <strong>pairs describing ONE entity</strong>, not rows and columns across many.
             When the data is tabular, that's a <Code>Table</Code> (<Code>System/Table &amp; List/Table</Code>),

@@ -181,15 +181,15 @@ function TokenTokens() {
     <Flex direction="column" gap="4">
       <TokenGroup
         label="STATIC CHIP (surface — pixel-identical to Badge's removable chip)"
-        blurb="Token reskins nothing at rest — the container IS a Radix Badge (surface variant), so its fill, border and label colour ARE Badge's. Pressed paint is the one exception, measured in the PRESSED group below ([[token-pressed-state]]). Each row is read off the rendered chip, so the table reports what the chip paints."
+        blurb="At rest the container IS a Radix Badge (surface variant), so its fill and border ARE Badge's, and so is its label colour except on five light accents, where the label stacks a 5% black to clear 4.5:1 ([[contrast-by-alpha-stacking]]). Pressed paint is the other exception, measured in the PRESSED group below ([[token-pressed-state]]). Each row is read off the rendered chip, so the table reports what the chip paints."
         specimen={<Token leadingIcon={<Tag weight="bold" />} onRemove={() => {}} data-size-lesson="the chip's remove ✕ holds step 1 — it garnishes the chip, it doesn't join the ambient row">Design</Token>}
       >
         <MeasuredSpec render={() => <Token leadingIcon={<Tag weight="bold" />} onRemove={() => {}}>Design</Token>}>
           <MeasuredRow part="Container fill" token="--accent-surface" select=".rt-ds-token" prop="background-color" />
           <MeasuredRow
             part="Label + icon"
-            note="One ink for both — the body is all:unset, so it inherits the container's colour."
-            token="--accent-a11"
+            note="One ink for both — the body is all:unset, so it inherits the container's colour. Radix's --accent-a11, with a 5% black stacked on light orange, teal, yellow, amber and jade."
+            token="--accent-token-ink"
             select=".rt-ds-token"
             prop="color"
           />
@@ -641,19 +641,19 @@ export const History: Story = {
           <Decision id="[[token-chip]] · reuse">
             Token <strong>reskins nothing</strong>. Its container <em>is</em> a <Code>.rt-Badge</Code> (surface
             variant + categorical <Code>color</Code>), so Badge's chip skin, the <Code>[data-interactive]</Code>
-            paint (hover/press gradient, the [[focus-ring]] focus ring), and the inset ✕'s ghost skin all apply
+            paint (hover/press gradient, the focus ring per [[focus-ring]]), and the inset ✕'s ghost skin all apply
             <strong> verbatim</strong>. What Token adds on top is <em>geometry, never paint</em>: the body and
             the ✕ each grow to the 24×24 pointer-target floor and hand the growth straight back as an equal
             negative margin, so the chip still renders pixel-for-pixel as a Badge does. Pressed paint is the one
             exception: a toggle given <Code>pressed</Code> takes the look the system gives every pressed toggle,
             the selected tint under strong ink at weight 600 ([[token-pressed-state]]).
             The <strong>only net-new</strong> is the invisible-button body — a container
-            span + an <Code>all:unset</Code> body + a <strong>sibling</strong> ✕ + the focus ring hoisted via
+            span + an <Code>all:unset</Code> body + a <strong>sibling</strong> ✕ + the focus ring hoisted via{" "}
             <Code>:has(:focus-visible)</Code> + <Code>stopPropagation</Code>. <strong>Zero net-new tokens.</strong>
           </Decision>
           <Decision id="[[token-chip]] · sibling-remove">
-            The remove ✕ is a <strong>real sibling button</strong> of the body — never nested inside the
-            <Code>&lt;a&gt;</Code> or <Code>&lt;button&gt;</Code> (a ✕ nested inside an interactive
+            The remove ✕ is a <strong>real sibling button</strong> of the body — never nested inside the{" "}
+            <Code>&lt;a&gt;</Code> or <Code>&lt;button&gt;</Code> (a ✕ nested inside an interactive{" "}
             <Code>&lt;a&gt;</Code>/<Code>&lt;button&gt;</Code> is invalid HTML). It sits beside the body in
             <strong> every</strong> mode, so removal coexists with a link cleanly.
           </Decision>
@@ -697,7 +697,7 @@ export const History: Story = {
           </Decision>
           <Decision id="0.9.0">
             Initial <Code>System/Token</Code> — the interactive chip: a container that reuses Badge's surface
-            skin + <Code>[data-interactive]</Code> paint + the inset ✕'s skin verbatim, the net-new
+            skin + <Code>[data-interactive]</Code> paint + the inset ✕'s skin verbatim, the net-new{" "}
             <Code>all:unset</Code> invisible-button body + sibling ✕ + the <Code>:has(:focus-visible)</Code> ring
             hoist; both hit targets grown to the 24×24 floor on a cancelling negative margin (paint unchanged);
             three modes; Backspace/Delete removal; no tone. Token spec reads live where it borrows Badge's skin.

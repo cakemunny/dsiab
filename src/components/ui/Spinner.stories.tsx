@@ -247,19 +247,19 @@ export const History: Story = {
             Radix substrate + our <Code>--ds-*</Code> layer, not a hand-rolled indicator. Button's own{" "}
             <Code>loading</Code> prop already renders this same Radix spinner, so there is one skin, no fork.
           </Decision>
-          <Decision id="Control lane">
+          <Decision id="[[feedback-set]] · Control lane">
             An unset <Code>size</Code> follows the global size tier on the <strong>control lane</strong> (small →{" "}
             <Code>1</Code>), so a spinner renders at the same step as the button or text it sits beside. An
             explicit <Code>1</Code>–<Code>3</Code> wins.
           </Decision>
-          <Decision id="Ambient loop">
+          <Decision id="[[feedback-set]] · Ambient loop">
             The eight-leaf fade is an <em>ambient</em> loop, so its cadence is a <strong>literal</strong> baked
             into Radix's skin rather than a value off the intent-named <Code>--ds-duration</Code> ladder — the
             same stance as the StatusDot breathe. The wrap therefore adds{" "}
             <strong>no motion CSS and no <Code>--ds-*</Code> roles</strong>; the leaves ink from{" "}
             <Code>currentColor</Code>.
           </Decision>
-          <Decision id="Reduced motion">
+          <Decision id="[[feedback-set]] · Reduced motion">
             Radix Themes ships the leaf-fade with <strong>no <Code>prefers-reduced-motion</Code> guard</strong>,
             so the cycle does not stop on its own. Matching the StatusDot ambient-loop stance, the system silences
             it <strong>centrally</strong> — under <Code>prefers-reduced-motion: reduce</Code> the leaves settle and

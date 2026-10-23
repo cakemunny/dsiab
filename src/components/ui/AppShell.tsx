@@ -138,7 +138,7 @@ function isMobileNavConfig(m: AppShellProps["mobileNav"]): m is MobileNavConfig 
 
 /**
  * Resolve the shell's mobile state through the committed SSR-safe media-query engine. A NAMED
- * breakpoint routes through `useIsMobile` (the [[radix-themes-substrate]] hook, verbatim); a NUMERIC breakpoint is a custom
+ * breakpoint routes through `useIsMobile` (from `hooks/useMediaQuery`); a NUMERIC breakpoint is a custom
  * min-width px threshold routed through the same underlying `useMediaQuery`. Both hooks are ALWAYS
  * called (never conditionally — rules of hooks), so a breakpoint can switch kinds at runtime.
  * `defaultIsMobile` seeds the server snapshot on whichever path is live.
