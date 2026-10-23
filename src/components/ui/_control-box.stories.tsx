@@ -549,7 +549,8 @@ export const ControlBoxUnderScaling: Story = {
    ban is on the system's own CSS, which this is not.
    ===================================================================================== */
 
-/** The four values WCAG 1.4.12 requires a page to survive. */
+/** Three of the four values WCAG 1.4.12 requires a page to survive. The fourth, paragraph spacing, has no
+ *  paragraph to act on inside a single-row control. */
 const TEXT_SPACING_CSS = `
 .text-spacing-scope, .text-spacing-scope * {
   line-height: 1.5 !important;
