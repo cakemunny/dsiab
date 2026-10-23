@@ -422,7 +422,7 @@ export const History: Story = {
             <Code>role="doc-noteref"</Code> is a <strong>reference role valid only on the LINKED <Code>&lt;a&gt;</Code></strong>.
             On a plain unlinked <Code>&lt;span&gt;</Code> it trips axe <Code>aria-allowed-role</Code>, so it's
             <strong> omitted</strong> there — <Code>noteRole = href ? "doc-noteref" : undefined</Code>. The
-            <Code> aria-label</Code> (<Code>Citation {"{n}"}: {"{title}"}</Code>) names the citation in <strong>both</strong>
+            <Code> aria-label</Code> (<Code>Citation {"{n}"}: {"{title}"}</Code>) names the citation in <strong>both</strong>{" "}
             forms regardless. This polarity is correct here.
           </Decision>
           <Decision id="[[inline-citation]] · accent-aware badge">

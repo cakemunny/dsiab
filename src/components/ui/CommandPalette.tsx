@@ -387,15 +387,15 @@ function CommandPaletteBody<TAux>({
         <div className="rt-ds-cmdk-footer" aria-hidden>
           <span className="rt-ds-cmdk-hint">
             <Kbd>↑</Kbd>
-            <Kbd>↓</Kbd>
+            <Kbd>↓</Kbd>{/* the hint is an inline-flex row, so its gap is the space */}
             navigate
           </span>
           <span className="rt-ds-cmdk-hint">
-            <Kbd>↵</Kbd>
+            <Kbd>↵</Kbd>{/* the hint is an inline-flex row, so its gap is the space */}
             select
           </span>
           <span className="rt-ds-cmdk-hint">
-            <Kbd>Esc</Kbd>
+            <Kbd>Esc</Kbd>{/* the hint is an inline-flex row, so its gap is the space */}
             close
           </span>
         </div>

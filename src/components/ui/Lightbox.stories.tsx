@@ -478,7 +478,7 @@ export const History: Story = {
         <Flex direction="column" gap="3">
           <Decision id="[[lightbox-viewer]] · Radix Dialog shell">
             The viewer is built on the
-            <strong> raw Radix Themes <Code>Dialog</Code></strong> — composed directly, as <Code>AlertDialog</Code>
+            <strong> raw Radix Themes <Code>Dialog</Code></strong> — composed directly, as <Code>AlertDialog</Code>{" "}
             does. Radix gives
             <strong> focus-trap + scroll-lock + Escape + backdrop-dismiss</strong> for free — no hand-rolled
             scroll-lock. <strong>Close-focus is the exception</strong> and is ours (see [[focus-return-on-close]] below). Modal enter/exit motion is <strong>inherited</strong> from

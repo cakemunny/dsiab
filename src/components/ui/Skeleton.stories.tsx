@@ -305,7 +305,7 @@ export const History: Story = {
           <Decision id="[[feedback-set]] · Gray skin, tokenless">
             It reuses Radix's own skeleton skin — a neutral placeholder whose pulse breathes between{" "}
             <Code>--gray-a3</Code> and <Code>--gray-a4</Code> — so a bare skeleton already matches the system's
-            loading look with <strong>no new CSS and no new token</strong>. It declares no <Code>--ds-*</Code>
+            loading look with <strong>no new CSS and no new token</strong>. It declares no <Code>--ds-*</Code>{" "}
             roles of its own.
           </Decision>
           <Decision id="[[feedback-set]] · Ambient pulse + reduced-motion">

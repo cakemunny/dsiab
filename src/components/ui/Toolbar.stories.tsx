@@ -346,7 +346,7 @@ export const History: Story = {
         <Flex direction="column" gap="3">
           <Decision id="0.9.0">
             Initial <Code>System/Toolbar</Code> — <Code>@radix-ui/react-toolbar</Code> composed with a
-            start/center/end slot layout, a <Code>size</Code> cascade, and a <Code>dividers</Code>
+            start/center/end slot layout, a <Code>size</Code> cascade, and a <Code>dividers</Code>{" "}
             affordance. IconButton now forwards its ref so roving focus can land on icon-only items.
           </Decision>
         </Flex>

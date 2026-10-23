@@ -371,7 +371,7 @@ export const History: Story = {
         <Flex direction="column" gap="3">
           <Decision id="[[status-dot]] · Accent-aware fill">
             The four semantic variants paint from the <strong>accent-aware</strong> <Code>--ds-fill-success</Code> /
-            <Code>-warning</Code> / <Code>-error</Code> / <Code>-accent</Code> tokens (the same <Code>-9</Code>
+            <Code>-warning</Code> / <Code>-error</Code> / <Code>-accent</Code> tokens (the same <Code>-9</Code>{" "}
             solids Badge and Callout use), so a dot <strong>follows the brand's collision shift</strong> — a grass
             brand's success reads lime, a red brand's error reads oxblood. <Code>neutral</Code> takes the solid{" "}
             <Code>--ds-icon-neutral</Code> (gray-11), visible in both modes. <strong>Zero net-new tokens.</strong>

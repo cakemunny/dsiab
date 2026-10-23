@@ -506,7 +506,7 @@ export const History: Story = {
           </Decision>
           <Decision id="[[overflow-list]] · callback-ref cleanup">
             The observer teardown is <strong>callback-ref based</strong>, not a <Code>useEffect</Code> return:
-            React calls <Code>containerRef(null)</Code> on unmount and that is where <Code>unobserveResize</Code>
+            React calls <Code>containerRef(null)</Code> on unmount and that is where <Code>unobserveResize</Code>{" "}
             runs. A naive <Code>useRef</Code> + <Code>useEffect</Code> rewrite would drop the cleanup — the callback
             refs are load-bearing. Zero net-new tokens.
           </Decision>

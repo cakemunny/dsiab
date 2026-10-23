@@ -502,7 +502,7 @@ export const History: Story = {
             honestly or omit from the type</strong> — never declare a prop surface and silently discard it.
           </Decision>
           <Decision id="[[layout-primitive]] · Landmarks · opt-in">
-            <Code>banner</Code>/<Code>contentinfo</Code>/<Code>complementary</Code> are <strong>opt-in</strong>
+            <Code>banner</Code>/<Code>contentinfo</Code>/<Code>complementary</Code> are <strong>opt-in</strong>{" "}
             per slot (the <Code>landmark</Code> prop), never auto-emitted: a Layout can be nested, and multiple
             same-type landmarks are invalid. Slots render generic containers by default; <Code>main</Code> is
             deliberately not offered here — AppShell owns the single <Code>main</Code> landmark + skip target.
