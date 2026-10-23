@@ -230,8 +230,11 @@ function DateTimeInputBody({
           />
         </div>
         <div className="rt-ds-datetimeinput-time">
+          {/* "Time", not TimeInput's default "Select a time": the field is 9ch wide, sized to a value such
+              as "12:45 PM", and the longer hint clipped at every size. */}
           <TimeInput
             aria-label={timeLabel}
+            placeholder="Time"
             value={time}
             onValueChange={onTimeChange}
             min={timeMin}
