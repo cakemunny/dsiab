@@ -37,18 +37,10 @@ function PressedFillSpec() {
       <Flex align="center" gap="3" style={{ padding: "20px" }}>
         <div style={{ flexShrink: 0 }}><ToggleButton defaultPressed pressedIcon={BOLD_PRESSED}>{BOLD_REST}</ToggleButton></div>
         <Text size="1" style={{ color: "var(--ds-text-weak)" }}>
-          A pressed ToggleButton fills from the accent-aware <Mono>--ds-fill-selected-subtle</Mono>, draws a 1px inset{" "}
-          <Mono>--ds-stroke-accent-weak</Mono> edge, the edge a pressed <strong>Token</strong> keeps, and bolds
-          its label to weight 600 — a non-colour cue, so <strong>on</strong> reads without relying on colour
-          alone. The label also <strong>leaves the accent</strong>: it takes{" "}
-          <Mono>--ds-text-strong</Mono>, the same committed-selection ink a checked{" "}
-          <strong>Select</strong> row and a current <strong>Pagination</strong> page carry. An icon inside the toggle
-          paints in <Mono>currentColor</Mono>, so it leaves the accent with the label. Accent ink on an
-          accent tint is one hue arguing with itself — the two move together as the brand changes, and the
-          pair fell under AA on 17 of the 54 accent × appearance combinations before the ink stepped out.
-          The label reserves its bold width at all times, so the weight shift never reflows. Everything else
-          is Button's own ghost skin (size · focus ring · disabled), reused, not re-skinned. The three rows below
-          are read off a pressed toggle and checked against the tokens they name.
+          A pressed toggle takes a tinted fill, a 1px accent edge and a bold label, so it reads as on without
+          relying on colour. The label and any icon switch to <Mono>--ds-text-strong</Mono>, because accent ink
+          on its own accent tint falls under AA on many accents. The first three rows below are read off a
+          pressed toggle and checked against their tokens.
         </Text>
       </Flex>
       <MeasuredSpec render={() => <ToggleButton defaultPressed>{BOLD_REST}</ToggleButton>}>
