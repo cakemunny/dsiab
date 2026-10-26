@@ -54,6 +54,11 @@ export interface ListboxNavigationOptions {
 export interface ListboxNavigation {
   highlightedIndex: number;
   setHighlightedIndex: Dispatch<SetStateAction<number>>;
+  /** Highlights a row under the pointer. It never scrolls the list: a hover that scrolled a clipped row
+   *  into view would put the next row under a resting pointer, and that hover would scroll again. */
+  highlightFromPointer: (index: number) => void;
+  /** True when the current highlight came from the pointer, so a caller's own scroll effect can skip it. */
+  isPointerHighlight: () => boolean;
   getItemId: (index: number) => string;
   /** `getItemId(highlightedIndex)` when active with a highlight, else undefined — the input's
    *  `aria-activedescendant`. */
@@ -78,7 +83,20 @@ export function useListboxNavigation({
   idPart = "option",
   autoScroll = true,
 }: ListboxNavigationOptions): ListboxNavigation {
-  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [highlightedIndex, setIndex] = useState(-1);
+
+  // Every highlight records whether the pointer made it. Only a pointer highlight skips the scroll, so
+  // the keyboard and the async search still bring their row into view.
+  const pointerHighlightRef = useRef(false);
+  const setHighlightedIndex = useCallback<Dispatch<SetStateAction<number>>>((next) => {
+    pointerHighlightRef.current = false;
+    setIndex(next);
+  }, []);
+  const highlightFromPointer = useCallback((index: number) => {
+    pointerHighlightRef.current = true;
+    setIndex(index);
+  }, []);
+  const isPointerHighlight = useCallback(() => pointerHighlightRef.current, []);
 
   const getItemId = useCallback((index: number) => `${listboxId}-${idPart}-${index}`, [listboxId, idPart]);
 
@@ -130,9 +148,10 @@ export function useListboxNavigation({
   );
 
   // Keep the highlighted row in view during keyboard navigation (fixed-height scroll container) —
-  // scrollIntoView({block:"nearest"}), LIFTED from Typeahead.
+  // scrollIntoView({block:"nearest"}), LIFTED from Typeahead. A pointer highlight is already under the
+  // pointer and does not scroll (upstream facebook/astryx ae4ad8375d, the hover scroll loop).
   useEffect(() => {
-    if (!autoScroll || !isActive || highlightedIndex < 0) return;
+    if (!autoScroll || !isActive || highlightedIndex < 0 || pointerHighlightRef.current) return;
     document.getElementById(getItemId(highlightedIndex))?.scrollIntoView?.({ block: "nearest" });
   }, [autoScroll, isActive, highlightedIndex, getItemId]);
 
@@ -141,6 +160,8 @@ export function useListboxNavigation({
   return {
     highlightedIndex,
     setHighlightedIndex,
+    highlightFromPointer,
+    isPointerHighlight,
     getItemId,
     activeDescendant,
     moveDown,

@@ -135,7 +135,7 @@ function CommandPaletteBody<TAux>({
 
   // Bridge (same pattern as Typeahead): useAsyncSearch moves the cursor on resolve via
   // useListboxNavigation's setter, but nav needs the result COUNT (from useAsyncSearch). The setter is a
-  // stable useState setter reached through a ref populated just below, after nav is created.
+  // stable callback reached through a ref populated just below, after nav is created.
   const setHighlightRef = useRef<(index: number) => void>(() => {});
 
   const resolveBootstrapHighlight = useCallback(
@@ -266,6 +266,9 @@ function CommandPaletteBody<TAux>({
       return;
     }
     const gi = flatGroupIndex[idx];
+    // A row under the pointer is already in view, so a hover into a new group scrolls nothing. The group
+    // stays unmarked, so the first keyboard move inside it still brings its heading into view.
+    if (nav.isPointerHighlight()) return;
     if (gi === activeGroupRef.current) return;
     activeGroupRef.current = gi;
     document.getElementById(`${listId}-group-${gi}-heading`)?.scrollIntoView?.({ block: "nearest" });
@@ -291,7 +294,7 @@ function CommandPaletteBody<TAux>({
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => selectItem(item)}
         onMouseEnter={() => {
-          if (pointerMovedRef.current) nav.setHighlightedIndex(index);
+          if (pointerMovedRef.current) nav.highlightFromPointer(index);
         }}
       >
         {/* The option draws its icon inside the caller's row content, so the whole label span takes the
