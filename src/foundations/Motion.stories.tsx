@@ -336,8 +336,9 @@ function MotionPage() {
         lead="A curve's shape tells you how an element accelerates through its transition. Each one plots progress (vertical) against time (horizontal) — the dashed line is linear for reference, and the chip beside it moves on that exact curve."
       >
         {/* The lanes are fixed geometry, so on a narrow screen they scroll inside their own box rather
-            than moving the page. */}
-        <Box style={{ maxWidth: "100%", overflowX: "auto" }}>
+            than moving the page. A scroll box clips on every side, so the padding leaves room for the
+            Replay button's 4px focus ring and the matching negative margin keeps the lanes in place. */}
+        <Box style={{ maxWidth: "100%", overflowX: "auto", padding: "var(--ds-space-4)", margin: "calc(-1 * var(--ds-space-4))" }}>
         <Flex direction="column" gap="4">
           {EASINGS.map(([token, curve]) => (
             <Flex key={token} align="center" gap="4">

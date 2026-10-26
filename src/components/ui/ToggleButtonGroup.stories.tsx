@@ -153,8 +153,9 @@ function ZoneWall() {
     <Flex direction="column" gap="1" data-testid="tbg-dont">
       <Text size="1" weight="medium" style={{ color: "var(--ds-text-strong)" }}>Time zone</Text>
       {/* The strip is too wide on purpose, so on a narrow screen it scrolls inside the card rather than
-          moving the page. The 3px padding and margin keep an edge item's focus ring out of the clip. */}
-      <Box style={{ maxWidth: "100%", overflowX: "auto", padding: 3, margin: -3 }}>
+          moving the page. A scroll box clips on every side, so the padding leaves room for the 4px focus
+          ring and the matching negative margin keeps the strip where it was. */}
+      <Box style={{ maxWidth: "100%", overflowX: "auto", padding: "var(--ds-space-4)", margin: "calc(-1 * var(--ds-space-4))" }}>
         <ToggleButtonGroup.Root type="single" defaultValue="london" label="Time zone (don't)">
           {ZONES.map((z) => (
             <ToggleButtonGroup.Item key={z.value} value={z.value}>{z.label}</ToggleButtonGroup.Item>
