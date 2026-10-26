@@ -107,7 +107,7 @@ function MotionSpec() {
 // A bordered card wrapper for a live disclosure specimen (keeps the borderless component visually contained).
 function Card({ children }: { children: React.ReactNode }) {
   return (
-    <Box style={{ width: "100%", maxWidth: 320, background: "var(--ds-bg-base)", border: "1px solid var(--ds-stroke-weak)", borderRadius: "var(--ds-radius-3)", overflow: "hidden" }}>
+    <Box style={{ width: 320, maxWidth: "100%", background: "var(--ds-bg-base)", border: "1px solid var(--ds-stroke-weak)", borderRadius: "var(--ds-radius-3)", overflow: "hidden" }}>
       {children}
     </Box>
   );
@@ -165,7 +165,7 @@ export const Usage: Story = {
             page state the same ladder four times over, and two of those copies could go stale. */}
         <Section title="Specimen" lead="A single disclosure (shown open via defaultOpen, and closed), and a group with one item open via defaultValue. Every specimen renders in its resting state — nothing animates on load. Click any header to toggle and watch the height animate: it opens faster than it closes.">
           <Flex align="start" gap="5" wrap="wrap">
-            <Flex direction="column" gap="1">
+            <Flex direction="column" gap="1" style={{ maxWidth: "100%" }}>
               <Caption>Collapsible — open (defaultOpen)</Caption>
               <Card>
                 <Collapsible defaultOpen trigger="What's included">
@@ -175,7 +175,7 @@ export const Usage: Story = {
                 </Collapsible>
               </Card>
             </Flex>
-            <Flex direction="column" gap="1">
+            <Flex direction="column" gap="1" style={{ maxWidth: "100%" }}>
               <Caption>Collapsible — closed (default)</Caption>
               <Card>
                 <Collapsible trigger="Advanced settings">
@@ -185,7 +185,7 @@ export const Usage: Story = {
                 </Collapsible>
               </Card>
             </Flex>
-            <Flex direction="column" gap="1">
+            <Flex direction="column" gap="1" style={{ maxWidth: "100%" }}>
               <Caption>CollapsibleGroup — single, dividers</Caption>
               <Card>
                 <CollapsibleGroup.Root type="single" defaultValue="ship" dividers="between">
