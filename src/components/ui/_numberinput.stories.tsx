@@ -278,3 +278,50 @@ export const SoftDisabledReason: Story = {
     if (calls("niSoft").length !== 0) throw new Error("a soft-disabled field must not commit edits (handlers early-return)");
   },
 };
+
+/** Three upstream NumberInput fixes, checked here (facebook/astryx 58f9542136, 60cea48a97, be5278b0ee).
+ *  A draft that is not a number keeps the prior value, so `12abc` never commits 12. A fractional step
+ *  never crosses a rounded bound. A pasted `1,234.5` with locale grouping commits nothing rather than a
+ *  wrong number. The fourth upstream fix, an entry above the maximum committing at the bound, is the
+ *  opposite of [[number-input]]'s reject-not-clamp, which `RejectNotClamp` above holds. */
+export const UpstreamParseCases: Story = {
+  render: () => (
+    <Box p="4" data-testid="ni-upstream" style={{ maxWidth: 320 }}>
+      <NumberInput label="Quantity" defaultValue={5} onValueChange={record("niUpText")} />
+      <NumberInput label="Ratio" min={0} max={1} step={0.1} defaultValue={0.9} onValueChange={record("niUpStep")} />
+    </Box>
+  ),
+  play: async ({ canvasElement }) => {
+    const [text, ratio] = [...canvasElement.querySelectorAll<HTMLInputElement>('[data-testid="ni-upstream"] input')];
+    const w = window as unknown as Record<string, unknown[]>;
+    w["niUpText"] = [];
+    w["niUpStep"] = [];
+
+    // `12abc` and a pasted `1,234.5`: a native number field holds neither, so the draft is empty, nothing
+    // fires, and blur keeps the prior value.
+    for (const draft of ["12abc", "1,234.5"]) {
+      text.focus();
+      typeInto(text, draft);
+      await sleep(40);
+      text.blur();
+      await waitFor(() => String(text.value) === "5").catch(() => undefined);
+      if (String(text.value) !== "5") throw new Error(`a draft of "${draft}" must keep the prior value 5; got "${text.value}"`);
+    }
+    if (calls("niUpText").some((v) => v !== undefined && v !== 5))
+      throw new Error(`a draft that is not a number must never commit a number; fired ${JSON.stringify(calls("niUpText"))}`);
+
+    // A 0.1 step from 0.9 lands on exactly 1, and a second step stays at the bound, never 1.0000000000000002.
+    ratio.focus();
+    for (let i = 0; i < 2; i++) {
+      ratio.stepUp();
+      ratio.dispatchEvent(new Event("input", { bubbles: true }));
+      await sleep(20);
+    }
+    ratio.blur();
+    await sleep(40);
+    if (ratio.value !== "1") throw new Error(`two 0.1 steps from 0.9 with max 1 must land on 1; got "${ratio.value}"`);
+    const fired = calls("niUpStep") as Num[];
+    if (fired.some((v) => v !== undefined && v > 1)) throw new Error(`a step must never cross the bound; fired ${JSON.stringify(fired)}`);
+    if (fired.at(-1) !== 1) throw new Error(`the stepped value must commit as exactly 1; fired ${JSON.stringify(fired)}`);
+  },
+};
