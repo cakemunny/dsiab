@@ -62,9 +62,10 @@ The same rule governs *values*. If the system does not specify a number for your
 size, a duration, a spacing step — say so and stop. Never invent a number, and never split the
 difference between two you found elsewhere.
 
-Then read the component's Storybook page (`npm run storybook`, `:6006`). It is the rendered source of
-truth, and its Usage story closes on a live token spec that tells you what the component actually
-paints.
+Then read the component's docs page. It is the rendered source of truth, and its Usage story closes
+on a live token spec that tells you what the component actually paints. In a product repo, `npx dsiab
+docs` opens the pages for the version you installed. In the system repo, run `npm run storybook`,
+which serves on `:6006` unless that port is taken.
 
 ## Step 2 — the rules that will fail your code
 
