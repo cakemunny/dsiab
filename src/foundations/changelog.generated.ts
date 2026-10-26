@@ -12,8 +12,16 @@ export type ChangelogEntry = {
 
 export const CHANGELOG: { generatedFrom: string; kept: number; entries: ChangelogEntry[] } = {
   "generatedFrom": "HEAD",
-  "kept": 30,
+  "kept": 31,
   "entries": [
+    {
+      "date": "2026-10-26",
+      "type": "fix",
+      "scope": "command-palette",
+      "summary": "stop a hover from scrolling the list",
+      "hash": "233cb89",
+      "refs": []
+    },
     {
       "date": "2026-10-23",
       "type": "feat",
