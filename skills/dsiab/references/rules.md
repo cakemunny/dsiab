@@ -125,8 +125,8 @@ the root barely moves it. GUIDELINES §8a has the table of owners, and [[seam-ow
 Radix's `Theme`, the one way to restore that root, is deliberately unexported. So from your code there
 is no supported way to build a themed floating surface of your own. Use one the system ships, each of
 which owns its portal: `Dialog`, `AlertDialog`, `Popover`, `Tooltip`, `HoverCard`, `DropdownMenu`,
-`ContextMenu`, `Overlay`, `CommandPalette`, `MultiSelect`, `Select`. If none of them fits, surface the
-gap and do not hand-roll one.
+`ContextMenu`, `Overlay`, `CommandPalette`, `MultiSelect`, `Select`, `Toast`, `Lightbox`. Check the
+roster for the rest. If none of them fits, surface the gap and do not hand-roll one.
 
 **When a component cannot do what you need.** First check the props, then `asChild` where the component
 offers it (GUIDELINES §10 states what you take on), then surface the gap. The last resort is a copy you

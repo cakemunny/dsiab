@@ -254,7 +254,8 @@ When asked to vet a design or a system change, run the full ledger and report wi
 - **Visual (rendered page):** drive the rendered page with whatever browser tool the harness provides.
   Save screenshots under `.screenshots/` in the repo, and create the folder if it is absent. Storybook
   iframe: `http://localhost:6006/iframe.html?id=<story-id>&viewMode=story`. Use the port this repo's
-  Storybook actually serves. **Cache-bust reloads** with
+  Storybook actually serves. `npm run storybook` writes the port it serves to `.devport` at the
+  repository root. **Cache-bust reloads** with
   `&cb=$(date +%s)` (HMR doesn't reliably bust CSS). Probe pixels with `document.elementFromPoint(x,y)`;
   probe the cascade with `getComputedStyle`. **On a wide-gamut (P3) display, computed colours come back
   as `color(display-p3 …)`** — rasterize via a canvas to read hex/contrast; a regex on `rgb()` mangles
