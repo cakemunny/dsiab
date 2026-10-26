@@ -9,6 +9,7 @@ __screenshots__/
 *.log
 .DS_Store
 .worktree-port
+.devport
 .screenshots/
 
 # agent files that `npm run agents` generates from skills/, plus each tool's local state

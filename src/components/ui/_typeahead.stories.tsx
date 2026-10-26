@@ -359,3 +359,49 @@ export const States: Story = {
       throw new Error("a bare Typeahead must forward aria-label to the combobox input");
   },
 };
+
+/** Hover never scrolls. Upstream found a loop: a hover highlighted a row clipped at the list's edge, the
+ *  highlight scrolled it into view, the scroll put the next row under the resting pointer, and that hover
+ *  scrolled again. So a pointer at rest on a clipped row leaves the list where it is, and the arrow keys
+ *  still bring the highlight into view. */
+export const HoverDoesNotScroll: Story = {
+  render: () => (
+    <Box p="4" data-testid="ta-hover" style={{ maxWidth: 300 }}>
+      <Typeahead label="Fruit" source={fruitSource} placeholder="Search fruit…" debounceMs={0} maxItems={30} />
+    </Box>
+  ),
+  play: async ({ canvasElement }) => {
+    const input = combobox(canvasElement.querySelector<HTMLElement>('[data-testid="ta-hover"]')!)!;
+    input.focus();
+    typeInto(input, "e");
+    const list = await waitFor(() => document.querySelector<HTMLElement>(".rt-ds-typeahead-listbox"));
+    await waitFor(() => list.scrollHeight > list.clientHeight);
+    const options = () => [...list.querySelectorAll<HTMLElement>('[role="option"]')];
+    const activeIdx = () => {
+      const a = input.getAttribute("aria-activedescendant");
+      return a ? options().findIndex((o) => o.id === a) : -1;
+    };
+
+    // The first row clipped by the bottom edge: the one a resting pointer can sit on half-hidden.
+    const edge = list.getBoundingClientRect().bottom;
+    const clipped = options().find((o) => {
+      const r = o.getBoundingClientRect();
+      return r.top < edge && r.bottom > edge;
+    }) ?? options().find((o) => o.getBoundingClientRect().top >= edge)!;
+    const clippedIndex = options().indexOf(clipped);
+
+    const before = list.scrollTop;
+    clipped.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
+    await waitFor(() => activeIdx() === clippedIndex);
+    await sleep(80);
+    if (list.scrollTop !== before)
+      throw new Error(`a hover must move only the highlight, never the list; scrollTop went ${before} -> ${list.scrollTop}`);
+
+    // The keyboard still scrolls: End jumps to the last row, far below the fold.
+    press(input, "End");
+    await waitFor(() => activeIdx() === options().length - 1);
+    await waitFor(() => list.scrollTop > before, 1000).catch(() => {
+      throw new Error("a keyboard move must still scroll the highlighted row into view");
+    });
+  },
+};

@@ -212,6 +212,55 @@ export const PointerGuard: Story = {
   },
 };
 
+/** Hover never scrolls. Upstream found a loop: a hover highlighted a row clipped at the list's edge, the
+ *  highlight scrolled it into view, the scroll put the next row under the resting pointer, and that hover
+ *  scrolled again. So a pointer at rest on a clipped row leaves the list where it is, and the arrow keys
+ *  still bring the highlight into view. */
+const LONG: TypeaheadOption[] = Array.from({ length: 40 }, (_, i) => ({
+  id: `l${i}`,
+  label: `Command ${i + 1}`,
+  auxiliaryData: { group: i < 20 ? "First" : "Second" },
+}));
+const longSource = createStaticSource(LONG);
+
+export const HoverDoesNotScroll: Story = {
+  render: () => <OpenPalette source={longSource} />,
+  // The long list overflows, which trips axe's scrollable-region-focusable on .rt-ds-cmdk-scroll. Focus
+  // stays in the input and the arrow keys scroll the list, which this story checks, so the rule is off
+  // here as it is on the docs specimens (CommandPalette.stories.tsx).
+  parameters: { a11y: { config: { rules: [{ id: "scrollable-region-focusable", enabled: false }] } } },
+  play: async () => {
+    const input = await waitFor(() => cmdkInput());
+    await waitFor(() => cmdkOptions().length === 40);
+    const scroller = cmdkScroll()!;
+    if (scroller.scrollHeight <= scroller.clientHeight) throw new Error("precondition: the long list must overflow its scroller");
+
+    // The first row clipped by the bottom edge: the one a resting pointer can sit on half-hidden.
+    const edge = scroller.getBoundingClientRect().bottom;
+    const clipped = cmdkOptions().find((o) => {
+      const r = o.getBoundingClientRect();
+      return r.top < edge && r.bottom > edge;
+    }) ?? cmdkOptions().find((o) => o.getBoundingClientRect().top >= edge)!;
+    const clippedIndex = cmdkOptions().indexOf(clipped);
+
+    const before = scroller.scrollTop;
+    scroller.dispatchEvent(new MouseEvent("mousemove", { bubbles: true }));
+    clipped.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
+    await waitFor(() => activeIdx(input) === clippedIndex);
+    await sleep(80);
+    if (scroller.scrollTop !== before)
+      throw new Error(`a hover must move only the highlight, never the list; scrollTop went ${before} -> ${scroller.scrollTop}`);
+
+    // The keyboard still scrolls: End jumps to the last row, which sits far below the fold.
+    input.focus();
+    press(input, "End");
+    await waitFor(() => activeIdx(input) === 39);
+    await waitFor(() => scroller.scrollTop > before, 1000).catch(() => {
+      throw new Error("a keyboard move must still scroll the highlighted row into view");
+    });
+  },
+};
+
 /** Stale-resolution guard — an OLDER search resolving AFTER a NEWER one must be dropped. */
 export const StaleResolution: Story = {
   render: () => <OpenPalette source={overlapSource} debounceMs={0} />,

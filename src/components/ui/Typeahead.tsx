@@ -269,7 +269,7 @@ function TypeaheadBody<TAux>({
   // (extracted from THIS file — useComboboxEngine). Both hooks default to this component's prior
   // behavior exactly; the two CommandPalette deltas (optimistic narrowing, committed-query empty text)
   // are opt-in and left OFF here. Two-way dep between them (search moves the cursor on resolve; nav
-  // needs the result COUNT) is broken with a ref: nav.setHighlightedIndex is a stable useState setter,
+  // needs the result COUNT) is broken with a ref: nav.setHighlightedIndex is a stable callback,
   // reached through setHighlightRef, which is only READ inside async callbacks — after this render's
   // assignment below.
   const setHighlightRef = useRef<(index: number) => void>(() => {});
@@ -612,7 +612,7 @@ function TypeaheadBody<TAux>({
                     // would otherwise blur the input.
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => handleSelect(option)}
-                    onMouseEnter={() => setHighlightedIndex(i)}
+                    onMouseEnter={() => nav.highlightFromPointer(i)}
                   >
                     <span className="rt-ds-typeahead-label">
                       {renderOption ? renderOption(option) : (option.element ?? option.label)}

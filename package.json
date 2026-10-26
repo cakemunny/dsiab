@@ -78,7 +78,7 @@
     "pack": "npm run build && npm pack",
     "prepublishOnly": "npm run build",
     "barrel": "node scripts/gen-barrel.mjs",
-    "storybook": "storybook dev -p 6006",
+    "storybook": "node scripts/storybook.mjs",
     "build-storybook": "storybook build",
     "postbuild-storybook": "node scripts/scan-public-build.mjs storybook-static",
     "docs": "node bin/dsiab.mjs docs",
