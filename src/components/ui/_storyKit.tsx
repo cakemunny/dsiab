@@ -350,9 +350,11 @@ export function toHex(color: string): string {
 export const HexThemeKey = createContext("");
 
 // All code text in the table: one fixed-size, no-background monospace treatment — so it never scales
-// with the size toolbar and the names match the hex.
+// with the size toolbar and the names match the hex. It is an inline flex box, so a token name stays on
+// one line wherever it fits and wraps at a hyphen only when it is wider than its column, and its baseline
+// is its first line, which keeps a row aligned on the baseline (MEASURED_GRID) at its own height.
 export const Mono = ({ children, muted }: { children: ReactNode; muted?: boolean }) => (
-  <span style={{ fontFamily: "var(--code-font-family)", fontSize: 12, color: muted ? "var(--ds-text-weak)" : "var(--ds-text-link)" }}>{children}</span>
+  <span style={{ display: "inline-flex", maxWidth: "100%", fontFamily: "var(--code-font-family)", fontSize: 12, color: muted ? "var(--ds-text-weak)" : "var(--ds-text-link)" }}>{children}</span>
 );
 
 export function HexValue({ token }: { token: string }) {
