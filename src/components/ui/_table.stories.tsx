@@ -105,3 +105,34 @@ export const OverflowStop: Story = {
       throw new Error(`the caller's tabIndex must land on the named viewport; got tabindex=${caller.getAttribute("tabindex")} role=${caller.getAttribute("role")}`);
   },
 };
+
+/* The stop follows the overflow, not the first render. The container widens until the table fits, so the
+   stop must go, then narrows again, so the stop must come back. This is the upstream rule for a scroller:
+   it joins the tab order only while it has something to scroll. */
+export const StopFollowsOverflow: Story = {
+  render: () => (
+    <Box p="4" data-testid="frame" style={WIDE}>
+      <Table.Root data-testid="resizing" aria-label="Quarterly results, resizing"><Rows /></Table.Root>
+    </Box>
+  ),
+  play: async ({ canvasElement }) => {
+    const frame = canvasElement.querySelector<HTMLElement>('[data-testid="frame"]')!;
+    const viewport = viewportOf(canvasElement, "resizing");
+    const settle = async (want: string | null) => {
+      const t0 = performance.now();
+      while (viewport.getAttribute("tabindex") !== want && performance.now() - t0 < 1500) await waitFrames();
+      return viewport.getAttribute("tabindex");
+    };
+
+    if (!(viewport.scrollWidth > viewport.clientWidth)) throw new Error("precondition: the narrow table must overflow its container");
+    if ((await settle("0")) !== "0") throw new Error("a table that overflows must be a keyboard stop");
+
+    frame.style.width = "2000px";
+    const wide = await settle(null);
+    if (viewport.scrollWidth > viewport.clientWidth) throw new Error("precondition: the widened table must fit its container");
+    if (wide !== null) throw new Error(`a table that stops overflowing must leave the tab order; tabindex is ${wide}`);
+
+    frame.style.width = `${WIDE.width}px`;
+    if ((await settle("0")) !== "0") throw new Error("a table that overflows again must take its keyboard stop back");
+  },
+};

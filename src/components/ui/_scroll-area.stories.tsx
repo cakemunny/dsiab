@@ -106,3 +106,38 @@ export const TextOnlyStop: Story = {
       throw new Error(`a caller's own tabIndex must win over the system's choice, got ${callerTabIndex.getAttribute("tabindex")}`);
   },
 };
+
+/* The stop follows the overflow, not the first render. The box grows until the notes fit, so the stop must
+   go, then shrinks again, so the stop must come back. This is the upstream rule for a scroller: it joins
+   the tab order only while it has something to scroll. */
+export const StopFollowsOverflow: Story = {
+  render: () => (
+    <Box p="4">
+      <ScrollArea data-testid="resizing" aria-label="Release notes, resizing" type="always" scrollbars="vertical" style={BOX}><Notes /></ScrollArea>
+    </Box>
+  ),
+  play: async ({ canvasElement }) => {
+    const viewport = canvasElement.querySelector<HTMLElement>('[data-testid="resizing"]')!;
+    const root = viewport.closest<HTMLElement>(".rt-ScrollAreaRoot") ?? viewport;
+    const settle = async (want: string | null) => {
+      const t0 = performance.now();
+      while (viewport.getAttribute("tabindex") !== want && performance.now() - t0 < 1500) {
+        const { promise, resolve } = Promise.withResolvers<void>();
+        setTimeout(resolve, 20);
+        await promise;
+      }
+      return viewport.getAttribute("tabindex");
+    };
+
+    if (viewport.scrollHeight <= viewport.clientHeight) throw new Error("precondition: the short box must overflow");
+    if ((await settle("0")) !== "0") throw new Error("a viewport that overflows with text only must be a keyboard stop");
+
+    root.style.height = "2000px";
+    const tall = await settle(null);
+    if (viewport.scrollHeight > viewport.clientHeight) throw new Error("precondition: the tall box must fit the notes");
+    if (tall !== null) throw new Error(`a viewport that stops overflowing must leave the tab order; tabindex is ${tall}`);
+
+    root.style.height = `${BOX.height}px`;
+    if ((await settle("0")) !== "0") throw new Error("a viewport that overflows again must take its keyboard stop back");
+  },
+};
