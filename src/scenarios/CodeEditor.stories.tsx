@@ -45,6 +45,7 @@ import { Text } from "../components/ui/Text";
 import { ToggleButtonGroup } from "../components/ui/ToggleButtonGroup";
 import { Tooltip } from "../components/ui/Tooltip";
 import { TreeList, type TreeListItemData } from "../components/ui/TreeList";
+import { screenFrame } from "./_screenFrame";
 
 /* Code editor — a generic recreation of an AI-integrated editor, at rest.
  *
@@ -663,6 +664,7 @@ function CodeEditorScreen() {
 
 const meta: Meta = {
   title: "UI examples/Code editor",
+  decorators: [screenFrame],
   parameters: {
     layout: "fullscreen",
     // Showcase pages assert nothing and are registered as fully axe-off in

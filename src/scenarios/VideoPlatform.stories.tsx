@@ -48,6 +48,7 @@ import { Timestamp } from "../components/ui/Timestamp";
 import { Tooltip } from "../components/ui/Tooltip";
 import { TopNav } from "../components/ui/TopNav";
 import { useResolvedSize } from "../theme/SizeContext";
+import { screenFrame } from "./_screenFrame";
 
 /* Video platform — a recreation of the watch page archetype, rendered AT REST.
  *
@@ -740,6 +741,7 @@ function WatchPage() {
 
 const meta: Meta = {
   title: "UI examples/Video platform",
+  decorators: [screenFrame],
   parameters: {
     layout: "fullscreen",
     // Showcase pages assert nothing and are registered as fully axe-off in

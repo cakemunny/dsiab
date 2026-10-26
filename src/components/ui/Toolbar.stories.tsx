@@ -20,7 +20,7 @@ const DEFINITION = <>A single-tab-stop container for a related set of controls, 
 // visible chrome (the surface it sits on) is the demo frame, not the component.
 function Frame({ children }: { children: React.ReactNode }) {
   return (
-    <Box style={{ width: "fit-content", padding: "6px 8px", background: "var(--ds-bg-base)", border: "1px solid var(--ds-stroke-weak)", borderRadius: "var(--ds-radius-3)" }}>
+    <Box style={{ width: "fit-content", maxWidth: "100%", padding: "6px 8px", background: "var(--ds-bg-base)", border: "1px solid var(--ds-stroke-weak)", borderRadius: "var(--ds-radius-3)" }}>
       {children}
     </Box>
   );
@@ -165,7 +165,7 @@ export const Usage: Story = {
           <Frame>
             <Toolbar.Root
               aria-label="Editor"
-              style={{ width: 480 }}
+              style={{ width: 480, maxWidth: "100%" }}
               start={<Toolbar.Button asChild><IconButton priority="tertiary" aria-label="Settings"><Gear /></IconButton></Toolbar.Button>}
               center={
                 <>

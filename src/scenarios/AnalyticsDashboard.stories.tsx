@@ -25,6 +25,7 @@ import { NumberInput } from "../components/ui/NumberInput";
 import { EmptyState } from "../components/ui/EmptyState";
 import type { DateRange } from "../dates/dateTypes";
 import { useResolvedSize } from "../theme/SizeContext";
+import { screenFrame } from "./_screenFrame";
 
 /* A generic recreation of a product analytics dashboard, at rest and full-bleed.
  *
@@ -557,6 +558,7 @@ function Dashboard() {
 
 const meta: Meta = {
   title: "UI examples/Analytics dashboard",
+  decorators: [screenFrame],
   parameters: {
     layout: "fullscreen",
     // Showcase pages assert nothing and are registered as fully axe-off in

@@ -63,6 +63,7 @@ import { createPowerSearchConfig } from "../powersearch/usePowerSearchConfig";
 import type { PowerSearchFilter } from "../powersearch/types";
 import { createISOTimeString, type ISOTimeString } from "../dates/timeParser";
 import { CONTROL_MEMBER_STEP, useSizeLane } from "../theme/SizeContext";
+import { screenFrame } from "./_screenFrame";
 
 /* A generic web mail client, at rest. The system's own AppShell carries it — top bar in the header
  * slot, folder rail in the panel slot, and the two work panes in the guaranteed `main` — with a
@@ -968,6 +969,7 @@ function MailScreen() {
 
 const meta: Meta = {
   title: "UI examples/Mail client",
+  decorators: [screenFrame],
   parameters: {
     layout: "fullscreen",
     // Showcase pages assert nothing and are registered as fully axe-off in
