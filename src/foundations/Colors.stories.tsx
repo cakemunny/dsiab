@@ -357,7 +357,7 @@ function ColorRoles({ accent = "iris", appearance = "light" }: { accent?: string
               <div style={{ fontFamily: "var(--code-font-family)", fontSize: 10, letterSpacing: "0.07em", textTransform: "uppercase", color: "var(--ds-text-weak)", marginBottom: 4, paddingLeft: 8 }}>
                 {g.label}
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(480px, 1fr))", columnGap: 28 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(480px, 100%), 1fr))", columnGap: 28 }}>
                 {g.tokens.map((n) => <Swatch key={n} name={n} kind={KIND[family]} accent={accent} />)}
               </div>
             </div>

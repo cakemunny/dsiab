@@ -36,6 +36,7 @@ import { Skeleton } from "../components/ui/Skeleton";
 import { Token } from "../components/ui/Token";
 import { Tooltip } from "../components/ui/Tooltip";
 import { useResolvedSize } from "../theme/SizeContext";
+import { screenFrame } from "./_screenFrame";
 
 /* Social feed — a generic recreation of the three-column feed archetype, rendered AT REST.
  *
@@ -664,6 +665,7 @@ function SocialFeedScreen() {
 
 const meta: Meta = {
   title: "UI examples/Social feed",
+  decorators: [screenFrame],
   parameters: {
     layout: "fullscreen",
     // Showcase pages assert nothing and are registered as fully axe-off in

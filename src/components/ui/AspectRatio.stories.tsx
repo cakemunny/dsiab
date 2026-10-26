@@ -159,11 +159,15 @@ export const Usage: Story = {
         title="The ratio holds at any scale"
         lead="The same 16 / 9 lock in three containers of different widths. The height is never set — it falls out of the width, so the quotient underneath each tile comes out the same however big the box gets. The figures are measured off the rendered boxes, not written in."
       >
+        {/* The 380px tile is measured at that width, so on a narrow screen the row scrolls inside its
+            own box rather than shrinking the tile or moving the page. */}
+        <Box style={{ maxWidth: "100%", overflowX: "auto" }}>
         <Flex align="end" gap="5" wrap="wrap" data-testid="scale-row">
           <ScaledTile width={160} label="160px" ratio={16 / 9} ratioLabel="16 / 9" icon={<Play weight="fill" />} testId="scale-160" />
           <ScaledTile width={260} label="260px" ratio={16 / 9} ratioLabel="16 / 9" icon={<Play weight="fill" />} testId="scale-260" />
           <ScaledTile width={380} label="380px" ratio={16 / 9} ratioLabel="16 / 9" icon={<Play weight="fill" />} testId="scale-380" />
         </Flex>
+        </Box>
         <Caption>
           16 ÷ 9 = 1.78. Three boxes, three heights, one quotient — that is the guarantee you're buying:
           you size the container and the shape survives it.

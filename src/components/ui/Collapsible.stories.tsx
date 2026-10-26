@@ -107,7 +107,7 @@ function MotionSpec() {
 // A bordered card wrapper for a live disclosure specimen (keeps the borderless component visually contained).
 function Card({ children }: { children: React.ReactNode }) {
   return (
-    <Box style={{ width: 320, background: "var(--ds-bg-base)", border: "1px solid var(--ds-stroke-weak)", borderRadius: "var(--ds-radius-3)", overflow: "hidden" }}>
+    <Box style={{ width: "100%", maxWidth: 320, background: "var(--ds-bg-base)", border: "1px solid var(--ds-stroke-weak)", borderRadius: "var(--ds-radius-3)", overflow: "hidden" }}>
       {children}
     </Box>
   );

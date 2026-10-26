@@ -38,6 +38,7 @@ import { Switch } from "../components/ui/Switch";
 import { Text } from "../components/ui/Text";
 import { Timestamp } from "../components/ui/Timestamp";
 import { Tooltip } from "../components/ui/Tooltip";
+import { screenFrame } from "./_screenFrame";
 
 /* A conversational assistant, recreated: history rail, transcript, docked composer, settings rail. It
  * renders AT REST — nothing open, nothing mid-gesture, no interaction script. The only motion-adjacent
@@ -518,6 +519,7 @@ function AiAssistantScreen() {
 
 const meta: Meta = {
   title: "UI examples/AI assistant",
+  decorators: [screenFrame],
   parameters: {
     layout: "fullscreen",
     // Showcase pages assert nothing and are registered as fully axe-off in

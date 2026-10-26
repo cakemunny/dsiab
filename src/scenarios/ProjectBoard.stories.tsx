@@ -41,6 +41,7 @@ import { Tooltip } from "../components/ui/Tooltip";
 import { createPowerSearchConfig } from "../powersearch/usePowerSearchConfig";
 import type { PowerSearchFilter } from "../powersearch/types";
 import { useResolvedSize } from "../theme/SizeContext";
+import { screenFrame } from "./_screenFrame";
 
 /* Project board — a generic recreation of the kanban issue tracker every software team recognises:
  * a filter rail, a filter bar, four status columns of draggable cards, and a detail panel for the
@@ -800,6 +801,7 @@ function ProjectBoardScreen() {
 
 const meta: Meta = {
   title: "UI examples/Project board",
+  decorators: [screenFrame],
   parameters: {
     layout: "fullscreen",
     // Showcase pages assert nothing and are registered as fully axe-off in

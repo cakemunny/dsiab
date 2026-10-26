@@ -38,6 +38,7 @@ import { Timestamp } from "../components/ui/Timestamp";
 import { Tooltip } from "../components/ui/Tooltip";
 import { TreeList, type TreeListItemData } from "../components/ui/TreeList";
 import { useResolvedSize } from "../theme/SizeContext";
+import { screenFrame } from "./_screenFrame";
 
 /* Agent run — a recreation of the run view a long-running autonomous agent renders while it works
    through a plan. No traditional analogue: the screen has to hold a plan whose steps are in four
@@ -603,6 +604,7 @@ function AgentRunScreen() {
 
 const meta: Meta = {
   title: "UI examples/Agent run",
+  decorators: [screenFrame],
   parameters: {
     layout: "fullscreen",
     // Showcase pages assert nothing and are registered as fully axe-off in

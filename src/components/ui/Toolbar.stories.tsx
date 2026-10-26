@@ -165,7 +165,7 @@ export const Usage: Story = {
           <Frame>
             <Toolbar.Root
               aria-label="Editor"
-              style={{ width: 480 }}
+              style={{ width: "100%", maxWidth: 480 }}
               start={<Toolbar.Button asChild><IconButton priority="tertiary" aria-label="Settings"><Gear /></IconButton></Toolbar.Button>}
               center={
                 <>

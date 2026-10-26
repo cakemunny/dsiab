@@ -47,7 +47,7 @@ function Spacing() {
         <div>{SPACE.map((s) => <SpaceBar key={s} step={s} />)}</div>
       </Section>
       <Section title="Radius — one dial, sharp to soft">
-        <div style={{ display: "flex", gap: 16 }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
           {RADIUS.map((r) => (
             <div key={r.label} style={{ display: "flex", flexDirection: "column", gap: 6, alignItems: "center" }}>
               <div style={{ width: 64, height: 64, background: "var(--ds-fill-accent-weak)", border: "1px solid var(--ds-stroke-accent)", borderRadius: `var(${r.token})` }} />

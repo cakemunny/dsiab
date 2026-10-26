@@ -335,6 +335,9 @@ function MotionPage() {
         title="Easing — the shape of the motion"
         lead="A curve's shape tells you how an element accelerates through its transition. Each one plots progress (vertical) against time (horizontal) — the dashed line is linear for reference, and the chip beside it moves on that exact curve."
       >
+        {/* The lanes are fixed geometry, so on a narrow screen they scroll inside their own box rather
+            than moving the page. */}
+        <Box style={{ maxWidth: "100%", overflowX: "auto" }}>
         <Flex direction="column" gap="4">
           {EASINGS.map(([token, curve]) => (
             <Flex key={token} align="center" gap="4">
@@ -363,6 +366,7 @@ function MotionPage() {
             </Button>
           </Box>
         </Flex>
+        </Box>
         <Caption>
           All four chips move together and share one duration —{" "}
           <Token>--ds-duration-emphasis</Token> ({durationValue("--ds-duration-emphasis")}) — so the only
