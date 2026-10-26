@@ -339,7 +339,9 @@ function MotionPage() {
             than moving the page. A scroll box clips on every side, so the padding leaves room for the
             Replay button's 4px focus ring and the matching negative margin keeps the lanes in place. */}
         <Box style={{ maxWidth: "100%", overflowX: "auto", padding: "var(--ds-space-4)", margin: "calc(-1 * var(--ds-space-4))" }}>
-        <Flex direction="column" gap="4">
+        {/* The column keeps its natural width, so the box scrolls instead of squeezing the lanes. A
+            squeezed column wrapped the Replay button onto two lines, which fails the size check. */}
+        <Flex direction="column" gap="4" style={{ minWidth: "max-content" }}>
           {EASINGS.map(([token, curve]) => (
             <Flex key={token} align="center" gap="4">
               <Box style={{ width: EASE_NAME_W, flexShrink: 0 }}>
