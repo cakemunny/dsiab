@@ -2,7 +2,7 @@
   "name": "dsiab",
   "private": false,
   "type": "module",
-  "version": "0.9.2",
+  "version": "0.9.3-rc.1",
   "description": "dsiab, Design System In A Box: a brand-themeable component and token layer over Radix Themes.",
   "license": "(MIT AND OFL-1.1)",
   "author": "cakemunny",
@@ -53,7 +53,7 @@
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/",
-    "tag": "latest"
+    "tag": "next"
   },
   "keywords": [
     "design-system",
