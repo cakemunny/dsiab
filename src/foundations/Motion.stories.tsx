@@ -128,6 +128,9 @@ const EASE_PLOT_W = 56;
 const EASE_TRACK_W = 160;
 const EASE_CHIP_PX = 24;
 const EASE_TRAVEL = EASE_TRACK_W - EASE_CHIP_PX;
+/* The widest lane on one line: name, plot, track and the longest use text, measured at 789px. Below
+   this lane-box width each lane stacks, so the use text is never pushed past the edge of the box. */
+const EASE_STACK_BELOW_PX = 790;
 
 /** cubic-bezier(x1,y1,x2,y2) → an SVG path from bottom-left (0,100) to top-right (100,0). */
 function bezierPath(curve: string): string {
@@ -335,16 +338,16 @@ function MotionPage() {
         title="Easing — the shape of the motion"
         lead="A curve's shape tells you how an element accelerates through its transition. Each one plots progress (vertical) against time (horizontal) — the dashed line is linear for reference, and the chip beside it moves on that exact curve."
       >
-        {/* The lanes are fixed geometry, so on a narrow screen they scroll inside their own box rather
-            than moving the page. A scroll box clips on every side, so the padding leaves room for the
-            Replay button's 4px focus ring and the matching negative margin keeps the lanes in place. */}
-        <Box style={{ maxWidth: "100%", overflowX: "auto", padding: "var(--ds-space-4)", margin: "calc(-1 * var(--ds-space-4))" }}>
-        {/* The column keeps its natural width, so the box scrolls instead of squeezing the lanes. A
-            squeezed column wrapped the Replay button onto two lines, which fails the size check. */}
-        <Flex direction="column" gap="4" style={{ minWidth: "max-content" }}>
+        {/* On a wide box each lane is one row. On a narrower box each lane stacks: the name, then the
+            plot and the track, then the use text at the full width of the box. The box still scrolls
+            below the 232px of the plot and the track. A scroll box clips on every side, so the padding
+            leaves room for the Replay button's 4px focus ring, and the negative margin keeps the lanes
+            in place. */}
+        <Box className="ds-ease-box" style={{ maxWidth: "100%", overflowX: "auto", padding: "var(--ds-space-4)", margin: "calc(-1 * var(--ds-space-4))" }}>
+        <Flex className="ds-ease-col" direction="column" gap="4">
           {EASINGS.map(([token, curve]) => (
-            <Flex key={token} align="center" gap="4">
-              <Box style={{ width: EASE_NAME_W, flexShrink: 0 }}>
+            <Flex key={token} className="ds-ease-lane" align="center" gap="4">
+              <Box className="ds-ease-name" style={{ width: EASE_NAME_W, flexShrink: 0 }}>
                 <Token>{token.replace("--ds-", "")}</Token>
               </Box>
               <svg width={EASE_PLOT_W} height={EASE_PLOT_W} viewBox="-6 -6 112 112" style={{ flexShrink: 0 }} aria-hidden="true">
@@ -357,13 +360,13 @@ function MotionPage() {
                   style={{ transitionTimingFunction: curve, transform: `translateX(${easeAt * EASE_TRAVEL}px)` }}
                 />
               </Box>
-              <Text size="2" style={{ color: "var(--ds-text-weak)" }}>{EASING_USE[token]}</Text>
+              <Text className="ds-ease-use" size="2" style={{ color: "var(--ds-text-weak)" }}>{EASING_USE[token]}</Text>
             </Flex>
           ))}
-          {/* The control sits directly under the track it drives — the two lane widths and the two
-              gaps between them, so it lines up with the four chips rather than floating under the
-              names. The offset is built from the same constants the lanes use. */}
-          <Box style={{ marginLeft: `calc(${EASE_NAME_W}px + ${EASE_PLOT_W}px + var(--ds-space-16) * 2)` }}>
+          {/* The control sits directly under the track it drives, so it lines up with the four chips
+              rather than floating under the names. The `.ds-ease-replay` rule below builds its offset
+              from the same constants the lanes use. */}
+          <Box className="ds-ease-replay">
             <Button priority="secondary" onClick={() => setEaseAt((a) => (a ? 0 : 1))}>
               Replay all four
             </Button>
@@ -425,7 +428,21 @@ function MotionPage() {
         "@keyframes dsChipIn  { from { opacity: 0; transform: scale(0.7) } to { opacity: 1; transform: scale(1)   } }" +
         "@keyframes dsChipOut { from { opacity: 1; transform: scale(1)   } to { opacity: 0; transform: scale(0.7) } }" +
         ".ds-ease-chip { width: 24px; height: 24px; border-radius: var(--ds-radius-2); background: var(--ds-fill-accent);" +
-        "  transition-property: transform; transition-duration: var(--ds-duration-emphasis); }"
+        "  transition-property: transform; transition-duration: var(--ds-duration-emphasis); }" +
+        /* One row: the column keeps its natural width, so the box scrolls instead of squeezing the
+           lanes. A squeezed column wrapped the Replay button onto two lines, which fails the size check. */
+        ".ds-ease-box { container-type: inline-size; }" +
+        ".ds-ease-col { min-width: max-content; }" +
+        `.ds-ease-replay { margin-left: calc(${EASE_NAME_W}px + ${EASE_PLOT_W}px + var(--ds-space-16) * 2); }` +
+        /* Stacked: the name and the use text each take a full line, so the plot and the track share
+           the middle line and the Replay offset drops the name. The lines of one lane sit closer
+           together than two lanes do, so each use text reads as part of the lane above it. */
+        `@container (max-width: ${EASE_STACK_BELOW_PX - 1}px) {` +
+        "  .ds-ease-col { min-width: 0; row-gap: var(--ds-space-32); }" +
+        "  .ds-ease-lane { flex-wrap: wrap; row-gap: var(--ds-space-8); }" +
+        "  .ds-ease-name, .ds-ease-use { flex-basis: 100%; }" +
+        `  .ds-ease-replay { margin-left: calc(${EASE_PLOT_W}px + var(--ds-space-16)); }` +
+        "}"
       }</style>
     </Page>
   );
