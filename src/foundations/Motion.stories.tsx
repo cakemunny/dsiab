@@ -404,10 +404,12 @@ function MotionPage() {
             </Table.Body>
           </Table.Root>
         </Box>
+        {/* `Mono`, not `Token`: these two names are wider than a 320px column, so they may break at a
+            hyphen there. `Mono` still keeps each name whole on any line wide enough to hold it. */}
         <Caption>
           The one sanctioned layout animation is a collapsible's height, and only through the Radix
-          variable — <Token>var(--radix-accordion-content-height)</Token> /{" "}
-          <Token>var(--radix-collapsible-content-height)</Token> — which resolves the measured height so
+          variable — <Mono>var(--radix-accordion-content-height)</Mono> /{" "}
+          <Mono>var(--radix-collapsible-content-height)</Mono> — which resolves the measured height so
           the keyframe has a real value to land on. A keyframed open/close also <em>restarts</em> when you
           interrupt it rather than reversing: an animation begins at its own first keyframe, not at the
           value the interrupted run had reached.
