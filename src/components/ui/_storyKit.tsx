@@ -352,7 +352,7 @@ export const HexThemeKey = createContext("");
 // All code text in the table: one fixed-size, no-background monospace treatment — so it never scales
 // with the size toolbar and the names match the hex. It is an inline flex box, so a token name stays on
 // one line wherever it fits and wraps at a hyphen only when it is wider than its column, and its baseline
-// is its first line, which keeps a row aligned on the baseline (MEASURED_GRID) at its own height.
+// is its first line, which keeps a four-column row aligned on the baseline (`.ds-measured-row`) at its own height.
 export const Mono = ({ children, muted }: { children: ReactNode; muted?: boolean }) => (
   <span style={{ display: "inline-flex", maxWidth: "100%", fontFamily: "var(--code-font-family)", fontSize: 12, color: muted ? "var(--ds-text-weak)" : "var(--ds-text-link)" }}>{children}</span>
 );
@@ -409,11 +409,13 @@ export const SWATCH_GRID: CSSProperties = {
 
 /** The row shell every token table renders through. `kind` marks the row for the
  *  runtime assertion: "colour" rows show a swatch and are checked (name present,
- *  name before value, value muted); "note" rows carry prose and are skipped. */
+ *  name before value, value muted); "note" rows carry prose and are skipped.
+ *  A measured-table row passes `grid={{}}` and `className="ds-measured-row"`, because an
+ *  inline grid would beat the stylesheet that stacks the row in a narrow table. */
 export function TokenRow({
-  grid = SPEC_GRID, style, kind = "colour", children,
-}: { grid?: CSSProperties; style?: CSSProperties; kind?: "colour" | "note"; children: ReactNode }) {
-  return <Box data-token-row={kind} style={style ? { ...grid, ...style } : grid}>{children}</Box>;
+  grid = SPEC_GRID, className, style, kind = "colour", children,
+}: { grid?: CSSProperties; className?: string; style?: CSSProperties; kind?: "colour" | "note"; children: ReactNode }) {
+  return <Box data-token-row={kind} className={className} style={style ? { ...grid, ...style } : grid}>{children}</Box>;
 }
 
 /* A row that states rather than proves: a radius or size lane, a transparent rest, a paint no row can
@@ -428,13 +430,17 @@ export function TokenRow({
  * both where the eye already looks for evidence: the Measured cell is an em-dash exactly where a
  * measured row shows its value, and the verdict cell opens with `stated` — the same vocabulary as
  * `matches` and `not measured ·`. */
+// A stated row carries its own container, because pages place it in many parents: inside a
+// `MeasuredSpec`, after one in a `TokenGroup`, or straight in a card the page draws itself.
 export const NoteRow = ({ part, value, radix }: { part: string; value: string; radix?: string }) => (
-  <TokenRow kind="note" grid={MEASURED_GRID}>
-    <Text size="1" style={{ color: "var(--ds-text-strong)" }}>{linkRulings(part)}</Text>
-    <Box style={{ minWidth: 0 }}>{radix ? <Mono muted>{radix}</Mono> : null}</Box>
-    <Box><Mono muted>—</Mono></Box>
-    <Box style={{ overflowWrap: "anywhere" }}><Muted>stated · {value}</Muted></Box>
-  </TokenRow>
+  <Box className="ds-measured">
+    <TokenRow kind="note" grid={{}} className="ds-measured-row">
+      <Text size="1" style={{ color: "var(--ds-text-strong)" }}>{linkRulings(part)}</Text>
+      <Box style={{ minWidth: 0 }}>{radix ? <Mono muted>{radix}</Mono> : null}</Box>
+      <Box className="ds-measured-none"><Mono muted>—</Mono></Box>
+      <Box style={{ overflowWrap: "anywhere" }}><Muted>stated · {value}</Muted></Box>
+    </TokenRow>
+  </Box>
 );
 
 /* ===========================================================================
@@ -1124,13 +1130,61 @@ const MeasureHost = createContext<MeasureScope | null>(null);
  *  Both mono tracks are `minmax(0, …)` rather than plain lengths: at their ideal width they ARE
  *  220/96, but a table narrow enough that two fixed tracks plus the gutters no longer fit gives
  *  them up instead of pushing the page into a horizontal scroll (measured: a 420px viewport
- *  overflowed by 15px with plain lengths, and does not with these). */
+ *  overflowed by 15px with plain lengths, and does not with these).
+ *
+ *  ── BELOW 640px OF TABLE ──────────────────────────────────────────────────────────────────────
+ *  The same `minmax(0, …)` lets the two prose tracks reach 0px first, because the grid gives the
+ *  fixed-maximum tracks their space before any `fr` track. Measured at a 375px viewport: a 295px
+ *  row resolved to `0px 111px 96px 0px`, the part and the verdict ran one letter per line, and one
+ *  row stood 938px tall. So a table narrower than four columns can hold stops being a grid: the
+ *  header hides, and each row stacks the part and its note, the token, the value and the
+ *  verdict. The value carries a "Measured" label there, because without the header a bare
+ *  `0.15s` under a token name reads as the token's own value. Each part takes a line of its own,
+ *  because a token and its value fit side by side in some rows and not in others, and the rows then
+ *  stop sharing one rhythm (measured: `--ds-duration-overlay` and `Measured 0.15s` need 257px of a
+ *  255px line at a 375px viewport). The table is a named container, so
+ *  the switch follows the table's width and not the screen's.
+ *
+ *  The layout lives in `MEASURED_CSS` and not in an inline style, because an inline style beats
+ *  every class rule and the container query could not change it. */
 export const MEASURED_COLUMNS = "minmax(0, 1fr) minmax(0, 220px) minmax(0, 96px) minmax(0, 0.8fr)";
-export const MEASURED_GRID: CSSProperties = {
-  display: "grid", gridTemplateColumns: MEASURED_COLUMNS,
-  columnGap: "var(--space-4)", rowGap: "var(--space-3)",
-  padding: "7px 20px", borderTop: "1px solid var(--ds-stroke-weak)", alignItems: "baseline",
-};
+/** The narrowest table that still holds four readable columns: about 8rem of part, the 220px and
+ *  96px tracks, about 6rem of verdict, three 16px gutters and the 40px of row padding, which sums
+ *  to 628px. The threshold rounds that up to 640px. */
+const MEASURED_STACK_BELOW_PX = 640;
+const MEASURED_CSS =
+  // The rows used to sit straight in the page's own stack and took its gap, which differs by page.
+  // `inherit` hands that gap down through both wrappers, so they change nothing at desktop width. The
+  // rows sit in a box of their own because a container query cannot style the container itself.
+  ".ds-measured { container: ds-measured / inline-size; row-gap: inherit; }" +
+  ".ds-measured-rows { display: flex; flex-direction: column; row-gap: inherit; }" +
+  `.ds-measured-row { display: grid; grid-template-columns: ${MEASURED_COLUMNS};` +
+  "  column-gap: var(--space-4); row-gap: var(--space-3); padding: 7px 20px;" +
+  "  border-top: 1px solid var(--ds-stroke-weak); align-items: baseline; }" +
+  ".ds-measured-label { display: none; }" +
+  `@container ds-measured (max-width: ${MEASURED_STACK_BELOW_PX - 1}px) {` +
+  "  .ds-measured-rows { row-gap: 0; }" +
+  "  .ds-measured-row { display: flex; flex-direction: column; row-gap: var(--space-2);" +
+  "    padding-block: var(--space-3); }" +
+  "  .ds-measured-row.ds-measured-head { display: none; }" +
+  // The verdict reads last, after a long value or a shadow's layers that follow it in the source.
+  "  .ds-measured-row > :nth-child(4) { order: 1; }" +
+  // A stated row with no Radix name, and a long value's first-line cell, are empty. Hidden, they
+  // leave no blank line.
+  "  .ds-measured-row > :empty { display: none; }" +
+  // A stated row's em-dash marks an empty Measured column. With no column there, the
+  // `stated ·` verdict already says nothing was measured, so the line goes.
+  "  .ds-measured-row > .ds-measured-none { display: none; }" +
+  "  .ds-measured-label { display: inline; }" +
+  "}";
+// One copy of the stylesheet in the document head serves every table on the page. It is rewritten
+// each time this module loads, so a hot reload picks up a change to it.
+if (typeof document !== "undefined") {
+  const sheet = document.getElementById("ds-measured-css")
+    ?? document.head.appendChild(Object.assign(document.createElement("style"), { id: "ds-measured-css" }));
+  sheet.textContent = MEASURED_CSS;
+}
+const MeasuredLabel = () => <span className="ds-measured-label"><Muted>Measured </Muted></span>;
 const HEAD: CSSProperties = { color: "var(--ds-text-weak)", letterSpacing: "0.06em", textTransform: "uppercase" };
 
 /** Frames the host keeps waiting after the last row released, in case one more is on its way. */
@@ -1324,13 +1378,17 @@ export function MeasuredSpec({
         {host && cycle.live ? render(host) : null}
       </div>
       <MeasureHost.Provider value={scope}>
-        <Box style={{ ...MEASURED_GRID, borderTop: "none", paddingTop: 10, paddingBottom: 4 }}>
-          <Text size="1" weight="bold" style={HEAD}>Part</Text>
-          <Text size="1" weight="bold" style={HEAD}>Token claimed</Text>
-          <Text size="1" weight="bold" style={HEAD}>Measured</Text>
-          <Text size="1" weight="bold" style={HEAD}>Verdict</Text>
+        <Box className="ds-measured">
+          <Box className="ds-measured-rows">
+            <Box className="ds-measured-row ds-measured-head" style={{ borderTop: "none", paddingTop: 10, paddingBottom: 4 }}>
+              <Text size="1" weight="bold" style={HEAD}>Part</Text>
+              <Text size="1" weight="bold" style={HEAD}>Token claimed</Text>
+              <Text size="1" weight="bold" style={HEAD}>Measured</Text>
+              <Text size="1" weight="bold" style={HEAD}>Verdict</Text>
+            </Box>
+            {children}
+          </Box>
         </Box>
-        {children}
       </MeasureHost.Provider>
     </>
   );
@@ -1508,8 +1566,9 @@ export function MeasuredRow({ part, token, select, prop, pseudo, state, at, note
    * every row is its own grid sharing one fixed template (which is exactly what makes the columns line
    * up across a whole table), so any content-driven track would only widen the row that needed it and
    * break the alignment for the rest. So a long value keeps its four columns and takes a SECOND LINE,
-   * spanning from the token column to the end, directly under the token it belongs to. Short values —
-   * the overwhelming majority — stay where the eye scans for them. */
+   * spanning from the token column to the end, directly under the token it belongs to. Below 640px of
+   * table the row stacks (see `MEASURED_COLUMNS`), and that line is one more line after the token,
+   * ahead of the verdict. Short values — the overwhelming majority — stay where the eye scans for them. */
   const shown = compactValue(prop, ev?.measured ?? "");
   const longValue = !shadow && shown.text.length > 14;
 
@@ -1518,7 +1577,7 @@ export function MeasuredRow({ part, token, select, prop, pseudo, state, at, note
       ref={row}
       data-token-row={proven ? "measured" : "unproven"}
       data-measured-from={ev?.source || undefined}
-      style={MEASURED_GRID}
+      className="ds-measured-row"
     >
       <Flex direction="column" gap="1" style={{ minWidth: 0 }}>
         <Text size="1" style={{ color: "var(--ds-text-strong)" }}>
@@ -1533,6 +1592,7 @@ export function MeasuredRow({ part, token, select, prop, pseudo, state, at, note
         <Mono>{token}</Mono>
       </Flex>
       <Box style={{ overflowWrap: "anywhere" }} title={shown.title}>
+        {proven && longValue ? null : <MeasuredLabel />}
         {!proven ? <Mono muted>—</Mono>
           : shadow ? <Mono muted>{shadow.layers.length} layer{shadow.layers.length === 1 ? "" : "s"}</Mono>
           : longValue ? null
@@ -1572,7 +1632,7 @@ export function MeasuredRow({ part, token, select, prop, pseudo, state, at, note
         </Flex>
       ) : proven && longValue ? (
         <Box style={{ gridColumn: "2 / -1", overflowWrap: "anywhere", paddingTop: 2 }} title={shown.title}>
-          <Mono muted>{shown.text}</Mono>
+          <MeasuredLabel /><Mono muted>{shown.text}</Mono>
         </Box>
       ) : null}
     </Box>
