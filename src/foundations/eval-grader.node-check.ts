@@ -106,13 +106,17 @@ describe("RED: solution plus one plant fails that check alone", () => {
     }
   });
 
+  // Two real compiler processes: about 2.5 s on a laptop, past vitest's 5 s default on a loaded CI
+  // runner. The two grades run in parallel and the limit names the cost instead of hiding it.
   test("tsc: a type error fails it and clean code passes, with the repo's binary when the workspace has none", async () => {
     const tsconfig = JSON.stringify({ compilerOptions: { strict: true, noEmit: true }, include: ["src"] });
-    const bad = await gradeWorkspace(workspace(null, { "tsconfig.json": tsconfig, "src/bad.ts": 'export const n: number = "x";\n' }), { id: "t", uses: [] });
-    const good = await gradeWorkspace(workspace(null, { "tsconfig.json": tsconfig, "src/good.ts": "export const n: number = 1;\n" }), { id: "t", uses: [] });
+    const [bad, good] = await Promise.all([
+      gradeWorkspace(workspace(null, { "tsconfig.json": tsconfig, "src/bad.ts": 'export const n: number = "x";\n' }), { id: "t", uses: [] }),
+      gradeWorkspace(workspace(null, { "tsconfig.json": tsconfig, "src/good.ts": "export const n: number = 1;\n" }), { id: "t", uses: [] }),
+    ]);
     expect([byId(bad.checks, "tsc").status, byId(good.checks, "tsc").status]).toEqual(["fail", "pass"]);
     expect(byId(bad.checks, "tsc").measured).toContain("TS2322");
-  });
+  }, 30_000);
 
   test("changed and scaffold-intact: read against the baseline manifest", async () => {
     const dir = workspace("settings-form", { "AGENTS.md": "rules\n", "package.json": JSON.stringify({ dependencies: { react: "19.2.7" } }) });
