@@ -97,7 +97,7 @@ export interface TimeInputProps {
   increment?: number;
   /** A trailing clear ✕ (out of the tab order, [[field-family-anatomy]]) appears while a value is set. @default false */
   hasClear?: boolean;
-  /** Focus the input on mount. (Undocumented upstream — we document it.) @default false */
+  /** Focus the input on mount. @default false */
   hasAutoFocus?: boolean;
   /** Greyed hint while empty. @default "Select a time" */
   placeholder?: string;

@@ -505,9 +505,9 @@ export interface TopNavMegaMenuProps {
 
 /** A full-width mega panel anchored to the nav bar (not the trigger): a grid of items + an optional
  *  presentational FeaturedCard. Same popover recipe + hover-intent + roving + nav semantics; the trigger
- *  gains aria-controls (upstream omits). Full-width is a fixed Popover.Anchor at the bar's measured rect,
+ *  gains aria-controls. Full-width is a fixed Popover.Anchor at the bar's measured rect,
  *  so `--radix-popover-trigger-width` equals the bar width (CSS reads it) — JS measurement, since CSS
- *  anchor-positioning is a named deferral. */
+ *  anchor positioning is not used yet. */
 export function TopNavMegaMenu({
   label,
   icon,
@@ -646,8 +646,8 @@ export interface TopNavMegaMenuFeaturedCardProps {
   [key: `data-${string}`]: unknown;
 }
 
-/** The presentational featured card in a mega panel. The hard-appended "→" glyph Astryx used is replaced
- *  with a proper Phosphor `ArrowRight` (D11). Optionally a routed link (a promo CTA); else static. */
+/** The presentational featured card in a mega panel. Its arrow is a Phosphor `ArrowRight`, not a
+ *  typed "→" glyph (D11). Optionally a routed link (a promo CTA); else static. */
 export function TopNavMegaMenuFeaturedCard({
   title,
   description,

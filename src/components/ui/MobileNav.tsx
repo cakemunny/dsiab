@@ -171,8 +171,8 @@ export interface MobileNavToggleProps
 
 /**
  * The hamburger button that opens/closes the mobile drawer. Reads `useAppShellMobile()` for the drawer
- * state + ids (or takes them explicitly), and drives `aria-expanded` + `aria-controls` — an a11y upgrade
- * over upstream, which has neither. Reuses the System `IconButton`.
+ * state + ids (or takes them explicitly), and drives `aria-expanded` + `aria-controls`. Reuses the
+ * System `IconButton`.
  */
 export function MobileNavToggle({
   open,

@@ -45,7 +45,7 @@ import { observeResize, unobserveResize } from "../../utils/sharedResizeObserver
 export type AppShellVariant = "base" | "subtle" | "raised";
 
 /**
- * The mobile-drawer configuration — every knob upstream ships UNDOCUMENTED. Pass a `MobileNavConfig`
+ * The mobile-drawer configuration. Pass a `MobileNavConfig`
  * object as `mobileNav` to tune the default drawer; pass `false` to disable it entirely; or pass a
  * `ReactNode` to supply fully custom drawer contents (the tri-modal `mobileNav` prop).
  */

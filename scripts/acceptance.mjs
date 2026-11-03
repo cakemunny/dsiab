@@ -461,10 +461,13 @@ async function main() {
     const pkgDir = join(app, "node_modules", "dsiab");
     const DOCS = ["docs/GUIDELINES.md", "docs/AGENT-SETUP.md", "docs/REFERENCES.md", "CHANGELOG.md", "LICENSE",
       "THIRD-PARTY-NOTICES", "skills/dsiab/SKILL.md", "skills/dsiab/references/rules.md",
-      "skills/design-system-steward/SKILL.md", "dist/registry.json", "dist/DECISIONS.md"];
+      "skills/design-system-steward/SKILL.md", "dist/registry.json", "dist/DECISIONS.md", "dist/components/index.md"];
     const missingDocs = DOCS.filter((f) => !existsSync(join(pkgDir, f)));
     check("docs", "every document that should ship is installed", missingDocs.length === 0,
       missingDocs.length ? `missing: ${missingDocs.join(", ")}` : DOCS.join(", "));
+
+    const refPath = (() => { try { return run("node", ["-p", "require.resolve('dsiab/components/Select.md')"], { cwd: app }).trim(); } catch { return ""; } })();
+    check("docs", "the subpath dsiab/components/<Name>.md resolves ([[compiled-component-reference]])", existsSync(refPath), refPath || "did not resolve");
 
     // The root AGENTS.md holds the rules for working on this repository, and CONTRIBUTING.md the
     // route for a change to it. A consumer receives the consumer rules from --init instead, so either

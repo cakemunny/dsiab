@@ -10,8 +10,9 @@
  *   is lost including the good ones. Its font-weight / raw-hex / spacing-step rules are also OURS:
  *   they say a product's marketing gradient is a defect, which it is not.
  *
- *   So this file ships only rules that pass one test: **would this be a defect in a codebase that
- *   had never heard of this design system?** Four do. Each rule below states the case in `why`.
+ *   So the rules in this file pass one test: **would this be a defect in a codebase that had never
+ *   heard of this design system?** Each rule below states the case in `why`. The system's own rules
+ *   live in `dsiabRules.mjs`, under the refined test that ruling states ([[ds-check-dsiab-rules]]).
  *   A FORK of the system needs none of this — a fork has the vitest suite, and `npm test` is
  *   already its authoring gate.
  *
@@ -29,6 +30,7 @@
  */
 import { readdirSync, readFileSync, statSync, lstatSync } from "node:fs";
 import { join, relative, extname, sep } from "node:path";
+import { DSIAB_RULES, prepareTree, fileContext, dsiabFindings, formatDsiabReach } from "./dsiabRules.mjs";
 
 /* ------------------------------------------------------------------------------------------------
    THE RULES
@@ -37,7 +39,7 @@ import { join, relative, extname, sep } from "node:path";
 /** @typedef {{id:string,title:string,why:string,fix:string,reads:string}} Rule */
 
 /** @type {Rule[]} */
-export const RULES = [
+const WEB_RULES = [
   {
     id: "transition-all",
     title: "a transition animates `all`",
@@ -102,6 +104,7 @@ export const RULES = [
   },
 ];
 
+export const RULES = [...WEB_RULES, ...DSIAB_RULES];
 export const RULE_IDS = RULES.map((r) => r.id);
 const RULE_BY_ID = new Map(RULES.map((r) => [r.id, r]));
 
@@ -654,10 +657,12 @@ function childIsOperable(tag, attrs) {
 /**
  * @param {string} rel   path as it should be reported
  * @param {string} src   file contents
- * @returns {null | {file:string, findings:Array, allowed:Array, allowIssues:Array, stale:Array}}
- *          null when the extension is outside the scanned set.
+ * @param {{tree?: object, file?: object}} [ctx]  the run's shared state and this file's flags, from
+ *        `checkTree`. Without it, the dsiab rules use the package's own facts (`dsiabRules.mjs`).
+ * @returns {null | {file:string, findings:Array, allowed:Array, allowIssues:Array, stale:Array,
+ *          notEvaluated:Array}} null when the extension is outside the scanned set.
  */
-export function checkSource(rel, src) {
+export function checkSource(rel, src, ctx = {}) {
   const ext = extname(rel).toLowerCase();
   const regions = regionsFor(ext, src);
   if (!regions) return null;
@@ -757,6 +762,8 @@ export function checkSource(rel, src) {
     );
   }
 
+  const skipped = dsiabFindings(src, regions, { ...ctx, markup: MARKUP_EXT.includes(ext) }, add, inCode);
+
   // De-dupe: a `transition: all` inside a styled-components template is legitimately visible to both
   // the CSS and the JS matcher.
   const seen = new Set();
@@ -780,8 +787,9 @@ export function checkSource(rel, src) {
       kept.push(f);
     }
   }
+  const notEvaluated = allows.filter((a) => a.claimed === 0 && skipped.has(a.rule));
   const stale = allows
-    .filter((a) => a.claimed === 0)
+    .filter((a) => a.claimed === 0 && !skipped.has(a.rule))
     .map((a) => ({
       file: rel,
       line: a.line,
@@ -791,7 +799,7 @@ export function checkSource(rel, src) {
         `nothing on line${a.covers.length > 1 ? "s" : ""} ${a.covers.join(" or ")} violates \`${a.rule}\` any more`,
     }));
 
-  return { file: rel, findings: kept, allowed, allowIssues, stale };
+  return { file: rel, findings: kept, allowed, allowIssues, stale, notEvaluated };
 }
 
 /** Parse every `ds-allow` in the file, validate it against the grammar, and work out which lines it
@@ -946,17 +954,19 @@ export function checkTree(root) {
   const inventory = collectFiles(root);
   const results = [];
   const unreadable = [...inventory.unreadable];
+  const sources = [];
   for (const file of inventory.files) {
-    let src;
     try {
-      src = readFileSync(file, "utf8");
+      sources.push({ file, src: readFileSync(file, "utf8") });
     } catch {
       unreadable.push(file);
-      continue;
     }
+  }
+  const tree = prepareTree(sources);
+  for (const { file, src } of sources) {
     const rel = relative(root, file) || file.split(sep).pop();
-    const r = checkSource(rel, src);
-    if (r && (r.findings.length || r.allowed.length || r.allowIssues.length || r.stale.length)) results.push(r);
+    const r = checkSource(rel, src, { tree, file: fileContext(file) });
+    if (r && (r.findings.length || r.allowed.length || r.allowIssues.length || r.stale.length || r.notEvaluated.length)) results.push(r);
   }
   const counts = {
     findings: results.reduce((n, r) => n + r.findings.length, 0),
@@ -965,7 +975,8 @@ export function checkTree(root) {
     stale: results.reduce((n, r) => n + r.stale.length, 0),
   };
   counts.failures = counts.findings + counts.allowIssues + counts.stale;
-  return { root, results, counts, reach: { ...inventory, unreadable } };
+  const notEvaluated = results.reduce((n, r) => n + r.notEvaluated.length, 0);
+  return { root, results, counts, reach: { ...inventory, unreadable, dsiab: tree, notEvaluated } };
 }
 
 /* ------------------------------------------------------------------------------------------------
@@ -1044,6 +1055,7 @@ export function formatReach(reach) {
   out.push("");
   out.push("  Inside the files it did read:");
   for (const l of WITHIN_FILE_LIMITS) out.push(`      · ${wrap(l, 92, "        ")}`);
+  out.push(...formatDsiabReach(reach.dsiab, reach.notEvaluated));
   return out.join("\n");
 }
 

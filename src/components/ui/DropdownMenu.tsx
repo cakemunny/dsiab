@@ -117,7 +117,7 @@ function DropdownMenuItem({ tone, ...props }: DropdownMenuItemProps) {
  * `TriggerIcon` IS DELIBERATELY ABSENT — a Radix Themes snippet using `<DropdownMenu.TriggerIcon />`
  * will throw "Element type is invalid" here. It is not a menu part: Radix exports it as an alias of its
  * internal `ChevronDownIcon` (dropdown-menu.d.ts: `ChevronDownIcon as TriggerIcon`; the two are the same
- * function object). `src/index.ts` already withholds `ChevronDownIcon` and its three siblings by ruling —
+ * function object). The package entry point already withholds `ChevronDownIcon` and its three siblings by ruling —
  * this system draws with `@phosphor-icons/react`, and Radix's icons are a second family on a different
  * grid (Radix: fixed `width="9" viewBox="0 0 9 9"`; Phosphor: `width="1em" viewBox="0 0 256 256"`).
  * Re-exporting it under this name would re-admit through the back door the exact icon the front door

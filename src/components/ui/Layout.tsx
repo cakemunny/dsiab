@@ -279,18 +279,17 @@ export interface LayoutProps extends Omit<ComponentPropsWithoutRef<"div">, "chil
   ref?: Ref<HTMLDivElement>;
   /**
    * Cap + centre the content measure (`Layout.Content`). A number is px; a string is any CSS length
-   * (e.g. `"72ch"`). Omit for a full-bleed content area. (Real API — upstream ships it undocumented.)
+   * (e.g. `"72ch"`). Omit for a full-bleed content area.
    */
   contentWidth?: number | string;
   /**
    * Slot-aware inner padding, on the `--ds-space` scale (`"4"` = 16px, default). Applied per slot:
-   * header/footer get inline + block padding, content + panel get full padding. (Real API — upstream
-   * ships it undocumented.)
+   * header/footer get inline + block padding, content + panel get full padding.
    */
   padding?: LayoutPadding;
   /**
    * Draw a hairline rule between adjacent areas (header↔body, body↔footer, panel↔content). Each slot
-   * can override its own boundary via `hasDivider`. (Real API — upstream ships it undocumented.)
+   * can override its own boundary via `hasDivider`.
    */
   defaultHasDividers?: boolean;
   /** Test id, forwarded to the root. */
@@ -336,7 +335,7 @@ const VDivider = () => (
  * </Layout>
  * ```
  *
- * Not a flex-wrapping box (upstream's docs mislead) — a deterministic header / [panel · content] /
+ * Not a flex-wrapping box — a deterministic header / [panel · content] /
  * footer shell with resolved dividers and slot-aware padding.
  */
 export function Layout({

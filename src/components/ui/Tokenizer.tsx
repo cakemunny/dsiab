@@ -51,7 +51,7 @@ type Size = "1" | "2" | "3";
 type Tone = "error" | "warning" | "success" | "info";
 type Validation = { tone: Tone; message: ReactNode };
 
-/** The change metadata handed to `onValueChange`. Upstream's phantom `'reorder'` is dropped (never emitted). */
+/** The change metadata handed to `onValueChange`. There is no `'reorder'` reason, because none is ever emitted. */
 export interface TokenizerChange<TAux = unknown> {
   item: TypeaheadOption<TAux>;
   type: "add" | "create" | "remove";

@@ -21,8 +21,8 @@ import { useScrollOverflow, scrollByViewport } from "../../hooks/useScrollOverfl
  * unmounted — that would drop focus to <body>). Reuses our IconButton + Phosphor carets. Zero net-new
  * tokens; scoped .radix-themes; no !important. */
 
-/** Spacing steps → --ds-space-* tokens. A divergence from Astryx's fractional 0.5/1.5 steps (our
- *  scaling-aware scale has no half-steps); the useful range is covered. */
+/** Spacing steps → --ds-space-* tokens. Whole steps only: the scaling-aware scale has no
+ *  half-steps such as 0.5 or 1.5, and the useful range is covered. */
 export type CarouselSpace = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 const SPACE_TOKEN: Record<CarouselSpace, string> = {
   0: "var(--ds-space-0)",

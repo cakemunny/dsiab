@@ -968,6 +968,73 @@ This ledger records the rulings that shape the design system and the reason behi
 >
 > **Status.** Ruled 2026-10-01. It amends [ruling-shape](#ruling-shape) with the name heading and the tags line. No later ruling amends it.
 
+### ds-check-dsiab-rules
+
+**Tags.** `TOKENS`, `INSTALL`. **Ruled.** 2026-11-03.
+
+**`ds-check` runs four of this system's own rules over consumer code: `unknown-token`, `bare-scale-step`, `important-flag` and `radix-duplicate`.**
+
+**What you see.**
+
+- `unknown-token` fails a `var(--ds-…)` whose name the package does not define, inside a family the system owns or one of the families other systems use (`color`, `spacing`, `border`, `background` and the rest). The detail names the real token, the steps of a numeric family, or the names in the family. A `--ds-*` name declared anywhere in the checked tree passes, and so does a name in a family the system does not own, such as `--ds-mything-gap`.
+- `bare-scale-step` fails a numeric step of a colour scale, the brand ramps included, and names the role `semantic.css` declares for that step.
+- `important-flag` fails `!important`.
+- `radix-duplicate` fails a named import from `@radix-ui/themes` of a component the roster ships under the same name, and names the import to write.
+
+**The test for a rule, refined.** The rules that shipped first pass one test: would it be a defect in a codebase that had never heard of this system? `unknown-token` and `radix-duplicate` pass it unchanged, because a name that resolves to nothing and a second copy of an installed component are defects anywhere. `bare-scale-step` and `important-flag` pass a refined test: would it be a defect in a file that already builds on this system? So they run only in a dsiab file, one whose comment-free text imports `dsiab` or holds `var(--ds-` or `.radix-themes`. A product page that never touched the system keeps its own `!important`.
+
+**The facts.** One function, `buildCheckFacts` in `src/foundations/checkFacts.mjs`, derives every fact the rules read: the known names, the names a suggestion may use, the colour scales (each prefix with an alpha step, which picks up `oxblood` and the status aliases), the role for each step, and the duplicates. In a checkout `ds-check` builds them from the sources, and in an install it reads `dist/check-facts.json`, which the build writes with the same function. When neither loads, the three rules that need them print NOT RUN with the reason and are never reported clean.
+
+**Not a duplicate.** Grid, Section, AspectRatio, VisuallyHidden and Skeleton are bare re-exports of Radix's own binding, so importing them from Radix imports the same object, and the facts list them as passthroughs that `radix-duplicate` skips. `Theme` is not reported, because `Contrast` wraps it under another name.
+
+**Allowances.** An allowance for a rule that did not run on its file, because the facts did not load, the file is not a dsiab file, or the file is the package's own source, is reported as not evaluated and never as stale.
+
+**The package's own source.** Over this repository, `bare-scale-step` skips `src/tokens` and the stories, and `radix-duplicate` skips all of `src/`, because those are the layer the rules protect. The two other rules run there. The one `!important` in the source, in `components.css`, overrides Radix's own flag on the Skeleton pulse to honour reduced motion, and carries the one allowance.
+
+**Not caught.** `--accent-contrast`, `--accent-surface` and `--color-*`, a raw hex value, a string passed to a call such as `cn("…")`, a name built at runtime, and a CSS module with no dsiab marker of its own. A raw hex rule would fit the dsiab-file scope and stays an open question.
+
+**Changed from.** `ds-check` ran five rules that are defects in any codebase, and its help said the system's own rules are not run over consumer code.
+
+**Status.** Ruled 2026-11-03. No later ruling amends it.
+
+### compiled-component-reference
+
+**Tags.** `DOCUMENTATION`, `INSTALL`. **Ruled.** 2026-11-03.
+
+**Each available component ships a Markdown reference compiled at build time from the types and the roster, and the docs page wins over it.**
+
+**What you see.** The package holds `dist/components/<Name>.md`, one file for each available roster entry, and `dist/components/index.md`, which lists them by category and names what the package leaves out. A reader opens them as `dsiab/components/<Name>.md`. Each file opens on the sentence that the docs page wins, links the docs page for the installed version, and lists the exports, the import line, each export's own props with their JSDoc, the Radix props it inherits, and the Radix props it does not accept. An entry with no export of its own points at the file of the page that documents it.
+
+**What it leaves out.** Measured token values, visual states, keyboard tables and examples. Those are on the docs page, and a list copied here would drift from it. The file invents no JSX.
+
+**Why.** An agent in a product repository has the package and no running docs site. The declarations answer which props exist, but a reader has to follow each name through several files to find what a wrapper removed from the Radix component it remembers, and that removed prop is the one an agent writes by mistake.
+
+**How it stays true.** `scripts/dist-reference.mjs` reads one TypeScript program over the source with the options that emit the shipped declarations, so it needs no prior build. Status, tier and `wraps` come from the same projection as `dsiab/registry.json`. The files are generated on every build and never committed. `dist-reference.node-check.ts` holds coverage, export headings, the docs-win sentence, leaks, ruling citations and size, with a red proof for each, and holds the props of Button, Select, Calendar, Badge and a hook to known values.
+
+**Changed from.** Nothing. The package shipped the declarations and the roster and no per-component reference.
+
+**Status.** Ruled 2026-11-03. No later ruling amends it.
+
+### skill-read-back-step
+
+**Tags.** `DOCUMENTATION`, `INSTALL`. **Ruled.** 2026-11-03.
+
+**The `dsiab` skill routes an agent to the component reference, asks for one read-back pass over the changed files before `npx ds-check`, and names the install failures no check reports.**
+
+**What you see.**
+
+- Step 1 sends the agent to `dsiab/components/<Name>.md` and its index before it writes against a component ([[compiled-component-reference]]).
+- Step 3 opens on a read-back pass written as plain replace-this-with-that pairs, and only for drift the check does not catch: a raw colour, field chrome placed beside an input, a hand-built surface the roster ships, and a number the system does not specify. It names no rule id and no rule count, and sends the agent to `npx ds-check --rules` for the list.
+- The install section is a three-item diagnosis list that points at `references/rules.md` for the reasons, so the skill does not hold a second copy of them.
+
+**Why.** A rule the agent has read is not a rule it applies while the feature has its attention, and a pass that checks only what the tool already reports adds nothing. A light, plain register is used instead of a forceful audit. The effect is unmeasured for dsiab until the eval set (PR 2) runs, and at its planned size that eval can show an effect only on the checks no rule covers.
+
+**Not checked.** `ds-check` does not flag a missing `import "dsiab/styles.css"` or an import of `@radix-ui/themes/styles.css` in a dsiab file. Both are lines of source, so a rule could catch them, and that stays an open question.
+
+**Changed from.** Step 3 named five rules by id, the skill had no read-back step and no route to a per-component reference, and the install section restated the reasons in `references/rules.md` as prose.
+
+**Status.** Ruled 2026-11-03. No later ruling amends it.
+
 ## Token additions (2026-06-18)
 
 ### serif-em-and-quote

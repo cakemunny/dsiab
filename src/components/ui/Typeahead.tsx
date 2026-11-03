@@ -67,8 +67,8 @@ type EmbeddedControlProps = {
   "aria-invalid"?: boolean | "true" | "false";
 };
 
-/** One option. `id` is REQUIRED in our port (drops Astryx's id-less fallback + its `getKey` util —
- *  our key/selection equality is `id`). `element` is optional custom row content; `renderOption`
+/** One option. `id` is REQUIRED: there is no id-less fallback and no `getKey` util, because
+ *  key and selection equality is `id`. `element` is optional custom row content; `renderOption`
  *  overrides it. `auxiliaryData` is the consumer's payload, carried back on `onValueChange`. */
 export interface TypeaheadOption<TAux = unknown> {
   id: string;
@@ -154,8 +154,8 @@ export interface TypeaheadProps<TAux = unknown> {
 }
 
 /** Create a search source from a static array — the only place client-side filtering lives (the
- *  component itself never filters). Substring match on `label` + optional `keywords`. Ported from
- *  Astryx `createStaticSource` (adapted to our `TypeaheadOption`/`TypeaheadSource`). */
+ *  component itself never filters). Substring match on `label` + optional `keywords`, over
+ *  `TypeaheadOption` and returning a `TypeaheadSource`. */
 export function createStaticSource<TAux = unknown>(
   items: TypeaheadOption<TAux>[],
   options?: { keywords?: (item: TypeaheadOption<TAux>) => string[] },

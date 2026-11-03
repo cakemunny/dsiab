@@ -282,3 +282,29 @@ These sources shaped the ledger itself rather than a component, so each row name
 | Source | What it informed |
 |---|---|
 | [CSS Custom Properties for Cascading Variables Level 1, Guaranteed-invalid values](https://drafts.csswg.org/css-variables-1/#guaranteed-invalid) | [[missing-provider-warning]]. READ: a custom property with no declaration holds the guaranteed-invalid value, which serializes as the empty string and makes any property that references it invalid at computed-value time. ADOPTED: an empty `--ds-fill-accent` on `.radix-themes` as the sign of an absent stylesheet, and the same rule as the reason every `calc()` fails without the attributes `Provider` writes. |
+
+## Checking consumer code against the token layer ([[ds-check-dsiab-rules]])
+
+| Source | What it informed |
+|---|---|
+| [stylelint, declaration-no-important](https://github.com/stylelint/stylelint/blob/main/lib/rules/declaration-no-important/README.md) | [[ds-check-dsiab-rules]]. READ on 2026-11-03: the rule disallows `!important` in every declaration, with or without spaces before it. ADOPTED: flag every `!important`, spaced or not. REJECTED: a global scope, because a product page that never touched this system may keep its own, so `important-flag` runs only in a file that builds on dsiab. |
+| [csstools, stylelint-value-no-unknown-custom-properties](https://github.com/csstools/stylelint-value-no-unknown-custom-properties) | [[ds-check-dsiab-rules]]. READ on 2026-11-03: the plugin flags a `var(--name)` that nothing it can see defines, and `importFrom` supplies the definitions from CSS, JS or JSON. ADOPTED: check each `var()` against an imported list of the package's own names, shipped as `dist/check-facts.json`. REJECTED: requiring every custom property to resolve, because a consumer's own properties are not ours to judge, so `unknown-token` fails only a `--ds-*` name in a family this system owns and accepts any name the checked tree declares. |
+| Radix Colors, understanding the scale (the step-by-step use cases of a 12-step scale) | [[ds-check-dsiab-rules]]. ADOPTED: the step ranges, backgrounds at 1 and 2, component fills at 3 to 5, borders at 6 to 8, solid fills at 9 and 10 and text at 11 and 12, as the fallback hint for a step no role maps to. REJECTED: the ranges as the primary suggestion, because the semantic token file already declares the exact role for most steps, and inverting those declarations cannot drift from the token layer. |
+
+## A compiled reference for each component ([[compiled-component-reference]])
+
+The links were not fetched again in this change, because the session that wrote it could not reach them, so each row names its source without a URL.
+
+| Source | What it informed |
+|---|---|
+| State of AI in Design Systems survey | [[compiled-component-reference]], [[skill-read-back-step]]. READ: during planning. Its finding that agent-facing documentation stays true when it is compiled from the code, not written beside it. ADOPTED: generate each file at build from the types and the roster. REJECTED: a hand-written usage page per component, which drifts the first time a prop changes. For [[skill-read-back-step]], ADOPTED: a read-back step and a list of the failures no check reports. REJECTED: an MCP server for now. |
+| Per-component Markdown twins in React Spectrum, Mantine and Cloudscape | [[compiled-component-reference]]. READ: during planning. Each publishes one Markdown file per component beside its rendered docs, linked from an index, and the version-locked ones link the docs of the installed release. ADOPTED: one file per component, an index, and a docs link for the exact installed version. REJECTED: one concatenated file for every component, which makes a reader load all of them to find one. |
+
+## The skill's read-back step ([[skill-read-back-step]])
+
+The survey row above serves this ruling too. The links were not fetched in this change, because the session that wrote it could not reach the survey host, so each row names its source without a URL.
+
+| Source | What it informed |
+|---|---|
+| Astryx's self-check record, as the State of AI in Design Systems survey reports it | [[skill-read-back-step]]. READ: during planning. Rules alone left raw CSS in 11 to 13 percent of complex runs, and a one-paragraph re-read cut that about fourfold, with plain wording beating a forceful audit. ADOPTED: one short read-back block in plain verbs. REJECTED: the "STOP, MANDATORY" audit register. |
+| Carbon's self-check list and Primer's required final step, as the survey reports them | [[skill-read-back-step]]. READ: during planning. ADOPTED: a short list of named failures to look for. REJECTED: Primer's all-caps register, and a list of what the check already reports, which goes stale as rules are added. |
