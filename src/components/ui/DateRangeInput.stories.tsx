@@ -529,6 +529,11 @@ export const History: Story = {
 
       <Section title="Changelog" lead="Notable changes, newest first — grows as the component evolves.">
         <Flex direction="column" gap="3">
+          <Decision id="0.9.4">
+            <strong>A split layout, opt-in.</strong> <Code>layout="split"</Code> gives each end of the range its
+            own calendar, a start date and an end date side by side, each paging on its own and each bounded by
+            the other. The default linked layout is unchanged ([[calendar-range-role]]).
+          </Decision>
           <Decision id="0.9.0">
             Initial <Code>System/DateRangeInput</Code> — the range picker: the surface-trigger chrome (no caret)
             + the calendar-<strong>dialog</strong> popover on <Code>@radix-ui/react-popover</Code> hosting{" "}

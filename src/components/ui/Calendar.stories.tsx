@@ -946,6 +946,13 @@ export const History: Story = {
 
       <Section title="Changelog" lead="Notable changes, newest first — grows as the component evolves.">
         <Flex direction="column" gap="3">
+          <Decision id="0.9.4">
+            <strong>One end at a time, and the band crosses the month edge.</strong> A range calendar takes{" "}
+            <Code>rangeRole="start"</Code> or <Code>"end"</Code>: it edits only its own end of a shared range,
+            stops at the other end, and pages on its own, so a span longer than a month can be picked. A hover
+            shows the range a click would make. Days outside the month that fall inside a range now band in a
+            neutral grey, and keyboard paging stops at <Code>min</Code> and <Code>max</Code> ([[calendar-range-role]]).
+          </Decision>
           <Decision id="0.9.0">
             <strong>The month grid pages, and both grids are documented where they can be seen.</strong>{" "}
             The month grid gains year chevrons (and <Code>Page Up</Code> / <Code>Page Down</Code>), filling
