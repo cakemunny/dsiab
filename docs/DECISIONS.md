@@ -234,6 +234,44 @@ This ledger records the rulings that shape the design system and the reason behi
 
 **Status.** Ruled 2026-11-03. No later ruling amends it.
 
+### local-usage-scan
+
+**Tags.** `INSTALL`, `DOCUMENTATION`. **Ruled.** 2026-11-03.
+
+**A project learns which system components it uses from a scan of its own code on the developer's machine, and no usage data leaves that machine.**
+
+**Where it is collected.** A `usage` command in the installed package reads the project's own source files. It matches each import from `dsiab` against the roster that the installed copy ships, and counts each use down to the file and line. Nothing runs inside the product, and no shipped component records what it renders.
+
+**What is sent.** Nothing. The command makes no network connection, and nothing is collected across installs, so each team sees only its own project. A report reaches anyone else only when its team chooses to send the file.
+
+**Where it is shown.** The command prints a summary and can write one report file. A Usage page in the hosted documentation opens that file in the reader's browser and draws every view from the file alone, sending no part of it anywhere. The reading happens on the machine because a hosted page cannot see the files of the project that opened it.
+
+**What is counted.**
+
+- A rendered element counts toward its component, and a dotted member such as `DropdownMenu.Item` counts toward its root.
+- A call counts toward a hook.
+- A type is never counted, and an entry whose exports are all types appears in no list or count.
+- A use the scan cannot trace is listed as untraced, with its file, line and reason, and is never counted as zero.
+- When nothing imports from `dsiab`, the report says so instead of calling every component unused.
+
+**The kind of each export.** The published roster gains a kind for each exported name: `component`, `hook`, `function`, `constant` or `type`, worked out at build time from the compiled type declarations. The kinds sit in a separate map beside `exports`, so every existing reader of `exports` keeps working, and a reader treats a kind it does not know as not countable.
+
+**Order of work.** The scan and the command come first. The page is built only after a run over a real project answers at least one question that the project's owner wrote down before the run. The first page uses tables and counts made from existing components. A chart component waits for three real uses, as [contribution-threshold](#contribution-threshold) requires.
+
+**Why.** Reading the code answers the question asked, which is which components a project uses, how often and where, down to the file and line. Tracking rendered components would put telemetry inside a shipped package, would count only the screens someone opened, and still could not name the file.
+
+**Guidance.** The maintainer directed, on 2026-11-03, the following:
+
+- Each team sees only its own project.
+- The page lives in the hosted documentation and opens a report from the developer's disk.
+- Tables come before a chart.
+- The need is tested on a personal project before the page is built.
+- The kind of each export sits in its own map beside the list of names.
+
+**Changed from.** No ruling covered usage. The package could check a project's code against its rules, but could not say which of its components that project used.
+
+**Status.** Ruled 2026-11-03. No later ruling amends it.
+
 ### package-manager-and-storybook
 
 **Tags.** `CONTRIBUTING`. **Ruled.** No date recorded.
