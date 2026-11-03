@@ -41,7 +41,7 @@ rule file above 24,000 bytes.
 
 ## The roster in this repository
 
-**`registry.json` at the root is the roster of record**: 110 entries on 2026-10-01, one per component,
+**`registry.json` at the root is the roster of record**: 111 entries on 2026-11-03, one per component,
 each with `status`, `tier`, `module` and the exact `exports[]` names it publishes. Read the file, never
 a remembered list or a count in a doc. It answers the first question worth asking: does this already
 exist?
