@@ -1,5 +1,7 @@
 import { createContext, memo, useCallback, useContext, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { flushSync } from "react-dom";
+import { createRoot } from "react-dom/client";
 import { Box, Flex } from "@radix-ui/themes";
 import { MagnifyingGlass } from "@phosphor-icons/react";
 import decisionsMd from "../../docs/DECISIONS.md?raw";
@@ -16,6 +18,7 @@ import { Text } from "../components/ui/Text";
 import { TextField } from "../components/ui/TextField";
 import { Token } from "../components/ui/Token";
 import { VisuallyHidden } from "../components/ui/VisuallyHidden";
+import { Provider } from "../theme/Provider";
 import { useSizeLane } from "../theme/SizeContext";
 
 // The Decisions page IS the ruling ledger (DECISIONS.md), parsed live from the source so it cannot drift.
@@ -709,7 +712,7 @@ export const Decisions: Story = {
 
 /** Test only: hidden from the sidebar and the docs view by `!dev`, still run by the test suite. It renders
  *  the same page and drives it the way a reader does: search, a tag, the sort, an empty result and its
- *  Clear filters action, a ruling opened from a link, and then every row opened once. Kept apart from the
+ *  Clear filters action, a ruling opened from a link, and then it reads every ruling's body. Kept apart from the
  *  docs story so a reader's view of the page never moves on its own (the same split as
  *  `_radio-cards.stories.tsx` and the Colors FailLoudProbe). */
 export const Interactions: Story = {
@@ -805,43 +808,61 @@ export const Interactions: Story = {
     shape.click();
     await waitFor(() => shape.getAttribute("aria-expanded") === "false", "ruling-shape to close");
 
-    // Every row, opened once. No Evidence part, no [[ citation, no stray backtick and no old section code
-    // reach the page, and a Sources label is the verdict and its few plain words, never a sentence.
+    // Every ruling's body, the one a row opens to. No Evidence part, no [[ citation, no stray backtick and no
+    // old section code reach the page, and a Sources label is the verdict and its few plain words, never a
+    // sentence. The two rows above prove a row opens to its body, so the bodies render here in one commit
+    // beside the list: opening and closing each row in turn re-rendered the whole list twice a row, about 60ms
+    // a row on a loaded four-core box, and took the story past its 15s limit (measured 2026-11-03).
     if (RULINGS.some((r) => JSON.stringify(r.blocks).includes(EVIDENCE))) throw new Error("An Evidence part reached the Decisions page");
-    let withSources = 0;
-    let opened = 0;
-    for (const row of triggers()) {
-      const name = nameOf(row);
-      row.click();
-      const part = await waitFor(
-        () => row.getAttribute("aria-expanded") === "true" && document.getElementById(row.getAttribute("aria-controls") ?? ""),
-        `${name} to open`,
+    const host = canvasElement.appendChild(document.createElement("div"));
+    const root = createRoot(host);
+    try {
+      flushSync(() =>
+        root.render(
+          <Provider>
+            {RULINGS.map((r) => (
+              <div key={r.name} data-body={r.name}>
+                <RulingBody ruling={r} />
+              </div>
+            ))}
+          </Provider>,
+        ),
       );
-      const prose = proseOf(part);
-      if (prose.includes("[[")) throw new Error(`A [[ citation reached the page in ${name}`);
-      if (/The entry as first written/.test(part.textContent ?? "")) throw new Error(`An Evidence part reached the page in ${name}`);
-      // Prose only: code spans are literal, such as the bytes `20 C2 B7 20` in docs-page-header.
-      const code = prose.match(OLD_CODE);
-      if (code) throw new Error(`The old section code ${code[2]} reached the page in ${name}`);
-      const sources = part.querySelector("[data-sources]");
-      if (Boolean(sources) !== SOURCES.has(name)) throw new Error(`${name} shows ${sources ? "a" : "no"} Sources part against REFERENCES.md`);
-      if (sources) {
-        withSources++;
-        const text = proseOf(sources);
-        if (text.includes("[[") || text.includes("`")) throw new Error(`The Sources part of ${name} shows raw markdown: ${text.slice(0, 120)}`);
-        for (const label of sources.querySelectorAll("[data-verdict]"))
-          if (!/^(Adopted|Read|Rejected)\b[^.:]{0,40}:?$/.test(label.textContent ?? ""))
-            throw new Error(`The Sources part of ${name} has the label "${label.textContent}"`);
-      }
-      // Each row closes before the next opens, so the page stays one panel tall and each render stays cheap.
-      row.click();
-      await waitFor(() => row.getAttribute("aria-expanded") === "false", `${name} to close`);
-      opened++;
+      sweepBodies(host);
+    } finally {
+      root.unmount();
+      host.remove();
     }
-    // The sweep proves something only if it ran: every row, and a Sources part among them.
-    if (opened !== HEADINGS || !withSources) throw new Error(`The row sweep opened ${opened} rows, ${withSources} with sources`);
 
     (document.activeElement as HTMLElement | null)?.blur();
     window.scrollTo(0, 0);
   },
 };
+
+/** The checks on every rendered ruling body, each body a `[data-body]` element named for its ruling. */
+function sweepBodies(host: HTMLElement) {
+  let withSources = 0;
+  let swept = 0;
+  for (const part of host.querySelectorAll<HTMLElement>("[data-body]")) {
+    const name = part.dataset.body!;
+    const prose = proseOf(part);
+    if (prose.includes("[[")) throw new Error(`A [[ citation reached the page in ${name}`);
+    if (/The entry as first written/.test(part.textContent ?? "")) throw new Error(`An Evidence part reached the page in ${name}`);
+    // Prose only: code spans are literal, such as the bytes `20 C2 B7 20` in docs-page-header.
+    const code = prose.match(OLD_CODE);
+    if (code) throw new Error(`The old section code ${code[2]} reached the page in ${name}`);
+    const sources = part.querySelector("[data-sources]");
+    if (Boolean(sources) !== SOURCES.has(name)) throw new Error(`${name} shows ${sources ? "a" : "no"} Sources part against REFERENCES.md`);
+    if (sources) {
+      withSources++;
+      const text = proseOf(sources);
+      if (text.includes("[[") || text.includes("`")) throw new Error(`The Sources part of ${name} shows raw markdown: ${text.slice(0, 120)}`);
+      for (const label of sources.querySelectorAll("[data-verdict]"))
+        if (!/^(Adopted|Read|Rejected)\b[^.:]{0,40}:?$/.test(label.textContent ?? ""))
+          throw new Error(`The Sources part of ${name} has the label "${label.textContent}"`);
+    }
+    swept++;
+  }
+  // The sweep proves something only if it ran: every ruling, and a Sources part among them.
+  if (swept !== HEADINGS || !withSources) throw new Error(`The body sweep read ${swept} rulings, ${withSources} with sources`);
+}
