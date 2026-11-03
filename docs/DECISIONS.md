@@ -2773,7 +2773,7 @@ Cells are flush so a band runs unbroken, and only the outer corners and the corn
 - [textless-part-fills](#textless-part-fills) paints the today bar in `--accent-indicator` in place of `--ds-fill-accent`.
 - [indicator-mark-edges](#indicator-mark-edges) adds a 1px edge to the today bar where it paints the accent.
 - [mark-on-tint-edge](#mark-on-tint-edge) gives the today bar inside a range an edge step of its own.
-- [calendar-range-role](#calendar-range-role) adds the start and end roles that edit one end of a range, and lets an adjacent-month day continue a range run in the neutral spillover band.
+- [calendar-range-role](#calendar-range-role) lets an adjacent-month day continue a range run in the neutral spillover band, and a disabled day still caps it.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 
@@ -2985,15 +2985,15 @@ The field otherwise rests in its neutral state. A red border on a field that rev
 
 **Why.** A date span can run past one month, so one calendar cannot always show both ends. Editing one end per click keeps a half-set range out of the value, because `DateRange` stays whole.
 
+**Known gap.** Forced colours has no calendar rules. Under Windows high contrast, the range band, the chips and the today bar vanish, so the endpoints differ from the days between them only by weight. This is recorded, not fixed here, and it stays open until a forced-colours treatment for the calendar is ruled.
+
+**Measured.** Contrast was read on 2026-11-03 off the rendered Calendar in Storybook, each colour composited over its background and rasterised in sRGB. Over the page, the spillover numeral on the grey band reads 5.22:1 in light and 7.57:1 in dark, and the grey band against the page reads 1.14:1 in light and 1.19:1 in dark. Over the DateRangeInput popover panel, the design-system-steward review read the spillover numeral at 5.22:1 in light and 6.19:1 in dark, the grey band at 1.14:1 and 1.22:1, and the in-month band at 1.34:1 and 1.63:1. The band carries continuity only, and the endpoints and `aria-selected` carry the state, so the band is not held to the 3:1 floor for a part that shows state.
+
 **Guidance.** The maintainer ruled, on 2026-10-30, that a date span may run past one month, so the start and the end must page on their own. On 2026-11-02 the maintainer chose a start or end role on range mode and asked for it on `DateRangeInput` as well. On 2026-11-03 the maintainer approved the first-click one-day range from a prototype, with three defaults: the hover paints the result, paging stops at the bounds in every calendar, and the split layout is opt-in.
 
 **Changed from.** [calendar-grid](#calendar-grid) said an adjacent-month day caps a range run. It now continues the run where the spillover band paints it, and a disabled day still caps it. [date-range-input](#date-range-input) said a range is picked with two clicks. In the split layout one click sets one end, and the linked layout keeps two clicks.
 
 **Status.** Ruled 2026-11-03. It amends [calendar-grid](#calendar-grid) and [date-range-input](#date-range-input). No later ruling amends it.
-
-**Known gap.** Forced colours has no calendar rules. Under Windows high contrast, the range band, the chips and the today bar vanish, so the endpoints differ from the days between them only by weight. This is recorded, not fixed here, and it stays open until a forced-colours treatment for the calendar is ruled.
-
-**Evidence.** Contrast was read on 2026-11-03 off the rendered Calendar in Storybook, each colour composited over its background and rasterised in sRGB. Over the page, the spillover numeral on the grey band reads 5.22:1 in light and 7.57:1 in dark, and the grey band against the page reads 1.14:1 in light and 1.19:1 in dark. Over the DateRangeInput popover panel, the design-system-steward review read the spillover numeral at 5.22:1 in light and 6.19:1 in dark, the grey band at 1.14:1 and 1.22:1, and the in-month band at 1.34:1 and 1.63:1. The band carries continuity only, and the endpoints and `aria-selected` carry the state, so the band is not held to the 3:1 floor for a part that shows state.
 
 ### number-input
 
