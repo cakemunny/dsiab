@@ -308,3 +308,13 @@ The survey row above serves this ruling too. The links were not fetched in this 
 |---|---|
 | Astryx's self-check record, as the State of AI in Design Systems survey reports it | [[skill-read-back-step]]. READ: during planning. Rules alone left raw CSS in 11 to 13 percent of complex runs, and a one-paragraph re-read cut that about fourfold, with plain wording beating a forceful audit. ADOPTED: one short read-back block in plain verbs. REJECTED: the "STOP, MANDATORY" audit register. |
 | Carbon's self-check list and Primer's required final step, as the survey reports them | [[skill-read-back-step]]. READ: during planning. ADOPTED: a short list of named failures to look for. REJECTED: Primer's all-caps register, and a list of what the check already reports, which goes stale as rules are added. |
+
+## The eval set ([[eval-measures-not-gates]])
+
+The sources come from the survey the planning for this change read. The links were not fetched in this change, so each row names its source without a URL.
+
+| Source | What it informed |
+|---|---|
+| shadcn's committed evals file | [[eval-measures-not-gates]]. READ: during planning. ADOPTED: a committed list of prompt and expectation pairs. REJECTED: a model judging the output, because a grader that is not deterministic cannot be proven with a fixture. |
+| Atlassian's head-to-head agent evals, and the skill-creator eval format's benchmark variance | [[eval-measures-not-gates]]. READ: during planning. ADOPTED: repeated runs reported as a rate with its spread, and two arms compared in one session. REJECTED: a single run read as pass or fail. |
+| Astryx's nightly benchmark, which publishes its losses | [[eval-measures-not-gates]]. READ: during planning. ADOPTED: reporting the failures beside the rate. REJECTED: a nightly run and a committed baseline, because of model spend and because a stored baseline mixes the change with a different model and dependency set. |

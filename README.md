@@ -31,7 +31,7 @@ Dark mode is `appearance="dark"`, and the orange brand is `accentColor="orange"`
 
 [![The DSIAB docs site, open at the TextField anatomy page](https://github.com/cakemunny/dsiab/raw/main/docs/images/readme-docs.png)](https://dsiab.pages.dev)
 
-**Documentation:** [dsiab.pages.dev](https://dsiab.pages.dev) runs the components live, with their props, their design tokens and the reasoning behind them. Its toolbar switches light and dark, the accent and the size, and `npx dsiab docs` opens the docs for the version you installed.
+**Documentation:** [dsiab.pages.dev](https://dsiab.pages.dev) runs the components live, with their props, their design tokens and the reasoning behind them. Its toolbar switches light and dark, the accent and the size, and `npx dsiab docs` opens the docs for the version you installed. For agents, [`/llms.txt`](https://dsiab.pages.dev/llms.txt) indexes a Markdown page per component.
 
 ## Why use it
 

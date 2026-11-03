@@ -68,6 +68,8 @@ built by `scripts/dist-reference.mjs` from the source types and that projection,
 ([[compiled-component-reference]]). It reads prop and export JSDoc, so that JSDoc is written for a
 package reader: no source-project names and no `src/` paths. `dist-reference.node-check.ts` fails on
 either.
+`npm run build-storybook` publishes the same files on the docs site with an `/llms.txt` index, written
+by `scripts/site-reference.mjs` before the public scan.
 
 ## The bar for anything new
 
@@ -262,6 +264,7 @@ npm run pack                        # build, then npm pack, the tarball you inst
 npm run test:tokens                 # the source-scanning guard lane
 npm test                            # the story suite, with axe
 npm run test:publish                # pack it, install it elsewhere, prove the tarball works
+npm run eval -- --help              # the eval set: pre-release, needs an agent CLI and model spend
 npm run agents                      # generate the contributor agent files
 npx ds-check [path]                 # check code against the shipped rules
 npx ds-check --rules                # what those rules are, and how to allow a line on purpose
@@ -275,6 +278,11 @@ stylesheet import and a component rendered outside `Provider` each print one con
 second copy of Radix's stylesheet loaded after ours prints nothing, because both sheets write legitimate
 values and nothing can tell which one won. So a build that appears to work proves nothing. It needs the
 npm registry and takes a couple of minutes. `-- --keep` leaves the throwaway app behind.
+
+**`npm run eval` measures, it does not enforce** ([[eval-measures-not-gates]]). It runs an agent of your
+choice on the tasks in `evals/tasks.json` against a tarball from `npm run pack`, and writes pass rates
+to the ignored .evals folder. Run it before a release, and on a change to `rules.md` or `skills/dsiab/`
+compare the HEAD tarball with the branch tarball in one session.
 
 ## What a done-claim requires
 

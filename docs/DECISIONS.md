@@ -1033,9 +1033,11 @@ This ledger records the rulings that shape the design system and the reason behi
 
 **How it stays true.** `scripts/dist-reference.mjs` reads one TypeScript program over the source with the options that emit the shipped declarations, so it needs no prior build. Status, tier and `wraps` come from the same projection as `dsiab/registry.json`. The files are generated on every build and never committed. `dist-reference.node-check.ts` holds coverage, export headings, the docs-win sentence, leaks, ruling citations and size, with a red proof for each, and holds the props of Button, Select, Calendar, Badge and a hook to known values.
 
+**The docs site.** `npm run build-storybook` writes the same files, byte for byte, beside the built site, with the roster, the ledger, the rules and the agent setup guide, and an `/llms.txt` that links each of them by a site-absolute path. `scripts/site-reference.mjs` does it before the public build scan, and fails the build when a component file links a story the built site does not hold. Each file links the docs of the release it was built from, so `llms.txt` on the latest site links that release's permanent alias by design. A `_headers` file asks Pages to serve the files as UTF-8 text, and whether Pages honours it for these paths is checked with `curl -I` after a deploy, not before. `site-reference.node-check.ts` holds `llms.txt` to the available roster and to the files written.
+
 **Changed from.** Nothing. The package shipped the declarations and the roster and no per-component reference.
 
-**Status.** Ruled 2026-11-03. No later ruling amends it.
+**Status.** Ruled 2026-11-03. On 2026-11-03 the docs site gained the same files and an `llms.txt`.
 
 ### skill-read-back-step
 
@@ -1054,6 +1056,26 @@ This ledger records the rulings that shape the design system and the reason behi
 **Not checked.** `ds-check` does not flag a missing `import "dsiab/styles.css"` or an import of `@radix-ui/themes/styles.css` in a dsiab file. Both are lines of source, so a rule could catch them, and that stays an open question.
 
 **Changed from.** Step 3 named five rules by id, the skill had no read-back step and no route to a per-component reference, and the install section restated the reasons in `references/rules.md` as prose.
+
+**Status.** Ruled 2026-11-03. No later ruling amends it.
+
+### eval-measures-not-gates
+
+**Tags.** `CONTRIBUTING`. **Ruled.** 2026-11-03.
+
+**An eval set measures whether an agent with dsiab installed builds UI the way the rules say, and it reports rates. It is not a gate and does not run in CI.**
+
+**What you see.** `evals/tasks.json` holds six tasks, whose prompts never name a component. `scripts/eval.mjs` builds one scaffold per tarball through `dsiab init --write --yes`, pinned to the repository lockfile, copies it into a fresh workspace under the OS temp directory for each run, and runs any agent through a shell template. A timeout kills the template's process group. `scripts/eval-grade.mjs` grades each workspace, and `--check-only` grades one by hand. Results go to the ignored .evals folder. The runner exits 0 whatever the rates, and 2 only when the environment broke.
+
+**What a pass means.** Compliant completion. The task's outcome is present (`require`), the expected components are imported and rendered (`uses`), and `ds-check`, `tsc`, the imports tsc cannot see, the `forbid` patterns and the scaffold manifest all pass. The grader reads `ds-check`'s verdict from one `checkTree` call and adds no rule of its own that `ds-check` owns. It also fails the gaming paths: an added allowance or type-check suppression, a `--ds-*` name the agent declared itself, and a loosened tsconfig, agent file or dependency range. A pass says nothing about visual quality, runtime accessibility or a Vite build.
+
+**How it stays honest.** Each task has a reference solution in `evals/solutions/`, and `eval-grader.node-check.ts` grades every one as a pass, and each solution with one plant as a fail of exactly that check. The oracle template copies the solutions and must score N/N with live tsc, and a template that does nothing must score 0/N.
+
+**Reading a number.** Every `k/N` carries a Wilson 95% interval, and per-task rates are descriptive only. A rules or skill change is judged by two tarballs in one session with one label, paired by task: a sign test over the tasks that moved, and the pooled difference with its interval. Violations per run are the finer secondary measure. The minimum detectable effect, at α = 0.05 with 80% power: about 40 runs per arm detect a 30-point swing in the overall rate (80 to 50 percent), which is N ≈ 7 over these six tasks. At the default N = 3, 18 runs per arm, only a swing of about 40 points shows. Anything smaller needs more runs or stays a judgement. No result is committed, because a stored baseline mixes the change with a different model, harness and dependency set.
+
+**Not yet done.** The grader is uncalibrated. The first real run keeps its workspaces (`--keep`), a person labels each one against its task, and the agreement table goes in that pull request. Each disagreement becomes a plant or a documented limit. The tasks were written by the rules' authors, and a reader who did not write the rules should review them before that run. Agent configuration at the user level is not controlled.
+
+**Changed from.** Nothing. The repository had no eval.
 
 **Status.** Ruled 2026-11-03. No later ruling amends it.
 

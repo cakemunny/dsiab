@@ -78,7 +78,7 @@ npm run test:tokens                 # the source-scanning guards
 npm test                            # story tests in real Chromium, with axe on every story
 ```
 
-A visual claim also needs the before and after screenshots above. `npm run test:publish` is the pre-release gate. It packs the tarball, installs it into a throwaway app, builds the App snippet from the README and measures the result in a browser. Run it as well for a change to the build or to the package surface.
+A visual claim also needs the before and after screenshots above. `npm run test:publish` is the pre-release gate. It packs the tarball, installs it into a throwaway app, builds the App snippet from the README and measures the result in a browser. Run it as well for a change to the build or to the package surface. A change to `skills/dsiab/references/rules.md` or the `dsiab` skill should carry the `npm run eval` summary of the HEAD tarball against the branch tarball, run in one session.
 
 ## Working with an agent
 

@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "about": "The eval set ([[eval-measures-not-gates]]). Each prompt reads as a product engineer would ask and never names a component. `uses`: every entry must be imported from dsiab and rendered or called; `A|B` accepts either. `require` asserts the outcome, `forbid` a hand-rolled shape. scripts/eval-grade.mjs grades, and evals/solutions/<id>/ is the reference answer each task is proven passable with.",
+  "suffix": "Work in src/. When you are done, the work should follow this project's rules.",
+  "tasks": [
+    {
+      "id": "settings-form",
+      "prompt": "Replace the placeholder page with a settings form: a display-name field, a toggle for email notifications, and a Save button.",
+      "uses": ["TextField", "Switch", "Button"],
+      "why": "Field chrome comes with the input; a hand-placed label beside it is the failure. FormLayout may wrap it and is not required.",
+      "require": [{ "pattern": "[Ee]mail notifications", "why": "the toggle is labelled" }],
+      "forbid": [{ "pattern": "<input\\b", "why": "a native input instead of the system's field" }]
+    },
+    {
+      "id": "error-banner",
+      "prompt": "The page saves a draft. When saving fails, show an error message at the top of the page with a Retry action. Simulate the failure with a button.",
+      "uses": ["Callout|useToast", "Button"],
+      "why": "A status message is a Callout or a toast, not a red div.",
+      "require": [{ "pattern": "[Rr]etry", "why": "the retry action exists" }, { "pattern": "tone\\s*[=:]\\s*\\{?[\"']error[\"']", "why": "the message is an error, by tone" }],
+      "forbid": [{ "pattern": "role\\s*=\\s*[\"']alert[\"']", "why": "a hand-rolled alert region" }]
+    },
+    {
+      "id": "confirm-delete",
+      "prompt": "Add a Delete project button. It must ask the user to confirm before anything is deleted.",
+      "uses": ["AlertDialog|Dialog", "Button"],
+      "why": "A floating surface the system ships owns its portal and theme root.",
+      "require": [{ "pattern": "tone\\s*=\\s*[\"']danger[\"']", "why": "the destructive action carries the danger tone" }],
+      "forbid": [{ "pattern": "window\\.confirm|createPortal", "why": "a browser dialog or a hand-built portal" }]
+    },
+    {
+      "id": "tag-filter",
+      "prompt": "Show a list of six articles, each with tags, and let the user filter the list by several tags at once.",
+      "uses": ["MultiSelect|Tokenizer|CheckboxGroup|CheckboxCards|ToggleButtonGroup"],
+      "why": "A multi-value picker the roster ships, not a raw Radix duplicate or a row of hand-styled chips.",
+      "require": [{ "pattern": "\\.filter\\(", "why": "the list is actually filtered" }],
+      "forbid": [{ "pattern": "<select\\b", "why": "a native multi-select" }]
+    },
+    {
+      "id": "due-date",
+      "prompt": "Build a small task form with a title and a due date, and a button to add the task.",
+      "uses": ["DateInput|DateTimeInput", "TextField", "Button"],
+      "why": "The date field is the system's, not a native date input.",
+      "require": [{ "pattern": "[Dd]ue", "why": "the date field is labelled as the due date" }],
+      "forbid": [{ "pattern": "type\\s*=\\s*[\"']date", "why": "a native date input" }]
+    },
+    {
+      "id": "brand-colours",
+      "prompt": "Our brand is purple. Make the primary button purple, and show the content in a card with a soft grey background.",
+      "uses": ["Button", "Card"],
+      "why": "The brand is a Provider prop and the card has a filled skin; a hex value or an invented token is the failure.",
+      "require": [{ "pattern": "accentColor\\s*[=:]\\s*\\{?[\"']purple[\"']", "why": "the accent is set on Provider" }, { "pattern": "<Card[^>]*variant\\s*=\\s*[\"']filled[\"']|--ds-[a-z-]+\\s*:", "why": "the card is grey by a variant or a role override" }],
+      "forbid": [{ "pattern": "#[0-9a-fA-F]{3,8}\\b", "scope": "style", "why": "a hand-typed colour" }]
+    }
+  ]
+}
