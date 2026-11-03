@@ -167,7 +167,8 @@ export const ALLOW_GRAMMAR = [
   "              <!-- … --> in .html/.vue/.svelte/.astro. `//` is not a comment in plain .css,",
   "              so it is not accepted there.",
   "  placement   on the violating line, or alone on the line directly above it (blank lines and",
-  "              other comment lines in between are skipped).",
+  "              other comment lines in between are skipped). Between JSX elements, write it as",
+  "              {/* ds-allow … */} alone on its line, and it counts as alone.",
   "",
   "  It suppresses the FAILURE, never the finding: an allowed deviation is still printed, under",
   "  ALLOWED, with its reason. An allowance on a line that no longer violates that rule FAILS, so",
@@ -287,17 +288,104 @@ const REGEX_MAY_START_AFTER = new Set([
  *  that opens on `>` (the tail of `/>`) or reads as `name>` is markup, not a pattern. */
 const JSX_TAG_BODY_RE = /^\s*>|^[A-Za-z][\w.:-]*\s*\/?>/;
 
-function scanJs(src, base = 0) {
+/** JSX TEXT IS TEXT. A page's words sit in JSX text, and the scanner used to read them as code: a
+ *  `/*` in `<Code>/* x</Code>` opened a comment that ran to the end of the file, a `//` in a written
+ *  web address ate the rest of its line, and the apostrophe in `Don't` opened a string. Every finding
+ *  they covered vanished while the run stayed clean. Measured on 2026-11-03, and held by
+ *  `jsx-text-masking.node-check.ts`.
+ *
+ *  So in a file that can hold JSX the scanner keeps a stack of frames: `code` (with its own brace
+ *  depth), `tag` (an opening tag's attributes) and `children` (text between tags). Text is skipped,
+ *  and every `{…}` inside a tag or between tags is scanned as code again, so a JSX comment is still a
+ *  comment and an allowance written in one still counts.
+ *
+ *  An element can start only where an expression can: after the punctuation below or after one of
+ *  these keywords. A TypeScript generic that looks like a tag (`<T,>(x) =>`, `<T extends X>`,
+ *  `<T>(a: T) => T`) is refused by its head. A file whose JSX never closes is scanned again without
+ *  any of this, so a parse this code cannot follow costs no more than it did before. */
+const JSX_EXT = [".tsx", ".jsx", ".js", ".mjs", ".cjs"];
+const JSX_MAY_START_AFTER = new Set([undefined, "(", ",", "=", ":", "?", "[", "{", "}", ";", "&", "|", "!", ">"]);
+const JSX_MAY_START_KEYWORD = /(?:^|[^\w$])(?:return|yield|await|default|case|else|do)\s*$/;
+const TS_GENERIC_HEAD_RE = /^<\s*[A-Za-z_$][\w$]*\s*(?:,|extends\b|>\s*\()/;
+
+function jsxMayStart(src, i, prev) {
+  const next = src[i + 1];
+  if (next !== ">" && !/[A-Za-z]/.test(next ?? "")) return false;
+  if (!JSX_MAY_START_AFTER.has(prev) && !JSX_MAY_START_KEYWORD.test(src.slice(Math.max(0, i - 12), i))) return false;
+  return !TS_GENERIC_HEAD_RE.test(src.slice(i, i + 64));
+}
+
+/** One step inside a `tag` or `children` frame. Returns the next index. */
+function stepJsx(src, i, frames, found, base) {
+  const c = src[i];
+  const d = src[i + 1];
+  if (c === "{") { frames.push({ t: "code", depth: 0 }); return i + 1; }
+  if (frames[frames.length - 1].t === "tag") {
+    if (c === "/" && d === "*") {
+      const end = src.indexOf("*/", i + 2);
+      const e = end < 0 ? src.length : end + 2;
+      found.comments.push([base + i, base + e]);
+      return e;
+    }
+    if (c === "/" && d === "/") {
+      const end = src.indexOf("\n", i);
+      const e = end < 0 ? src.length : end;
+      found.comments.push([base + i, base + e]);
+      return e;
+    }
+    if (c === '"' || c === "'") {
+      const end = src.indexOf(c, i + 1);
+      const e = end < 0 ? src.length : end;
+      found.strings.push([base + i + 1, base + e]);
+      return e + 1;
+    }
+    if (c === "/" && d === ">") { frames.pop(); return i + 2; }
+    if (c === ">") { frames[frames.length - 1] = { t: "children" }; return i + 1; }
+    return i + 1;
+  }
+  if (c === "<" && d === "/") {
+    const end = src.indexOf(">", i);
+    frames.pop();
+    return end < 0 ? src.length : end + 1;
+  }
+  if (c === "<" && (d === ">" || /[A-Za-z]/.test(d ?? ""))) { frames.push({ t: "tag" }); return i + 1; }
+  return i + 1;
+}
+
+function scanJs(src, base = 0, jsx = false) {
   const comments = [];
   const templates = [];
   const strings = [];
+  const found = { comments, strings };
+  /** The JSX frame stack. The bottom frame is the file's own code and never pops. */
+  const frames = [{ t: "code", depth: 0 }];
   const n = src.length;
   let i = 0;
   /** Last significant character seen in CODE, for the regex-vs-division question below. */
   let prev;
   while (i < n) {
+    const top = frames[frames.length - 1];
+    if (top.t !== "code") {
+      i = stepJsx(src, i, frames, found, base);
+      // The tree closed. What follows an element is an operator or punctuation, so a `/` there is
+      // division, and `)` says so.
+      if (frames.length === 1) prev = ")";
+      continue;
+    }
     const c = src[i];
     const d = src[i + 1];
+    if (jsx && c === "<" && jsxMayStart(src, i, prev)) {
+      frames.push({ t: "tag" });
+      i++;
+      continue;
+    }
+    if (c === "}" && top.depth === 0 && frames.length > 1) {
+      frames.pop();
+      i++;
+      continue;
+    }
+    if (c === "{") top.depth++;
+    else if (c === "}" && top.depth > 0) top.depth--;
     // A regex literal, consumed whole. WITHOUT this, the quote inside `/["'`]/` opens a phantom
     // string and every comment, string and template span after it is wrong — measured: this file's
     // own JSDoc stopped being recognised as a comment, and was reported as a violation.
@@ -398,6 +486,7 @@ function scanJs(src, base = 0) {
     if (!/\s/.test(c)) prev = c;
     i++;
   }
+  if (frames.length > 1) return scanJs(src, base, false);
   return { comments, templates, strings };
 }
 
@@ -418,17 +507,22 @@ const inAnySpan = (index, spans) => spans.some(([s, e]) => index >= s && index <
 
 /**
  * Split one file into:
- *   css      — CSS-syntax text, everything else blanked
- *   code     — script + markup text, comments blanked
- *   comments — every real comment span, for `ds-allow` validity
+ *   css       — CSS-syntax text, everything else blanked
+ *   code      — script + markup text, comments blanked
+ *   comments  — every real comment span, for `ds-allow` validity
+ *   strings   — quoted string spans, which no matcher in `code` may start inside
+ *   templates — template-literal TEXT spans. The motion rules read a style value there on purpose,
+ *               and no other rule may start inside one: a message that mentions `tabIndex={2}` is
+ *               a message, not a tab order. Measured 2026-11-03, held by
+ *               `jsx-text-masking.node-check.ts`.
  */
 function regionsFor(ext, src) {
   if (STYLE_EXT.includes(ext)) {
     const comments = scanCssComments(src, 0, ext !== ".css");
-    return { css: blankSpans(src, comments), code: blankLine(src), comments, strings: [] };
+    return { css: blankSpans(src, comments), code: blankLine(src), comments, strings: [], templates: [] };
   }
   if (SCRIPT_EXT.includes(ext)) {
-    const { comments, templates, strings } = scanJs(src);
+    const { comments, templates, strings } = scanJs(src, 0, JSX_EXT.includes(ext));
     const styleTemplates = templates.filter((t) => t[2]);
     const cssRaw = keepOnly(src, styleTemplates);
     // A CSS comment inside a styled-components template is a real comment, both for matching and
@@ -440,6 +534,7 @@ function regionsFor(ext, src) {
       code: blankSpans(src, comments),
       comments: [...comments, ...cssComments],
       strings,
+      templates: templates.map(([s, e]) => [s, e]),
     };
   }
   if (MARKUP_EXT.includes(ext)) {
@@ -462,10 +557,12 @@ function regionsFor(ext, src) {
     const jsComments = [];
     const jsTemplates = [];
     const jsStrings = [];
+    const jsText = [];
     for (const [s, e] of scriptBlocks) {
       const r = scanJs(src.slice(s, e), s);
       jsComments.push(...r.comments);
       jsTemplates.push(...r.templates.filter((t) => t[2]));
+      jsText.push(...r.templates.map(([ts, te]) => [ts, te]));
       jsStrings.push(...r.strings);
     }
     const cssSpans = [...styleBlocks, ...styleAttrs, ...jsTemplates];
@@ -476,6 +573,7 @@ function regionsFor(ext, src) {
       code: blankSpans(src, [...styleBlocks, ...htmlComments, ...jsComments]),
       comments: [...htmlComments, ...jsComments, ...cssComments],
       strings: jsStrings,
+      templates: jsText,
     };
   }
   return null;
@@ -666,12 +764,14 @@ export function checkSource(rel, src, ctx = {}) {
   const ext = extname(rel).toLowerCase();
   const regions = regionsFor(ext, src);
   if (!regions) return null;
-  const { css, code, comments, strings } = regions;
-  /** A match in the `code` region must START outside a string literal. `transition: "all 200ms"`
-   *  starts at the property, outside the quotes — a defect. `"…tabIndex={2}…"` inside a sentence
-   *  starts INSIDE the string: it is documentation, a test fixture or an error message, and this
-   *  file's own rule descriptions were the first thing an unfiltered version reported. */
-  const inCode = (index) => !inAnySpan(index, strings);
+  const { css, code, comments, strings, templates } = regions;
+  /** A match in the `code` region must START outside a string literal and outside template text.
+   *  `transition: "all 200ms"` and `transition: \`all 200ms\`` start at the property, outside the
+   *  quotes — a defect. `"…tabIndex={2}…"` inside a sentence starts INSIDE the string: it is
+   *  documentation, a test fixture or an error message, and this file's own rule descriptions were
+   *  the first thing an unfiltered version reported. Template text is the same case: a message in
+   *  backticks that mentions a tab order was reported as one until 2026-11-03. */
+  const inCode = (index) => !inAnySpan(index, strings) && !inAnySpan(index, templates);
   const lineOf = lineIndexer(src);
   const rawLines = src.split("\n");
   const found = [];
@@ -856,10 +956,13 @@ function parseAllows(rel, src, rawLines, comments, lineOf) {
     }
 
     // Coverage: its own line, plus — when the comment is alone on its line — the first line below
-    // that carries something other than a comment.
+    // that carries something other than a comment. Between JSX elements a comment has to sit in
+    // braces, `{/* … */}`, so a brace in front of it still counts as alone. Without that, a JSX
+    // allowance on its own line covered nothing but itself and was reported stale (2026-11-03).
     const covers = [line];
     const before = rawLines[line - 1].slice(0, m.index - (src.lastIndexOf("\n", m.index - 1) + 1));
-    if (before.trim() === "") {
+    const jsxAlone = m[1] === "/*" && /^\{\s*$/.test(before.trim());
+    if (before.trim() === "" || jsxAlone) {
       for (let i = line; i < rawLines.length; i++) {
         const t = rawLines[i].trim();
         // A leading `*` is a comment continuation — UNLESS the line opens a block, in which case it
@@ -867,7 +970,8 @@ function parseAllows(rel, src, rawLines, comments, lineOf) {
         // looking for. Without the `{` test, `* { transition: all }` under its allowance was never
         // the covered line: the violation was reported AND the allowance was called stale.
         const commentTail = t.startsWith("*") && !t.includes("{");
-        if (t === "" || t.startsWith("//") || t.startsWith("/*") || commentTail || t.startsWith("<!--")) continue;
+        const jsxComment = /^\{\s*\/\*/.test(t);
+        if (t === "" || t.startsWith("//") || t.startsWith("/*") || commentTail || jsxComment || t.startsWith("<!--")) continue;
         covers.push(i + 1);
         break;
       }
