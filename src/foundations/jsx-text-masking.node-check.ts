@@ -16,6 +16,15 @@
    the JSX tracking must NOT break: a comment allowance inside JSX, a string
    attribute, TypeScript generics in a .tsx file, a cast in a .ts file, a
    template-literal style value, and a file whose JSX never closes.
+
+   Two more defects sit beside it, both measured on 2026-11-03:
+
+     · Template text is read by the motion rules on purpose, and it used to be
+       read by every other rule too, so a message that merely mentioned a tab
+       order or an `asChild` swap was reported as one.
+     · An allowance written as a JSX comment, in braces, alone on its line
+       covered only its own line, because the brace in front of it did not
+       count as "alone". It never reached the line below, where it belongs.
    ============================================================================= */
 import { test, expect } from "vitest";
 import { checkSource } from "./consumerRules.mjs";
@@ -70,4 +79,25 @@ test("a template-literal style value is still read, by design", () => {
 test("JSX that never closes falls back to the plain scan", () => {
   const src = 'const x = <div>;\nconst s = { transition: "all 1s" };\n';
   expect(rulesIn("a.tsx", src).findings).toEqual(["2 transition-all"]);
+});
+
+test.each([
+  ["a tab order", "const msg = `set tabIndex={2} to see it`;\n"],
+  ["an asChild swap", `const doc = \`${LOST}\`;\n`],
+])("%s mentioned in template text is not a finding", (_label, src) => {
+  expect(rulesIn("a.tsx", src).findings).toEqual([]);
+});
+
+test("an element inside a template placeholder is still read", () => {
+  expect(rulesIn("a.tsx", `const s = \`\${${LOST}}\`;\n`).findings).toEqual(["1 aschild-nonint"]);
+});
+
+test("a JSX comment allowance alone on its line covers the line below", () => {
+  const src =
+    "<div>\n" +
+    "  {/* ds-allow tabindex-positive — this demo shows the ordering bug on purpose */}\n" +
+    "  {/* a second comment line is skipped */}\n" +
+    "  <span tabIndex={2}>x</span>\n" +
+    "</div>\n";
+  expect(rulesIn("a.tsx", src)).toEqual({ findings: [], allowed: 1 });
 });
