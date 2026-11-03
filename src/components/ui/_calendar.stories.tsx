@@ -1,7 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Box } from "@radix-ui/themes";
+import { useState } from "react";
+import { userEvent } from "@vitest/browser/context";
+import { Box, Flex } from "@radix-ui/themes";
 import { Calendar } from "./Calendar";
-import type { ISODateString } from "../../dates/dateTypes";
+import type { DateRange, ISODateString } from "../../dates/dateTypes";
 import {
   plainDateFromISO,
   plainDateToISO,
@@ -922,5 +924,219 @@ export const Rtl: Story = {
     keyAtFocus("ArrowDown");
     await sleep(0);
     expectFocus(addDays(ANCHOR, 7), "in RTL, ArrowDown still moves one week forward (vertical axis unswapped)");
+  },
+};
+
+/* ---- range role, spillover band, bounded paging ------------------------- */
+
+const rangeOf = (start: string, end: string): DateRange => ({ start: D(start), end: D(end) });
+
+/* Two role calendars that share ONE value: the start calendar edits the start, the end calendar the end. */
+function SharedRangeHarness() {
+  const [range, setRange] = useState<DateRange>(rangeOf("2026-07-10", "2026-07-20"));
+  return (
+    <Flex gap="5" p="4" data-testid="cal-shared" wrap="wrap">
+      <Box data-testid="cal-start">
+        <Calendar mode="range" rangeRole="start" value={range} onValueChange={setRange} focusDate={D("2026-07-10")} />
+      </Box>
+      <Box data-testid="cal-end">
+        <Calendar mode="range" rangeRole="end" value={range} onValueChange={setRange} focusDate={D("2026-07-20")} />
+      </Box>
+    </Flex>
+  );
+}
+
+/** Role click sets only its own end: a start-role click moves the start and leaves the end; an end-role click moves
+ *  the end and leaves the start. Each calendar is bounded by the other end, so the days past it are disabled. */
+export const RangeRoleEditsOneEnd: Story = {
+  render: () => <SharedRangeHarness />,
+  play: async ({ canvasElement }) => {
+    const root = canvasElement.querySelector<HTMLElement>('[data-testid="cal-shared"]')!;
+    const startCal = root.querySelector<HTMLElement>('[data-testid="cal-start"]')!;
+    const endCal = root.querySelector<HTMLElement>('[data-testid="cal-end"]')!;
+
+    dayBtn(startCal, "2026-07-14")!.click();
+    await waitFor(() => dayBtn(startCal, "2026-07-14")!.getAttribute("data-range") === "start");
+    if (dayBtn(endCal, "2026-07-20")!.getAttribute("data-range") !== "end")
+      throw new Error("a start-role click must leave the range end on 2026-07-20");
+    if (dayBtn(startCal, "2026-07-10")!.getAttribute("data-range") != null)
+      throw new Error("the old start must no longer be painted as the range start");
+
+    dayBtn(endCal, "2026-07-25")!.click();
+    await waitFor(() => dayBtn(endCal, "2026-07-25")!.getAttribute("data-range") === "end");
+    if (dayBtn(startCal, "2026-07-14")!.getAttribute("data-range") !== "start")
+      throw new Error("an end-role click must leave the range start on 2026-07-14");
+
+    if (dayBtn(startCal, "2026-07-26")!.getAttribute("aria-disabled") !== "true")
+      throw new Error("the start role must disable the days past the range end");
+    if (dayBtn(endCal, "2026-07-13")!.getAttribute("aria-disabled") !== "true")
+      throw new Error("the end role must disable the days before the range start");
+    if (!/selected range/.test(dayBtn(startCal, "2026-07-14")!.getAttribute("aria-label") ?? ""))
+      throw new Error("a role endpoint label must append the selected range");
+  },
+};
+
+/** A first click on an empty role calendar gives a one-day range, and announces it politely. */
+export const RangeRoleFirstClickIsOneDay: Story = {
+  render: () => (
+    <Box p="4" data-testid="cal-first">
+      <Calendar mode="range" rangeRole="end" focusDate={D(ANCHOR)} onValueChange={noop} />
+    </Box>
+  ),
+  play: async ({ canvasElement }) => {
+    const scope = canvasElement.querySelector<HTMLElement>('[data-testid="cal-first"]')!;
+    clearLive();
+    dayBtn(scope, "2026-07-14")!.click();
+    await waitFor(() => dayBtn(scope, "2026-07-14")!.getAttribute("data-range") != null);
+    if (dayBtn(scope, "2026-07-14")!.getAttribute("data-endpoint") == null)
+      throw new Error("a one-day range must mark its day as an endpoint");
+    if (scope.querySelectorAll("[data-range]").length !== 1)
+      throw new Error("a first click must paint one day, not a span");
+    await waitFor(() => /Selected range/.test(liveRegion()?.textContent ?? ""));
+  },
+};
+
+/** The bound disables days past the other end: a start role stops at the end, an end role at the start. */
+export const RangeRoleBoundDisablesDays: Story = {
+  render: () => (
+    <Flex gap="5" p="4" data-testid="cal-bounds" wrap="wrap">
+      <Box data-testid="cal-bound-start">
+        <Calendar mode="range" rangeRole="start" defaultValue={rangeOf("2026-07-10", "2026-07-20")} focusDate={D("2026-07-10")} onValueChange={noop} />
+      </Box>
+      <Box data-testid="cal-bound-end">
+        <Calendar mode="range" rangeRole="end" defaultValue={rangeOf("2026-07-10", "2026-07-20")} focusDate={D("2026-07-20")} onValueChange={noop} />
+      </Box>
+    </Flex>
+  ),
+  play: async ({ canvasElement }) => {
+    const root = canvasElement.querySelector<HTMLElement>('[data-testid="cal-bounds"]')!;
+    const startCal = root.querySelector<HTMLElement>('[data-testid="cal-bound-start"]')!;
+    const endCal = root.querySelector<HTMLElement>('[data-testid="cal-bound-end"]')!;
+    if (dayBtn(startCal, "2026-07-20")!.getAttribute("aria-disabled") === "true")
+      throw new Error("the range end itself must stay selectable in the start role");
+    if (dayBtn(startCal, "2026-07-21")!.getAttribute("aria-disabled") !== "true")
+      throw new Error("the start role must disable 2026-07-21, past the range end");
+    if (dayBtn(endCal, "2026-07-10")!.getAttribute("aria-disabled") === "true")
+      throw new Error("the range start itself must stay selectable in the end role");
+    if (dayBtn(endCal, "2026-07-09")!.getAttribute("aria-disabled") !== "true")
+      throw new Error("the end role must disable 2026-07-09, before the range start");
+  },
+};
+
+/** Hover in a role calendar previews from the hovered day to the other end; the committed band stays painted under it. */
+export const RangeRoleHoverPreviewKeepsBand: Story = {
+  render: () => (
+    <Box p="4" data-testid="cal-hover">
+      <Calendar mode="range" rangeRole="start" defaultValue={rangeOf("2026-07-10", "2026-07-20")} focusDate={D("2026-07-10")} onValueChange={noop} />
+    </Box>
+  ),
+  play: async ({ canvasElement }) => {
+    const scope = canvasElement.querySelector<HTMLElement>('[data-testid="cal-hover"]')!;
+    hover(dayBtn(scope, "2026-07-14")!);
+    await waitFor(() => dayBtn(scope, "2026-07-14")!.getAttribute("data-preview") === "start");
+    if (dayBtn(scope, "2026-07-20")!.getAttribute("data-preview") !== "end")
+      throw new Error("the preview must end on the other end of the range, 2026-07-20");
+    if (dayBtn(scope, "2026-07-16")!.getAttribute("data-range") !== "middle")
+      throw new Error("the committed band must stay painted under a hover preview");
+    if (dayBtn(scope, "2026-07-16")!.getAttribute("data-preview") !== "middle")
+      throw new Error("a day both committed and previewed must carry both attributes");
+    if (dayBtn(scope, "2026-07-10")!.getAttribute("data-preview") != null)
+      throw new Error("a committed day outside the preview must not carry the preview");
+    if (dayBtn(scope, "2026-07-10")!.getAttribute("data-range") !== "start")
+      throw new Error("the committed start must stay the range start while previewing");
+  },
+};
+
+/** Spillover: the outside days inside the range carry the band, and the run continues across the month edge. */
+export const SpilloverBandsAcrossMonthEdge: Story = {
+  render: () => (
+    <Box p="4" data-testid="cal-spill">
+      <Calendar mode="range" focusDate={D("2026-07-15")} defaultValue={rangeOf("2026-06-29", "2026-07-02")} onValueChange={noop} />
+    </Box>
+  ),
+  play: async ({ canvasElement }) => {
+    const scope = canvasElement.querySelector<HTMLElement>('[data-testid="cal-spill"]')!;
+    for (const iso of ["2026-06-29", "2026-06-30"])
+      if (!dayBtn(scope, iso)!.hasAttribute("data-range-outside"))
+        throw new Error(`spillover day ${iso} inside the range must carry data-range-outside`);
+    if (dayBtn(scope, "2026-06-28")!.hasAttribute("data-range-outside"))
+      throw new Error("a spillover day outside the range must not be banded");
+    if (dayBtn(scope, "2026-07-01")!.hasAttribute("data-range-outside"))
+      throw new Error("an in-month day must never carry the spillover attribute");
+    if (dayBtn(scope, "2026-06-29")!.getAttribute("data-round-start") == null)
+      throw new Error("the run must start with a left cap on its first banded day");
+    if (dayBtn(scope, "2026-06-30")!.hasAttribute("data-round-start"))
+      throw new Error("the run must continue across the month edge, with no cap at 2026-06-30");
+    if (dayBtn(scope, "2026-07-01")!.hasAttribute("data-round-start"))
+      throw new Error("the run must continue into 2026-07-01 with no cap");
+    if (dayBtn(scope, "2026-07-02")!.getAttribute("data-round-end") == null)
+      throw new Error("the run must end with a right cap on the range end");
+  },
+};
+
+/** A disabled day inside a spillover run still caps it, banded or not. */
+export const SpilloverDisabledDayCapsRun: Story = {
+  render: () => (
+    <Box p="4" data-testid="cal-spill-disabled">
+      <Calendar
+        mode="range"
+        focusDate={D("2026-07-15")}
+        defaultValue={rangeOf("2026-06-29", "2026-07-02")}
+        isDateDisabled={(iso) => iso === "2026-06-30"}
+        onValueChange={noop}
+      />
+    </Box>
+  ),
+  play: async ({ canvasElement }) => {
+    const scope = canvasElement.querySelector<HTMLElement>('[data-testid="cal-spill-disabled"]')!;
+    if (dayBtn(scope, "2026-06-30")!.getAttribute("aria-disabled") !== "true")
+      throw new Error("the disabled spillover day must stay disabled");
+    if (dayBtn(scope, "2026-06-29")!.getAttribute("data-round-end") == null)
+      throw new Error("the disabled day after 2026-06-29 must cap the run on its right");
+    if (dayBtn(scope, "2026-07-01")!.getAttribute("data-round-start") == null)
+      throw new Error("the disabled day before 2026-07-01 must cap the run on its left");
+  },
+};
+
+/** Keyboard paging clamps to the bound: Page Down from 2026-07-15 would land on August 15, past the start role's bound. */
+export const RangeRolePageDownClampsToBound: Story = {
+  render: () => (
+    <Box p="4" data-testid="cal-clamp">
+      <Calendar mode="range" rangeRole="start" defaultValue={rangeOf("2026-07-10", "2026-07-20")} focusDate={D("2026-07-15")} onValueChange={noop} />
+    </Box>
+  ),
+  play: async ({ canvasElement }) => {
+    const scope = canvasElement.querySelector<HTMLElement>('[data-testid="cal-clamp"]')!;
+    const day = dayBtn(scope, "2026-07-15")!;
+    day.focus();
+    keyOn(day, "PageDown");
+    await waitFor(() => activeDate() === "2026-07-20");
+    if (!scope.contains(document.activeElement))
+      throw new Error("Page Down at a bound must keep focus inside the grid");
+  },
+};
+
+/** A real pointer press on a spillover day commits it. The press focuses the day on mouse-down; focus must not
+ *  page the view, or the click lands on a remounted button and never commits. This is the one play here that
+ *  drives the mouse with real input (`userEvent.click`), because `element.click()` skips focus and cannot show it. */
+export const SpilloverClickCommitsWithPointer: Story = {
+  render: () => (
+    <Box p="4" data-testid="cal-pointer">
+      <Calendar mode="range" focusDate={D("2026-07-15")} onValueChange={noop} />
+    </Box>
+  ),
+  play: async ({ canvasElement }) => {
+    const scope = canvasElement.querySelector<HTMLElement>('[data-testid="cal-pointer"]')!;
+    // 2026-06-29 is a leading spillover day of the July grid. The first press starts a range and pages to June.
+    await userEvent.click(await waitFor(() => dayBtn(scope, "2026-06-29")));
+    await waitFor(() => activeDate() === "2026-06-29" && document.activeElement?.hasAttribute("data-outside") === false);
+    // 2026-07-03 is a trailing spillover day of the June grid: the second press commits, and pages back to July.
+    await userEvent.click(await waitFor(() => dayBtn(scope, "2026-07-03")));
+    await waitFor(() => activeDate() === "2026-07-03" && document.activeElement?.hasAttribute("data-outside") === false);
+    await waitFor(() => dayBtn(scope, "2026-07-03")!.getAttribute("data-range") === "end");
+    if (!dayBtn(scope, "2026-06-29")!.hasAttribute("data-range-outside"))
+      throw new Error("the committed spillover start must carry the spillover band");
+    if (dayBtn(scope, "2026-07-03")!.getAttribute("data-range") !== "end")
+      throw new Error("the second press must commit 2026-07-03 as the range end");
   },
 };

@@ -1,8 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { useLayoutEffect, useRef, useState } from "react";
+import { useId, useLayoutEffect, useRef, useState, type ComponentProps } from "react";
 import { Box, Code, Flex, Grid, Text } from "@radix-ui/themes";
 import { Calendar } from "./Calendar";
 import type { DateRange, ISODateString } from "../../dates/dateTypes";
+import { useResolvedSize } from "../../theme/SizeContext";
 import {
   getDaysInMonth,
   plainDateToday,
@@ -38,6 +39,8 @@ const dOf = (d: number): ISODateString =>
   plainDateToISO({ year: T.year, month: T.month, day: Math.min(Math.max(d, 1), DIM) });
 const RANGE_DEMO: DateRange = { start: dOf(9), end: dOf(15) };
 const SELECTED_DEMO = dOf(12);
+/* A range that runs off the month's last day, so its trailing spillover days sit inside the range. */
+const SPILL_DEMO: DateRange = { start: dOf(DIM - 1), end: plainDateToISO(plainDateAddDays(plainDateFromISO(dOf(DIM)), 2)) };
 // Read live from the locale rather than slicing a formatted string — the month is not
 // always the first part of "month year".
 const THIS_MONTH_NAME = new Intl.DateTimeFormat(undefined, { month: "long" }).format(plainDateToDate(T));
@@ -501,6 +504,7 @@ export const Usage: Story = {
                   <div data-spec="plain"><Calendar onValueChange={noop} /></div>
                   <div data-spec="selected"><Calendar defaultValue={plainDateToISO(T)} onValueChange={noop} /></div>
                   <div data-spec="range"><Calendar mode="range" defaultValue={RANGE_DEMO} onValueChange={noop} /></div>
+                  <div data-spec="spill"><Calendar mode="range" defaultValue={SPILL_DEMO} onValueChange={noop} /></div>
                   <div data-spec="limited"><Calendar min={dOf(10)} max={dOf(20)} onValueChange={noop} /></div>
                   <div data-spec="years"><Calendar defaultView="year" defaultValue={SELECTED_DEMO} onValueChange={noop} /></div>
                 </>
@@ -530,9 +534,17 @@ export const Usage: Story = {
               />
               <MeasuredRow
                 part="Range · preview band"
-                note="Lives only between the first and second click of a range — no static render can hold it, so it stays unproven rather than printing a colour nothing was read from."
+                note="Lives only under the pointer: between the two clicks of a range, or while hovering a rangeRole calendar. No static render can hold it, so it stays unproven rather than printing a colour nothing was read from."
                 token="--ds-fill-accent-weak"
                 select=".rt-ds-calendar-day[data-preview]"
+                pseudo="::before"
+                prop="background-color"
+              />
+              <MeasuredRow
+                part="Range · spillover band"
+                note="An adjacent-month day inside the range bands in the neutral weak fill, so the run reads across the month edge."
+                token="--ds-fill-weak"
+                select='[data-spec="spill"] .rt-ds-calendar-day[data-range-outside]'
                 pseudo="::before"
                 prop="background-color"
               />
@@ -618,7 +630,7 @@ export const Usage: Story = {
   ),
   // The token table's EVIDENCE, asserted at runtime ([[measured-token-rows]]). Static analysis can prove a row is a
   // MeasuredRow; only a live DOM can prove it measured a real Calendar node, that the claim was resolved
-  // somewhere else, and that the two agree. 13 measured; the range PREVIEW band is the one row that
+  // somewhere else, and that the two agree. 14 measured; the range PREVIEW band is the one row that
   // cannot be proven — it exists only between the two clicks of a range, so it reports what it could not
   // measure instead of falling back to resolving its token. Passive: nothing here drives a calendar.
   // The preview-band row has no element to find, and a row with nothing to match waits (60 frames) before
@@ -628,8 +640,8 @@ export const Usage: Story = {
   // then runs the identical assertions.
   play: async ({ canvasElement }) => {
     const rows = await awaitMeasuredRows(canvasElement);
-    if (rows.measured !== 13 || rows.unproven !== 1) {
-      throw new Error(`expected 13 measured / 1 unproven token rows, got ${rows.measured} / ${rows.unproven}`);
+    if (rows.measured !== 14 || rows.unproven !== 1) {
+      throw new Error(`expected 14 measured / 1 unproven token rows, got ${rows.measured} / ${rows.unproven}`);
     }
   },
 };
@@ -641,10 +653,10 @@ const CALENDAR_KEYS: KeyBinding[] = [
   { keys: ["↑", "↓"], action: "Move focus one week up / down — the same weekday in the adjacent row.", src: "system" },
   { keys: ["Home", "End"], action: "Jump to the first / last day of the focused week.", src: "system" },
   { keys: ["Ctrl + Home", "Ctrl + End"], action: "Jump to the first / last day of the month.", src: "system" },
-  { keys: ["Page Up", "Page Down"], action: "Move to the previous / next month.", src: "system" },
-  { keys: ["Shift + Page Up", "Shift + Page Down"], action: "Move to the previous / next year.", src: "system" },
-  { keys: ["Enter", "Space"], action: <>Select the focused day. In <Code>range</Code> mode, the first press sets the start and the second sets the end.</>, src: "system" },
-  { keys: ["Esc"], action: <>Cancel a range that is mid-selection (a start chosen, waiting on the end); a committed selection is left unchanged.</>, src: "system" },
+  { keys: ["Page Up", "Page Down"], action: <>Move to the previous / next month. Stops at <Code>min</Code> / <Code>max</Code>.</>, src: "system" },
+  { keys: ["Shift + Page Up", "Shift + Page Down"], action: <>Move to the previous / next year. Stops at <Code>min</Code> / <Code>max</Code>.</>, src: "system" },
+  { keys: ["Enter", "Space"], action: <>Select the focused day. In <Code>range</Code> mode, the first press sets the start and the second sets the end. With <Code>rangeRole</Code>, one press sets that end only.</>, src: "system" },
+  { keys: ["Esc"], action: <>Cancel a range that is mid-selection (a start chosen, waiting on the end); a committed selection is left unchanged. A <Code>rangeRole</Code> calendar has no mid-selection.</>, src: "system" },
 ];
 
 const VIEW_JUMP_KEYS: KeyBinding[] = [
@@ -693,9 +705,50 @@ export const Keyboard: Story = {
 
         <Caption>
           <strong>Screen readers:</strong> each day is a <Code>role="gridcell"</Code> with a full localized{" "}
-          <Code>aria-label</Code> (“Monday, July 14, 2026”) and <Code>aria-selected</Code> on the chosen day;
+          <Code>aria-label</Code> (“Monday, July 14, 2026”) and <Code>aria-selected</Code> on every selected day, each day of a range included. In a <Code>rangeRole</Code> calendar, each endpoint label ends with the whole range (“selected range July 9, 2026 to July 15, 2026”);
           today carries <Code>aria-current="date"</Code>. A machine-readable <Code>data-date="YYYY-MM-DD"</Code>{" "}
           drives navigation, so the human label is never parsed — which would break under fr-FR or ja-JP.
+        </Caption>
+      </Section>
+    </Page>
+  ),
+};
+
+/* ---- Start and end ------------------------------------------------------ */
+
+/** Two role calendars on one shared range: the start calendar edits the start, the end calendar the end. */
+function StartAndEndDemo() {
+  const [range, setRange] = useState<DateRange>(RANGE_DEMO);
+  const startId = useId();
+  const endId = useId();
+  const captionSize = useResolvedSize<ComponentProps<typeof Text>["size"]>("text", undefined) ?? "1";
+  return (
+    <Flex gap="6" wrap="wrap" align="start">
+      <Flex direction="column" gap="2" role="group" aria-labelledby={startId}>
+        <Text as="span" id={startId} size={captionSize} className="rt-ds-daterange-caption">Start date</Text>
+        <Calendar mode="range" rangeRole="start" value={range} onValueChange={setRange} />
+      </Flex>
+      <Flex direction="column" gap="2" role="group" aria-labelledby={endId}>
+        <Text as="span" id={endId} size={captionSize} className="rt-ds-daterange-caption">End date</Text>
+        <Calendar mode="range" rangeRole="end" value={range} onValueChange={setRange} />
+      </Flex>
+    </Flex>
+  );
+}
+
+/** StartAndEnd — two role calendars sharing one range. The start calendar stops at the end and the end calendar at the start, and hovering outside the range previews the band out to the hovered day. */
+export const StartAndEnd: Story = {
+  render: () => (
+    <Page maxWidth={900}>
+      <PageHeader title="Calendar · Start and end" standfirst={DEFINITION} />
+      <Section
+        title="Start and end, one range"
+        lead={<>Give each calendar a <Code>rangeRole</Code> and both read the same <Code>value</Code>. The start calendar edits only the start, the end calendar only the end, and each is bounded by the other, so the start stops at the end and the end stops at the start.</>}
+      >
+        <StartAndEndDemo />
+        <Caption>
+          Click a day in the start calendar to move the start, then a day in the end calendar to move the end.
+          A click on an empty value makes a one-day range. Each endpoint reads the whole range to a screen reader.
         </Caption>
       </Section>
     </Page>
@@ -706,13 +759,14 @@ export const Keyboard: Story = {
 
 const PROPS: PropDef[] = [
   { name: "mode", type: `"single" | "range"`, def: `"single"`, desc: <>Pick one date, or a start→end range.</>, source: "Calendar.tsx" },
+  { name: "rangeRole", type: `"start" | "end"`, desc: <>Range mode only. The calendar edits one end of the shared <Code>value</Code>, bounded by the other end; on an empty value the first click is a one-day range. Two calendars with the two roles make a start and an end.</>, source: "Calendar.tsx" },
   { name: "value / defaultValue", type: "ISO | {start,end}", desc: <>Controlled / uncontrolled selection — an ISO string (single) or an ISO <Code>{`{ start, end }`}</Code> (range).</>, source: "Calendar.tsx" },
   { name: "onValueChange", type: "(v) => void", def: "— (required)", desc: <>Fires with the ISO selection — an ISO string (single) or an ISO <Code>{`{ start, end }`}</Code> (range).</>, source: "Calendar.tsx" },
   { name: "min / max", type: "ISO", desc: <>Inclusive selectable bounds; dates outside are disabled.</>, source: "Calendar.tsx" },
   { name: "isDateDisabled", type: "(iso) => boolean", desc: <>Custom disable predicate — return <strong>true to disable</strong> a date.</>, source: "Calendar.tsx" },
   { name: "weekStartsOn", type: "0…6", def: "0", desc: <>First weekday column (0 = Sunday).</>, source: "Calendar.tsx" },
   { name: "numberOfMonths", type: "1 | 2", def: "1", desc: <>Show one or two months; anything but 2 clamps to 1.</>, source: "Calendar.tsx" },
-  { name: "hasOutsideDays", type: "boolean", def: "true", desc: <>Render dimmed adjacent-month spillover days (navigable — a click flips the month).</>, source: "Calendar.tsx" },
+  { name: "hasOutsideDays", type: "boolean", def: "true", desc: <>Render adjacent-month spillover days (navigable, and a click flips the month). Inside a range they band in neutral <Code>--ds-fill-weak</Code>, so the band runs across the month edge.</>, source: "Calendar.tsx" },
   { name: "hasWeekNumbers", type: "boolean", def: "false", desc: <>Prefix each week row with its ISO week number.</>, source: "Calendar.tsx" },
   { name: "defaultView", type: `"day" | "month" | "year"`, def: `"day"`, desc: <>Which view the calendar opens on. Initial-only and uncontrolled: a birth-date field can land straight on the year grid instead of making the user page there. Opening on a grid moves no focus, exactly like opening on the day view.</>, source: "Calendar.tsx" },
   { name: "focusDate / onFocusDateChange", type: "ISO", desc: <>Controlled focused day for the roving tab stop.</>, source: "Calendar.tsx" },

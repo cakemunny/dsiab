@@ -42,6 +42,7 @@ import {
   plainDateToday,
   plainDateAddDays,
   plainDateIsEqual,
+  plainDateIsBefore,
   plainDateMin,
   plainDateMax,
   plainDateGetWeekNumber,
@@ -51,11 +52,10 @@ import {
 } from "../../dates/plainDate";
 import { useCalendarDays, type CalendarDay } from "../../dates/useCalendarDays";
 import { useCalendarConstraints } from "../../dates/useCalendarConstraints";
+import { applyRangeRole, rangeSentence, useRangeRole } from "../../dates/useRangeRole";
 import {
   computeDayCellState,
   computeDayNeighborContinuity,
-  computeRangeRounding,
-  computePreviewRounding,
 } from "../../dates/dayCellUtils";
 import { useGridFocus } from "../../hooks/useGridFocus";
 import { useIsomorphicLayoutEffect } from "../../hooks/useIsomorphicLayoutEffect";
@@ -123,6 +123,12 @@ export interface CalendarRangeProps extends CalendarBaseProps {
   defaultValue?: DateRange;
   /** Required. Fires with the committed {start, end} ISO range. */
   onValueChange: (value: DateRange) => void;
+  /**
+   * Which end of the shared `value` this calendar edits. Unset is the two-click range. "start" or "end"
+   * makes one click set only that end, bounded by the other end, and on an empty value the first click
+   * gives a one-day range. A start and an end calendar sharing one `value` make a range input.
+   */
+  rangeRole?: "start" | "end";
 }
 
 export type CalendarProps = CalendarSingleProps | CalendarRangeProps;
@@ -471,6 +477,11 @@ interface CalendarMonthProps {
   next: CaptionNav | null;
   /** Only the first pane's caption carries the month/year view controls. */
   interactive: boolean;
+  /** Whether this pane bands the spillover before its month / after it. A sibling pane that shows the date in-month takes the band. */
+  bandLeading: boolean;
+  bandTrailing: boolean;
+  /** Read out on each committed endpoint of a role calendar, e.g. "selected range July 9, 2026 to July 15, 2026". */
+  endpointNote: string | null;
   onTogglePicker: (kind: PickerKind) => void;
   onDaySelect: (day: CalendarDay) => void;
   onDayHover: (date: PlainDate | null) => void;
@@ -487,6 +498,7 @@ function CalendarMonth(props: CalendarMonthProps) {
     selectedDate, rangeStart, rangeEnd, previewStart, previewEnd, focusDate, isDateDisabled,
     prev, next, interactive, onTogglePicker, onDaySelect, onDayHover, onFocusDate, onPageStep,
     onYearStep, onEdge, onEscape,
+    bandLeading, bandTrailing, endpointNote,
   } = props;
 
   const { weeks, dayNames } = useCalendarDays({
@@ -495,6 +507,13 @@ function CalendarMonth(props: CalendarMonthProps) {
     weekStartsOn,
   });
   const captionId = useId();
+  // The spillover band paints an outside day only where no sibling pane shows that date in-month: the
+  // leading days of the first pane and the trailing days of the last. The same test feeds the run's
+  // continuity, so the paint and the run cannot disagree.
+  const bandsOutsideDay = (date: PlainDate): boolean => {
+    if (!hasOutsideDays) return false;
+    return plainDateIsBefore(date, monthDate) ? bandLeading : bandTrailing;
+  };
 
   const grid = useGridFocus<HTMLTableElement>({
     columns: 7,
@@ -546,11 +565,17 @@ function CalendarMonth(props: CalendarMonthProps) {
   // Keep the roving stop synced AND mirror DOM focus back into React state so
   // the declared tabIndex tracks the focused day (never parse the human label —
   // data-date is the machine-readable source).
+  //
+  // A spillover day is skipped here. A press on it focuses it on mouse-down, and
+  // mirroring that focus would move the controlled focusDate into the neighbouring
+  // month: the view pages, the button remounts, and the click never commits. The
+  // view pages on the click instead, in onDaySelect.
   const handleFocus = useCallback(
     (e: ReactFocusEvent) => {
       grid.handleFocus(e);
-      const iso = (e.target as HTMLElement).getAttribute?.("data-date");
-      if (iso) onFocusDate(plainDateFromISO(iso as ISODateString));
+      const target = e.target as HTMLElement;
+      const iso = target.getAttribute?.("data-date");
+      if (iso && target.getAttribute("data-outside") == null) onFocusDate(plainDateFromISO(iso as ISODateString));
     },
     [grid, onFocusDate],
   );
@@ -580,18 +605,20 @@ function CalendarMonth(props: CalendarMonthProps) {
       today,
       isDisabled: constraintDisabled,
       isOutside: day.isOutside,
+      bandsOutside: bandsOutsideDay(day.date),
     });
 
     const rangeActive = state.isInRange || state.isRangeStart || state.isRangeEnd;
     const previewActive = state.isInPreview || state.isPreviewStart || state.isPreviewEnd;
+    const spilloverActive = state.isOutsideInRange || state.isOutsideInPreview;
 
-    // A single selected day is a fully rounded chip; a range/preview cell rounds
-    // only where the highlight run breaks (endpoints + row edges + neighbour
-    // discontinuity), so the band stays continuous between the endpoints.
+    // A single selected day is a fully rounded chip. A range or preview cell rounds only where the run
+    // breaks. The committed range and the hover preview read as ONE run, so the caps sit at the run's
+    // real edges and not at the committed endpoint under a hover.
     let roundStart = state.isSelected;
     let roundEnd = state.isSelected;
-    if (rangeActive || previewActive) {
-      const neighbors = computeDayNeighborContinuity({
+    if (rangeActive || previewActive || spilloverActive) {
+      const run = computeDayNeighborContinuity({
         week,
         dayIndex,
         mode,
@@ -600,12 +627,10 @@ function CalendarMonth(props: CalendarMonthProps) {
         previewStart,
         previewEnd,
         isDisabled: isDateDisabled,
+        bandsOutside: bandsOutsideDay,
       });
-      const rounding = rangeActive
-        ? computeRangeRounding(state, { prevInRange: neighbors.prevInRange, nextInRange: neighbors.nextInRange })
-        : computePreviewRounding(state, { prevInPreview: neighbors.prevInPreview, nextInPreview: neighbors.nextInPreview });
-      roundStart = roundStart || rounding.roundLeft;
-      roundEnd = roundEnd || rounding.roundRight;
+      roundStart = roundStart || !run.prevInRun;
+      roundEnd = roundEnd || !run.nextInRun;
     }
 
     const isEndpoint =
@@ -630,13 +655,17 @@ function CalendarMonth(props: CalendarMonthProps) {
           data-date={day.iso}
           className="rt-ds-calendar-day"
           tabIndex={isSeed ? 0 : -1}
-          aria-label={plainDateFormat(day.date, DATE_FORMAT_WITH_WEEKDAY)}
+          aria-label={
+            plainDateFormat(day.date, DATE_FORMAT_WITH_WEEKDAY) +
+            (endpointNote && (state.isRangeStart || state.isRangeEnd) ? `, ${endpointNote}` : "")
+          }
           aria-disabled={constraintDisabled || undefined}
           data-outside={day.isOutside || undefined}
           data-today={state.isToday || undefined}
           data-selected={state.isSelected || undefined}
           data-range={rangeActive ? (state.isRangeStart ? "start" : state.isRangeEnd ? "end" : "middle") : undefined}
           data-preview={previewActive ? (state.isPreviewStart ? "start" : state.isPreviewEnd ? "end" : "middle") : undefined}
+          data-range-outside={spilloverActive || undefined}
           data-endpoint={isEndpoint || undefined}
           data-round-start={roundStart || undefined}
           data-round-end={roundEnd || undefined}
@@ -732,6 +761,9 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(function Calen
   // A pending focus target expressed as a selector — used by the month/year grids, whose
   // cells (and the caption triggers they return to) have no ISO identity.
   const pendingSelector = useRef<string | null>(null);
+  // A click restores focus only where the click's own remount dropped it (see the layout effect). Keyboard paging
+  // is not a click, so it moves focus unconditionally and does not set this.
+  const pendingFocusIfLost = useRef(false);
   const announce = useAnnounce();
 
   /* --- constraints: compose the public predicate into the lifted hook -------
@@ -742,7 +774,6 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(function Calen
     if (!isDateDisabledProp) return undefined;
     return [(date: Date) => !isDateDisabledProp(plainDateToISO(plainDateFromDate(date)))];
   }, [isDateDisabledProp]);
-  const { isDateDisabled, minDate, maxDate } = useCalendarConstraints({ min, max, dateConstraints });
 
   /* --- committed value (controlled or uncontrolled) ------------------------ */
   const isRange = mode === "range";
@@ -756,6 +787,18 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(function Calen
   );
   const singleValue = singleControlled !== undefined ? singleControlled : singleUncontrolled;
   const rangeValue = rangeControlled !== undefined ? rangeControlled : rangeUncontrolled;
+
+  /* --- role bounds ----------------------------------------------------------
+     A role calendar stops at the other end of the shared range, so the days past it are disabled. */
+  const role = isRange ? (props as CalendarRangeProps).rangeRole : undefined;
+  const bounds = useRangeRole(role, rangeValue, min, max);
+  const { isDateDisabled, minDate, maxDate } = useCalendarConstraints({
+    min: bounds.min,
+    max: bounds.max,
+    dateConstraints,
+  });
+  // Endpoint labels read the whole committed range, so a role calendar names it on each endpoint.
+  const endpointNote = role && rangeValue ? `selected range ${rangeSentence(rangeValue)}` : null;
 
   /* --- in-progress range selection ----------------------------------------- */
   const [anchor, setAnchor] = useState<PlainDate | null>(null);
@@ -815,6 +858,15 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(function Calen
     const iso = pendingFocus.current;
     if (!iso || !rootRef.current) return;
     pendingFocus.current = null;
+    // A click that pages the view remounts its own button, and focus falls to the body: restore it there. A spillover
+    // copy of the clicked day can keep focus instead, when its month pane stays mounted (a two-month view), so focus on
+    // that day's own button counts as lost too. Focus already on something else (a caller that refocused its input on
+    // select, while this grid is still animating out) is not ours to take.
+    const restoreIfLost = pendingFocusIfLost.current;
+    pendingFocusIfLost.current = false;
+    const focused = document.activeElement;
+    const lost = !focused || focused === document.body || focused.getAttribute("data-date") === iso;
+    if (restoreIfLost && !lost) return;
     // Prefer the in-month cell: in a two-month view the target date can also
     // render as a dimmed spillover in the sibling pane, and querySelector would
     // otherwise return that first DOM match.
@@ -840,6 +892,17 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(function Calen
         previewEnd: plainDateMax(anchor, other),
       };
     }
+    // A role calendar previews from the hovered day back to the end it does not edit. The committed band
+    // stays painted under the preview, so the preview's lighter tint shows only on the days it adds.
+    if (role && hoverDate && bounds.otherEnd && rangeValue) {
+      const other = plainDateFromISO(bounds.otherEnd);
+      return {
+        rangeStart: plainDateFromISO(rangeValue.start),
+        rangeEnd: plainDateFromISO(rangeValue.end),
+        previewStart: plainDateMin(hoverDate, other),
+        previewEnd: plainDateMax(hoverDate, other),
+      };
+    }
     if (rangeValue) {
       const a = plainDateFromISO(rangeValue.start);
       const b = plainDateFromISO(rangeValue.end);
@@ -851,17 +914,28 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(function Calen
       };
     }
     return { rangeStart: null, rangeEnd: null, previewStart: null, previewEnd: null };
-  }, [isRange, anchor, hoverDate, rangeValue]);
+  }, [isRange, anchor, hoverDate, rangeValue, role, bounds.otherEnd]);
 
   /* --- interaction handlers ------------------------------------------------- */
   const onDaySelect = useCallback(
     (day: CalendarDay) => {
       if (isDateDisabled(day.date)) return;
       if (day.isOutside) setViewStart(firstOfMonth(day.date));
+      // A spillover click pages the view, which remounts the button under the pointer. Hand focus to the clicked
+      // day's in-month button in its new month, so the keyboard carries on from the day that was picked.
+      pendingFocus.current = day.iso;
+      pendingFocusIfLost.current = true;
 
       if (!isRange) {
         if (singleControlled === undefined) setSingleUncontrolled(day.iso);
         (props as CalendarSingleProps).onValueChange(day.iso);
+      } else if (role) {
+        // A role calendar edits only its own end of the shared value.
+        const next = applyRangeRole(role, day.iso, rangeValue);
+        if (rangeControlled === undefined) setRangeUncontrolled(next);
+        (props as CalendarRangeProps).onValueChange(next);
+        setHoverDate(null);
+        announce(`Selected range ${rangeSentence(next)}`);
       } else if (!anchor) {
         setAnchor(day.date);
         setHoverDate(null);
@@ -877,14 +951,14 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(function Calen
       }
       setFocusDate(day.date);
     },
-    [isDateDisabled, isRange, anchor, singleControlled, rangeControlled, props, setFocusDate],
+    [isDateDisabled, isRange, anchor, singleControlled, rangeControlled, props, setFocusDate, role, rangeValue, announce],
   );
 
   const onDayHover = useCallback(
     (pd: PlainDate | null) => {
-      if (isRange && anchor) setHoverDate(pd);
+      if (isRange && (anchor || role)) setHoverDate(pd);
     },
-    [isRange, anchor],
+    [isRange, anchor, role],
   );
 
   const onEscape = useCallback(() => {
@@ -937,11 +1011,28 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(function Calen
     },
     [viewStart, focusDate, setFocusDate, announce, viewLabel],
   );
-  const onPageStep = useCallback((dir: -1 | 1) => moveFocusTo(addMonthsClamped(focusDate, dir)), [focusDate, moveFocusTo]);
-  const onYearStep = useCallback((dir: -1 | 1) => moveFocusTo(addMonthsClamped(focusDate, dir * 12)), [focusDate, moveFocusTo]);
+  // Keyboard paging stays inside min and max, bounds included, so a role bound set by the other end
+  // cannot strand focus in a month where every day is disabled.
+  const clampToBounds = useCallback(
+    (pd: PlainDate): PlainDate => {
+      let r = pd;
+      if (minDate) r = plainDateMax(r, minDate);
+      if (maxDate) r = plainDateMin(r, maxDate);
+      return r;
+    },
+    [minDate, maxDate],
+  );
+  const onPageStep = useCallback(
+    (dir: -1 | 1) => moveFocusTo(clampToBounds(addMonthsClamped(focusDate, dir))),
+    [focusDate, moveFocusTo, clampToBounds],
+  );
+  const onYearStep = useCallback(
+    (dir: -1 | 1) => moveFocusTo(clampToBounds(addMonthsClamped(focusDate, dir * 12))),
+    [focusDate, moveFocusTo, clampToBounds],
+  );
   const onEdge = useCallback(
-    (dir: -1 | 1, offset: number) => moveFocusTo(plainDateAddDays(focusDate, dir * offset)),
-    [focusDate, moveFocusTo],
+    (dir: -1 | 1, offset: number) => moveFocusTo(clampToBounds(plainDateAddDays(focusDate, dir * offset))),
+    [focusDate, moveFocusTo, clampToBounds],
   );
 
   /* --- picker open / close / commit ----------------------------------------
@@ -1170,6 +1261,9 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(function Calen
                     : null
                 }
                 interactive={i === 0}
+                bandLeading={i === 0}
+                bandTrailing={i === months - 1}
+                endpointNote={endpointNote}
                 onTogglePicker={onTogglePicker}
                 onDaySelect={onDaySelect}
                 onDayHover={onDayHover}

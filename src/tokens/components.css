@@ -796,6 +796,12 @@
 .radix-themes .rt-ds-daterange-layout { display: flex; flex-direction: column; gap: var(--space-3); }
 .radix-themes .rt-ds-daterange-body { display: flex; flex-direction: row; align-items: flex-start; gap: var(--space-5); }
 .radix-themes .rt-ds-daterange-footer { display: flex; justify-content: flex-end; }
+/* Split layout (DateRangeInput layout="split"): a start calendar and an end calendar side by side. Each pane is a
+   role="group" named by its visible caption, and the gap between the panes is the one --space-5 the body row uses.
+   The caption is a Text on the text lane, so it steps with the dialog's type, and it paints in the weak text token. */
+.radix-themes .rt-ds-daterange-split { display: flex; flex-direction: row; align-items: flex-start; gap: var(--space-5); }
+.radix-themes .rt-ds-daterange-pane { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; }
+.radix-themes .rt-ds-daterange-caption { color: var(--ds-text-weak); }
 
 /* Preset sidebar — a vertical column of ghost Buttons in a role="group" (Tab order, NOT a listbox), ruled
    off from the calendar by a logical-end hairline so it reads as a distinct region.
@@ -2894,6 +2900,20 @@
 }
 .radix-themes .rt-ds-calendar-day[data-range]::before { background: var(--ds-fill-selected-subtle); }
 .radix-themes .rt-ds-calendar-day[data-preview]::before { background: var(--ds-fill-accent-weak); }
+
+/* Spillover band — an adjacent-month day inside the committed range or the hover preview. The run continues
+   across the month edge, so the band reads as one span. A spillover day is never a selection, so it takes the
+   neutral weak fill rather than the committed or preview tint. */
+.radix-themes .rt-ds-calendar-day[data-range-outside]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--ds-fill-weak);
+}
+/* A hover preview laid over the committed band keeps the committed tint, so the lighter preview tint shows only on
+   the days the preview adds. */
+.radix-themes .rt-ds-calendar-day[data-range][data-preview]::before { background: var(--ds-fill-selected-subtle); }
 
 /* Chip (::after) — the endpoint / single-selected step of the ramp.
    WHY THE TINT AND NOT THE SOLID FILL. This chip used to paint --ds-fill-selected (accent-9)

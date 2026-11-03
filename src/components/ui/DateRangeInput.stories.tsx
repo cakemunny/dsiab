@@ -22,7 +22,7 @@ const DEFINITION = (
   <>
     Reach for a DateRangeInput when the user enters a <strong>start → end</strong> span — a report
     window, a booking, a filter. Common relative spans are offered as <strong>presets</strong>; the
-    two-month calendar is for exact picking. The wire value is always <Code>{`{ start, end }`}</Code> ISO
+    calendar is for exact picking: one two-month range calendar by default, or a start calendar and an end calendar with <Code>layout="split"</Code>. The wire value is always <Code>{`{ start, end }`}</Code> ISO
     strings.
   </>
 );
@@ -154,7 +154,7 @@ const meta: Meta<typeof DateRangeInput> = {
       description: {
         component:
           "**DateRangeInput** — a range date picker: one button trigger opening a **dialog** that hosts a " +
-          "preset sidebar beside a two-month range **Calendar**. The range sibling of **DateInput**, but a " +
+          "preset sidebar beside a two-month range **Calendar** (the default `linked` layout; `split` shows a start and an end calendar, one month each). The range sibling of **DateInput**, but a " +
           "different shape at both ends: the trigger reuses the **MultiSelect/Select surface-trigger chrome** " +
           "(fill + border + the system focus ring ([[focus-ring]]) for free) with a leading calendar glyph and **no caret** (it " +
           "opens a dialog, not a dropdown); the popover reuses DateInput’s mechanism (a `role=\"dialog\"` that " +
@@ -186,7 +186,7 @@ export const Anatomy: Story = {
 
         <Rule />
 
-        <Section title="Anatomy — the open dialog" lead="The dialog the trigger opens into — solid and opaque (never translucent), the SAME overlay surface as the DateInput / Select menus so the floating family reads as one. Inside: the preset sidebar (logical-start) beside a two-month range Calendar, with a Done footer. Selecting a preset or a range KEEPS it open (confirm/refine). The specimen below is house-faithful (real tokens, follows the toolbar accent).">
+        <Section title="Anatomy — the open dialog" lead="The dialog the trigger opens into — solid and opaque (never translucent), the SAME overlay surface as the DateInput / Select menus so the floating family reads as one. Inside: the preset sidebar (logical-start) beside a two-month range Calendar, with a Done footer. This is the default linked layout; Split layout shows the other. Selecting a preset or a range KEEPS it open (confirm/refine). The specimen below is house-faithful (real tokens, follows the toolbar accent).">
           <DialogSpecimen>
             <DialogBodySpecimen />
           </DialogSpecimen>
@@ -327,6 +327,31 @@ export const Keyboard: Story = {
   ),
 };
 
+/* ---- Split layout --------------------------------------------------------- */
+
+/** SplitLayout — the opt-in split layout: a Start date calendar and an End date calendar side by side, each paging on its own. The default linked layout stays one two-click range calendar. */
+export const SplitLayout: Story = {
+  render: () => (
+    <Page>
+      <PageHeader title="DateRangeInput · Split layout" standfirst={DEFINITION} />
+      <Section
+        title="Start and end, side by side"
+        lead={<>Set <Code>layout="split"</Code> to give each end of the range its own calendar. The start calendar edits the start, the end calendar edits the end, and each is bounded by the other. Each calendar shows one month and keeps its own place, so a span that crosses months needs no shared paging.</>}
+      >
+        <Flex direction="column" gap="2">
+          <Box style={{ maxWidth: 320 }}>
+            <DateRangeInput label="Stay" layout="split" defaultValue={SAMPLE_RANGE} presets={DEMO_PRESETS} onValueChange={noop} />
+          </Box>
+          <Caption>
+            A live target. Open it and each calendar pages alone. <Code>numberOfMonths</Code> does not apply to the
+            split layout, because each calendar shows one month.
+          </Caption>
+        </Flex>
+      </Section>
+    </Page>
+  ),
+};
+
 /* ---- Props ---------------------------------------------------------- */
 const PROPS: PropDef[] = [
   { name: "value / defaultValue", type: "DateRange", desc: <>Controlled / uncontrolled range — <Code>{`{ start, end }`}</Code> ISO <Code>YYYY-MM-DD</Code> strings.</>, source: "DateRangeInput.tsx" },
@@ -334,7 +359,8 @@ const PROPS: PropDef[] = [
   { name: "presets", type: "ReadonlyArray<{ label; getRange }>", desc: <>Shortcut ranges rendered as the sidebar. The active one (its <Code>getRange()</Code> equals the value) carries <Code>aria-current</Code> + the committed-band tint.</>, source: "DateRangeInput.tsx" },
   { name: "min / max", type: "ISODateString", desc: <>Selectable bounds — earlier/later dates are disabled in the calendar. A committed range out of bounds surfaces a STANDING validation error.</>, source: "DateRangeInput.tsx" },
   { name: "isDateDisabled", type: "(iso) => boolean", desc: <>Custom disable predicate — <Code>true</Code> = disabled (forwarded to Calendar, which bridges the polarity).</>, source: "DateRangeInput.tsx" },
-  { name: "numberOfMonths", type: "1 | 2", def: "2", desc: <>Months shown side by side in the dialog.</>, source: "DateRangeInput.tsx" },
+  { name: "numberOfMonths", type: "1 | 2", def: "2", desc: <>Months shown side by side in the dialog. Ignored by <Code>layout="split"</Code>, which shows one month per calendar.</>, source: "DateRangeInput.tsx" },
+  { name: "layout", type: `"linked" | "split"`, def: `"linked"`, desc: <>How the dialog lays out the range. <Code>linked</Code> is one range calendar, two clicks pick it. <Code>split</Code> is a Start date and an End date calendar side by side, each paging alone.</>, source: "DateRangeInput.tsx" },
   { name: "placeholder", type: "string", def: `"Select dates"`, desc: <>Greyed hint while empty.</>, source: "DateRangeInput.tsx" },
   { name: "hasClear", type: "boolean", def: "true", desc: <>A trailing clear ✕ (out of tab order, Backspace/Delete parity) while a range is set.</>, source: "DateRangeInput.tsx" },
   { name: "size", type: `"1" | "2" | "3"`, def: `control lane (1 at small)`, desc: <>Control size. Unset, it resolves from the global <Code>uiSize</Code> control lane.</>, source: "DateRangeInput.tsx" },

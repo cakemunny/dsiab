@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Box } from "@radix-ui/themes";
+import { userEvent } from "@vitest/browser/context";
 import { DateRangeInput, type DateRangePreset } from "./DateRangeInput";
 import type { DateRange, ISODateString } from "../../dates/dateTypes";
 
@@ -298,5 +299,134 @@ export const SoftDisabledReason: Story = {
     trigger.click();
     await sleep(60);
     if (dialogOf(trigger)) throw new Error("a soft-disabled trigger must not open the dialog");
+  },
+};
+
+/** The pane named by its visible caption: each split calendar's group is labelled by its caption's id. */
+const paneNamed = (dialog: ParentNode, name: string) =>
+  [...dialog.querySelectorAll<HTMLElement>('[role="group"][aria-labelledby]')].find(
+    (g) => document.getElementById(g.getAttribute("aria-labelledby") ?? "")?.textContent === name,
+  ) ?? null;
+
+/** The click's focus target: the in-month button of that date, never a spillover copy of it. */
+const focusedOnInMonth = (iso: string) =>
+  document.activeElement?.getAttribute("data-date") === iso && document.activeElement?.hasAttribute("data-outside") === false;
+
+/** Split layout: a Start date and an End date calendar, each seeded to its end of the value on open. Focus on open
+ *  lands in the start grid, and paging one calendar leaves the other where it was. */
+export const SplitLayoutPagesIndependently: Story = {
+  render: () => (
+    <Box p="4" data-testid="dr-split" style={{ maxWidth: 560 }}>
+      <DateRangeInput label="Report window" layout="split" defaultValue={R("2026-07-10", "2026-07-20")} onValueChange={record("drSplit")} />
+    </Box>
+  ),
+  play: async ({ canvasElement }) => {
+    const scope = canvasElement.querySelector<HTMLElement>('[data-testid="dr-split"]')!;
+    const trigger = triggerOf(scope)!;
+    trigger.click();
+    const dialog = await waitFor(() => dialogOf(trigger));
+    const startPane = await waitFor(() => paneNamed(dialog, "Start date"));
+    const endPane = paneNamed(dialog, "End date");
+    if (!endPane) throw new Error('the split layout must render an "End date" group');
+    const tabStop = (pane: HTMLElement) => pane.querySelector<HTMLElement>('button.rt-ds-calendar-day[tabindex="0"]');
+
+    if (tabStop(startPane)?.getAttribute("data-date") !== "2026-07-10")
+      throw new Error(`the start calendar must seed to the range start; got ${tabStop(startPane)?.getAttribute("data-date")}`);
+    if (tabStop(endPane)?.getAttribute("data-date") !== "2026-07-20")
+      throw new Error(`the end calendar must seed to the range end; got ${tabStop(endPane)?.getAttribute("data-date")}`);
+    const focused = await waitFor(() => {
+      const a = document.activeElement as HTMLElement | null;
+      return a?.getAttribute?.("data-date") === "2026-07-10" ? a : null;
+    });
+    if (!startPane.contains(focused)) throw new Error("focus on open must land in the start calendar");
+
+    press(focused, "PageUp");
+    await waitFor(() => tabStop(startPane)?.getAttribute("data-date") === "2026-06-10");
+    if (tabStop(endPane)?.getAttribute("data-date") !== "2026-07-20")
+      throw new Error("paging the start calendar must leave the end calendar where it was");
+
+    const endDay = tabStop(endPane)!;
+    endDay.focus();
+    press(endDay, "PageDown");
+    await waitFor(() => tabStop(endPane)?.getAttribute("data-date") === "2026-08-20");
+    if (tabStop(startPane)?.getAttribute("data-date") !== "2026-06-10")
+      throw new Error("paging the end calendar must leave the start calendar where it was");
+  },
+};
+
+/** Split layout: the first click in either calendar commits a one-day range, as the role calendar does. */
+export const SplitLayoutFirstClickIsOneDay: Story = {
+  render: () => (
+    <Box p="4" data-testid="dr-split-one" style={{ maxWidth: 560 }}>
+      <DateRangeInput label="Stay" layout="split" onValueChange={record("drSplitOne")} />
+    </Box>
+  ),
+  play: async ({ canvasElement }) => {
+    const scope = canvasElement.querySelector<HTMLElement>('[data-testid="dr-split-one"]')!;
+    const trigger = triggerOf(scope)!;
+    reset("drSplitOne");
+    trigger.click();
+    const dialog = await waitFor(() => dialogOf(trigger));
+    const startPane = await waitFor(() => paneNamed(dialog, "Start date"));
+    // No value yet, so the calendar shows today's month: pick its first enabled, in-month day.
+    const day = await waitFor(() =>
+      startPane.querySelector<HTMLButtonElement>('button.rt-ds-calendar-day:not([data-outside]):not([aria-disabled="true"])'),
+    );
+    const iso = day.getAttribute("data-date")!;
+    day.click();
+    await waitFor(() => calls("drSplitOne").length > 0);
+    const last = calls("drSplitOne").at(-1)!;
+    if (last.start !== iso || last.end !== iso)
+      throw new Error(`a first split-layout click must commit a one-day range on ${iso}; got ${JSON.stringify(last)}`);
+  },
+};
+
+/** Split layout, real pointer: a press on a spillover day commits it. Focus on mouse-down must not page the view,
+ *  or the click lands on a remounted button and never commits. */
+export const SplitLayoutSpilloverClickCommits: Story = {
+  render: () => (
+    <Box p="4" data-testid="dr-split-spill" style={{ maxWidth: 560 }}>
+      <DateRangeInput label="Report window" layout="split" defaultValue={R("2026-07-10", "2026-07-20")} onValueChange={record("drSplitSpill")} />
+    </Box>
+  ),
+  play: async ({ canvasElement }) => {
+    const scope = canvasElement.querySelector<HTMLElement>('[data-testid="dr-split-spill"]')!;
+    const trigger = triggerOf(scope)!;
+    await userEvent.click(trigger);
+    const dialog = await waitFor(() => dialogOf(trigger));
+    const startPane = await waitFor(() => paneNamed(dialog, "Start date"));
+    // 2026-06-30 is a leading spillover day of the July grid; the start role may move back to it.
+    const spill = await waitFor(() => startPane.querySelector<HTMLButtonElement>('button[data-date="2026-06-30"]'));
+    reset("drSplitSpill");
+    await userEvent.click(spill);
+    await waitFor(() => focusedOnInMonth("2026-06-30"));
+    await waitFor(() => calls("drSplitSpill").length > 0);
+    const last = calls("drSplitSpill").at(-1)!;
+    if (last.start !== "2026-06-30" || last.end !== "2026-07-20")
+      throw new Error(`a real press on a spillover day must commit it as the start; got ${JSON.stringify(last)}`);
+  },
+};
+
+/** Linked layout, real pointer: two presses on spillover days commit a range that starts and ends outside the month. */
+export const LinkedSpilloverClickCommits: Story = {
+  render: () => (
+    <Box p="4" data-testid="dr-linked-spill" style={{ maxWidth: 560 }}>
+      <DateRangeInput label="Report window" defaultValue={R("2026-07-10", "2026-07-20")} onValueChange={record("drLinkedSpill")} />
+    </Box>
+  ),
+  play: async ({ canvasElement }) => {
+    const scope = canvasElement.querySelector<HTMLElement>('[data-testid="dr-linked-spill"]')!;
+    const trigger = triggerOf(scope)!;
+    await userEvent.click(trigger);
+    const dialog = await waitFor(() => dialogOf(trigger));
+    reset("drLinkedSpill");
+    await userEvent.click(await waitFor(() => dialog.querySelector<HTMLElement>('button[data-date="2026-06-30"]')));
+    await waitFor(() => focusedOnInMonth("2026-06-30"));
+    await userEvent.click(await waitFor(() => dialog.querySelector<HTMLElement>('button[data-date="2026-07-05"]')));
+    await waitFor(() => focusedOnInMonth("2026-07-05"));
+    await waitFor(() => calls("drLinkedSpill").length > 0);
+    const last = calls("drLinkedSpill").at(-1)!;
+    if (last.start !== "2026-06-30" || last.end !== "2026-07-05")
+      throw new Error(`two real presses must commit the normalized range; got ${JSON.stringify(last)}`);
   },
 };
