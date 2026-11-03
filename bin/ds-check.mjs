@@ -63,8 +63,9 @@ try {
     `ds-check could not load its rule module.\n` +
       `  expected: ${RULES_MODULE}\n` +
       `  ${err && err.message ? err.message : err}\n` +
-      `If this package was installed from a tarball, its "files" list must carry both\n` +
-      `"bin" and "src/foundations/{consumerRules,dsiabRules,checkFacts}.mjs". Report this — it is a packaging bug, not yours.\n`,
+      `If this package was installed from a tarball, its "files" list must carry "bin" and\n` +
+      `"src/foundations/{consumerRules,dsiabRules,checkFacts,scanScript,sourceRegions,sourceWalk}.mjs".\n` +
+      `Report this — it is a packaging bug, not yours.\n`,
   );
   process.exit(2);
 }

@@ -12,7 +12,8 @@ The plan answers kanban task t_ad0bf9c3 with a local usage scan of each project'
 | Jason's decisions on the shape | Done. Eleven decisions, listed below. |
 | Rule checker fix, the prerequisite | Merged into main as cakemunny/dsiab#23 (`aa25061`). |
 | Phase 0, the record | Drafted on `claude/affectionate-knuth-c742av` (`036be16`, amended by the counting, project and report decisions). Waits for Jason's review. |
-| Phase 1, the scanner and the usage command | Not started. Unblocked. |
+| Phase 1a, the shared source modules | Built on `claude/affectionate-knuth-c742av`. Waits for review with Phase 0. |
+| Phase 1b and 1c, the kind field, the scanner and the usage command | Not started. |
 | Need check | Waits for Jason's personal project to hold a finished screen. Runs on a locally packed build, before any release ships Phase 1. |
 | Phase 2, the Usage page | Waits for the Need check. |
 
@@ -85,12 +86,12 @@ The rule checker's method for skipping comments and text misread page text, and 
 
 ### Phase 1a: a shared module for reading source
 
-- Move the file walker, the file read loop and the masking out of `consumerRules.mjs` into **two** new shipped modules, one for masking and one for the walk. The masking alone is about 390 lines and the walker about 70, so a single module would break the cap of 400 lines per file. The rule checker and the scanner both import them.
-- Split the scanning function in the move, because the fix took it past the limit of 100 lines per function.
+- Move the file walker, the file read loop and the masking out of `consumerRules.mjs` into **three** new shipped modules: `scanScript.mjs`, the character scanner for script and JSX; `sourceRegions.mjs`, the CSS comment scan, the markup split and `regionsFor`; and `sourceWalk.mjs`, the walk and `readSources`. The masking alone is about 390 lines, so it splits in two to keep each file under the cap of 400 lines. The rule checker and the scanner both import them, and `consumerRules.mjs` still exports the extension lists and `collectFiles`, which `ds-check` and its guards import from it.
+- Split the scanning function in the move, because the fix took it past the limit of 100 lines per function. `scanJs` keeps the loop, and the regex literal, the quoted string, the template literal and its `${…}` body each become a helper.
 - **The walker records names, and the rule checker's output stays the same.** Today `collectFiles` skips a symlink without recording it, counts skipped folders as a number only, and skips a folder in `DIR_IGNORE` at any depth, `build` inside `src` included. The walker gains, additively, the list of skipped folders with the reason for each (ignored name, hidden, or symlink) and the list of skipped symlinks. The rule checker reads only the fields it reads today, so its printed report and its exit code do not change. Case 17 reads the new fields.
-- Add both modules to the package's file list.
+- Add the three modules to the package's file list, the shipped-files guard and the packaging message `ds-check` prints when it cannot load its rules.
 
-**Done when** the rule checker's tests pass unchanged, a byte-for-byte comparison of `ds-check` output over this repository before and after the move shows no difference, a test asserts the new walker fields for a symlinked folder and for `src/build`, and the release check finds both modules in the packed package.
+**Done when** the rule checker's tests pass unchanged, a byte-for-byte comparison of `ds-check` output over this repository before and after the move shows no difference, with the old and new module run over the same tree, a test asserts the new walker fields for a symlinked folder and for `src/build`, and the release check finds the three modules in the packed package.
 
 ### Phase 1b: the kind field
 
