@@ -90,6 +90,7 @@
     "test": "vitest",
     "test:tokens": "vitest run --config vitest.node.config.ts",
     "test:publish": "node scripts/acceptance.mjs",
+    "eval": "node scripts/eval.mjs",
     "changelog": "node scripts/gen-changelog.mjs",
     "prepare": "node scripts/install-git-hooks.mjs",
     "install-git-hooks": "node scripts/install-git-hooks.mjs"

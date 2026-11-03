@@ -11,6 +11,8 @@ __screenshots__/
 .worktree-port
 .devport
 .screenshots/
+# eval results (scripts/eval.mjs); they hold model output and local paths
+.evals/
 
 # agent files that `npm run agents` generates from skills/, plus each tool's local state
 /.agents/

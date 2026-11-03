@@ -1037,6 +1037,26 @@ This ledger records the rulings that shape the design system and the reason behi
 
 **Status.** Ruled 2026-11-03. No later ruling amends it.
 
+### eval-measures-not-gates
+
+**Tags.** `CONTRIBUTING`. **Ruled.** 2026-11-03.
+
+**An eval set measures whether an agent with dsiab installed builds UI the way the rules say, and it reports rates. It is not a gate and does not run in CI.**
+
+**What you see.** `evals/tasks.json` holds six tasks, whose prompts never name a component. `scripts/eval.mjs` builds one scaffold per tarball through `dsiab init --write --yes`, pinned to the repository lockfile, copies it into a fresh workspace under the OS temp directory for each run, and runs any agent through a shell template. A timeout kills the template's process group. `scripts/eval-grade.mjs` grades each workspace, and `--check-only` grades one by hand. Results go to the ignored .evals folder. The runner exits 0 whatever the rates, and 2 only when the environment broke.
+
+**What a pass means.** Compliant completion. The task's outcome is present (`require`), the expected components are imported and rendered (`uses`), and `ds-check`, `tsc`, the imports tsc cannot see, the `forbid` patterns and the scaffold manifest all pass. The grader reads `ds-check`'s verdict from one `checkTree` call and adds no rule of its own that `ds-check` owns. It also fails the gaming paths: an added allowance or type-check suppression, a `--ds-*` name the agent declared itself, and a loosened tsconfig, agent file or dependency range. A pass says nothing about visual quality, runtime accessibility or a Vite build.
+
+**How it stays honest.** Each task has a reference solution in `evals/solutions/`, and `eval-grader.node-check.ts` grades every one as a pass, and each solution with one plant as a fail of exactly that check. The oracle template copies the solutions and must score N/N with live tsc, and a template that does nothing must score 0/N.
+
+**Reading a number.** Every `k/N` carries a Wilson 95% interval, and per-task rates are descriptive only. A rules or skill change is judged by two tarballs in one session with one label, paired by task: a sign test over the tasks that moved, and the pooled difference with its interval. Violations per run are the finer secondary measure. The minimum detectable effect, at α = 0.05 with 80% power: about 40 runs per arm detect a 30-point swing in the overall rate (80 to 50 percent), which is N ≈ 7 over these six tasks. At the default N = 3, 18 runs per arm, only a swing of about 40 points shows. Anything smaller needs more runs or stays a judgement. No result is committed, because a stored baseline mixes the change with a different model, harness and dependency set.
+
+**Not yet done.** The grader is uncalibrated. The first real run keeps its workspaces (`--keep`), a person labels each one against its task, and the agreement table goes in that pull request. Each disagreement becomes a plant or a documented limit. The tasks were written by the rules' authors, and a reader who did not write the rules should review them before that run. Agent configuration at the user level is not controlled.
+
+**Changed from.** Nothing. The repository had no eval.
+
+**Status.** Ruled 2026-11-03. No later ruling amends it.
+
 ## Token additions (2026-06-18)
 
 ### serif-em-and-quote
