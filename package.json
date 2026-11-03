@@ -83,7 +83,7 @@
     "barrel": "node scripts/gen-barrel.mjs",
     "storybook": "node scripts/storybook.mjs",
     "build-storybook": "storybook build",
-    "postbuild-storybook": "node scripts/scan-public-build.mjs storybook-static",
+    "postbuild-storybook": "node scripts/site-reference.mjs storybook-static && node scripts/scan-public-build.mjs storybook-static",
     "docs": "node bin/dsiab.mjs docs",
     "agents": "node scripts/agents.mjs",
     "pretest": "npm run test:tokens",

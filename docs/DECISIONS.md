@@ -1011,9 +1011,11 @@ This ledger records the rulings that shape the design system and the reason behi
 
 **How it stays true.** `scripts/dist-reference.mjs` reads one TypeScript program over the source with the options that emit the shipped declarations, so it needs no prior build. Status, tier and `wraps` come from the same projection as `dsiab/registry.json`. The files are generated on every build and never committed. `dist-reference.node-check.ts` holds coverage, export headings, the docs-win sentence, leaks, ruling citations and size, with a red proof for each, and holds the props of Button, Select, Calendar, Badge and a hook to known values.
 
+**The docs site.** `npm run build-storybook` writes the same files, byte for byte, beside the built site, with the roster, the ledger, the rules and the agent setup guide, and an `/llms.txt` that links each of them by a site-absolute path. `scripts/site-reference.mjs` does it before the public build scan, and fails the build when a component file links a story the built site does not hold. Each file links the docs of the release it was built from, so `llms.txt` on the latest site links that release's permanent alias by design. A `_headers` file asks Pages to serve the files as UTF-8 text, and whether Pages honours it for these paths is checked with `curl -I` after a deploy, not before. `site-reference.node-check.ts` holds `llms.txt` to the available roster and to the files written.
+
 **Changed from.** Nothing. The package shipped the declarations and the roster and no per-component reference.
 
-**Status.** Ruled 2026-11-03. No later ruling amends it.
+**Status.** Ruled 2026-11-03. On 2026-11-03 the docs site gained the same files and an `llms.txt`.
 
 ### skill-read-back-step
 
