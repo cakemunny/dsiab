@@ -67,7 +67,7 @@ export type DataListRootProps = RootProps & {
    * versus wrapping is a decision per LIST, so it is declared here and every value obeys it.
    *
    * `"truncate"` hands the hidden text back: the value carries a `title` with its full string, which
-   * is the standing obligation in `src/utils/truncation.ts`. One value may still differ, deliberately,
+   * is the standing obligation of every truncation in this system. One value may still differ, deliberately,
    * through `truncate` on `DataList.Value`. */
   overflow?: DataListOverflow;
 };

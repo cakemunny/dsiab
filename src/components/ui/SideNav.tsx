@@ -530,8 +530,7 @@ export interface SideNavCollapseButtonProps {
   className?: string;
   [key: `data-${string}`]: unknown;
 }
-/** The imperative collapse toggle. Carries aria-expanded={!collapsed} (upstream has none — an a11y
- *  upgrade) + aria-controls at the nav. Renders nothing in a drawer mode (no collapse rail there). */
+/** The imperative collapse toggle. Carries aria-expanded={!collapsed} + aria-controls at the nav. Renders nothing in a drawer mode (no collapse rail there). */
 export function SideNavCollapseButton({ label, className, ...rest }: SideNavCollapseButtonProps) {
   const { collapsed, toggleCollapsed, mode, navId } = useSideNavContext();
   // The rail's rows read the TEXT lane (that is the lane `Item` resolves), and this button is a member

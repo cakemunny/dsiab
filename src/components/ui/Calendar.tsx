@@ -71,9 +71,8 @@ interface CalendarBaseProps {
   max?: ISODateString;
   /**
    * Custom disable predicate — receives an ISO date string, returns **true to
-   * disable**. NOTE the polarity/arg flip vs the upstream `dateConstraints`
-   * (which took a native `Date` and returned true = ALLOWED): this system's
-   * public contract is ISO-in / true-means-blocked, composed into
+   * disable**. NOTE the polarity: it takes an ISO string, not a native `Date`,
+   * and true means BLOCKED, not allowed. That contract is composed into
    * {@link useCalendarConstraints} at the boundary.
    */
   isDateDisabled?: (date: ISODateString) => boolean;
