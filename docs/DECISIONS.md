@@ -4469,6 +4469,7 @@ Double-click toggles between 1x and 2x. While zoomed, a drag, the keypad in the 
 **Status.** Ruled 2026-07-28.
 
 - [modal-measurement-lifecycle](#modal-measurement-lifecycle) measures a modal surface by mounting it, reading it and unmounting it, and replaces the check that the measured node is connected when the assertion runs with a check that it was connected at the read.
+- An update of 2026-11-03 keeps the header row only on a table 640px wide or wider. On a narrower table the header hides and each row stacks its cells, the verdict last, and the value carries a "Measured" label, so it never reads as the token's own value.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 
