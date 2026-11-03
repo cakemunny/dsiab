@@ -235,6 +235,23 @@ describe("the repository and the CLI", () => {
     }
   });
 
+  it("the dsiab skill lists no rule ids and no rule count, and every id it allows is real", () => {
+    // The skill points at `npx ds-check --rules`, so a list or a count there goes stale with each new rule.
+    const problems = (text: string) => [
+      ...[...text.matchAll(/ds-allow ([a-z0-9-]+)/g)].filter((m) => !RULE_IDS.includes(m[1])).map((m) => `unknown id ${m[1]}`),
+      ...RULE_IDS.filter((id) => text.includes(`\`${id}\``)).map((id) => `lists \`${id}\``),
+      ...[...text.matchAll(/\b(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve) (?:dsiab )?rules\b/gi)].map((m) => `count "${m[0]}"`),
+    ];
+    const skill = readFileSync(join(ROOT, "skills/dsiab/SKILL.md"), "utf8");
+    expect(problems(skill)).toEqual([]);
+    // RED: the list and count this skill used to carry, and an allowance for a rule that does not exist.
+    expect(problems("It enforces five rules: `transition-all`.\nds-allow no-such-rule — x")).toEqual([
+      "unknown id no-such-rule",
+      "lists `transition-all`",
+      'count "five rules"',
+    ]);
+  });
+
   it("rules.md names every dsiab rule it says ds-check enforces", () => {
     const rulesMd = readFileSync(join(ROOT, "skills/dsiab/references/rules.md"), "utf8");
     for (const id of DSIAB_RULE_IDS) expect(rulesMd, `rules.md does not name \`${id}\``).toContain(`\`${id}\``);

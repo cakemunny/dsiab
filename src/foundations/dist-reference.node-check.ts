@@ -202,6 +202,11 @@ describe("the props are the right props", () => {
   });
 });
 
+/** The reference paths a shipped Markdown file fails to name. Pure. */
+const SUBPATH = `dsiab/${OUT_DIR.replace(/^dist\//, "")}`;
+const REFERENCE_PATHS = [`${SUBPATH}/<Name>.md`, `${SUBPATH}/index.md`];
+const unnamedPaths = (text: string) => REFERENCE_PATHS.filter((p) => !text.includes(`\`${p}\``));
+
 describe("one path, named the same everywhere", () => {
   test("OUT_DIR, the exports key and rules.md agree", () => {
     expect(OUT_DIR).toBe("dist/components");
@@ -209,5 +214,12 @@ describe("one path, named the same everywhere", () => {
     const rules = readFileSync("skills/dsiab/references/rules.md", "utf8");
     expect(rules).toContain("dsiab/components/<Name>.md");
     expect(rules).toContain("dsiab/components/index.md");
+  });
+
+  test("the dsiab skill routes to the same paths ([[skill-read-back-step]])", () => {
+    const skill = readFileSync("skills/dsiab/SKILL.md", "utf8");
+    expect(unnamedPaths(skill), "skills/dsiab/SKILL.md must name the reference the build writes").toEqual([]);
+    // RED: a skill that names a renamed directory fails both paths.
+    expect(unnamedPaths(skill.replaceAll("dsiab/components/", "dsiab/reference/"))).toEqual(REFERENCE_PATHS);
   });
 });

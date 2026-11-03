@@ -1015,6 +1015,26 @@ This ledger records the rulings that shape the design system and the reason behi
 
 **Status.** Ruled 2026-11-03. No later ruling amends it.
 
+### skill-read-back-step
+
+**Tags.** `DOCUMENTATION`, `INSTALL`. **Ruled.** 2026-11-03.
+
+**The `dsiab` skill routes an agent to the component reference, asks for one read-back pass over the changed files before `npx ds-check`, and names the install failures no check reports.**
+
+**What you see.**
+
+- Step 1 sends the agent to `dsiab/components/<Name>.md` and its index before it writes against a component ([[compiled-component-reference]]).
+- Step 3 opens on a read-back pass written as plain replace-this-with-that pairs, and only for drift the check does not catch: a raw colour, field chrome placed beside an input, a hand-built surface the roster ships, and a number the system does not specify. It names no rule id and no rule count, and sends the agent to `npx ds-check --rules` for the list.
+- The install section is a three-item diagnosis list that points at `references/rules.md` for the reasons, so the skill does not hold a second copy of them.
+
+**Why.** A rule the agent has read is not a rule it applies while the feature has its attention, and a pass that checks only what the tool already reports adds nothing. A light, plain register is used instead of a forceful audit. The effect is unmeasured for dsiab until the eval set (PR 2) runs, and at its planned size that eval can show an effect only on the checks no rule covers.
+
+**Not checked.** `ds-check` does not flag a missing `import "dsiab/styles.css"` or an import of `@radix-ui/themes/styles.css` in a dsiab file. Both are lines of source, so a rule could catch them, and that stays an open question.
+
+**Changed from.** Step 3 named five rules by id, the skill had no read-back step and no route to a per-component reference, and the install section restated the reasons in `references/rules.md` as prose.
+
+**Status.** Ruled 2026-11-03. No later ruling amends it.
+
 ## Token additions (2026-06-18)
 
 ### serif-em-and-quote

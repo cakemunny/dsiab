@@ -297,5 +297,14 @@ The links were not fetched again in this change, because the session that wrote 
 
 | Source | What it informed |
 |---|---|
-| State of AI in Design Systems survey | [[compiled-component-reference]]. READ: during planning. Its finding that agent-facing documentation stays true when it is compiled from the code, not written beside it. ADOPTED: generate each file at build from the types and the roster. REJECTED: a hand-written usage page per component, which drifts the first time a prop changes. |
+| State of AI in Design Systems survey | [[compiled-component-reference]], [[skill-read-back-step]]. READ: during planning. Its finding that agent-facing documentation stays true when it is compiled from the code, not written beside it. ADOPTED: generate each file at build from the types and the roster. REJECTED: a hand-written usage page per component, which drifts the first time a prop changes. For [[skill-read-back-step]], ADOPTED: a read-back step and a list of the failures no check reports. REJECTED: an MCP server for now. |
 | Per-component Markdown twins in React Spectrum, Mantine and Cloudscape | [[compiled-component-reference]]. READ: during planning. Each publishes one Markdown file per component beside its rendered docs, linked from an index, and the version-locked ones link the docs of the installed release. ADOPTED: one file per component, an index, and a docs link for the exact installed version. REJECTED: one concatenated file for every component, which makes a reader load all of them to find one. |
+
+## The skill's read-back step ([[skill-read-back-step]])
+
+The survey row above serves this ruling too. The links were not fetched in this change, because the session that wrote it could not reach the survey host, so each row names its source without a URL.
+
+| Source | What it informed |
+|---|---|
+| Astryx's self-check record, as the State of AI in Design Systems survey reports it | [[skill-read-back-step]]. READ: during planning. Rules alone left raw CSS in 11 to 13 percent of complex runs, and a one-paragraph re-read cut that about fourfold, with plain wording beating a forceful audit. ADOPTED: one short read-back block in plain verbs. REJECTED: the "STOP, MANDATORY" audit register. |
+| Carbon's self-check list and Primer's required final step, as the survey reports them | [[skill-read-back-step]]. READ: during planning. ADOPTED: a short list of named failures to look for. REJECTED: Primer's all-caps register, and a list of what the check already reports, which goes stale as rules are added. |
