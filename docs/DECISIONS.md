@@ -997,6 +997,24 @@ This ledger records the rulings that shape the design system and the reason behi
 
 **Status.** Ruled 2026-11-03. No later ruling amends it.
 
+### compiled-component-reference
+
+**Tags.** `DOCUMENTATION`, `INSTALL`. **Ruled.** 2026-11-03.
+
+**Each available component ships a Markdown reference compiled at build time from the types and the roster, and the docs page wins over it.**
+
+**What you see.** The package holds `dist/components/<Name>.md`, one file for each available roster entry, and `dist/components/index.md`, which lists them by category and names what the package leaves out. A reader opens them as `dsiab/components/<Name>.md`. Each file opens on the sentence that the docs page wins, links the docs page for the installed version, and lists the exports, the import line, each export's own props with their JSDoc, the Radix props it inherits, and the Radix props it does not accept. An entry with no export of its own points at the file of the page that documents it.
+
+**What it leaves out.** Measured token values, visual states, keyboard tables and examples. Those are on the docs page, and a list copied here would drift from it. The file invents no JSX.
+
+**Why.** An agent in a product repository has the package and no running docs site. The declarations answer which props exist, but a reader has to follow each name through several files to find what a wrapper removed from the Radix component it remembers, and that removed prop is the one an agent writes by mistake.
+
+**How it stays true.** `scripts/dist-reference.mjs` reads one TypeScript program over the source with the options that emit the shipped declarations, so it needs no prior build. Status, tier and `wraps` come from the same projection as `dsiab/registry.json`. The files are generated on every build and never committed. `dist-reference.node-check.ts` holds coverage, export headings, the docs-win sentence, leaks, ruling citations and size, with a red proof for each, and holds the props of Button, Select, Calendar, Badge and a hook to known values.
+
+**Changed from.** Nothing. The package shipped the declarations and the roster and no per-component reference.
+
+**Status.** Ruled 2026-11-03. No later ruling amends it.
+
 ## Token additions (2026-06-18)
 
 ### serif-em-and-quote

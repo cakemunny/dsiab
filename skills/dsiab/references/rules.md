@@ -22,6 +22,11 @@ Everything below except the documentation site ships inside the package, so your
   `[[focus-ring]]` instead of restating it.
 - **`node_modules/dsiab/dist/registry.json`** (imported as `dsiab/registry.json`) is the roster of
   every component. The next section explains it.
+- **`node_modules/dsiab/dist/components/<Name>.md`** (the subpath `dsiab/components/<Name>.md`) is one
+  file per available component: its exports, the exact props each takes, the Radix props it inherits
+  and the ones it does not accept, and the import line. `dsiab/components/index.md` lists them all.
+  They are compiled from the types at build time, and the docs page wins over them
+  ([[compiled-component-reference]]).
 - **`node_modules/dsiab/CHANGELOG.md`** records what changed in each release.
 - **`node_modules/dsiab/dist/index.d.ts`** stays the authority on exact type signatures.
 - **The documentation site** renders every component live. `npx dsiab docs` opens the pages for the

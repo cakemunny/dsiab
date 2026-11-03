@@ -52,8 +52,8 @@ export type ToastPosition = "top-start" | "top-end" | "bottom-start" | "bottom-e
 export type CollisionBehavior = "overwrite" | "ignore";
 export type DismissFn = () => void;
 
-/** A single, canonical action ("Undo"). `altText` is mandatory (an a11y upgrade
- *  over Astryx's bare endContent) — the assistive-tech description of the action. */
+/** A single, canonical action ("Undo"). `altText` is mandatory — the
+ *  assistive-tech description of the action. */
 export interface ToastAction {
   label: ReactNode;
   altText: string;
@@ -66,7 +66,7 @@ export interface ToastOptions {
   /** Semantic family. `info` (default) · `success` · `warning` · `error`. */
   tone?: ToastTone;
   /** Auto-dismiss after `autoHideDuration`. Defaults to `true` for every tone
-   *  except `error`, which persists (Astryx's rule, kept). */
+   *  except `error`, which persists. */
   autoHide?: boolean;
   /** Auto-hide countdown in ms (default 5000). Paused on hover/focus/window-blur;
    *  on resume the remaining time is clamped to a 1000ms minimum. */

@@ -89,8 +89,7 @@ export interface TreeListProps {
   /** Header above the tree, associated via aria-labelledby. */
   header?: ReactNode;
   /**
-   * CONTROLLED expansion — the exact set of expanded ids (D12; upstream is
-   * uncontrolled-only). When provided, TreeList reads expansion from here and
+   * CONTROLLED expansion — the exact set of expanded ids (D12). When provided, TreeList reads expansion from here and
    * reports every toggle through {@link onExpandedChange}; omit BOTH to run
    * uncontrolled (seeded from `isExpanded` in the data + internal toggles).
    */

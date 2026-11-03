@@ -62,8 +62,8 @@ export interface OutlineProps {
    * this default closes ([[per-component-line-budget]]). Raise it where entries are genuinely long headings and the rail is
    * wide enough to carry them.
    *
-   * Same vocabulary as `Item`'s `labelLines`, and the same implementation
-   * (`src/utils/truncation.ts`), so `1` means the same thing in both.
+   * Same vocabulary as `Item`'s `labelLines`, and the same implementation,
+   * so `1` means the same thing in both.
    * @default 1
    */
   labelLines?: number;
