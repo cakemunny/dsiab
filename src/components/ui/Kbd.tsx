@@ -9,8 +9,8 @@ export interface KbdProps extends Omit<RadixKbdProps, "size"> {
 }
 
 /** Keyboard-input token — the visual for a key the user presses. Its size STEP
- *  follows the global `uiSize` (text lane), the same as `Text`/`Heading`; ported
- *  components pin OUR default (small), never Astryx's md (spec R10). The cap does
+ *  follows the global `uiSize` (text lane), the same as `Text`/`Heading`, so it
+ *  defaults to this system's small, never md. The cap does
  *  NOT then render that step's type: Radix shrinks every Kbd optically to 0.8× it,
  *  and `components.css` clamps the result UP to the system's 12px type floor — so
  *  the cap ramp is 12 / 12 / 12.8px across small / medium / large, deliberately a

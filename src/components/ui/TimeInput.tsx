@@ -97,7 +97,7 @@ export interface TimeInputProps {
   increment?: number;
   /** A trailing clear ✕ (out of the tab order, [[field-family-anatomy]]) appears while a value is set. @default false */
   hasClear?: boolean;
-  /** Focus the input on mount. (Undocumented upstream — we document it.) @default false */
+  /** Focus the input on mount. @default false */
   hasAutoFocus?: boolean;
   /** Greyed hint while empty. @default "Select a time" */
   placeholder?: string;
@@ -114,7 +114,7 @@ export interface TimeInputProps {
    *  NOT flow here — they announce + revert (the two-channel model, [[date-input]]/[[time-input]]). */
   validation?: Validation;
   disabled?: boolean;
-  /** D8 ([[disabled-reason]]): a non-empty reason SOFT-disables (aria-disabled + readOnly + reason tooltip + glyph)
+  /** [[disabled-reason]]: a non-empty reason SOFT-disables (aria-disabled + readOnly + reason tooltip + glyph)
    *  instead of natively disabling, so the reason stays perceivable on hover AND keyboard focus. */
   disabledReason?: string;
   width?: number | string;

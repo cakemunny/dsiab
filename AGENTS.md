@@ -63,6 +63,14 @@ The package ships a projection of this file as `dsiab/registry.json`, built by
 - Every other field is gone, `module`, `controlBox` and `priorArt` among them, so an entry holds
   `name`, `status`, `tier`, `wraps`, `exports` and, when it is not available, `reason`.
 
+The package also ships `dsiab/components/<Name>.md`, one file per available entry plus an index,
+built by `scripts/dist-reference.mjs` from the source types and that projection, and never committed
+([[compiled-component-reference]]). It reads prop and export JSDoc, so that JSDoc is written for a
+package reader: no source-project names and no `src/` paths. `dist-reference.node-check.ts` fails on
+either.
+`npm run build-storybook` publishes the same files on the docs site with an `/llms.txt` index, written
+by `scripts/site-reference.mjs` before the public scan.
+
 ## The bar for anything new
 
 **A new component, token family or pattern needs three real uses before it enters the system** ([[contribution-threshold]]).
@@ -251,11 +259,12 @@ asks it to. Their findings are worth a second look, because some come back overs
 npm install                         # dependencies at the exact lockfile versions
 npm run storybook                   # the docs, on port 6006, the rendered source of truth
 npm run barrel                      # regenerate src/index.ts from registry.json
-npm run build                       # dist/index.js + .d.ts + styles.css + registry.json + DECISIONS.md
+npm run build                       # dist/index.js + .d.ts + styles.css + registry.json + DECISIONS.md + check-facts.json + components/*.md
 npm run pack                        # build, then npm pack, the tarball you install into an app
 npm run test:tokens                 # the source-scanning guard lane
 npm test                            # the story suite, with axe
 npm run test:publish                # pack it, install it elsewhere, prove the tarball works
+npm run eval -- --help              # the eval set: pre-release, needs an agent CLI and model spend
 npm run agents                      # generate the contributor agent files
 npx ds-check [path]                 # check code against the shipped rules
 npx ds-check --rules                # what those rules are, and how to allow a line on purpose
@@ -269,6 +278,11 @@ stylesheet import and a component rendered outside `Provider` each print one con
 second copy of Radix's stylesheet loaded after ours prints nothing, because both sheets write legitimate
 values and nothing can tell which one won. So a build that appears to work proves nothing. It needs the
 npm registry and takes a couple of minutes. `-- --keep` leaves the throwaway app behind.
+
+**`npm run eval` measures, it does not enforce** ([[eval-measures-not-gates]]). It runs an agent of your
+choice on the tasks in `evals/tasks.json` against a tarball from `npm run pack`, and writes pass rates
+to the ignored .evals folder. Run it before a release, and on a change to `rules.md` or `skills/dsiab/`
+compare the HEAD tarball with the branch tarball in one session.
 
 ## What a done-claim requires
 

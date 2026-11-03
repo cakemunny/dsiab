@@ -298,3 +298,38 @@ Read on 2026-11-03 for the start or end role on a range Calendar and the split l
 | [Zag, date-picker connect source](https://github.com/chakra-ui/zag/blob/main/packages/machines/date-picker/src/date-picker.connect.ts) | Calendar. READ: a day is `aria-selected` when selected or in range, and `numOfMonths` renders from one visible range. ADOPTED: in-range days exposed as selected. REJECTED: paging apart, which it does not offer. |
 | [PatternFly, Date picker design guidelines](https://www.patternfly.org/components/date-and-time/date-picker/design-guidelines) | DateRangeInput. READ: "Two date pickers can be used together to specify a date range. The first one functions as a start ('from') date and the second one functions as an end ('to') date." ADOPTED: the split layout as a start calendar and an end calendar. |
 | [Carbon, Date picker usage](https://carbondesignsystem.com/components/date-picker/usage/) | DateRangeInput. READ: range inputs are labelled with a start and an end label, and the calendar shows one month at a time. ADOPTED: a visible "Start date" and "End date" caption on each calendar of the split layout. |
+## Checking consumer code against the token layer ([[ds-check-dsiab-rules]])
+
+| Source | What it informed |
+|---|---|
+| [stylelint, declaration-no-important](https://github.com/stylelint/stylelint/blob/main/lib/rules/declaration-no-important/README.md) | [[ds-check-dsiab-rules]]. READ on 2026-11-03: the rule disallows `!important` in every declaration, with or without spaces before it. ADOPTED: flag every `!important`, spaced or not. REJECTED: a global scope, because a product page that never touched this system may keep its own, so `important-flag` runs only in a file that builds on dsiab. |
+| [csstools, stylelint-value-no-unknown-custom-properties](https://github.com/csstools/stylelint-value-no-unknown-custom-properties) | [[ds-check-dsiab-rules]]. READ on 2026-11-03: the plugin flags a `var(--name)` that nothing it can see defines, and `importFrom` supplies the definitions from CSS, JS or JSON. ADOPTED: check each `var()` against an imported list of the package's own names, shipped as `dist/check-facts.json`. REJECTED: requiring every custom property to resolve, because a consumer's own properties are not ours to judge, so `unknown-token` fails only a `--ds-*` name in a family this system owns and accepts any name the checked tree declares. |
+| Radix Colors, understanding the scale (the step-by-step use cases of a 12-step scale) | [[ds-check-dsiab-rules]]. ADOPTED: the step ranges, backgrounds at 1 and 2, component fills at 3 to 5, borders at 6 to 8, solid fills at 9 and 10 and text at 11 and 12, as the fallback hint for a step no role maps to. REJECTED: the ranges as the primary suggestion, because the semantic token file already declares the exact role for most steps, and inverting those declarations cannot drift from the token layer. |
+
+## A compiled reference for each component ([[compiled-component-reference]])
+
+The links were not fetched again in this change, because the session that wrote it could not reach them, so each row names its source without a URL.
+
+| Source | What it informed |
+|---|---|
+| State of AI in Design Systems survey | [[compiled-component-reference]], [[skill-read-back-step]]. READ: during planning. Its finding that agent-facing documentation stays true when it is compiled from the code, not written beside it. ADOPTED: generate each file at build from the types and the roster. REJECTED: a hand-written usage page per component, which drifts the first time a prop changes. For [[skill-read-back-step]], ADOPTED: a read-back step and a list of the failures no check reports. REJECTED: an MCP server for now. |
+| Per-component Markdown twins in React Spectrum, Mantine and Cloudscape | [[compiled-component-reference]]. READ: during planning. Each publishes one Markdown file per component beside its rendered docs, linked from an index, and the version-locked ones link the docs of the installed release. ADOPTED: one file per component, an index, and a docs link for the exact installed version. REJECTED: one concatenated file for every component, which makes a reader load all of them to find one. |
+
+## The skill's read-back step ([[skill-read-back-step]])
+
+The survey row above serves this ruling too. The links were not fetched in this change, because the session that wrote it could not reach the survey host, so each row names its source without a URL.
+
+| Source | What it informed |
+|---|---|
+| Astryx's self-check record, as the State of AI in Design Systems survey reports it | [[skill-read-back-step]]. READ: during planning. Rules alone left raw CSS in 11 to 13 percent of complex runs, and a one-paragraph re-read cut that about fourfold, with plain wording beating a forceful audit. ADOPTED: one short read-back block in plain verbs. REJECTED: the "STOP, MANDATORY" audit register. |
+| Carbon's self-check list and Primer's required final step, as the survey reports them | [[skill-read-back-step]]. READ: during planning. ADOPTED: a short list of named failures to look for. REJECTED: Primer's all-caps register, and a list of what the check already reports, which goes stale as rules are added. |
+
+## The eval set ([[eval-measures-not-gates]])
+
+The sources come from the survey the planning for this change read. The links were not fetched in this change, so each row names its source without a URL.
+
+| Source | What it informed |
+|---|---|
+| shadcn's committed evals file | [[eval-measures-not-gates]]. READ: during planning. ADOPTED: a committed list of prompt and expectation pairs. REJECTED: a model judging the output, because a grader that is not deterministic cannot be proven with a fixture. |
+| Atlassian's head-to-head agent evals, and the skill-creator eval format's benchmark variance | [[eval-measures-not-gates]]. READ: during planning. ADOPTED: repeated runs reported as a rate with its spread, and two arms compared in one session. REJECTED: a single run read as pass or fail. |
+| Astryx's nightly benchmark, which publishes its losses | [[eval-measures-not-gates]]. READ: during planning. ADOPTED: reporting the failures beside the rate. REJECTED: a nightly run and a committed baseline, because of model spend and because a stored baseline mixes the change with a different model and dependency set. |

@@ -51,7 +51,7 @@ type Size = "1" | "2" | "3";
 type Tone = "error" | "warning" | "success" | "info";
 type Validation = { tone: Tone; message: ReactNode };
 
-/** The change metadata handed to `onValueChange`. Upstream's phantom `'reorder'` is dropped (never emitted). */
+/** The change metadata handed to `onValueChange`. There is no `'reorder'` reason, because none is ever emitted. */
 export interface TokenizerChange<TAux = unknown> {
   item: TypeaheadOption<TAux>;
   type: "add" | "create" | "remove";
@@ -88,7 +88,7 @@ export interface TokenizerProps<TAux = unknown> {
   /** A STANDING validation state (a real problem the user must resolve). */
   validation?: Validation;
   disabled?: boolean;
-  /** D8 ([[disabled-reason]]): a non-empty reason SOFT-disables (aria-disabled + readOnly + reason tooltip + glyph)
+  /** [[disabled-reason]]: a non-empty reason SOFT-disables (aria-disabled + readOnly + reason tooltip + glyph)
    *  instead of natively disabling, so the reason stays perceivable on hover AND keyboard focus. */
   disabledReason?: string;
   /** Greyed hint while EMPTY (no tokens). Names the mechanism — "Search to add…", never "press Enter". */

@@ -67,9 +67,9 @@ interface ToolbarBaseProps extends Omit<RadixRootProps, "orientation" | "childre
   /** Roving axis + visual flow. `horizontal` → Arrow Left/Right; `vertical` → Arrow Up/Down. */
   orientation?: Orientation;
   /** Control tier for every composed control (Button/IconButton/ToggleButtonGroup). Unset → the global
-   *  `uiSize` control lane (default `small` → `1`). Never Astryx's `md`. */
+   *  `uiSize` control lane (default `small` → `1`). Never `md`. */
   size?: ToolbarSize;
-  /** Insert a styled separator between the groups you pass into each slot (Astryx's `dividers`). */
+  /** Insert a styled separator between the groups you pass into each slot. */
   dividers?: boolean;
 }
 

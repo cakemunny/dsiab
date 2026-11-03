@@ -27,8 +27,8 @@ They hold different files, and most of this page assumes the second.
   ds-check`. You do **not** have `src/`, the Storybook, or any `npm run …` script listed below — npm
   answers *Missing script*. You **do** have a roster: `dsiab/registry.json`, a trimmed
   projection carrying each component's `name`, `status`, `tier`, `exports[]` and `wraps`. Step 1
-  below works here, with the consumer form of the lookup. `dist/index.d.ts` stays the authority on
-  exact type signatures.
+  below works here, with the consumer form of the lookup. The component reference it routes you to is
+  compiled from the same types as `dist/index.d.ts`, which stays the authority on exact signatures.
 - **The system repo itself** — a fork, or a clone of this repository. Everything here runs:
   `registry.json` at the root, Storybook on :6006, `npm run barrel`, the guards, the story suite.
 
@@ -47,6 +47,9 @@ node -e "console.log(require('./registry.json').filter(e=>/dialog/i.test(e.name)
 
 # does this exist? — in a PRODUCT REPO that installed the package
 node -e "console.log(require('dsiab/registry.json').components.filter(e=>/dialog/i.test(e.name)).map(e=>e.name+' '+e.status).join('\n'))"
+
+# what does it take? — in a PRODUCT REPO
+node -p "require('fs').readFileSync(require.resolve('dsiab/components/Select.md'),'utf8')"
 ```
 
 Three outcomes, and each has one correct response. The status value differs by where you are: the
@@ -62,10 +65,12 @@ The same rule governs *values*. If the system does not specify a number for your
 size, a duration, a spacing step — say so and stop. Never invent a number, and never split the
 difference between two you found elsewhere.
 
-Then read the component's docs page. It is the rendered source of truth, and its Usage story closes
-on a live token spec that tells you what the component actually paints. In a product repo, `npx dsiab
-docs` opens the pages for the version you installed. In the system repo, run `npm run storybook`,
-which serves on `:6006` unless that port is taken.
+Then read that component's reference before you write against it: `dsiab/components/<Name>.md` in a
+product repo, all of them listed in `dsiab/components/index.md`. Take its props rather than the Radix
+Themes props you remember, because it names the Radix props dsiab does not accept. The docs page wins
+where the two disagree, and `npx dsiab docs` opens the pages for the version you installed. In the
+system repo, read the component's `.tsx` and its stories, and run `npm run storybook`, which serves on
+`:6006` unless that port is taken.
 
 ## Step 2 — the rules that will fail your code
 
@@ -101,7 +106,17 @@ popovers and the rules for building onto the `Field` shell from inside the syste
 repository's own `AGENTS.md`, for contributors only. `DECISIONS.md` says why each exists. Cite the
 ruling name rather than re-argue it.
 
-## Step 3 — run the check, then claim
+## Step 3 — read it back, run the check, then claim
+
+Before you run the check, read back every file you changed, once, for the drift the check cannot
+see, and replace it:
+
+- a hex, `rgb()` or named colour → the `--ds-*` role, or `Provider`'s `accentColor` for the brand
+- a label, help text or error beside an input → its `label`, `description` and `validation` props
+- a hand-built alert, menu, popover or date input → the roster component that does it
+- a number the system does not specify → surface the gap
+
+`npx ds-check --rules` lists what the check catches, so leave that to it.
 
 **`npx ds-check` is mandatory before any done-claim. Run it, read the output, and quote the exit
 status.** Not "available", not "you may want to" — a claim that code works, is fixed, is complete, or
@@ -110,11 +125,12 @@ is ready, made without a `ds-check` run in the same session, is invalid and must
 ```bash
 npx ds-check                 # the current directory
 npx ds-check src/features    # a subtree, or a single file
-npx ds-check --rules         # the five rules in full, and the allowance grammar
+npx ds-check --rules         # every rule in full, and the allowance grammar
 ```
 
-It enforces five rules that are defects in **any** codebase, not this system's house style:
-`transition-all`, `will-change-misuse`, `focus-outline-removed`, `tabindex-positive`, `aschild-nonint`. It reads
+It checks the dsiab rules an agent breaks most: an `--ds-*` name the package does not define, a bare
+Radix scale step or `!important` in a file that uses dsiab, and an `@radix-ui/themes` import of a
+component dsiab ships. Beside them it runs rules that are defects in **any** codebase. It reads
 `.css .scss .less .pcss .postcss .ts .tsx .js .jsx .mjs .cjs .mts .cts .html .htm .vue .svelte .astro`
 and **prints its own reach on every run** — a pass is a statement about the files it lists and nothing
 more, so read that section rather than assuming coverage.
@@ -166,20 +182,23 @@ one of them that exists.
 ```bash
 npm install                  # dependencies, exact lockfile versions
 npm run storybook            # the docs on :6006 — the rendered source of truth
-npm run build                # dist/index.js + .d.ts + styles.css + registry.json + DECISIONS.md
+npm run build                # dist/index.js + .d.ts + styles.css + registry.json + DECISIONS.md + components/*.md
 npm run pack                 # build, then npm pack → the tarball you install into an app
 npm run barrel               # regenerate the public surface from registry.json
 npx ds-check                 # required before any done-claim
 ```
 
-## Consuming the package — two imports and one root
+## Consuming the package — three failures no check reports
 
-The stylesheet import is not optional: the library build extracts CSS out of the JS, so importing a
-component alone paints nothing. And `Provider` is the theme root — the element every `--ds-*` role and
-every Radix scale resolves against, and where the accent, the neutral, the size tier, the contrast model
-and the button order are seeded. Mount it **once, above everything**. A component rendered outside it
-gets unresolved custom properties. In development, each of these two failures prints one console
-warning. A production build prints nothing, and the page paints wrong.
+When a screen builds and looks wrong, check these first. `references/rules.md` says why each fails,
+and `ds-check` does not check for them:
+
+1. no `import "dsiab/styles.css"` at the entry point
+2. a component rendered outside `Provider`, which is mounted once, above everything
+3. `@radix-ui/themes/styles.css` imported as well
+
+The first two print one console warning in development ([[missing-provider-warning]]). A production
+build prints nothing for any of the three.
 
 ```tsx
 import "dsiab/styles.css";        // once, at your app's entry point
@@ -193,7 +212,3 @@ export function App() {
   );
 }
 ```
-
-Do **not** also import `@radix-ui/themes/styles.css`. This system wins the cascade by source order and
-bans `!important`, so a second copy of Radix's stylesheet loaded after ours silently costs every
-override.

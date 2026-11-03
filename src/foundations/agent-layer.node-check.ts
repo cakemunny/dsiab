@@ -49,6 +49,8 @@ const SHIPPED = [
   "docs/AGENT-SETUP.md",
   "docs/REFERENCES.md",
   "src/foundations/consumerRules.mjs",
+  "src/foundations/dsiabRules.mjs",
+  "src/foundations/checkFacts.mjs",
   "skills/dsiab",
   "skills/design-system-steward",
   "bin/dsiab.mjs",

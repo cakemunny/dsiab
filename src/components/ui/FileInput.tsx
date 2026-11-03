@@ -81,7 +81,7 @@ export interface FileInputProps {
   /** Field label — sets the accessible name (via htmlFor → the native input's id). Required. */
   label: ReactNode;
   /** Controlled selection — a single `File`, a `File[]` (when `isMultiple`), or `undefined` when empty.
-   *  `null`-free (D2): `undefined` is the only empty. */
+   *  Never `null`: `undefined` is the only empty value. */
   value?: File | File[];
   /** Required. Fires with the committed file(s), or `undefined` when cleared / nothing valid was picked. */
   onValueChange: (value: File | File[] | undefined) => void;
@@ -108,7 +108,7 @@ export interface FileInputProps {
    *  resolve. Rejections + partial acceptance do NOT flow here; they self-announce on surface 2. */
   validation?: Validation;
   disabled?: boolean;
-  /** D8 ([[disabled-reason]]): a non-empty reason SOFT-disables (aria-disabled + reason tooltip + glyph) instead of
+  /** [[disabled-reason]]: a non-empty reason SOFT-disables (aria-disabled + reason tooltip + glyph) instead of
    *  natively disabling, so the reason stays perceivable on hover AND keyboard focus. */
   disabledReason?: string;
   /** Marks the field required — sets `required`/`aria-required` on the input and a subtle `*` after the

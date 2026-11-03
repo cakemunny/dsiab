@@ -172,6 +172,9 @@ export function buildDistRegistry(registry) {
   };
 }
 
+/** The exact bytes of `dist/registry.json`, which the docs site publishes too. */
+export const distRegistryText = (registry) => `${JSON.stringify(buildDistRegistry(registry), null, 2)}\n`;
+
 /** True when this module is the process entry point rather than an import. */
 function isEntryPoint() {
   return Boolean(process.argv[1]) && import.meta.url === pathToFileURL(process.argv[1]).href;
@@ -181,7 +184,7 @@ if (isEntryPoint()) {
   const registry = JSON.parse(readFileSync(SOURCE_PATH, "utf8"));
   const projection = buildDistRegistry(registry);
   mkdirSync(dirname(OUT_PATH), { recursive: true });
-  writeFileSync(OUT_PATH, `${JSON.stringify(projection, null, 2)}\n`);
+  writeFileSync(OUT_PATH, distRegistryText(registry));
   const wrapped = projection.components.filter((c) => c.wraps !== null).length;
   console.log(
     `dist-registry: wrote ${projection.counts.total} components ` +

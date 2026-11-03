@@ -222,7 +222,7 @@ export interface TopNavItemProps {
   onClick?: (event: MouseEvent) => void;
   /** Framework Link component for the href body (overrides the ambient LinkProvider). */
   linkComponent?: LinkComponent;
-  /** The current destination → paints selected and emits `aria-current="page"` on the link (D2). */
+  /** The current destination → paints selected and emits `aria-current="page"` on the link ([[top-nav]]). */
   isSelected?: boolean;
   /** Disabled item. */
   isDisabled?: boolean;
@@ -230,7 +230,7 @@ export interface TopNavItemProps {
 }
 
 /** A top-level nav link — composes the Item primitive (never a re-anatomized row). The current
- *  destination carries `aria-current="page"` (D2 — nav + links, not role="menu"). */
+ *  destination carries `aria-current="page"` (a `nav` of links, never `role="menu"`, [[top-nav]]). */
 export function TopNavItem({
   label,
   icon,
@@ -442,7 +442,7 @@ export interface TopNavMenuProps {
 }
 
 /** A trigger + a popover flyout (the MultiSelect recipe) of nav links. Hover-intent opens it; the panel
- *  is a labelled `nav` region of LINKS (D2), arrow-roved via useListFocus. */
+ *  is a labelled `nav` region of LINKS ([[top-nav]]), arrow-roved via useListFocus. */
 export function TopNavMenu({ label, icon, isDisabled = false, children }: TopNavMenuProps) {
   const f = useFlyoutController(".rt-ds-item-body");
 
@@ -505,9 +505,9 @@ export interface TopNavMegaMenuProps {
 
 /** A full-width mega panel anchored to the nav bar (not the trigger): a grid of items + an optional
  *  presentational FeaturedCard. Same popover recipe + hover-intent + roving + nav semantics; the trigger
- *  gains aria-controls (upstream omits). Full-width is a fixed Popover.Anchor at the bar's measured rect,
+ *  gains aria-controls. Full-width is a fixed Popover.Anchor at the bar's measured rect,
  *  so `--radix-popover-trigger-width` equals the bar width (CSS reads it) — JS measurement, since CSS
- *  anchor-positioning is a named deferral. */
+ *  anchor positioning is not used yet. */
 export function TopNavMegaMenu({
   label,
   icon,
@@ -646,8 +646,8 @@ export interface TopNavMegaMenuFeaturedCardProps {
   [key: `data-${string}`]: unknown;
 }
 
-/** The presentational featured card in a mega panel. The hard-appended "→" glyph Astryx used is replaced
- *  with a proper Phosphor `ArrowRight` (D11). Optionally a routed link (a promo CTA); else static. */
+/** The presentational featured card in a mega panel. Its arrow is a Phosphor `ArrowRight`, not a
+ *  typed "→" glyph. Optionally a routed link (a promo CTA); else static. */
 export function TopNavMegaMenuFeaturedCard({
   title,
   description,

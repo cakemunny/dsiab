@@ -33,7 +33,7 @@ export interface CollapsibleProps
   > {
   /** The always-visible header content. A rotating chevron indicator is appended automatically. */
   trigger: ReactNode;
-  /** The collapsible body, revealed on open. Hidden by default (D4 — default closed). */
+  /** The collapsible body, revealed on open. Hidden by default ([[collapsible-and-accordion]]). */
   children?: ReactNode;
   /** Refused. The disclosure is a trigger plus a content region, two children of the Radix root, and
    *  `children` is already spoken for as the body, so there is no element to hand the root to.
