@@ -212,6 +212,25 @@ This ledger records the rulings that shape the design system and the reason behi
 
 ## Tooling & verification
 
+### jsx-text-masking
+
+**Tags.** `INSTALL`. **Ruled.** 2026-11-03.
+
+**The consumer rule checker reads JSX text as text, so words on a page never hide a finding below them.**
+
+**What changed.** In a file that can hold JSX, the scanner in `src/foundations/consumerRules.mjs` tracks whether it sits inside a tag, inside page text, or inside code between curly braces. It skips page text, so a comment opener, a web address or an apostrophe written there no longer acts as syntax. A comment inside JSX curly braces is still a comment, so an allowance written there still counts.
+
+**Left alone.**
+
+- Text inside a template literal is still read as code, because the motion rules check style values written there.
+- A plain TypeScript file is not tracked for JSX.
+- A TypeScript type that looks like a tag is recognised by its head and skipped.
+- A file whose JSX never closes is read as it was before.
+
+**Enforced by.** `src/foundations/jsx-text-masking.node-check.ts`, which failed in five cases before the fix.
+
+**Status.** Ruled 2026-11-03. No later ruling amends it.
+
 ### package-manager-and-storybook
 
 **Tags.** `CONTRIBUTING`. **Ruled.** No date recorded.

@@ -284,17 +284,104 @@ const REGEX_MAY_START_AFTER = new Set([
  *  that opens on `>` (the tail of `/>`) or reads as `name>` is markup, not a pattern. */
 const JSX_TAG_BODY_RE = /^\s*>|^[A-Za-z][\w.:-]*\s*\/?>/;
 
-function scanJs(src, base = 0) {
+/** JSX TEXT IS TEXT. A page's words sit in JSX text, and the scanner used to read them as code: a
+ *  `/*` in `<Code>/* x</Code>` opened a comment that ran to the end of the file, a `//` in a written
+ *  web address ate the rest of its line, and the apostrophe in `Don't` opened a string. Every finding
+ *  they covered vanished while the run stayed clean. Measured on 2026-11-03, and held by
+ *  `jsx-text-masking.node-check.ts`.
+ *
+ *  So in a file that can hold JSX the scanner keeps a stack of frames: `code` (with its own brace
+ *  depth), `tag` (an opening tag's attributes) and `children` (text between tags). Text is skipped,
+ *  and every `{…}` inside a tag or between tags is scanned as code again, so a JSX comment is still a
+ *  comment and an allowance written in one still counts.
+ *
+ *  An element can start only where an expression can: after the punctuation below or after one of
+ *  these keywords. A TypeScript generic that looks like a tag (`<T,>(x) =>`, `<T extends X>`,
+ *  `<T>(a: T) => T`) is refused by its head. A file whose JSX never closes is scanned again without
+ *  any of this, so a parse this code cannot follow costs no more than it did before. */
+const JSX_EXT = [".tsx", ".jsx", ".js", ".mjs", ".cjs"];
+const JSX_MAY_START_AFTER = new Set([undefined, "(", ",", "=", ":", "?", "[", "{", "}", ";", "&", "|", "!", ">"]);
+const JSX_MAY_START_KEYWORD = /(?:^|[^\w$])(?:return|yield|await|default|case|else|do)\s*$/;
+const TS_GENERIC_HEAD_RE = /^<\s*[A-Za-z_$][\w$]*\s*(?:,|extends\b|>\s*\()/;
+
+function jsxMayStart(src, i, prev) {
+  const next = src[i + 1];
+  if (next !== ">" && !/[A-Za-z]/.test(next ?? "")) return false;
+  if (!JSX_MAY_START_AFTER.has(prev) && !JSX_MAY_START_KEYWORD.test(src.slice(Math.max(0, i - 12), i))) return false;
+  return !TS_GENERIC_HEAD_RE.test(src.slice(i, i + 64));
+}
+
+/** One step inside a `tag` or `children` frame. Returns the next index. */
+function stepJsx(src, i, frames, found, base) {
+  const c = src[i];
+  const d = src[i + 1];
+  if (c === "{") { frames.push({ t: "code", depth: 0 }); return i + 1; }
+  if (frames[frames.length - 1].t === "tag") {
+    if (c === "/" && d === "*") {
+      const end = src.indexOf("*/", i + 2);
+      const e = end < 0 ? src.length : end + 2;
+      found.comments.push([base + i, base + e]);
+      return e;
+    }
+    if (c === "/" && d === "/") {
+      const end = src.indexOf("\n", i);
+      const e = end < 0 ? src.length : end;
+      found.comments.push([base + i, base + e]);
+      return e;
+    }
+    if (c === '"' || c === "'") {
+      const end = src.indexOf(c, i + 1);
+      const e = end < 0 ? src.length : end;
+      found.strings.push([base + i + 1, base + e]);
+      return e + 1;
+    }
+    if (c === "/" && d === ">") { frames.pop(); return i + 2; }
+    if (c === ">") { frames[frames.length - 1] = { t: "children" }; return i + 1; }
+    return i + 1;
+  }
+  if (c === "<" && d === "/") {
+    const end = src.indexOf(">", i);
+    frames.pop();
+    return end < 0 ? src.length : end + 1;
+  }
+  if (c === "<" && (d === ">" || /[A-Za-z]/.test(d ?? ""))) { frames.push({ t: "tag" }); return i + 1; }
+  return i + 1;
+}
+
+function scanJs(src, base = 0, jsx = false) {
   const comments = [];
   const templates = [];
   const strings = [];
+  const found = { comments, strings };
+  /** The JSX frame stack. The bottom frame is the file's own code and never pops. */
+  const frames = [{ t: "code", depth: 0 }];
   const n = src.length;
   let i = 0;
   /** Last significant character seen in CODE, for the regex-vs-division question below. */
   let prev;
   while (i < n) {
+    const top = frames[frames.length - 1];
+    if (top.t !== "code") {
+      i = stepJsx(src, i, frames, found, base);
+      // The tree closed. What follows an element is an operator or punctuation, so a `/` there is
+      // division, and `)` says so.
+      if (frames.length === 1) prev = ")";
+      continue;
+    }
     const c = src[i];
     const d = src[i + 1];
+    if (jsx && c === "<" && jsxMayStart(src, i, prev)) {
+      frames.push({ t: "tag" });
+      i++;
+      continue;
+    }
+    if (c === "}" && top.depth === 0 && frames.length > 1) {
+      frames.pop();
+      i++;
+      continue;
+    }
+    if (c === "{") top.depth++;
+    else if (c === "}" && top.depth > 0) top.depth--;
     // A regex literal, consumed whole. WITHOUT this, the quote inside `/["'`]/` opens a phantom
     // string and every comment, string and template span after it is wrong — measured: this file's
     // own JSDoc stopped being recognised as a comment, and was reported as a violation.
@@ -395,6 +482,7 @@ function scanJs(src, base = 0) {
     if (!/\s/.test(c)) prev = c;
     i++;
   }
+  if (frames.length > 1) return scanJs(src, base, false);
   return { comments, templates, strings };
 }
 
@@ -425,7 +513,7 @@ function regionsFor(ext, src) {
     return { css: blankSpans(src, comments), code: blankLine(src), comments, strings: [] };
   }
   if (SCRIPT_EXT.includes(ext)) {
-    const { comments, templates, strings } = scanJs(src);
+    const { comments, templates, strings } = scanJs(src, 0, JSX_EXT.includes(ext));
     const styleTemplates = templates.filter((t) => t[2]);
     const cssRaw = keepOnly(src, styleTemplates);
     // A CSS comment inside a styled-components template is a real comment, both for matching and
