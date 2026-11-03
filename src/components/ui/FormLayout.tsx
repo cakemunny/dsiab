@@ -55,10 +55,10 @@ export interface FormLayoutProps extends Omit<ComponentPropsWithoutRef<typeof Gr
  *
  * Its ONLY jobs: (1) publish the `direction` context so descendant Fields lay their labels out
  * consistently, and (2) give the fields consistent vertical rhythm as a **non-wrapping grid** (one
- * implicit column → each field on its own row; NOT a wrapping flex row — D9). It deliberately renders a
+ * implicit column → each field on its own row; NOT a wrapping flex row, [[form-layout]]). It deliberately renders a
  * plain `<div>` (via Radix `Grid`), never a `<form>`: the consumer owns the form element, so FormLayout
  * composes inside any form / route / dialog. All of Radix `Grid`'s props (className, style, data-*,
- * columns, …) forward honestly (D12 — nothing accepted-and-discarded).
+ * columns, …) forward honestly: no prop is accepted and then discarded.
  */
 export function FormLayout({ direction = "vertical", gap = "4", children, ...rest }: FormLayoutProps) {
   const ctx = useMemo<FormLayoutContextValue>(() => ({ direction }), [direction]);

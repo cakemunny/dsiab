@@ -109,7 +109,7 @@ export interface PowerSearchProps {
   /** Prevent adding, editing, or removing filters (chips stay visible, inert). @default false */
   readOnly?: boolean;
   disabled?: boolean;
-  /** D8 ([[disabled-reason]]): a non-empty reason SOFT-disables (aria-disabled + readOnly + reason tooltip + glyph) —
+  /** [[disabled-reason]]: a non-empty reason SOFT-disables (aria-disabled + readOnly + reason tooltip + glyph) —
    *  use this instead of wrapping a disabled PowerSearch in a Tooltip. */
   disabledReason?: string;
   /** Leading identification glyph at the START of the row. `undefined` → a search glyph; `null` removes it. */

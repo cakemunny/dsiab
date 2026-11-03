@@ -107,7 +107,7 @@ export interface DateRangeInputProps {
   /** A STANDING validation state (a real problem the user must resolve). */
   validation?: Validation;
   disabled?: boolean;
-  /** D8 ([[disabled-reason]]): a non-empty reason SOFT-disables (aria-disabled + reason tooltip + glyph) instead of
+  /** [[disabled-reason]]: a non-empty reason SOFT-disables (aria-disabled + reason tooltip + glyph) instead of
    *  natively disabling, so the reason stays perceivable on hover AND keyboard focus. */
   disabledReason?: string;
   width?: number | string;

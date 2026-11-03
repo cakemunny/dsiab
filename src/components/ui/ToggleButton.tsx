@@ -27,7 +27,7 @@ type Reserved = "priority" | "children" | "aria-label" | "asChild";
 export interface ToggleButtonProps extends Omit<ButtonProps, Reserved> {
   /** Controlled pressed state. Pair with `onPressedChange`. */
   pressed?: boolean;
-  /** Initial pressed state when uncontrolled (D1). */
+  /** Initial pressed state when uncontrolled. */
   defaultPressed?: boolean;
   /** Fires when the pressed state changes — in both controlled and uncontrolled use. */
   onPressedChange?: (pressed: boolean) => void;

@@ -148,7 +148,7 @@ export interface TypeaheadProps<TAux = unknown> {
   onInputKeyDown?: (e: KeyboardEvent<HTMLInputElement>) => void;
   /** Collapse the input to a focusable sliver (embedded, at a host's cap) — it stays in the tab order. */
   inputCollapsed?: boolean;
-  /** Extra attributes merged onto the `<input>` — embedded hosts inject D8 soft-disable
+  /** Extra attributes merged onto the `<input>` — embedded hosts inject the [[disabled-reason]] soft-disable
    *  (`readOnly` + `aria-disabled`) and a merged `aria-describedby`. */
   controlProps?: EmbeddedControlProps;
 }

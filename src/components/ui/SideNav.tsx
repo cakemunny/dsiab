@@ -565,7 +565,7 @@ export interface SideNavProps {
   /** Uncontrolled initial collapse. @default false */
   defaultCollapsed?: boolean;
   onCollapsedChange?: (collapsed: boolean) => void;
-  /** Enable drag-to-resize on the rail (reads the D5 useResizable engine). @default false */
+  /** Enable drag-to-resize on the rail (the `useResizable` engine of [[resize-handle]]). @default false */
   resizable?: boolean;
   /** Initial expanded width in px (resizable mode). @default 240 */
   defaultWidth?: number;

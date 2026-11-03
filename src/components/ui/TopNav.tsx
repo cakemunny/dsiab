@@ -222,7 +222,7 @@ export interface TopNavItemProps {
   onClick?: (event: MouseEvent) => void;
   /** Framework Link component for the href body (overrides the ambient LinkProvider). */
   linkComponent?: LinkComponent;
-  /** The current destination → paints selected and emits `aria-current="page"` on the link (D2). */
+  /** The current destination → paints selected and emits `aria-current="page"` on the link ([[top-nav]]). */
   isSelected?: boolean;
   /** Disabled item. */
   isDisabled?: boolean;
@@ -230,7 +230,7 @@ export interface TopNavItemProps {
 }
 
 /** A top-level nav link — composes the Item primitive (never a re-anatomized row). The current
- *  destination carries `aria-current="page"` (D2 — nav + links, not role="menu"). */
+ *  destination carries `aria-current="page"` (a `nav` of links, never `role="menu"`, [[top-nav]]). */
 export function TopNavItem({
   label,
   icon,
@@ -442,7 +442,7 @@ export interface TopNavMenuProps {
 }
 
 /** A trigger + a popover flyout (the MultiSelect recipe) of nav links. Hover-intent opens it; the panel
- *  is a labelled `nav` region of LINKS (D2), arrow-roved via useListFocus. */
+ *  is a labelled `nav` region of LINKS ([[top-nav]]), arrow-roved via useListFocus. */
 export function TopNavMenu({ label, icon, isDisabled = false, children }: TopNavMenuProps) {
   const f = useFlyoutController(".rt-ds-item-body");
 
@@ -647,7 +647,7 @@ export interface TopNavMegaMenuFeaturedCardProps {
 }
 
 /** The presentational featured card in a mega panel. Its arrow is a Phosphor `ArrowRight`, not a
- *  typed "→" glyph (D11). Optionally a routed link (a promo CTA); else static. */
+ *  typed "→" glyph. Optionally a routed link (a promo CTA); else static. */
 export function TopNavMegaMenuFeaturedCard({
   title,
   description,

@@ -76,7 +76,7 @@ export interface AppShellProps extends Omit<ComponentPropsWithoutRef<"div">, "ch
   /** The top navigation bar. Re-renders in `"default"` (desktop) / `"mobile-bar"` (mobile) modes. */
   topNav?: ReactNode;
   /** The side navigation rail. Shown in the desktop panel; on mobile it re-renders in the drawer
-   *  (`"drawer"` mode) while the desktop rail stays mounted-but-hidden (keep-mounted, D7). */
+   *  (`"drawer"` mode) while the desktop rail stays mounted but hidden, so its state survives the swap ([[app-shell]]). */
   sideNav?: ReactNode;
   /** An optional footer bar (status, meta, secondary actions). */
   footer?: ReactNode;
