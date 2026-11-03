@@ -282,3 +282,12 @@ These sources shaped the ledger itself rather than a component, so each row name
 | Source | What it informed |
 |---|---|
 | [CSS Custom Properties for Cascading Variables Level 1, Guaranteed-invalid values](https://drafts.csswg.org/css-variables-1/#guaranteed-invalid) | [[missing-provider-warning]]. READ: a custom property with no declaration holds the guaranteed-invalid value, which serializes as the empty string and makes any property that references it invalid at computed-value time. ADOPTED: an empty `--ds-fill-accent` on `.radix-themes` as the sign of an absent stylesheet, and the same rule as the reason every `calc()` fails without the attributes `Provider` writes. |
+
+## A compiled reference for each component ([[compiled-component-reference]])
+
+The links were not fetched again in this change, because the session that wrote it could not reach them, so each row names its source without a URL.
+
+| Source | What it informed |
+|---|---|
+| State of AI in Design Systems survey | [[compiled-component-reference]]. READ: during planning. Its finding that agent-facing documentation stays true when it is compiled from the code, not written beside it. ADOPTED: generate each file at build from the types and the roster. REJECTED: a hand-written usage page per component, which drifts the first time a prop changes. |
+| Per-component Markdown twins in React Spectrum, Mantine and Cloudscape | [[compiled-component-reference]]. READ: during planning. Each publishes one Markdown file per component beside its rendered docs, linked from an index, and the version-locked ones link the docs of the installed release. ADOPTED: one file per component, an index, and a docs link for the exact installed version. REJECTED: one concatenated file for every component, which makes a reader load all of them to find one. |

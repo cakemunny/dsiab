@@ -22,6 +22,7 @@
     "./styles.css": "./dist/styles.css",
     "./registry.json": "./dist/registry.json",
     "./DECISIONS.md": "./dist/DECISIONS.md",
+    "./components/*.md": "./dist/components/*.md",
     "./package.json": "./package.json"
   },
   "main": "./dist/index.js",
@@ -71,7 +72,7 @@
   },
   "scripts": {
     "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
-    "build": "npm run clean && vite build --config vite.config.lib.ts && tsc -p tsconfig.build.json && node scripts/dist-types.mjs && node scripts/dist-registry.mjs && node scripts/dist-decisions.mjs",
+    "build": "npm run clean && vite build --config vite.config.lib.ts && tsc -p tsconfig.build.json && node scripts/dist-types.mjs && node scripts/dist-registry.mjs && node scripts/dist-decisions.mjs && node scripts/dist-reference.mjs",
     "postbuild": "node scripts/scan-public-build.mjs dist",
     "dev": "vite build --config vite.config.lib.ts --watch",
     "dev:types": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
