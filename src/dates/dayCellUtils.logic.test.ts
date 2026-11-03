@@ -13,6 +13,7 @@ import {
   isEndpoint,
   isRangeHighlighted,
   isPreviewHighlighted,
+  computeRoleHoverPaint,
   type DayCellStateInput,
 } from './dayCellUtils';
 import type {ISODateString} from './dateTypes';
@@ -647,5 +648,58 @@ describe('isEndpoint', () => {
       }),
     );
     expect(isEndpoint(state)).toBe(false);
+  });
+});
+
+describe('computeRoleHoverPaint', () => {
+  const dateOf = (iso: ISODateString) => plainDateFromISO(iso);
+  const committed = {start: dateOf('2024-11-10'), end: dateOf('2024-12-09')};
+  // Hovering Nov 20 as the start role: the click would make Nov 20 – Dec 9.
+  const shrink = {start: dateOf('2024-11-20'), end: dateOf('2024-12-09')};
+  // Hovering Nov 2 as the start role: the click would make Nov 2 – Dec 9.
+  const extend = {start: dateOf('2024-11-02'), end: dateOf('2024-12-09')};
+
+  it('a committed day the result keeps is the committed band, and the result endpoint is its chip', () => {
+    const start = computeRoleHoverPaint({date: dateOf('2024-11-20'), isOutside: false, bandsOutside: false, result: shrink, committed});
+    expect(start).toEqual({band: 'start', preview: null, spill: false});
+    const end = computeRoleHoverPaint({date: dateOf('2024-12-09'), isOutside: false, bandsOutside: false, result: shrink, committed});
+    expect(end).toEqual({band: 'end', preview: null, spill: false});
+  });
+
+  it('a committed day the result drops paints nothing', () => {
+    const dropped = computeRoleHoverPaint({date: dateOf('2024-11-15'), isOutside: false, bandsOutside: false, result: shrink, committed});
+    expect(dropped).toEqual({band: null, preview: null, spill: false});
+  });
+
+  it('a committed day the result keeps but is no endpoint is a middle band day', () => {
+    const kept = computeRoleHoverPaint({date: dateOf('2024-11-10'), isOutside: false, bandsOutside: false, result: extend, committed});
+    expect(kept).toEqual({band: 'middle', preview: null, spill: false});
+  });
+
+  it('a day the result adds takes the preview band, and its endpoint the preview chip', () => {
+    const added = computeRoleHoverPaint({date: dateOf('2024-11-05'), isOutside: false, bandsOutside: false, result: extend, committed});
+    expect(added).toEqual({band: null, preview: 'middle', spill: false});
+    const addedStart = computeRoleHoverPaint({date: dateOf('2024-11-02'), isOutside: false, bandsOutside: false, result: extend, committed});
+    expect(addedStart).toEqual({band: null, preview: 'start', spill: false});
+  });
+
+  it('with no committed range, the whole result is preview', () => {
+    const none = computeRoleHoverPaint({date: dateOf('2024-11-20'), isOutside: false, bandsOutside: false, result: shrink, committed: null});
+    expect(none).toEqual({band: null, preview: 'start', spill: false});
+  });
+
+  it('an outside day follows the result and bands only in a pane that bands it', () => {
+    const covered = computeRoleHoverPaint({date: dateOf('2024-12-01'), isOutside: true, bandsOutside: true, result: extend, committed});
+    expect(covered).toEqual({band: null, preview: null, spill: true});
+    const unbanded = computeRoleHoverPaint({date: dateOf('2024-12-01'), isOutside: true, bandsOutside: false, result: extend, committed});
+    expect(unbanded.spill).toBe(false);
+    const dropped = computeRoleHoverPaint({
+      date: dateOf('2024-12-01'),
+      isOutside: true,
+      bandsOutside: true,
+      result: {start: dateOf('2024-11-20'), end: dateOf('2024-11-30')},
+      committed,
+    });
+    expect(dropped.spill).toBe(false);
   });
 });

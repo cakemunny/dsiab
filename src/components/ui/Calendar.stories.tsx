@@ -534,7 +534,7 @@ export const Usage: Story = {
               />
               <MeasuredRow
                 part="Range · preview band"
-                note="Lives only under the pointer: between the two clicks of a range, or while hovering a rangeRole calendar. No static render can hold it, so it stays unproven rather than printing a colour nothing was read from."
+                note="Lives only under the pointer: between the two clicks of a range, or while hovering a rangeRole calendar, where hover shows the range a click would make. No static render can hold it, so it stays unproven rather than printing a colour nothing was read from."
                 token="--ds-fill-accent-weak"
                 select=".rt-ds-calendar-day[data-preview]"
                 pseudo="::before"
@@ -736,7 +736,7 @@ function StartAndEndDemo() {
   );
 }
 
-/** StartAndEnd — two role calendars sharing one range. The start calendar stops at the end and the end calendar at the start, and hovering outside the range previews the band out to the hovered day. */
+/** StartAndEnd — two role calendars sharing one range. The start calendar stops at the end and the end calendar at the start. Hovering a day shows the range a click there would make: days it adds take the preview band, and committed days it drops lose their band. */
 export const StartAndEnd: Story = {
   render: () => (
     <Page maxWidth={900}>

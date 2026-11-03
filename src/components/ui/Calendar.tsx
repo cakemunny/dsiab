@@ -56,6 +56,8 @@ import { applyRangeRole, rangeSentence, useRangeRole } from "../../dates/useRang
 import {
   computeDayCellState,
   computeDayNeighborContinuity,
+  computeRoleHoverPaint,
+  type DaySpan,
 } from "../../dates/dayCellUtils";
 import { useGridFocus } from "../../hooks/useGridFocus";
 import { useIsomorphicLayoutEffect } from "../../hooks/useIsomorphicLayoutEffect";
@@ -175,6 +177,13 @@ function initialAnchor(props: CalendarProps): PlainDate {
     if (v) return plainDateFromISO(v);
   }
   return plainDateToday();
+}
+
+// The `data-range` / `data-preview` value of a day in a band: its endpoint, a middle day, or none. An endpoint wins.
+function bandAttr(inside: boolean, start: boolean, end: boolean): "start" | "middle" | "end" | null {
+  if (start) return "start";
+  if (end) return "end";
+  return inside ? "middle" : null;
 }
 
 /* ---- caption (nav chrome + the two view controls) ------------------------ */
@@ -470,6 +479,8 @@ interface CalendarMonthProps {
   rangeEnd: PlainDate | null;
   previewStart: PlainDate | null;
   previewEnd: PlainDate | null;
+  /** The range a click on the hovered day would make, while a role calendar hovers; null otherwise. Paints in place of the preview. */
+  roleResult: DaySpan | null;
   focusDate: PlainDate;
   isDateDisabled: (date: PlainDate) => boolean;
   /** Nav chrome for this pane's caption; null where the pair is split to the sibling pane. */
@@ -495,7 +506,7 @@ interface CalendarMonthProps {
 function CalendarMonth(props: CalendarMonthProps) {
   const {
     monthDate, weekStartsOn, hasOutsideDays, hasWeekNumbers, mode, size, today, isRtl,
-    selectedDate, rangeStart, rangeEnd, previewStart, previewEnd, focusDate, isDateDisabled,
+    selectedDate, rangeStart, rangeEnd, previewStart, previewEnd, focusDate, isDateDisabled, roleResult,
     prev, next, interactive, onTogglePicker, onDaySelect, onDayHover, onFocusDate, onPageStep,
     onYearStep, onEdge, onEscape,
     bandLeading, bandTrailing, endpointNote,
@@ -514,6 +525,11 @@ function CalendarMonth(props: CalendarMonthProps) {
     if (!hasOutsideDays) return false;
     return plainDateIsBefore(date, monthDate) ? bandLeading : bandTrailing;
   };
+
+  // While a role calendar hovers, the run is the result alone: the committed days a click would drop are not in it.
+  const runSpan = roleResult
+    ? { rangeStart: null, rangeEnd: null, previewStart: roleResult.start, previewEnd: roleResult.end }
+    : { rangeStart, rangeEnd, previewStart, previewEnd };
 
   const grid = useGridFocus<HTMLTableElement>({
     columns: 7,
@@ -608,9 +624,21 @@ function CalendarMonth(props: CalendarMonthProps) {
       bandsOutside: bandsOutsideDay(day.date),
     });
 
-    const rangeActive = state.isInRange || state.isRangeStart || state.isRangeEnd;
-    const previewActive = state.isInPreview || state.isPreviewStart || state.isPreviewEnd;
-    const spilloverActive = state.isOutsideInRange || state.isOutsideInPreview;
+    // While a role calendar hovers, the paint is the range a click would make. Otherwise it is the committed range.
+    const hover = roleResult
+      ? computeRoleHoverPaint({
+          date: day.date,
+          isOutside: day.isOutside,
+          bandsOutside: bandsOutsideDay(day.date),
+          result: roleResult,
+          committed: rangeStart && rangeEnd ? { start: rangeStart, end: rangeEnd } : null,
+        })
+      : null;
+    const band = hover ? hover.band : bandAttr(state.isInRange, state.isRangeStart, state.isRangeEnd);
+    const preview = hover ? hover.preview : bandAttr(state.isInPreview, state.isPreviewStart, state.isPreviewEnd);
+    const spilloverActive = hover ? hover.spill : state.isOutsideInRange || state.isOutsideInPreview;
+    const rangeActive = band != null;
+    const previewActive = preview != null;
 
     // A single selected day is a fully rounded chip. A range or preview cell rounds only where the run
     // breaks. The committed range and the hover preview read as ONE run, so the caps sit at the run's
@@ -622,10 +650,7 @@ function CalendarMonth(props: CalendarMonthProps) {
         week,
         dayIndex,
         mode,
-        rangeStart,
-        rangeEnd,
-        previewStart,
-        previewEnd,
+        ...runSpan,
         isDisabled: isDateDisabled,
         bandsOutside: bandsOutsideDay,
       });
@@ -634,7 +659,7 @@ function CalendarMonth(props: CalendarMonthProps) {
     }
 
     const isEndpoint =
-      state.isSelected || state.isRangeStart || state.isRangeEnd || state.isPreviewStart || state.isPreviewEnd;
+      state.isSelected || band === "start" || band === "end" || preview === "start" || preview === "end";
     const ariaSelected =
       state.isSelected || state.isRangeStart || state.isRangeEnd || state.isInRange ? true : undefined;
     // The declared roving stop is the in-month focusDate cell only — never an
@@ -663,8 +688,8 @@ function CalendarMonth(props: CalendarMonthProps) {
           data-outside={day.isOutside || undefined}
           data-today={state.isToday || undefined}
           data-selected={state.isSelected || undefined}
-          data-range={rangeActive ? (state.isRangeStart ? "start" : state.isRangeEnd ? "end" : "middle") : undefined}
-          data-preview={previewActive ? (state.isPreviewStart ? "start" : state.isPreviewEnd ? "end" : "middle") : undefined}
+          data-range={band ?? undefined}
+          data-preview={preview ?? undefined}
           data-range-outside={spilloverActive || undefined}
           data-endpoint={isEndpoint || undefined}
           data-round-start={roundStart || undefined}
@@ -892,17 +917,6 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(function Calen
         previewEnd: plainDateMax(anchor, other),
       };
     }
-    // A role calendar previews from the hovered day back to the end it does not edit. The committed band
-    // stays painted under the preview, so the preview's lighter tint shows only on the days it adds.
-    if (role && hoverDate && bounds.otherEnd && rangeValue) {
-      const other = plainDateFromISO(bounds.otherEnd);
-      return {
-        rangeStart: plainDateFromISO(rangeValue.start),
-        rangeEnd: plainDateFromISO(rangeValue.end),
-        previewStart: plainDateMin(hoverDate, other),
-        previewEnd: plainDateMax(hoverDate, other),
-      };
-    }
     if (rangeValue) {
       const a = plainDateFromISO(rangeValue.start);
       const b = plainDateFromISO(rangeValue.end);
@@ -914,7 +928,14 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(function Calen
       };
     }
     return { rangeStart: null, rangeEnd: null, previewStart: null, previewEnd: null };
-  }, [isRange, anchor, hoverDate, rangeValue, role, bounds.otherEnd]);
+  }, [isRange, anchor, hoverDate, rangeValue]);
+
+  // The range a click on the hovered day would make: the start role keeps the value's end, the end role its start.
+  const roleResult = useMemo<DaySpan | null>(() => {
+    if (!role || !hoverDate || !bounds.otherEnd) return null;
+    const other = plainDateFromISO(bounds.otherEnd);
+    return role === "start" ? { start: hoverDate, end: other } : { start: other, end: hoverDate };
+  }, [role, hoverDate, bounds.otherEnd]);
 
   /* --- interaction handlers ------------------------------------------------- */
   const onDaySelect = useCallback(
@@ -1245,6 +1266,7 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(function Calen
                 rangeEnd={rangeEnd}
                 previewStart={previewStart}
                 previewEnd={previewEnd}
+                roleResult={roleResult}
                 focusDate={focusDate}
                 isDateDisabled={isDateDisabled}
                 // The nav pair is SPLIT across the two captions (prev on the first pane,

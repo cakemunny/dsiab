@@ -356,3 +356,45 @@ export function computeDayNeighborContinuity(input: {
     nextInRun: nextInRange || nextInPreview,
   };
 }
+
+/** A span of days, both ends inclusive. */
+export interface DaySpan {
+  start: PlainDate;
+  end: PlainDate;
+}
+
+/** What paints one day while a role calendar hovers: the result of the click it previews, not the committed value. */
+export interface RoleHoverPaint {
+  /** `data-range` on the day: a committed day the result keeps. Null where the result drops it or it was never committed. */
+  band: 'start' | 'middle' | 'end' | null;
+  /** `data-preview` on the day: a day the result adds to the committed band. */
+  preview: 'start' | 'middle' | 'end' | null;
+  /** The spillover band: an outside day the result covers, in a pane that bands it. */
+  spill: boolean;
+}
+
+function spanHas(span: DaySpan | null, date: PlainDate): boolean {
+  return span != null && plainDateIsInRange(date, [span.start, span.end]);
+}
+
+/**
+ * Paint while a role calendar hovers a day. The paint is the range a click would make, `result`. A day the result
+ * keeps and the committed range already held takes the committed band; a day the result adds takes the preview band;
+ * a committed day the result drops paints nothing. The result's endpoints carry the chip. Hover is not selection, so
+ * aria-selected stays on the committed value and is read from the committed range by the caller.
+ */
+export function computeRoleHoverPaint(input: {
+  date: PlainDate;
+  isOutside: boolean;
+  bandsOutside: boolean;
+  result: DaySpan;
+  committed: DaySpan | null;
+}): RoleHoverPaint {
+  const {date, isOutside, bandsOutside, result, committed} = input;
+  if (isOutside) return {band: null, preview: null, spill: bandsOutside && spanHas(result, date)};
+  if (!spanHas(result, date)) return {band: null, preview: null, spill: false};
+  const edge = plainDateIsEqual(date, result.start) ? 'start' : plainDateIsEqual(date, result.end) ? 'end' : 'middle';
+  return spanHas(committed, date)
+    ? {band: edge, preview: null, spill: false}
+    : {band: null, preview: edge, spill: false};
+}

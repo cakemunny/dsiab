@@ -1023,29 +1023,73 @@ export const RangeRoleBoundDisablesDays: Story = {
   },
 };
 
-/** Hover in a role calendar previews from the hovered day to the other end; the committed band stays painted under it. */
-export const RangeRoleHoverPreviewKeepsBand: Story = {
+/* The in-month button of a date: a spillover copy of the same date sits in the neighbouring pane. */
+const inMonthDay = (scope: ParentNode, iso: string) =>
+  scope.querySelector<HTMLButtonElement>(`button[data-date="${iso}"]:not([data-outside])`);
+/* A day with no band paints nothing on ::before, so its computed background is transparent (the rgba form is what
+   Chromium reports for it). */
+
+/** Hover in a role calendar paints the range a click would make, not the committed one. Hovering Nov 20 as the start
+ *  of a Nov 10 – Dec 9 range shrinks it to Nov 20 – Dec 9: Nov 10–19 are dropped (no band, no chip), Nov 20 takes the
+ *  chip, and aria-selected stays on Nov 10 because hover is not selection. */
+export const RangeRoleHoverShowsShrink: Story = {
   render: () => (
-    <Box p="4" data-testid="cal-hover">
-      <Calendar mode="range" rangeRole="start" defaultValue={rangeOf("2026-07-10", "2026-07-20")} focusDate={D("2026-07-10")} onValueChange={noop} />
+    <Box p="4" data-testid="cal-shrink">
+      <Calendar mode="range" rangeRole="start" numberOfMonths={2} defaultValue={rangeOf("2026-11-10", "2026-12-09")} focusDate={D("2026-11-10")} onValueChange={noop} />
     </Box>
   ),
   play: async ({ canvasElement }) => {
-    const scope = canvasElement.querySelector<HTMLElement>('[data-testid="cal-hover"]')!;
-    hover(dayBtn(scope, "2026-07-14")!);
-    await waitFor(() => dayBtn(scope, "2026-07-14")!.getAttribute("data-preview") === "start");
-    if (dayBtn(scope, "2026-07-20")!.getAttribute("data-preview") !== "end")
-      throw new Error("the preview must end on the other end of the range, 2026-07-20");
-    if (dayBtn(scope, "2026-07-16")!.getAttribute("data-range") !== "middle")
-      throw new Error("the committed band must stay painted under a hover preview");
-    if (dayBtn(scope, "2026-07-16")!.getAttribute("data-preview") !== "middle")
-      throw new Error("a day both committed and previewed must carry both attributes");
-    if (dayBtn(scope, "2026-07-10")!.getAttribute("data-preview") != null)
-      throw new Error("a committed day outside the preview must not carry the preview");
-    if (dayBtn(scope, "2026-07-10")!.getAttribute("data-range") !== "start")
-      throw new Error("the committed start must stay the range start while previewing");
+    const scope = canvasElement.querySelector<HTMLElement>('[data-testid="cal-shrink"]')!;
+    hover(inMonthDay(scope, "2026-11-20")!);
+    await waitFor(() => inMonthDay(scope, "2026-11-20")!.getAttribute("data-range") === "start");
+    for (let day = 10; day <= 19; day++) {
+      const iso = `2026-11-${String(day).padStart(2, "0")}`;
+      const btn = inMonthDay(scope, iso)!;
+      if (btn.hasAttribute("data-range") || btn.hasAttribute("data-preview"))
+        throw new Error(`${iso} is dropped by the result, so it must carry no band or preview`);
+      const before = getComputedStyle(btn, "::before").backgroundColor;
+      if (before !== "transparent" && before !== "rgba(0, 0, 0, 0)")
+        throw new Error(`${iso} is dropped by the result, so its ::before must paint no band`);
+    }
+    if (inMonthDay(scope, "2026-11-20")!.getAttribute("data-endpoint") == null)
+      throw new Error("the hovered start, Nov 20, must carry the endpoint chip");
+    if (inMonthDay(scope, "2026-12-09")!.getAttribute("data-range") !== "end")
+      throw new Error("the committed end, Dec 9, must keep its chip under a shrink");
+    if (inMonthDay(scope, "2026-11-10")!.closest('[role="gridcell"]')!.getAttribute("aria-selected") !== "true")
+      throw new Error("aria-selected must stay on the committed Nov 10, because hover is not selection");
   },
 };
+
+/** Hover in a role calendar paints the range a click would make when it extends. Hovering Nov 2 as the start of a
+ *  Nov 10 – Dec 9 range paints Nov 2 – Dec 9: Nov 2–9 take the preview band, Nov 2 takes the chip, and Nov 10 loses its
+ *  chip (it is a middle day now), while aria-selected stays on the committed Nov 10. */
+export const RangeRoleHoverShowsExtend: Story = {
+  render: () => (
+    <Box p="4" data-testid="cal-extend">
+      <Calendar mode="range" rangeRole="start" numberOfMonths={2} defaultValue={rangeOf("2026-11-10", "2026-12-09")} focusDate={D("2026-11-10")} onValueChange={noop} />
+    </Box>
+  ),
+  play: async ({ canvasElement }) => {
+    const scope = canvasElement.querySelector<HTMLElement>('[data-testid="cal-extend"]')!;
+    hover(inMonthDay(scope, "2026-11-02")!);
+    await waitFor(() => inMonthDay(scope, "2026-11-02")!.getAttribute("data-preview") === "start");
+    if (inMonthDay(scope, "2026-11-02")!.getAttribute("data-endpoint") == null)
+      throw new Error("the hovered start, Nov 2, must carry the endpoint chip");
+    for (let day = 3; day <= 9; day++) {
+      const iso = `2026-11-${String(day).padStart(2, "0")}`;
+      if (inMonthDay(scope, iso)!.getAttribute("data-preview") !== "middle")
+        throw new Error(`${iso} is added by the result, so it must take the preview band`);
+    }
+    const nov10 = inMonthDay(scope, "2026-11-10")!;
+    if (nov10.getAttribute("data-range") !== "middle" || nov10.hasAttribute("data-endpoint"))
+      throw new Error("Nov 10 stays in the committed band but is no longer an endpoint, so it must lose its chip");
+    if (inMonthDay(scope, "2026-12-09")!.getAttribute("data-range") !== "end")
+      throw new Error("the committed end, Dec 9, must keep its chip under an extend");
+    if (nov10.closest('[role="gridcell"]')!.getAttribute("aria-selected") !== "true")
+      throw new Error("aria-selected must stay on the committed Nov 10, because hover is not selection");
+  },
+};
+
 
 /** Spillover: the outside days inside the range carry the band, and the run continues across the month edge. */
 export const SpilloverBandsAcrossMonthEdge: Story = {
