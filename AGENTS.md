@@ -251,7 +251,7 @@ asks it to. Their findings are worth a second look, because some come back overs
 npm install                         # dependencies at the exact lockfile versions
 npm run storybook                   # the docs, on port 6006, the rendered source of truth
 npm run barrel                      # regenerate src/index.ts from registry.json
-npm run build                       # dist/index.js + .d.ts + styles.css + registry.json + DECISIONS.md
+npm run build                       # dist/index.js + .d.ts + styles.css + registry.json + DECISIONS.md + check-facts.json
 npm run pack                        # build, then npm pack, the tarball you install into an app
 npm run test:tokens                 # the source-scanning guard lane
 npm test                            # the story suite, with axe

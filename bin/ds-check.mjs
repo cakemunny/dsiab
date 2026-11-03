@@ -9,7 +9,8 @@
  * WHAT IT DELIBERATELY IS NOT: our authoring gate. That is the vitest suite, and a fork of this
  * system already has it (`npm test`). This ships only the rules that would be defects in a codebase
  * that had never heard of this design system — see the header of `consumerRules.mjs` for the test
- * each rule had to pass, and the reasoning for the ones left out.
+ * each rule had to pass, and the reasoning for the ones left out — plus four of the system's own,
+ * under the refined test in `dsiabRules.mjs` ([[ds-check-dsiab-rules]]).
  *
  * WHAT IT REFUSES TO DO: imply coverage it does not have. Every run prints its reach — the
  * extensions it read, the extensions present that it could not read, and the limits inside the
@@ -63,7 +64,7 @@ try {
       `  expected: ${RULES_MODULE}\n` +
       `  ${err && err.message ? err.message : err}\n` +
       `If this package was installed from a tarball, its "files" list must carry both\n` +
-      `"bin" and "src/foundations/consumerRules.mjs". Report this — it is a packaging bug, not yours.\n`,
+      `"bin" and "src/foundations/{consumerRules,dsiabRules,checkFacts}.mjs". Report this — it is a packaging bug, not yours.\n`,
   );
   process.exit(2);
 }
@@ -363,10 +364,14 @@ function main() {
         "RULES",
         formatRules(),
         "",
-        `  These ${RULE_IDS.length} are here because each is a defect in ANY codebase. This system's own authoring`,
-        "  rules — the 3-weight ramp, no raw hex, spacing steps — are NOT run over your code: they are",
-        "  ours, and they would fire on your marketing gradient. If you forked the system, its full",
-        "  vitest suite is your authoring gate; `npm test` there covers what this deliberately does not.",
+        "  The rules up to aschild-nonint are defects in ANY codebase. From unknown-token on, they are",
+        "  this system's own. unknown-token and radix-duplicate are defects anywhere too: a token that",
+        "  resolves to nothing, and a second copy of a component you installed. bare-scale-step and",
+        "  important-flag run only in a dsiab file: one that imports dsiab, or holds `var(--ds-` or",
+        "  `.radix-themes`. The rest of the system's authoring rules — the 3-weight ramp, no raw hex,",
+        "  spacing steps — are NOT run: they would fire on your marketing gradient. If you forked the",
+        "  system, its full vitest suite is your authoring gate; `npm test` there covers what this",
+        "  deliberately does not.",
         "",
         "ALLOWING A LINE ON PURPOSE",
         ...ALLOW_GRAMMAR,

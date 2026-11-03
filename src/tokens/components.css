@@ -3900,6 +3900,7 @@
   .radix-themes .rt-SpinnerLeaf { animation: none; }
   .radix-themes .rt-ProgressIndicator[data-state="indeterminate"] { animation: none; transform: none; }
   .radix-themes .rt-ProgressIndicator[data-state="indeterminate"]::after { animation: none; }
+  /* ds-allow important-flag — overrides Radix's own !important Skeleton pulse to honour prefers-reduced-motion */
   .radix-themes .rt-Skeleton { animation: none !important; }
 }
 
