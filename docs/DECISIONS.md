@@ -968,6 +968,35 @@ This ledger records the rulings that shape the design system and the reason behi
 >
 > **Status.** Ruled 2026-10-01. It amends [ruling-shape](#ruling-shape) with the name heading and the tags line. No later ruling amends it.
 
+### ds-check-dsiab-rules
+
+**Tags.** `TOKENS`, `INSTALL`. **Ruled.** 2026-11-03.
+
+**`ds-check` runs four of this system's own rules over consumer code: `unknown-token`, `bare-scale-step`, `important-flag` and `radix-duplicate`.**
+
+**What you see.**
+
+- `unknown-token` fails a `var(--ds-…)` whose name the package does not define, inside a family the system owns or one of the families other systems use (`color`, `spacing`, `border`, `background` and the rest). The detail names the real token, the steps of a numeric family, or the names in the family. A `--ds-*` name declared anywhere in the checked tree passes, and so does a name in a family the system does not own, such as `--ds-mything-gap`.
+- `bare-scale-step` fails a numeric step of a colour scale, the brand ramps included, and names the role `semantic.css` declares for that step.
+- `important-flag` fails `!important`.
+- `radix-duplicate` fails a named import from `@radix-ui/themes` of a component the roster ships under the same name, and names the import to write.
+
+**The test for a rule, refined.** The rules that shipped first pass one test: would it be a defect in a codebase that had never heard of this system? `unknown-token` and `radix-duplicate` pass it unchanged, because a name that resolves to nothing and a second copy of an installed component are defects anywhere. `bare-scale-step` and `important-flag` pass a refined test: would it be a defect in a file that already builds on this system? So they run only in a dsiab file, one whose comment-free text imports `dsiab` or holds `var(--ds-` or `.radix-themes`. A product page that never touched the system keeps its own `!important`.
+
+**The facts.** One function, `buildCheckFacts` in `src/foundations/checkFacts.mjs`, derives every fact the rules read: the known names, the names a suggestion may use, the colour scales (each prefix with an alpha step, which picks up `oxblood` and the status aliases), the role for each step, and the duplicates. In a checkout `ds-check` builds them from the sources, and in an install it reads `dist/check-facts.json`, which the build writes with the same function. When neither loads, the three rules that need them print NOT RUN with the reason and are never reported clean.
+
+**Not a duplicate.** Grid, Section, AspectRatio, VisuallyHidden and Skeleton are bare re-exports of Radix's own binding, so importing them from Radix imports the same object, and the facts list them as passthroughs that `radix-duplicate` skips. `Theme` is not reported, because `Contrast` wraps it under another name.
+
+**Allowances.** An allowance for a rule that did not run on its file, because the facts did not load, the file is not a dsiab file, or the file is the package's own source, is reported as not evaluated and never as stale.
+
+**The package's own source.** Over this repository, `bare-scale-step` skips `src/tokens` and the stories, and `radix-duplicate` skips all of `src/`, because those are the layer the rules protect. The two other rules run there. The one `!important` in the source, in `components.css`, overrides Radix's own flag on the Skeleton pulse to honour reduced motion, and carries the one allowance.
+
+**Not caught.** `--accent-contrast`, `--accent-surface` and `--color-*`, a raw hex value, a string passed to a call such as `cn("…")`, a name built at runtime, and a CSS module with no dsiab marker of its own. A raw hex rule would fit the dsiab-file scope and stays an open question.
+
+**Changed from.** `ds-check` ran five rules that are defects in any codebase, and its help said the system's own rules are not run over consumer code.
+
+**Status.** Ruled 2026-11-03. No later ruling amends it.
+
 ## Token additions (2026-06-18)
 
 ### serif-em-and-quote

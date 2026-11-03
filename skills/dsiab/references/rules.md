@@ -179,6 +179,12 @@ the output. Mentioning it does not count, and neither does knowing it exists. It
 the extensions it read and the ones it could not, so a pass is a statement about the files it lists and
 nothing else.
 
+Beside defects in any codebase, it checks four of the rules above ([[ds-check-dsiab-rules]]):
+`unknown-token`, a `--ds-*` name this system does not define, with the real name suggested;
+`bare-scale-step`, a raw scale step where a `--ds-*` role belongs; `important-flag`; and
+`radix-duplicate`, a component imported from `@radix-ui/themes` that the roster ships. The middle two
+run only in a file that builds on dsiab, one that imports it or holds `var(--ds-` or `.radix-themes`.
+
 ```bash
 npx ds-check                 # the current directory
 npx ds-check src/features    # a subtree, or a single file
