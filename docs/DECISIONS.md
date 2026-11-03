@@ -244,12 +244,16 @@ This ledger records the rulings that shape the design system and the reason behi
 
 **What is sent.** Nothing. The command makes no network connection, and nothing is collected across installs, so each team sees only its own project. A report reaches anyone else only when its team chooses to send the file.
 
+**The report.** A report is a snapshot that gives context to decisions about how the system is used, at one moment. It is neither code nor documentation, so it is never committed. By default the command writes it into the cache folder inside the installed dependencies, which a project already ignores, and it warns when asked to write the file to a path that git does not ignore.
+
 **Where it is shown.** The command prints a summary and can write one report file. A Usage page in the hosted documentation opens that file in the reader's browser and draws every view from the file alone, sending no part of it anywhere. The reading happens on the machine because a hosted page cannot see the files of the project that opened it.
 
 **What is counted.**
 
-- A rendered element counts toward its component, and a dotted member such as `DropdownMenu.Item` counts toward its root.
-- A call counts toward a hook.
+- A component is counted the way the documentation presents it: one registry entry, one documentation page, one component. Each placement of its root counts one, so a dropdown with three items is one dropdown.
+- The other parts of a component, such as `DropdownMenu.Item`, are recorded with their own counts and locations for a filtered view, and add nothing to the component's count.
+- A repository that holds several projects is reported project by project, each read against the component list of its own installed copy, and the page filters by project.
+- A call of a hook is recorded under the entry that exports it, and counts one use when the hook is its own entry.
 - A type is never counted, and an entry whose exports are all types appears in no list or count.
 - A use the scan cannot trace is listed as untraced, with its file, line and reason, and is never counted as zero.
 - When nothing imports from `dsiab`, the report says so instead of calling every component unused.
@@ -267,6 +271,9 @@ This ledger records the rulings that shape the design system and the reason behi
 - Tables come before a chart.
 - The need is tested on a personal project before the page is built.
 - The kind of each export sits in its own map beside the list of names.
+- A component is counted the way the documentation presents it, and a filtered view can show its parts.
+- A repository with several projects is filtered by project.
+- A report is a snapshot that is never committed.
 
 **Changed from.** No ruling covered usage. The package could check a project's code against its rules, but could not say which of its components that project used.
 
