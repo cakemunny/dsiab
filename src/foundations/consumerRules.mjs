@@ -1066,7 +1066,7 @@ export function checkTree(root) {
       unreadable.push(file);
     }
   }
-  const tree = prepareTree(sources);
+  const tree = prepareTree(sources, undefined, (file, src) => regionsFor(extname(file).toLowerCase(), src));
   for (const { file, src } of sources) {
     const rel = relative(root, file) || file.split(sep).pop();
     const r = checkSource(rel, src, { tree, file: fileContext(file) });

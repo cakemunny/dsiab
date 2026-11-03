@@ -157,7 +157,7 @@ export interface DateTimeInputProps {
   /** The embedded time field's accessible name. @default "Time" */
   timeLabel?: string;
   disabled?: boolean;
-  /** D8 ([[disabled-reason]]): a non-empty reason SOFT-disables BOTH sub-fields (aria-disabled + readOnly + reason tooltip
+  /** [[disabled-reason]]: a non-empty reason SOFT-disables BOTH sub-fields (aria-disabled + readOnly + reason tooltip
    *  + glyph) instead of natively disabling, so the reason stays perceivable on hover AND keyboard focus. */
   disabledReason?: string;
   width?: number | string;

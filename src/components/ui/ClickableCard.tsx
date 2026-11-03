@@ -26,7 +26,7 @@ const OVERLAY_CLASS = "rt-ds-clickable-card";
 const LINK_CLASS = "rt-ds-clickable-card-link";
 
 /** Spread onto a nested interactive inside a ClickableCard so it sits above the stretched-link overlay
- *  and stays independently clickable (D6). */
+ *  and stays independently clickable. */
 export const interactiveLayer = { position: "relative", zIndex: 1 } as const;
 
 export interface ClickableCardProps extends Omit<CardProps, "asChild" | "title"> {

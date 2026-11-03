@@ -172,7 +172,9 @@ async function main() {
     } catch (error) {
       console.error("\nINSTALL FAILED — this is an environment problem, not a packaging one.");
       console.error(String(error.stderr || error.message).slice(0, 1200));
-      process.exit(2);
+      // Not process.exit, which would skip the finally below and leave the throwaway app on disk.
+      process.exitCode = 2;
+      return;
     }
     console.log("  installed");
 

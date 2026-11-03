@@ -110,7 +110,7 @@ interface NumberInputBaseProps {
    *  NOT flow here — they announce + revert (the two-channel model, [[date-input]]/[[number-input]]). */
   validation?: Validation;
   disabled?: boolean;
-  /** D8 ([[disabled-reason]]): a non-empty reason SOFT-disables (aria-disabled + readOnly + reason tooltip + glyph)
+  /** [[disabled-reason]]: a non-empty reason SOFT-disables (aria-disabled + readOnly + reason tooltip + glyph)
    *  instead of natively disabling, so the reason stays perceivable on hover AND keyboard focus. */
   disabledReason?: string;
   width?: number | string;
@@ -120,7 +120,7 @@ interface NumberInputBaseProps {
   "aria-labelledby"?: string;
 }
 
-/** Discriminated on `clearable` (D2): a clearable field shows a trailing ✕ and its callback accepts
+/** Discriminated on `clearable`: a clearable field shows a trailing ✕ and its callback accepts
  *  `undefined` (an emptied field); a non-clearable field never emits `undefined` (empty reverts). */
 export type NumberInputProps =
   | (NumberInputBaseProps & {

@@ -76,6 +76,8 @@ function referenceProblems(set: Map<string, string>, c: Ctx): Problem[] {
     for (const m of findLineageMatches(text)) add(file, `lineage term "${m.term}": ${m.matched}`);
     for (const m of text.matchAll(/(?<![A-Za-z0-9_./-])src\/[A-Za-z0-9/._-]*/g)) add(file, `src/ path ${m[0]}`);
     for (const b of bannedIn(text)) add(file, `banned term ${b.term} x${b.count}`);
+    // A section code of a private spec ("D12") reads as a citation a package reader cannot look up.
+    for (const m of text.matchAll(/\bD\d{1,2}\b/g)) add(file, `internal section code ${m[0]}`);
     for (const m of text.matchAll(/\[\[([A-Za-z0-9]+(?:-[A-Za-z0-9]+)+)\]\]/g)) {
       if (!c.rulings.has(m[1])) add(file, `[[${m[1]}]] heads no entry in the ledger`);
     }
@@ -134,6 +136,13 @@ describe("the compiled component reference ([[compiled-component-reference]])", 
     expect(found).toMatch(/lineage term "upstream"/);
     expect(found).toMatch(/src\/ path src\/utils\/x\.ts/);
     expect(found).toMatch(/banned term docs\//);
+  });
+
+  test("RED: a bare internal section code fails, and ARIA and CSS text does not", () => {
+    const found = problemsOf(planted("TreeList.md", (t) => `${t}\nControlled expansion (D12), see D2.\n`)).join("\n");
+    expect(found).toMatch(/TreeList\.md: internal section code D12/);
+    expect(found).toMatch(/TreeList\.md: internal section code D2/);
+    expect(problemsOf(planted("TreeList.md", (t) => `${t}\n\`aria-level\`, a 2D grid, \`--space-2\`, ID12.\n`)).filter((p) => p.includes("section code"))).toEqual([]);
   });
 
   test("RED: an unknown ruling and the banned ruling each fail", () => {

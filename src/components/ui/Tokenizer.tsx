@@ -88,7 +88,7 @@ export interface TokenizerProps<TAux = unknown> {
   /** A STANDING validation state (a real problem the user must resolve). */
   validation?: Validation;
   disabled?: boolean;
-  /** D8 ([[disabled-reason]]): a non-empty reason SOFT-disables (aria-disabled + readOnly + reason tooltip + glyph)
+  /** [[disabled-reason]]: a non-empty reason SOFT-disables (aria-disabled + readOnly + reason tooltip + glyph)
    *  instead of natively disabling, so the reason stays perceivable on hover AND keyboard focus. */
   disabledReason?: string;
   /** Greyed hint while EMPTY (no tokens). Names the mechanism — "Search to add…", never "press Enter". */

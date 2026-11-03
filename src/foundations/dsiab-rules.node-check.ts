@@ -1,8 +1,8 @@
 /* =============================================================================
-   dsiab-rules.node-check.ts — THE FOUR DSIAB RULES IN `ds-check` ([[ds-check-dsiab-rules]])
+   dsiab-rules.node-check.ts — THE DSIAB RULES IN `ds-check` ([[ds-check-dsiab-rules]])
    -----------------------------------------------------------------------------
-   `unknown-token`, `bare-scale-step`, `important-flag` and `radix-duplicate`
-   live in `dsiabRules.mjs`, and their facts in `checkFacts.mjs`. This file holds
+   `unknown-token`, `bare-scale-step`, `important-flag`, `radix-duplicate` and
+   `radix-stylesheet` live in `dsiabRules.mjs`, and their facts in `checkFacts.mjs`. This file holds
    one red proof per rule, the green controls that keep each one precise, the
    allowance cases a rule that did not run must not turn stale, both places the
    facts load from (a checkout and an installed `dist/`), and the drift arm on
@@ -139,6 +139,62 @@ describe("radix-duplicate", () => {
   });
 });
 
+describe("radix-stylesheet: a tree that imports dsiab", () => {
+  const SHEET = "@radix-ui/themes/styles.css";
+  /** checkTree over a temp tree of `files`, as `rule@file:line`. */
+  function treeRun(files: Record<string, string>) {
+    const dir = mkdtempSync(join(tmpdir(), "dsiab-sheet-"));
+    try {
+      for (const [f, text] of Object.entries(files)) writeFileSync(join(dir, f), text);
+      const report = checkTree(dir);
+      return {
+        found: report.results.flatMap((r: { findings: Finding[]; file: string }) => r.findings.map((x) => `${x.rule}@${r.file}:${x.line}`)),
+        reach: formatReport(report),
+      };
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  }
+
+  it("RED: the sheet in a global CSS file with no marker, because another file imports dsiab", () => {
+    const { found, reach } = treeRun({ "main.tsx": USES, "globals.css": `@import "${SHEET}";\n.x { color: red; }\n` });
+    expect(found).toEqual(["radix-stylesheet@globals.css:1"]);
+    expect(reach).toContain("radix-stylesheet ran, because a file here imports dsiab");
+  });
+
+  it("RED: every import shape, any Radix sheet, with the line and the sheet named", () => {
+    expect(run("a.tsx", `${USES}import "${SHEET}";\n`)).toEqual([
+      `radix-stylesheet@2: \`${SHEET}\` is already inside \`dsiab/styles.css\`, so this loads a second copy of it`,
+    ]);
+    const js = `${USES}require("${SHEET}");\nawait import("@radix-ui/themes/tokens.css");\nimport s from "@radix-ui/themes/layout/components.css";\n`;
+    expect(rules("a.ts", js)).toEqual(["radix-stylesheet@2", "radix-stylesheet@3", "radix-stylesheet@4"]);
+    const css = `@import "dsiab/styles.css";\n@import url("~${SHEET}");\n@import '../node_modules/@radix-ui/themes/tokens/colors/red.css';\n`;
+    expect(rules("a.css", css)).toEqual(["radix-stylesheet@2", "radix-stylesheet@3"]);
+  });
+
+  it("GREEN: a Radix Themes project without dsiab, even one that writes `.radix-themes` and a `--ds-` prefix", () => {
+    const { found, reach } = treeRun({
+      "main.tsx": `import "${SHEET}";\nimport { Theme } from "@radix-ui/themes";\nexport const T = Theme;\n`,
+      "app.css": `@import "${SHEET}";\n.radix-themes .x { color: var(--ds-mine); }\n:root { --ds-mine: red; }\n`,
+    });
+    expect(found).toEqual([]);
+    expect(reach).toContain("NOT RUN: radix-stylesheet, because no file here imports dsiab");
+  });
+
+  it("GREEN: a comment, a quoted string, Radix's JS entry, an import only named in a comment, the package's own source", () => {
+    expect(rules("a.tsx", `${USES}// import "${SHEET}";\nsay('import "${SHEET}"');\nimport { Grid } from "@radix-ui/themes";\n`)).toEqual([]);
+    expect(rules("a.css", `/* @import "dsiab/styles.css"; */\n@import "${SHEET}";\n`)).toEqual([]);
+    const self = { tree: tree(), file: { selfSrc: true } };
+    expect(rules("index.css", `@import "dsiab/x.css";\n@import "${SHEET}";\n`, self)).toEqual([]);
+  });
+
+  it("an allowance for it in a tree that does not import dsiab is not evaluated, never stale", () => {
+    const allow = "/* ds-allow radix-stylesheet — this app does not load dsiab's stylesheet */\n";
+    const r = checkSource("a.css", `${allow}@import "${SHEET}";\n`, { tree: tree() })!;
+    expect([r.findings.length, r.stale.length, r.notEvaluated.length]).toEqual([0, 0, 1]);
+  });
+});
+
 describe("allowances", () => {
   const ALLOW = "/* ds-allow important-flag — overrides a vendor flag to honour reduced motion */\n";
 
@@ -213,7 +269,7 @@ describe("the repository and the CLI", () => {
     const report = checkTree(join(ROOT, "src"));
     expect(report.counts.failures).toBe(0);
     expect(report.results.flatMap((r: { allowed: Finding[] }) => r.allowed.map((a) => a.rule))).toEqual(["important-flag"]);
-    expect(formatReport(report)).toContain("radix-duplicate skipped all of src/");
+    expect(formatReport(report)).toContain("radix-duplicate and radix-stylesheet skipped all of src/");
   });
 
   it("the CLI fails a planted token with the real name, and --rules lists every rule", () => {

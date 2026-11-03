@@ -57,10 +57,11 @@ const v = (name: string) => `var(--${name})`;
 const IMP = "!" + "important";
 const SHELL = `import { Provider, Text } from "dsiab";\nexport default function App() { return <Provider><Text>Hello</Text></Provider>; }\n`;
 const PLANTS: [string, string, string, Record<string, string>, string[]][] = [
-  ["ds-check", "the four dsiab rules", "settings-form", {
+  ["ds-check", "the dsiab rules", "settings-form", {
     "src/plant.css": `.radix-themes .x { color: ${v("ds-text-danger")}; background: ${v("gray-9")} ${IMP}; }\n`,
     "src/plant.tsx": 'import { Callout } from "@radix-ui/themes";\nexport const C = Callout;\n',
-  }, ["unknown-token@", "bare-scale-step@", "important-flag@", "radix-duplicate@"]],
+    "src/global.css": '@import "@radix-ui/themes/styles.css";\n',
+  }, ["unknown-token@", "bare-scale-step@", "important-flag@", "radix-duplicate@", "radix-stylesheet@"]],
   ["escape-hatch", "an allowance", "settings-form", {
     "src/plant.css": `.radix-themes .x {\n  /* ds-allow important-flag — the vendor sheet wins this one */\n  color: ${v("ds-text-strong")} ${IMP};\n}\n`,
   }, ["ds-allow important-flag@src/plant.css:3"]],
@@ -68,9 +69,9 @@ const PLANTS: [string, string, string, Record<string, string>, string[]][] = [
   ["invented-token", "a --ds-* name the tree declares itself", "settings-form", {
     "src/brand.css": ".radix-themes { --ds-brand-purple: purple; }\n.x { color: var(--ds-brand-purple); }\n",
   }, ["--ds-brand-purple@src/brand.css:1"]],
-  ["imports", "Radix's theme root, a deep path and a second Radix stylesheet", "settings-form", {
-    "src/plant.ts": 'import { Theme as T } from "@radix-ui/themes";\nimport "@radix-ui/themes/styles.css";\nimport "dsiab/dist/index.js";\nexport { T };\n',
-  }, ["Theme from @radix-ui/themes@src/plant.ts:1", "@radix-ui/themes/styles.css@src/plant.ts:2", "dsiab/dist/index.js@src/plant.ts:3"]],
+  ["imports", "Radix's theme root and a deep path", "settings-form", {
+    "src/plant.ts": 'import { Theme as T } from "@radix-ui/themes";\nimport "dsiab/dist/index.js";\nexport { T };\n',
+  }, ["Theme from @radix-ui/themes@src/plant.ts:1", "dsiab/dist/index.js@src/plant.ts:2"]],
   ["uses", "a component imported but only named in a comment", "brand-colours", {
     "src/App.tsx": app("brand-colours").replace('<Button priority="primary">Open workspace</Button>', "{/* <Button> */}<a href=\"#open\">Open workspace</a>"),
   }, ["missing: Button"]],
