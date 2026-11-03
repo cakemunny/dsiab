@@ -9,7 +9,7 @@
  * WHAT IT DELIBERATELY IS NOT: our authoring gate. That is the vitest suite, and a fork of this
  * system already has it (`npm test`). This ships only the rules that would be defects in a codebase
  * that had never heard of this design system — see the header of `consumerRules.mjs` for the test
- * each rule had to pass, and the reasoning for the ones left out — plus four of the system's own,
+ * each rule had to pass, and the reasoning for the ones left out — plus some of the system's own,
  * under the refined test in `dsiabRules.mjs` ([[ds-check-dsiab-rules]]).
  *
  * WHAT IT REFUSES TO DO: imply coverage it does not have. Every run prints its reach — the
@@ -368,10 +368,10 @@ function main() {
         "  this system's own. unknown-token and radix-duplicate are defects anywhere too: a token that",
         "  resolves to nothing, and a second copy of a component you installed. bare-scale-step and",
         "  important-flag run only in a dsiab file: one that imports dsiab, or holds `var(--ds-` or",
-        "  `.radix-themes`. The rest of the system's authoring rules — the 3-weight ramp, no raw hex,",
-        "  spacing steps — are NOT run: they would fire on your marketing gradient. If you forked the",
-        "  system, its full vitest suite is your authoring gate; `npm test` there covers what this",
-        "  deliberately does not.",
+        "  `.radix-themes`. radix-stylesheet runs only when some file in the run imports dsiab. The",
+        "  rest of the system's authoring rules — the 3-weight ramp, no raw hex, spacing steps — are",
+        "  NOT run: they would fire on your marketing gradient. If you forked the system, its full",
+        "  vitest suite is your authoring gate; `npm test` there covers what this deliberately does not.",
         "",
         "ALLOWING A LINE ON PURPOSE",
         ...ALLOW_GRAMMAR,

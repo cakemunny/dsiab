@@ -87,7 +87,8 @@ function checkTsc(dir, repoRoot) {
   return result("tsc", r.status === 0, measured, errors.length);
 }
 
-/** What tsc cannot see: Radix's unexported theme root, a deep path, a second Radix stylesheet. */
+/** What tsc cannot see: Radix's unexported theme root and a deep path. A second Radix stylesheet is
+ *  `ds-check`'s `radix-stylesheet`, so it is not checked here. */
 function checkImports(files) {
   const found = [];
   for (const f of files.filter((x) => SCRIPT.test(x.rel))) {
@@ -96,7 +97,7 @@ function checkImports(files) {
       if (bad.length) found.push(`${bad.join(",")} from @radix-ui/themes@${hit(f, f.code, m.index)}`);
     }
     for (const m of f.code.matchAll(/(?:from|import|import\s*\()\s*["']([^"']+)["']/g)) {
-      if (/node_modules\/dsiab|^dsiab\/(?:src|dist)\/|^@radix-ui\/themes\/styles\.css$/.test(m[1])) found.push(`${m[1]}@${hit(f, f.code, m.index)}`);
+      if (/node_modules\/dsiab|^dsiab\/(?:src|dist)\//.test(m[1])) found.push(`${m[1]}@${hit(f, f.code, m.index)}`);
     }
   }
   return result("imports", found.length === 0, found.join(", ") || "none", found.length);

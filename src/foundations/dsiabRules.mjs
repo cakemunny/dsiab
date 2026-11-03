@@ -1,5 +1,5 @@
 /**
- * dsiabRules.mjs — the four rules `ds-check` runs for this design system ([[ds-check-dsiab-rules]]).
+ * dsiabRules.mjs — the rules `ds-check` runs for this design system ([[ds-check-dsiab-rules]]).
  *
  * The header of `consumerRules.mjs` states the test a rule had to pass to ship: would it be a defect in
  * a codebase that had never heard of this design system? Two of these pass it unchanged.
@@ -12,8 +12,16 @@
  * `@import "dsiab/…"`) or contains `var(--ds-` or `.radix-themes`. A product's marketing page that never
  * touched the system keeps its own `!important`, and a file painting from the token layer does not.
  *
+ * `radix-stylesheet` passes the same refined test at the scope of the TREE: would a second copy of
+ * Radix's stylesheet be a defect in a project that already imports this system? It runs in every file
+ * of a run where some file IMPORTS `dsiab`, because that stylesheet usually sits in a global CSS file
+ * or an entry point with no marker of its own. The gate is the import alone. `.radix-themes` and
+ * `var(--ds-` are left out: a project on Radix Themes without dsiab writes the first, a `--ds-` prefix
+ * of its own is common, and either would turn that project's own stylesheet import into a finding.
+ *
  * SELF-SOURCE. Run over this package's own checkout, `bare-scale-step` skips `src/tokens/**` and the
- * stories, and `radix-duplicate` skips all of `src/`, because those are the layer the rules protect.
+ * stories, and `radix-duplicate` and `radix-stylesheet` skip all of `src/`, because those are the
+ * layer the rules protect: `src/tokens/index.css` is where `dsiab/styles.css` takes in Radix's sheet.
  * `unknown-token` and `important-flag` run everywhere. A rule that did not run on a file leaves any
  * allowance for it there "not evaluated", never stale.
  *
@@ -88,10 +96,28 @@ export const DSIAB_RULES = [
       "(`import * as T`) and the five bare re-exports dsiab ships unchanged (Grid, Section, AspectRatio, " +
       "VisuallyHidden, Skeleton) are not reported.",
   },
+  {
+    id: "radix-stylesheet",
+    title: "a second copy of Radix's stylesheet in a project that imports dsiab",
+    why:
+      "`dsiab/styles.css` already contains `@radix-ui/themes/styles.css`, ahead of this system's " +
+      "overrides. This system wins the cascade by source order, so a second copy loaded after it " +
+      "silently undoes every override, and nothing reports it: both sheets hold legitimate values. " +
+      "Loaded before it, the copy is dead weight.",
+    fix: 'Delete the import. `import "dsiab/styles.css"`, once at the entry point, is the whole stylesheet.',
+    reads:
+      "Only in a run where some file imports `dsiab`. A script `import`, `import()`, `require()` or " +
+      "`from` of any `@radix-ui/themes/….css`, and a CSS `@import` of one. A `<link>` tag, a bundler " +
+      "entry and a CDN URL are not read, and a MISSING `dsiab/styles.css` is not reported.",
+  },
 ];
 
 export const DSIAB_RULE_IDS = DSIAB_RULES.map((r) => r.id);
 const FACT_RULES = ["unknown-token", "bare-scale-step", "radix-duplicate"];
+const IMPORT_MARKER =
+  /\bfrom\s*["']dsiab(?:\/[^"']*)?["']|\bimport\s*["']dsiab\/[^"']*["']|\brequire\(\s*["']dsiab(?:\/[^"']*)?["']\s*\)|@import\s+(?:url\(\s*)?["']dsiab\//;
+/** Does this file's comment-free text import dsiab? */
+const importsDsiab = (regions) => IMPORT_MARKER.test(regions.code) || IMPORT_MARKER.test(regions.css);
 
 /* ---- the tree: facts, declarations and counts ------------------------------------------------- */
 
@@ -112,11 +138,19 @@ let packageFacts;
 /** The package's own facts, loaded once per process. */
 const factsOnce = () => (packageFacts ??= loadFacts(PACKAGE_ROOT));
 
-/** One run's shared state. `sources` is every file the run read, as `{file, src}`. */
-export function prepareTree(sources, loaded = factsOnce()) {
+/**
+ * One run's shared state. `sources` is every file the run read, as `{file, src}`. `regionsOf(file, src)`
+ * splits a file the way `checkSource` does, so `importsDsiab` reads comment-free text. Without it the
+ * tree imports nothing, and `radix-stylesheet` reads only each file's own imports.
+ */
+export function prepareTree(sources, loaded = factsOnce(), regionsOf) {
   const declared = new Set();
   for (const { src } of sources) declaredIn(src, declared);
-  return { ...loaded, declared, dsiab: 0, other: 0, self: 0 };
+  const imports = !!regionsOf && sources.some(({ file, src }) => {
+    const regions = src.includes("dsiab") && regionsOf(file, src);
+    return !!regions && importsDsiab(regions);
+  });
+  return { ...loaded, declared, importsDsiab: imports, dsiab: 0, other: 0, self: 0 };
 }
 
 /** Per-file flags: is this file part of the package's own source, and which part. */
@@ -133,8 +167,10 @@ export function fileContext(absPath) {
 
 /* ---- matching ---------------------------------------------------------------------------------- */
 
-const MARKER_RE =
-  /\bfrom\s*["']dsiab(?:\/[^"']*)?["']|\bimport\s*["']dsiab\/[^"']*["']|\brequire\(\s*["']dsiab(?:\/[^"']*)?["']\s*\)|@import\s+(?:url\(\s*)?["']dsiab\/|var\(\s*--ds-|\.radix-themes\b/;
+const MARKER_RE = new RegExp(`${IMPORT_MARKER.source}|var\\(\\s*--ds-|\\.radix-themes\\b`);
+const SHEET = `(?:~|[^"'\\s()]*node_modules/)?(@radix-ui/themes/[^"'\\s()]*\\.css)`;
+const SHEET_CODE_RE = new RegExp(`\\b(?:import\\s*\\(?|require\\(|from)\\s*["']${SHEET}["']`, "g");
+const SHEET_CSS_RE = new RegExp(`@import\\s+(?:url\\(\\s*)?["']?${SHEET}`, "g");
 const TOKEN_RE = new RegExp(`var\\(\\s*(${NAME})(?![\\w$-])`, "g");
 const IMPORTANT_RE = /!\s*important\b/gi;
 const RADIX_IMPORT_RE = /(?:^|[;\n{}])[ \t]*(?:import|export)\s+(?!type\b)\{([^}]*)\}\s*from\s*["']@radix-ui\/themes["']/g;
@@ -175,7 +211,7 @@ function scaleRegex(facts) {
 }
 
 /**
- * Run the four rules over one file's regions. `add(ruleId, index, text, detail)` records a finding.
+ * Run the dsiab rules over one file's regions. `add(ruleId, index, text, detail)` records a finding.
  * Returns the ids of the rules that did NOT run on this file, so its allowances for them are not
  * called stale. Called with no `ctx.tree`, it uses the package's own facts and this file's own
  * declarations, and treats the file as a consumer's.
@@ -191,7 +227,8 @@ export function dsiabFindings(src, regions, { markup = false, tree, file = {} } 
   else tree.other++;
   if (!isDsiab) ["bare-scale-step", "important-flag"].forEach((id) => skipped.add(id));
   if (file.selfLayer) skipped.add("bare-scale-step");
-  if (file.selfSrc) skipped.add("radix-duplicate");
+  if (file.selfSrc) ["radix-duplicate", "radix-stylesheet"].forEach((id) => skipped.add(id));
+  if (!tree.importsDsiab && !importsDsiab(regions)) skipped.add("radix-stylesheet");
   const runs = (id) => !skipped.has(id);
 
   const text = src.includes("var(") || src.includes("important") ? styleText(regions, markup) : "";
@@ -229,7 +266,17 @@ export function dsiabFindings(src, regions, { markup = false, tree, file = {} } 
       }
     }
   }
+  if (runs("radix-stylesheet") && src.includes("@radix-ui/themes/")) radixSheets(src, regions, add, inCode);
   return skipped;
+}
+
+/** Every import of a Radix Themes stylesheet, reported with its whole source line. */
+function radixSheets(src, regions, add, inCode) {
+  const lineAt = (i) => src.slice(src.lastIndexOf("\n", i - 1) + 1, (src.indexOf("\n", i) + 1 || src.length + 1) - 1);
+  const report = (m) => add("radix-stylesheet", m.index, lineAt(m.index),
+    `\`${m[1]}\` is already inside \`dsiab/styles.css\`, so this loads a second copy of it`);
+  for (const m of regions.code.matchAll(SHEET_CODE_RE)) if (inCode(m.index)) report(m);
+  for (const m of regions.css.matchAll(SHEET_CSS_RE)) report(m);
 }
 
 /* ---- suggestions ------------------------------------------------------------------------------- */
@@ -299,17 +346,21 @@ export function suggestForStep(scale, alpha, step, facts) {
 /** The block `formatReach` prints for these rules. */
 export function formatDsiabReach(tree, notEvaluated) {
   if (!tree) return [];
-  const out = ["", "  The dsiab rules (unknown-token, bare-scale-step, important-flag, radix-duplicate):"];
+  const out = ["", "  The dsiab rules (unknown-token, bare-scale-step, important-flag, radix-duplicate, radix-stylesheet):"];
   if (tree.facts) out.push(`      · facts read from ${tree.source}.`);
   else out.push(`      · NOT RUN: ${FACT_RULES.join(", ")}, because ${tree.error}.`, "        Reinstall the package.");
   out.push(
     `      · ${tree.dsiab} dsiab file(s) and ${tree.other} other file(s). bare-scale-step and important-flag`,
     "        ran only in the dsiab files.",
+    tree.importsDsiab
+      ? "      · radix-stylesheet ran, because a file here imports dsiab."
+      : "      · NOT RUN: radix-stylesheet, because no file here imports dsiab.",
   );
   if (tree.self) {
     out.push(
       `      · ${tree.self} file(s) of the dsiab package's own source. bare-scale-step skipped src/tokens and`,
-      "        the stories, and radix-duplicate skipped all of src/: the layer they protect.",
+      "        the stories, and radix-duplicate and radix-stylesheet skipped all of src/: the layer they",
+      "        protect.",
     );
   }
   if (notEvaluated) {

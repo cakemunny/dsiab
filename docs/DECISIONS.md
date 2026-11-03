@@ -994,7 +994,7 @@ This ledger records the rulings that shape the design system and the reason behi
 
 **Tags.** `TOKENS`, `INSTALL`. **Ruled.** 2026-11-03.
 
-**`ds-check` runs four of this system's own rules over consumer code: `unknown-token`, `bare-scale-step`, `important-flag` and `radix-duplicate`.**
+**`ds-check` runs this system's own rules over consumer code: `unknown-token`, `bare-scale-step`, `important-flag`, `radix-duplicate` and `radix-stylesheet`.**
 
 **What you see.**
 
@@ -1002,8 +1002,9 @@ This ledger records the rulings that shape the design system and the reason behi
 - `bare-scale-step` fails a numeric step of a colour scale, the brand ramps included, and names the role `semantic.css` declares for that step.
 - `important-flag` fails `!important`.
 - `radix-duplicate` fails a named import from `@radix-ui/themes` of a component the roster ships under the same name, and names the import to write.
+- `radix-stylesheet` fails an import of any `@radix-ui/themes/….css`, by script `import`, `import()`, `require()` or a CSS `@import`, because `dsiab/styles.css` already contains it and a copy loaded after it undoes every override with nothing to report it.
 
-**The test for a rule, refined.** The rules that shipped first pass one test: would it be a defect in a codebase that had never heard of this system? `unknown-token` and `radix-duplicate` pass it unchanged, because a name that resolves to nothing and a second copy of an installed component are defects anywhere. `bare-scale-step` and `important-flag` pass a refined test: would it be a defect in a file that already builds on this system? So they run only in a dsiab file, one whose comment-free text imports `dsiab` or holds `var(--ds-` or `.radix-themes`. A product page that never touched the system keeps its own `!important`.
+**The test for a rule, refined.** The rules that shipped first pass one test: would it be a defect in a codebase that had never heard of this system? `unknown-token` and `radix-duplicate` pass it unchanged, because a name that resolves to nothing and a second copy of an installed component are defects anywhere. `bare-scale-step` and `important-flag` pass a refined test: would it be a defect in a file that already builds on this system? So they run only in a dsiab file, one whose comment-free text imports `dsiab` or holds `var(--ds-` or `.radix-themes`. A product page that never touched the system keeps its own `!important`. `radix-stylesheet` passes the same test at the scope of the run: it fires in every file when some file imports `dsiab`, because the second stylesheet usually sits in a global CSS file or an entry point with no marker of its own. Its gate is the import alone, since a project on Radix Themes without dsiab writes `.radix-themes`, and a `--ds-` prefix of its own is common.
 
 **The facts.** One function, `buildCheckFacts` in `src/foundations/checkFacts.mjs`, derives every fact the rules read: the known names, the names a suggestion may use, the colour scales (each prefix with an alpha step, which picks up `oxblood` and the status aliases), the role for each step, and the duplicates. In a checkout `ds-check` builds them from the sources, and in an install it reads `dist/check-facts.json`, which the build writes with the same function. When neither loads, the three rules that need them print NOT RUN with the reason and are never reported clean.
 
@@ -1011,13 +1012,15 @@ This ledger records the rulings that shape the design system and the reason behi
 
 **Allowances.** An allowance for a rule that did not run on its file, because the facts did not load, the file is not a dsiab file, or the file is the package's own source, is reported as not evaluated and never as stale.
 
-**The package's own source.** Over this repository, `bare-scale-step` skips `src/tokens` and the stories, and `radix-duplicate` skips all of `src/`, because those are the layer the rules protect. The two other rules run there. The one `!important` in the source, in `components.css`, overrides Radix's own flag on the Skeleton pulse to honour reduced motion, and carries the one allowance.
+**The package's own source.** Over this repository, `bare-scale-step` skips `src/tokens` and the stories, and `radix-duplicate` and `radix-stylesheet` skip all of `src/`, because those are the layer the rules protect. The two other rules run there. The one `!important` in the source, in `components.css`, overrides Radix's own flag on the Skeleton pulse to honour reduced motion, and carries the one allowance.
 
-**Not caught.** `--accent-contrast`, `--accent-surface` and `--color-*`, a raw hex value, a string passed to a call such as `cn("…")`, a name built at runtime, and a CSS module with no dsiab marker of its own. A raw hex rule would fit the dsiab-file scope and stays an open question.
+**Not caught.** `--accent-contrast`, `--accent-surface` and `--color-*`, a raw hex value, a string passed to a call such as `cn("…")`, a name built at runtime, and a CSS module with no dsiab marker of its own. A raw hex rule would fit the dsiab-file scope and stays an open question. A Radix stylesheet loaded by a `<link>` tag, a bundler entry or a CDN URL is not caught either.
+
+**Not a rule: a missing `dsiab/styles.css`.** Its absence is a fact about the whole application, and `ds-check` is run over the code a change touched, so a subtree run would report it on nearly every run, and the entry point that imports the stylesheet lies outside the subtree. A gate on the project root would still misreport a stylesheet loaded by a bundler entry or a `<link>` tag. The console warning in development ([[missing-provider-warning]]) already reports the failure where it happens, with no false positive.
 
 **Changed from.** `ds-check` ran five rules that are defects in any codebase, and its help said the system's own rules are not run over consumer code.
 
-**Status.** Ruled 2026-11-03. No later ruling amends it.
+**Status.** Ruled 2026-11-03. On 2026-11-03 `radix-stylesheet` joined, scoped to a run that imports dsiab, and a rule for a missing `dsiab/styles.css` was declined, as **Not a rule** records.
 
 ### compiled-component-reference
 
@@ -1053,11 +1056,11 @@ This ledger records the rulings that shape the design system and the reason behi
 
 **Why.** A rule the agent has read is not a rule it applies while the feature has its attention, and a pass that checks only what the tool already reports adds nothing. A light, plain register is used instead of a forceful audit. The effect is unmeasured for dsiab until the eval set (PR 2) runs, and at its planned size that eval can show an effect only on the checks no rule covers.
 
-**Not checked.** `ds-check` does not flag a missing `import "dsiab/styles.css"` or an import of `@radix-ui/themes/styles.css` in a dsiab file. Both are lines of source, so a rule could catch them, and that stays an open question.
+**Not checked.** `ds-check` does not flag a missing `import "dsiab/styles.css"`, for the reason [[ds-check-dsiab-rules]] gives. Since 2026-11-03 its `radix-stylesheet` rule flags an import of `@radix-ui/themes/styles.css` in a project that imports dsiab.
 
 **Changed from.** Step 3 named five rules by id, the skill had no read-back step and no route to a per-component reference, and the install section restated the reasons in `references/rules.md` as prose.
 
-**Status.** Ruled 2026-11-03. No later ruling amends it.
+**Status.** Ruled 2026-11-03. On 2026-11-03 the second Radix stylesheet left **Not checked**, when [[ds-check-dsiab-rules]] gained `radix-stylesheet`.
 
 ### eval-measures-not-gates
 
