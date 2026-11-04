@@ -187,6 +187,7 @@ const INTERNAL_MODULES: Readonly<Record<string, string>> = {
   "palette/generate": "the step generator that customBrand calls.",
   "palette/oklch": "the OKLab maths under the palette modules. Kept apart from foundations/_assert.ts on purpose, and its header says why.",
   "palette/parseSeed": "the brand seed parser that Provider and customBrand call.",
+  "palette/surfaces": "the floors, inks and surfaces the generator measures on ([[palette-surface-table]]). Nothing publishes it.",
 
   // src/powersearch. The model layer behind PowerSearch. src/powersearch/index.ts is a folder barrel that src/index.ts does not re-export.
   "powersearch/formatFilterValue": "PowerSearch's filter-value formatter, and PowerSearch is its only caller.",
