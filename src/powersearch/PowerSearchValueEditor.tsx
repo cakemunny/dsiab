@@ -14,11 +14,11 @@
  *     DateRangeInput, Select, MultiSelect, Tokenizer, Typeahead) — never Astryx's TextInput/Selector.
  *   - Upstream's LOCAL `createStaticSource` copy (PowerSearchValueEditor.tsx:50-62) is COLLAPSED into the
  *     shared one exported from `Typeahead.tsx` (Rule-11 reuse).
- *   - `enum` / `enum_list` → our compound `Select` / `MultiSelect` (D2 option normalization); the two
+ *   - `enum` / `enum_list` → our compound `Select` / `MultiSelect`, with options normalized to one shape; the two
  *     auto-commit types (`enum`, `date_relative`) fire `onChange(value, shouldSave=true)`.
  *   - `date_absolute` marshals unixSeconds ⇄ ISODateString; `date_range` marshals ABSOLUTE endpoints ⇄
  *     our `DateRange` ISO; `time` rides ISOTimeString.
- *   - `nested` is DEFERRED (D20 flat-AND-only) → renders nothing; `empty` (boolean) has no editor (the
+ *   - `nested` is DEFERRED (v1 combines conditions with a flat AND only, [[power-search]]) → renders nothing; `empty` (boolean) has no editor (the
  *     popover auto-commits is_true/is_false).
  */
 

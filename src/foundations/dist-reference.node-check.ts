@@ -21,7 +21,8 @@
    It does not compare against `dist/`: every build writes the files again, the
    same way `dist/registry.json` is handled.
    ============================================================================= */
-import { readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, test, expect } from "vitest";
 import { findLineageMatches } from "./lineageTerms";
 import { bannedIn } from "../../scripts/dist-decisions.mjs";
@@ -76,8 +77,7 @@ function referenceProblems(set: Map<string, string>, c: Ctx): Problem[] {
     for (const m of findLineageMatches(text)) add(file, `lineage term "${m.term}": ${m.matched}`);
     for (const m of text.matchAll(/(?<![A-Za-z0-9_./-])src\/[A-Za-z0-9/._-]*/g)) add(file, `src/ path ${m[0]}`);
     for (const b of bannedIn(text)) add(file, `banned term ${b.term} x${b.count}`);
-    // A section code of a private spec ("D12") reads as a citation a package reader cannot look up.
-    for (const m of text.matchAll(/\bD\d{1,2}\b/g)) add(file, `internal section code ${m[0]}`);
+    for (const code of sectionCodes(text)) add(file, `internal section code ${code}`);
     for (const m of text.matchAll(/\[\[([A-Za-z0-9]+(?:-[A-Za-z0-9]+)+)\]\]/g)) {
       if (!c.rulings.has(m[1])) add(file, `[[${m[1]}]] heads no entry in the ledger`);
     }
@@ -105,6 +105,21 @@ function planted(file: string, edit: (text: string) => string): Map<string, stri
   return copy;
 }
 const problemsOf = (set: Map<string, string>) => referenceProblems(set, ctx).map((p) => `${p.file}: ${p.problem}`);
+
+
+/** A section code of a private spec ("D12") reads as a citation a package reader cannot look up. */
+function sectionCodes(text: string): string[] {
+  return [...text.matchAll(/\bD\d{1,2}\b/g)].map((m) => m[0]);
+}
+
+/** Every `.d.ts` under `dir`, as [path relative to dir, text]. */
+function declarations(dir: string, rel = ""): [string, string][] {
+  return readdirSync(join(dir, rel), { withFileTypes: true }).flatMap((e) => {
+    const r = rel ? `${rel}/${e.name}` : e.name;
+    if (e.isDirectory()) return declarations(dir, r);
+    return e.name.endsWith(".d.ts") ? [[r, readFileSync(join(dir, r), "utf8")] as [string, string]] : [];
+  });
+}
 
 describe("the compiled component reference ([[compiled-component-reference]])", () => {
   test("the real build has no problem", () => {
@@ -160,9 +175,11 @@ describe("the compiled component reference ([[compiled-component-reference]])", 
     expect(problemsOf(planted("Button.md", (t) => t + "x".repeat(MAX_FILE)))).toContain(`Button.md: over ${MAX_FILE} bytes`);
   });
 
+  // A second whole TypeScript program over the source: 3.3 s on one core alone, past vitest's 5 s
+  // default on a loaded two-core CI runner. The limit names that cost instead of hiding it.
   test("two builds give identical bytes", () => {
     expect([...buildReference()]).toEqual([...files]);
-  });
+  }, 30_000);
 });
 
 describe("the props are the right props", () => {
@@ -230,5 +247,21 @@ describe("one path, named the same everywhere", () => {
     expect(unnamedPaths(skill), "skills/dsiab/SKILL.md must name the reference the build writes").toEqual([]);
     // RED: a skill that names a renamed directory fails both paths.
     expect(unnamedPaths(skill.replaceAll("dsiab/components/", "dsiab/reference/"))).toEqual(REFERENCE_PATHS);
+  });
+});
+
+describe("the shipped type declarations", () => {
+  // The .d.ts carry the JSDoc of every export, including the ones the reference never prints, and a
+  // consumer's editor shows them on hover. The build writes them, so this reads dist/ when it exists:
+  // CI builds before this lane, and a local run without a build has nothing to read.
+  test("carry no internal section code", () => {
+    if (!existsSync("dist/index.d.ts")) {
+      expect(process.env.CI, "CI builds before this lane, so dist/ must exist there").toBeFalsy();
+      return;
+    }
+    const found = declarations("dist").flatMap(([file, text]) => sectionCodes(text).map((c) => `${file}: ${c}`));
+    expect(found).toEqual([]);
+    // RED: a planted code in a hover doc is found.
+    expect(sectionCodes("/** Restores the size (the D5 fix). */")).toEqual(["D5"]);
   });
 });

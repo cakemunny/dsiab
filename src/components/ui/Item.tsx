@@ -100,7 +100,7 @@ export interface ItemProps {
    * When set, emits `aria-selected="true" | "false"`; when omitted, falls back to the legacy
    * `true | undefined` derived from `role` + `isSelected`. Lets a collection distinguish a
    * SELECTABLE row (unselected → `"false"`) from a pure-navigation row (no attribute) — TreeList
-   * needs this (D12 / DECISIONS [[tree-list]]); List/menus pass nothing and keep the legacy behaviour.
+   * needs this ([[tree-list]]); List/menus pass nothing and keep the legacy behaviour.
    */
   ariaSelected?: boolean;
   /**
