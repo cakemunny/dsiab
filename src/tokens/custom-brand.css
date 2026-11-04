@@ -79,6 +79,20 @@
   --ds-custom-surface: var(--ds-brand-surface);
   --ds-custom-indicator: var(--ds-brand-indicator);
   --ds-custom-track: var(--ds-brand-track);
+  /* The filled button and the helper layers ([[seeded-brand-writer]]). theme.css maps them. */
+  --ds-custom-solid: var(--ds-brand-solid);
+  --ds-custom-on-solid: var(--ds-brand-on-solid);
+  --ds-custom-ring-stack: var(--ds-brand-ring-stack);
+  --ds-custom-ring-stack-scrim: var(--ds-brand-ring-stack-scrim);
+  --ds-custom-ring-stack-scrim-light: var(--ds-brand-ring-stack-scrim-light);
+  --ds-custom-part-edge: var(--ds-brand-part-edge);
+  --ds-custom-thumb-stroke: var(--ds-brand-thumb-stroke);
+  --ds-custom-mark-edge: var(--ds-brand-mark-edge);
+  --ds-custom-dash-stack: var(--ds-brand-dash-stack);
+  --ds-custom-slider-thumb-stack: var(--ds-brand-slider-thumb-stack);
+  --ds-custom-warning-dot-edge: var(--ds-brand-warning-dot-edge);
+  --ds-custom-success-dot-edge: var(--ds-brand-success-dot-edge);
+  --ds-custom-error-dot-edge: var(--ds-brand-error-dot-edge);
 }
 
 /* Both selector shapes — see the header. The first covers an explicit
@@ -115,6 +129,19 @@
   --ds-custom-surface: var(--ds-brand-dark-surface);
   --ds-custom-indicator: var(--ds-brand-dark-indicator);
   --ds-custom-track: var(--ds-brand-dark-track);
+  --ds-custom-solid: var(--ds-brand-dark-solid);
+  --ds-custom-on-solid: var(--ds-brand-dark-on-solid);
+  --ds-custom-ring-stack: var(--ds-brand-dark-ring-stack);
+  --ds-custom-ring-stack-scrim: var(--ds-brand-dark-ring-stack-scrim);
+  --ds-custom-ring-stack-scrim-light: var(--ds-brand-dark-ring-stack-scrim-light);
+  --ds-custom-part-edge: var(--ds-brand-dark-part-edge);
+  --ds-custom-thumb-stroke: var(--ds-brand-dark-thumb-stroke);
+  --ds-custom-mark-edge: var(--ds-brand-dark-mark-edge);
+  --ds-custom-dash-stack: var(--ds-brand-dark-dash-stack);
+  --ds-custom-slider-thumb-stack: var(--ds-brand-dark-slider-thumb-stack);
+  --ds-custom-warning-dot-edge: var(--ds-brand-dark-warning-dot-edge);
+  --ds-custom-success-dot-edge: var(--ds-brand-dark-success-dot-edge);
+  --ds-custom-error-dot-edge: var(--ds-brand-dark-error-dot-edge);
 }
 
 /* --- the map: this brand is the accent. Mode-independent, one arm, exactly as

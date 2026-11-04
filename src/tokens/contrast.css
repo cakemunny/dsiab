@@ -14,7 +14,8 @@
 
    Scope: the on-SOLID accent foreground and the shifted warning foreground,
    LIGHT mode only. APCA and the current WCAG-driven choice agree on every accent
-   EXCEPT orange — so orange is the sole accent override. Radix only pins dark
+   EXCEPT orange — so orange is the sole named accent override. A seeded brand
+   takes the glyph ink its generator measured, at the end of this file. Radix only pins dark
    foregrounds for amber/lime/mint/sky/yellow (all light fills, which APCA also
    wants dark), and the semantic fills already use white (= APCA's pick). The
    warning shift to orange under a gold, yellow, amber or lime brand has its own
@@ -54,4 +55,11 @@
 .radix-themes[data-contrast="apca"]:not(.dark):is([data-accent-color="gold"], [data-accent-color="yellow"], [data-accent-color="amber"], [data-accent-color="lime"]),
 .radix-themes[data-contrast="apca"]:not(.dark) .radix-themes:is([data-accent-color="gold"], [data-accent-color="yellow"], [data-accent-color="amber"], [data-accent-color="lime"]) {
   --warning-contrast: #fff;
+}
+
+/* A seeded brand: the glyph ink the generator measured as the higher APCA Lc on the seed's
+   step 9 ([[seeded-brand-writer]]), in light, as above. */
+.radix-themes[data-contrast="apca"]:not(.dark)[data-accent-color="ds-custom"],
+.radix-themes[data-contrast="apca"]:not(.dark) .radix-themes[data-accent-color="ds-custom"] {
+  --accent-contrast: var(--ds-brand-apca-contrast);
 }
