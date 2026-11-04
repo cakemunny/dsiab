@@ -1483,6 +1483,33 @@ White on `orange-9` measured 2.97:1, under the 3:1 floor of 2026-06-20 for text 
 
 **Status.** Ruled 2026-11-04.
 
+### seeded-soft-text-as-painted
+
+**Tags.** `COLOUR`, `ACCESSIBILITY`. **Ruled.** 2026-11-04.
+
+**A generated brand's step 11 is held at 4.5:1 as a soft fill paints it: the fill's alpha step on the page and on a card, and step 11's alpha step on that, for all six neutrals. In dark it holds at rest, on hover and on press. In light it holds at rest.**
+
+**What you see.** The accent Badge and a soft Button paint `--accent-a11` on `--accent-a3`, and a soft Button moves its fill to `--accent-a4` on hover and open and to `--accent-a5` on press. Under a seeded brand those labels now read at least 4.5:1. Before, `{ seed: "#1a5fb4" }` in dark read `#5791dc` on `#1d2d45`, 4.28:1, and fell to 3.52:1 on press on a card. Across 14 seeds, six neutrals, the page and a card, 210 soft labels read under 4.5:1: 162 in dark, on every state and on both surfaces, and 48 in light at rest on the page, where `#00a86b`, `#fff59d`, `#ffd400` and `#ff8c00` read 4.41 to 4.47:1 on the off-white page.
+
+**Two causes, both in `src/palette/generate.ts`.**
+
+1. **The dark alpha steps were derived over black.** Radix derives its dark alpha steps over `#111111`: blue-dark-a3 laid over `#111111` gives blue-dark-3 to within a byte. The generator derived its own over `#000`, so on the real page every dark tint painted lighter than its solid step. It now derives them over `#111111`. The light base stays white, which is Radix's too.
+2. **Step 11 was held against the solid step 3, not against what paints.** A translucent label laid over a translucent fill is not the solid step on the solid step. The light pages are off-white (`#fcfcfc` and its neighbours), and the dark pages and cards sit up to eight bytes off `#111111`, so the solid pair overstated the painted one. Step 11 is now searched against the painted pair, worst case over each neutral's page and card, in light on step 3 and in dark on step 5. In dark, step 5 is the lightest of the three soft fills, so clearing it clears every state.
+
+**Why dark holds every state and light only rest.** A generated brand is held to what the named accents deliver. Measured from Radix Colors 3.0, every named dark accent's step 11 clears 4.5:1 on its own alpha steps 3, 4 and 5 on every neutral's page and card, 4.66:1 at the lowest (blue on a card). In light, the named accents do not clear their hover fill: 16 of them read under 4.5:1 on step 4, and 24 on step 5. Holding a generated light brand to hover and press would ask more of it than of any named accent, so light is held at rest only.
+
+**The margin.** The painted pair is held at 4.55:1, not 4.5. A translucent colour is stored as four bytes and read back through the 8-bit canvas `parseColor` uses, and on a soft fill near 27% opacity that moved the ratio by up to 0.016 (`#1a5fb4`'s dark press fill on a mauve card, 4.495:1 in the generator and 4.481:1 through the helper). 0.05 covers three times that. The solid text steps need no margin, because they are tested as the byte they ship.
+
+**What else moves.** Step 11 is also `--ds-text-link` and `--ds-icon-interactive`, so for a seeded brand those move by the same amount, toward more contrast. In dark every alpha step changes, because its base changed, while the solid steps it composites to on the page stay as they were. A named accent does not move: nothing in `theme.css`, `custom-brand.css` or the Radix scales changed.
+
+**Guarded by** `_internal/Seeded brand text` → SoftLabelsAsPainted, in `src/theme/_seeded-brand-text.stories.tsx`. It renders the real Badge and a Radix soft Button, clones them into a `ds-custom` theme for 14 seeds, both appearances, six neutrals, the page and a card, proves each part paints `--accent-a11` on `--accent-a3`, and holds 1,008 labels at 4.5:1. It went red in both lanes on the generator before this ruling (210 labels, `#1a5fb4` in dark at 4.28:1 on the gray page), and again with the margin removed (3 labels, `#1a5fb4` on press on a dark card, 4.48 to 4.50:1). `src/palette/generate.logic.test.ts` holds the dark alpha steps compositing back to their solids over `#111111`.
+
+**Not covered.** The soft hover and press states in light, for the reason above. They are a gap shared with the named accents, not a generated-brand defect. The soft Callout paints the info family, not the accent, so it is out of this ruling. The surfaces are written in the generator as the hex values Radix Themes 3.3 ships, and the play reads them live, so a Radix change that moves one shows up as a failure there. The custom-accent plan's surface table is meant to own them in one place later.
+
+**Changed from.** [[seeded-brand-collisions]] and the generator's first contract, which held step 11 at 4.5:1 against the solid step 3 in both appearances and derived the dark alpha steps over black.
+
+**Status.** Ruled 2026-11-04. No later ruling amends it.
+
 ### dark-override-selectors
 
 **Tags.** `TOKENS`, `FOUNDATIONS`. **Ruled.** 2026-08-12.

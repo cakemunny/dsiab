@@ -135,6 +135,68 @@ export function contrastRatio(a: RGB, b: RGB): number {
 
 const WHITE: RGB = { r: 255, g: 255, b: 255 };
 const BLACK: RGB = { r: 0, g: 0, b: 0 };
+/** The page a dark alpha step is derived over. Radix derives its own dark alpha steps over
+ *  #111111, not black: blue-dark-a3 laid over #111111 gives blue-dark-3 to within a byte, and
+ *  laid over black it does not. Deriving ours over black made every dark tint paint lighter
+ *  than its solid on the real page, which took a soft Button's label under 4.5:1
+ *  ([[seeded-soft-text-as-painted]]). The light base stays white, which is Radix's too. */
+const DARK_ALPHA_BASE: RGB = { r: 17, g: 17, b: 17 };
+
+/** The surfaces a soft fill sits on, for the six neutrals (gray, mauve, slate, sage, olive,
+ *  sand) as Radix Themes 3.3 ships them. In light that is step 1, the page `--ds-bg-base`
+ *  paints, and white, the card `--ds-bg-raised` paints. In dark it is step 1 and step 2, which
+ *  `--ds-bg-raised` paints there. A text step is measured over each, because only white is an
+ *  alpha base: the light pages are off-white, and the dark pages and cards sit up to eight
+ *  bytes off #111111. `_internal/Seeded brand text` reads the live surfaces, so a Radix change
+ *  that moves one of them shows up there. */
+const SOFT_SURFACES: Record<Appearance, RGB[]> = {
+  light: ["#fcfcfc", "#fdfcfd", "#fcfcfd", "#fbfdfc", "#fcfdfc", "#fdfdfc", "#ffffff"].map(hexToRgb),
+  dark: [
+    "#111111", "#121113", "#111113", "#101211", "#111210", "#111110",
+    "#191919", "#1a191b", "#18191b", "#171918", "#181917", "#191918",
+  ].map(hexToRgb),
+};
+
+/** The soft fill a step-11 label is held against: step 3 (the rest fill) in light, step 5 (the
+ *  press fill) in dark. See the block above TEXT_FLOOR for why the two differ. */
+const SOFT_FILL_STEP: Record<Appearance, number> = { light: 3, dark: 5 };
+
+function hexToRgb(h: string): RGB {
+  return { r: parseInt(h.slice(1, 3), 16), g: parseInt(h.slice(3, 5), 16), b: parseInt(h.slice(5, 7), 16) };
+}
+
+/** A `#rrggbbaa` alpha step laid over an opaque `under`, as the browser blends it. */
+function compositeAlpha(alpha: string, under: RGB): RGB {
+  const n = (i: number) => parseInt(alpha.slice(i, i + 2), 16);
+  const a = n(7) / 255;
+  return { r: n(1) * a + under.r * (1 - a), g: n(3) * a + under.g * (1 - a), b: n(5) * a + under.b * (1 - a) };
+}
+
+/** How far above the floor a label measured as it paints is held. A translucent colour is
+ *  stored as four bytes and read back through an 8-bit canvas, and on a soft fill near 27%
+ *  opacity that moved the ratio by up to 0.016 (#1a5fb4's dark press fill on a mauve card,
+ *  4.495:1 here and 4.481:1 through `_assert.ts`'s `parseColor`). 0.05 covers three times that.
+ *  The solid steps need no margin: they are tested as the byte they ship. */
+const PAINTED_MARGIN = 0.05;
+
+/** The worst ratio of a text step on a soft fill as it paints: the fill's alpha step laid over
+ *  each surface, and the label's alpha step laid over that, which is what Radix's soft
+ *  Button does (`color: var(--accent-a11)` on `background-color: var(--accent-a3)`). A
+ *  translucent label over a fill is not the solid step on the solid fill, and on a near-black
+ *  seed, whose low steps sit darker than the page, the difference took it under the floor. */
+function paintedOnSoftFill(fill: RGB, appearance: Appearance): (fg: RGB) => number {
+  const base = appearance === "light" ? WHITE : DARK_ALPHA_BASE;
+  const fillAlpha = alphaOver(fill, base);
+  return (fg) => {
+    const fgAlpha = alphaOver(fg, base);
+    let worst = Infinity;
+    for (const surface of SOFT_SURFACES[appearance]) {
+      const under = compositeAlpha(fillAlpha, surface);
+      worst = Math.min(worst, contrastRatio(compositeAlpha(fgAlpha, under), under));
+    }
+    return worst;
+  };
+}
 
 /** The alpha step whose composite over `bg` equals `target`.
  *  Standard derivation: take the smallest alpha that can still reach the target
@@ -172,12 +234,14 @@ export function generateBrandScale(seed: RGB, appearance: Appearance): BrandScal
     shaped.push(inSrgbGamut(oklchToOklab(lch)) ? lch : gamutClamp(lch).lch);
   }
 
-  // The text steps must clear their floor against step 3, the darkest tint a soft
-  // fill uses — clearing it clears steps 1 and 2 too. See the block above.
+  // The text steps must clear their floor against the tint they sit on. Step 12 is
+  // held against step 3. Step 11 is held against a soft fill as it paints: step 3 in
+  // light, step 5 in dark ([[seeded-soft-text-as-painted]]). See the block below.
   const step3 = oklabToSrgb(oklchToOklab(shaped[2]!));
-  const eleven = enforceTextContrast(shaped[10]!, step3, TEXT_FLOOR, appearance);
+  const softFill = oklabToSrgb(oklchToOklab(shaped[SOFT_FILL_STEP[appearance] - 1]!));
+  const eleven = enforceTextContrast(shaped[10]!, paintedOnSoftFill(softFill, appearance), TEXT_FLOOR + PAINTED_MARGIN, appearance);
   shaped[10] = eleven.lch;
-  const twelve = enforceTextContrast(shaped[11]!, step3, STRONG_TEXT_FLOOR, appearance);
+  const twelve = enforceTextContrast(shaped[11]!, (fg) => contrastRatio(fg, step3), STRONG_TEXT_FLOOR, appearance);
   shaped[11] = twelve.lch;
   // Monotonicity survives the adjustment: step 12 must stay past step 11.
   if (appearance === "light" ? shaped[11]!.L > shaped[10]!.L : shaped[11]!.L < shaped[10]!.L) {
@@ -185,7 +249,7 @@ export function generateBrandScale(seed: RGB, appearance: Appearance): BrandScal
   }
 
   const solidRgb = shaped.map((c) => oklabToSrgb(oklchToOklab(c)));
-  const bg = appearance === "light" ? WHITE : BLACK;
+  const bg = appearance === "light" ? WHITE : DARK_ALPHA_BASE;
   const nine = solidRgb[8]!;
 
   return {
@@ -216,8 +280,19 @@ export function generateBrandScale(seed: RGB, appearance: Appearance): BrandScal
    is WCAG AA for text, which the shipped TEXT_ON_BG pairings already use.
 
    So after the ramp is shaped, the two text steps are DARKENED (light) or
-   LIGHTENED (dark) until they clear their floor against step 3 — the darkest of
-   the three tints a soft fill can use, so clearing it clears 1 and 2 as well.
+   LIGHTENED (dark) until they clear their floor. Step 12 is held against step 3.
+   Step 11 is held against a soft fill AS IT PAINTS: the fill's alpha step over
+   the page and the card of each of the six neutrals, and step 11's alpha step
+   over that, which is
+   what a soft Button draws. The fill is step 3 in light and step 5 in dark. A
+   soft Button paints step 3 at rest, step 4 on hover and step 5 on press, so in
+   dark, where step 5 is the lightest of the three, clearing it clears every
+   state. Every named dark accent already clears 4.5:1 there, at rest, hover and
+   press, on the page and on a card (4.66:1 at the lowest, blue on a card), so this holds a generated dark brand to what the named ones
+   deliver. In light the named accents do not clear their hover fill (16 of them
+   fall under 4.5:1 on step 4), so a generated light brand is held at rest only,
+   and the hover and press states in light are recorded as a gap in
+   [[seeded-soft-text-as-painted]].
    Chroma and hue are untouched; only lightness moves, which is the same axis the
    shape already travels, so the ramp stays monotonic.
    -------------------------------------------------------------------------- */
@@ -227,12 +302,12 @@ const TEXT_FLOOR = 4.5;
 /** Step 12 is the high-contrast text step; Radix keeps it far above the floor. */
 const STRONG_TEXT_FLOOR = 7;
 
-/** Move `lch` along L, away from `bg`, until it clears `floor` — or until it runs
+/** Move `lch` along L, away from the background `ratio` measures against, until it clears `floor` — or until it runs
  *  out of room. Returns the adjusted colour and whether the floor was reached, so
  *  a seed that cannot satisfy the contract is REPORTED rather than silently
  *  shipped just under it. */
 function enforceTextContrast(
-  lch: LCH, bg: RGB, floor: number, appearance: Appearance,
+  lch: LCH, ratio: (fg: RGB) => number, floor: number, appearance: Appearance,
 ): { lch: LCH; met: boolean } {
   const darken = appearance === "light";
   // ALWAYS return a gamut-clamped colour. Returning the raw LCH let the final
@@ -247,26 +322,26 @@ function enforceTextContrast(
   // real number; what ships is 8 bits, and rounding was landing it at 4.4848
   // against a 4.5 floor — a guard that verifies a value other than the one that
   // renders is not a guard.
-  if (contrastRatio(at(lch.L), bg) >= floor) return { lch: solve(lch.L), met: true };
+  if (ratio(at(lch.L)) >= floor) return { lch: solve(lch.L), met: true };
 
   const limit = darken ? 0 : 1;
-  if (contrastRatio(at(limit), bg) < floor) return { lch: solve(limit), met: false };
+  if (ratio(at(limit)) < floor) return { lch: solve(limit), met: false };
 
   let lo = darken ? limit : lch.L;
   let hi = darken ? lch.L : limit;
   for (let i = 0; i < 24; i++) {
     const mid = (lo + hi) / 2;
-    if (contrastRatio(at(mid), bg) >= floor) { if (darken) lo = mid; else hi = mid; }
+    if (ratio(at(mid)) >= floor) { if (darken) lo = mid; else hi = mid; }
     else { if (darken) hi = mid; else lo = mid; }
   }
   // Walk off the boundary until the ROUNDED colour clears the floor. One or two
   // steps of 0.002 in L; bounded so a pathological hue cannot loop.
   let L = darken ? lo : hi;
-  for (let i = 0; i < 40 && contrastRatio(at(L), bg) < floor; i++) {
+  for (let i = 0; i < 40 && ratio(at(L)) < floor; i++) {
     L += darken ? -0.002 : 0.002;
     if (L < 0 || L > 1) { L = limit; break; }
   }
-  return { lch: solve(L), met: contrastRatio(at(L), bg) >= floor };
+  return { lch: solve(L), met: ratio(at(L)) >= floor };
 }
 
 /** Both appearances at once — what the Provider and the CLI both need. */
