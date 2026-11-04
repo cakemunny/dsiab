@@ -3,9 +3,13 @@
 
    The math is the apca-w3 package (github.com/Myndex/apca-w3), imported
    unchanged as a development dependency. apca-w3 is Copyright © 2019-2022
-   Andrew Somers / Myndex, under its own Limited W3 License, which permits tools
-   that check web content against WCAG. This file is only an adapter from the
-   system's RGBA shape to that package, and therefore holds none of its code.
+   Andrew Somers / Myndex, under its own Limited W3 License, which permits its
+   use for predicting the contrast of web content in support of WCAG. This file
+   is only an adapter from the system's RGBA shape to that package, and
+   therefore holds none of its code. The reference is what the guards measure
+   with. The runtime copy the generator uses is the port in
+   `src/palette/apca.ts`, under the conditions [[apca-runtime-port]] records,
+   and no file in this folder imports it (`apca-port.node-check.ts`).
 
    Like the WCAG math and OKLCH hue helpers in _assert.ts, these run only in the
    foundation story tests (offline / verification) — never at component runtime.

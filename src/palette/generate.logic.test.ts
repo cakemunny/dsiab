@@ -101,7 +101,7 @@ describe("alpha steps composite back to their solids", () => {
     return { r: c.r * al + bg.r * (1 - al), g: c.g * al + bg.g * (1 - al), b: c.b * al + bg.b * (1 - al) };
   };
   it.each(SEEDS)("%s matches within a rounding step", (s) => {
-    for (const [mode, bg] of [["light", { r: 255, g: 255, b: 255 }], ["dark", { r: 0, g: 0, b: 0 }]] as const) {
+    for (const [mode, bg] of [["light", { r: 255, g: 255, b: 255 }], ["dark", { r: 17, g: 17, b: 17 }]] as const) {
       const sc = generateBrandScale(hex(s), mode);
       sc.alpha.forEach((a, i) => {
         const got = composite(a, bg);

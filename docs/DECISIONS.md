@@ -1536,6 +1536,33 @@ White on `orange-9` measured 2.97:1, under the 3:1 floor of 2026-06-20 for text 
 
 **Status.** Ruled 2026-11-04.
 
+### seeded-soft-text-as-painted
+
+**Tags.** `COLOUR`, `ACCESSIBILITY`. **Ruled.** 2026-11-04.
+
+**A generated brand's step 11 is held at 4.5:1 as a soft fill paints it: the fill's alpha step on the page and on a card, and step 11's alpha step on that, for all six neutrals. In dark it holds at rest, on hover and on press. In light it holds at rest.**
+
+**What you see.** The accent Badge and a soft Button paint `--accent-a11` on `--accent-a3`, and a soft Button moves its fill to `--accent-a4` on hover and open and to `--accent-a5` on press. Under a seeded brand those labels now read at least 4.5:1. Before, `{ seed: "#1a5fb4" }` in dark read `#5791dc` on `#1d2d45`, 4.28:1, and fell to 3.52:1 on press on a card. Across 14 seeds, six neutrals, the page and a card, 210 soft labels read under 4.5:1: 162 in dark, on every state and on both surfaces, and 48 in light at rest on the page, where `#00a86b`, `#fff59d`, `#ffd400` and `#ff8c00` read 4.41 to 4.47:1 on the off-white page.
+
+**Two causes, both in `src/palette/generate.ts`.**
+
+1. **The dark alpha steps were derived over black.** Radix derives its dark alpha steps over `#111111`: blue-dark-a3 laid over `#111111` gives blue-dark-3 to within a byte. The generator derived its own over `#000`, so on the real page every dark tint painted lighter than its solid step. It now derives them over `#111111`. The light base stays white, which is Radix's too.
+2. **Step 11 was held against the solid step 3, not against what paints.** A translucent label laid over a translucent fill is not the solid step on the solid step. The light pages are off-white (`#fcfcfc` and its neighbours), and the dark pages and cards sit up to eight bytes off `#111111`, so the solid pair overstated the painted one. Step 11 is now searched against the painted pair, worst case over each neutral's page and card, in light on step 3 and in dark on step 5. In dark, step 5 is the lightest of the three soft fills, so clearing it clears every state.
+
+**Why dark holds every state and light only rest.** A generated brand is held to what the named accents deliver. Measured from Radix Colors 3.0, every named dark accent's step 11 clears 4.5:1 on its own alpha steps 3, 4 and 5 on every neutral's page and card, 4.66:1 at the lowest (blue on a card). In light, the named accents do not clear their hover fill: 16 of them read under 4.5:1 on step 4, and 24 on step 5. Holding a generated light brand to hover and press would ask more of it than of any named accent, so light is held at rest only.
+
+**The margin.** The painted pair is held at 4.55:1, not 4.5. A translucent colour is stored as four bytes and read back through the 8-bit canvas `parseColor` uses, and on a soft fill near 27% opacity that moved the ratio by up to 0.016 (`#1a5fb4`'s dark press fill on a mauve card, 4.495:1 in the generator and 4.481:1 through the helper). 0.05 covers three times that. The solid text steps need no margin, because they are tested as the byte they ship.
+
+**What else moves.** Step 11 is also `--ds-text-link` and `--ds-icon-interactive`, so for a seeded brand those move by the same amount, toward more contrast. In dark every alpha step changes, because its base changed, while the solid steps it composites to on the page stay as they were. A named accent does not move: nothing in `theme.css`, `custom-brand.css` or the Radix scales changed.
+
+**Guarded by** `_internal/Seeded brand text` → SoftLabelsAsPainted, in `src/theme/_seeded-brand-text.stories.tsx`. It renders the real Badge and a Radix soft Button, clones them into a `ds-custom` theme for 14 seeds, both appearances, six neutrals, the page and a card, proves each part paints `--accent-a11` on `--accent-a3`, and holds 1,008 labels at 4.5:1. It went red in both lanes on the generator before this ruling (210 labels, `#1a5fb4` in dark at 4.28:1 on the gray page), and again with the margin removed (3 labels, `#1a5fb4` on press on a dark card, 4.48 to 4.50:1). `src/palette/generate.logic.test.ts` holds the dark alpha steps compositing back to their solids over `#111111`.
+
+**Not covered.** The soft hover and press states in light, for the reason above. They are a gap shared with the named accents, not a generated-brand defect. The soft Callout paints the info family, not the accent, so it is out of this ruling. The surfaces are written in the generator as the hex values Radix Themes 3.3 ships, and the play reads them live, so a Radix change that moves one shows up as a failure there. The custom-accent plan's surface table is meant to own them in one place later.
+
+**Changed from.** [[seeded-brand-collisions]] and the generator's first contract, which held step 11 at 4.5:1 against the solid step 3 in both appearances and derived the dark alpha steps over black.
+
+**Status.** Ruled 2026-11-04. No later ruling amends it.
+
 ### dark-override-selectors
 
 **Tags.** `TOKENS`, `FOUNDATIONS`. **Ruled.** 2026-08-12.
@@ -1845,6 +1872,53 @@ Both clear WCAG 1.4.3 AA at 4.5:1. The two scrims are opposites, and white on `-
 > **The WCAG and APCA contrast mode stays, and it exists for the four brands whose warning label cannot clear both floors in its own vivid colour (2026-09-27).** Ruled by the maintainer. On gold, amber, yellow and lime brands warning shifts to orange ([brand-status-collision-gate](#brand-status-collision-gate)), and the label on the solid warning fill clears one standard only: dark ink on orange-9 reads 5.47:1 and APCA Lc 45.8, and white reads 2.97:1 and Lc 60.8. Measured over 27 colours in both appearances on six text-on-fill pairs, 324 readings, the APCA mode changes these four pairs in light and nothing else. A deeper step clears both floors: orange-11 with white reads 4.51:1 and Lc 75.8 in light, and orange-11 with dark ink reads 8.07:1 and Lc 62.3 in dark on gold, yellow and lime, while dark amber on orange-10 with black reads Lc 55.2. The maintainer rejected the deeper step because it loses the vividness of the colour, and kept orange-9. So the `contrast` prop on Provider, the Contrast control in the Storybook toolbar, `contrast.css` and the Colors page check that holds `contrast.css` to the APCA polarity all stay, every WCAG and APCA check stays, and toggling between the two modes matters only for these four colours. No shipped component paints text on the solid warning fill today, so the choice reaches a consumer who does. **Found on the way, recorded and not fixed:** the warning status dot reads 1.23 to 2.9:1 against the page in light on all 27 colours, under the 3:1 a part without text owes. **[Update 2026-09-27 ([status-dot-edges](#status-dot-edges)): the warning dot stacks its own edge, `--warning-dot-edge`, and reads 3.04:1 and Lc 55.3 or more against the page, the subtle recess, a card and a panel in light, so this gap is closed.]**
 
 ## Accessibility rulings (made during implementation, verified in tests)
+
+### apca-runtime-port
+
+**Tags.** `ACCESSIBILITY`, `CONTRIBUTING`. **Ruled.** 2026-11-04.
+
+**The system carries its own TypeScript port of APCA in `src/palette/apca.ts`, for runtime use, under five conditions taken from the apca-w3 licence. The guards keep measuring with the reference package.**
+
+**What you see.** `src/palette/apca.ts` exports `apcaY`, `apcaLcFromY` and `apcaLc`, with the constant set `SA98G`, `APCA_W3_VERSION` ("0.1.9") and `APCA_ALGORITHM` ("0.0.98G-4g"). Nothing published imports it yet. The generator and the published assessment of the custom-accent work will. The apca-w3 package stays a development dependency, and `src/foundations/apca.ts`, the test lane's adapter, still measures with it.
+
+**Why a port.** The generator needs APCA at runtime to pick inks and shades, and a published assessment needs it in a consumer's browser. The reference package is a development dependency under a limited licence, so runtime code cannot import it. And the code that picks a colour must not be the code that checks it, so the guards keep the reference.
+
+**The licence, as read.** The text is the licence file of apca-w3 0.1.9, reproduced in `THIRD-PARTY-NOTICES` section 8. This is the maintainer's reading of it, not legal advice.
+
+- Port clause: files "may be used or incorporated only in tools for web-based content or web related content in support of the WCAG accessibility guidelines, and such use must be without modification to the essential elements of the code or specific approved constants, except as required to port to a given language."
+- Constants clause: an implementation "found to be non-compliant with the correct operation and methodology as defined for APCA contrast, including but not limited to the correct indication of polarity, and use of the current approved constants, shall be deemed in breech of license".
+- Naming clause: the name APCA "is only permitted for code that is properly implementing the APCA algorithm, and maintaining sync with the current version", 0.0.98G-4g or later, and the APCA logo and "Powered by APCA" mark need written consent.
+- Keep-current clause: developers "have a duty to ensure that the most recent version of this code is used".
+- Commercial clause: "Commercial use is prohibited without a written and signed commercial license agreement, except as provided by the W3 cooperative agreement for web content only." The same licence lets apca-w3 "be used for predicting contrast for web content used for that specific purpose without royalty".
+
+A port to another language is the one change the licence names as allowed, and choosing inks and shades so that web UI meets contrast floors is predicting the contrast of web content. So the reading allows the port.
+
+**The five conditions.**
+
+1. **Exact constants and polarity.** The port keeps every 0.0.98G-4g constant and the reference's order of operations, and returns a signed Lc. `src/palette/apca.logic.test.ts` compares it with the reference with `Object.is` on 132,192 pairs: every grey on every grey, a 6-level colour cube, and 20,000 seeded random pairs, both polarities. It fails when any of 15 constants changes by 1%, and when `normBG` in the port moves from 0.56 to 0.561. The sixteenth constant, `deltaYmin`, cannot be seen in any output, because any two luminances that close already fall under `loClip`, so `apca-port.node-check.ts` also compares the whole constant block with the reference source.
+2. **Full notice.** `THIRD-PARTY-NOTICES` section 8 carries the Myndex copyright, a statement of what was ported and changed, and the apca-w3 licence unchanged, including the W3C Software and Document Notice it incorporates. The port's own header says the same.
+3. **Keep current.** `apca-port.node-check.ts` fails when the installed apca-w3 differs from `APCA_W3_VERSION`, or when the notice names a different release. `AGENTS.md` adds a pre-release step: check npm for a newer non-breaking apca-w3 and install it, which turns that check red until the port is re-checked.
+4. **Naming.** The code and the documentation may call it APCA while conditions 1 and 3 hold. No APCA logo or "Powered by APCA" mark appears anywhere.
+5. **Scope.** The notice says the calculation is licensed for predicting the contrast of web content in support of WCAG only.
+
+**Guarded by** `src/foundations/apca-port.node-check.ts`, with five arms besides a non-vacuity check, and `src/palette/apca.logic.test.ts`:
+
+- Only `src/foundations/apca.ts` and the agreement test import apca-w3, and both still do.
+- The port imports nothing.
+- No file in `src/foundations` imports the port.
+- The port's recorded version equals the installed apca-w3, and the notice names it (condition 3).
+- Every constant equals the reference source's.
+
+Each arm went red on a planted defect: an apca-w3 import in `src/utils`, an import inside the port, an import of the port in `src/foundations`, the version set to 0.1.8, and `revBG` set to 0.651.
+
+**Not covered, and for later.**
+
+- The commercial clause is the one sentence a cautious reader could hold against this use, because consumers of the package may be commercial. The text exempts web-content use under the W3 agreement, and that is the use. The licence's own route to certainty is a question in the discussion tab of the apca-w3 repository, which is optional.
+- When the port first reaches the built bundle, through the published assessment, `THIRD-PARTY-NOTICES` section 8's line saying it is not yet bundled changes, and the package's SPDX licence expression needs review, because it names MIT and OFL-1.1 only.
+
+**Changed from.** [[apca-contrast-mode]] used APCA only through the reference package in the test lane.
+
+**Status.** Ruled 2026-11-04. No later ruling amends it.
 
 ### warning-contrast-ink
 
