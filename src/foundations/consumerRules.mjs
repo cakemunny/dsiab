@@ -29,7 +29,7 @@
  * consumer's repo with nothing installed but this package.
  */
 import { readdirSync, readFileSync, statSync, lstatSync } from "node:fs";
-import { join, relative, extname, sep } from "node:path";
+import { join, relative, extname, sep, dirname, isAbsolute, resolve } from "node:path";
 import { DSIAB_RULES, prepareTree, fileContext, dsiabFindings, formatDsiabReach } from "./dsiabRules.mjs";
 
 /* ------------------------------------------------------------------------------------------------
@@ -1053,9 +1053,40 @@ export function collectFiles(root) {
   return { files, scannedByExt, skippedByExt, skippedDirs, tooLarge, unreadable };
 }
 
-/** Run every rule over a directory (or a single file). */
-export function checkTree(root) {
-  const inventory = collectFiles(root);
+/** Several roots as ONE inventory, so the rules that read the whole run (a dsiab import anywhere, a
+ *  `--ds-*` name declared anywhere) see every file at once. A root inside another is read once. */
+function collectRoots(roots) {
+  const inside = (p, dir) => { const r = relative(dir, p); return r !== "" && !r.startsWith("..") && !isAbsolute(r); };
+  const outer = roots.filter((r, i) => roots.indexOf(r) === i && !roots.some((o) => inside(r, o)));
+  const parts = outer.map(collectFiles);
+  const merged = (key) => {
+    const m = new Map();
+    for (const p of parts) for (const [e, c] of p[key]) m.set(e, (m.get(e) ?? 0) + c);
+    return m;
+  };
+  return {
+    files: parts.flatMap((p) => p.files).sort(),
+    scannedByExt: merged("scannedByExt"),
+    skippedByExt: merged("skippedByExt"),
+    skippedDirs: parts.reduce((n, p) => n + p.skippedDirs, 0),
+    tooLarge: parts.flatMap((p) => p.tooLarge),
+    unreadable: parts.flatMap((p) => p.unreadable),
+  };
+}
+
+/** The deepest directory that holds every root, so each finding names a path the reader can open. */
+function commonDir(roots) {
+  const dirs = roots.map((r) => { try { return statSync(r).isFile() ? dirname(r) : r; } catch { return r; } });
+  let base = dirs[0];
+  while (!dirs.every((d) => d === base || relative(base, d).split(sep)[0] !== "..")) base = dirname(base);
+  return base;
+}
+
+/** Run every rule over a directory (or a single file), or over several of them as one run. */
+export function checkTree(rootOrRoots) {
+  const roots = [rootOrRoots].flat().map((r) => resolve(r));
+  const root = roots.length === 1 ? roots[0] : commonDir(roots);
+  const inventory = roots.length === 1 ? collectFiles(root) : collectRoots(roots);
   const results = [];
   const unreadable = [...inventory.unreadable];
   const sources = [];
@@ -1080,7 +1111,7 @@ export function checkTree(root) {
   };
   counts.failures = counts.findings + counts.allowIssues + counts.stale;
   const notEvaluated = results.reduce((n, r) => n + r.notEvaluated.length, 0);
-  return { root, results, counts, reach: { ...inventory, unreadable, dsiab: tree, notEvaluated } };
+  return { root, roots, results, counts, reach: { ...inventory, unreadable, dsiab: tree, notEvaluated } };
 }
 
 /* ------------------------------------------------------------------------------------------------

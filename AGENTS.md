@@ -266,7 +266,7 @@ npm test                            # the story suite, with axe
 npm run test:publish                # pack it, install it elsewhere, prove the tarball works
 npm run eval -- --help              # the eval set: pre-release, needs an agent CLI and model spend
 npm run agents                      # generate the contributor agent files
-npx ds-check [path]                 # check code against the shipped rules
+npx ds-check [path...]              # check code against the shipped rules, several paths as one run
 npx ds-check --rules                # what those rules are, and how to allow a line on purpose
 ```
 

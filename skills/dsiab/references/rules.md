@@ -195,7 +195,7 @@ Beside defects in any codebase, it checks these of the rules above ([[ds-check-d
 
 ```bash
 npx ds-check                 # the current directory
-npx ds-check src/features    # a subtree, or a single file
+npx ds-check src/features    # a subtree, a single file, or several paths as one run
 npx ds-check --rules         # the rules in full, and how to allow a line on purpose
 ```
 

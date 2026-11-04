@@ -1020,7 +1020,7 @@ This ledger records the rulings that shape the design system and the reason behi
 
 **Changed from.** `ds-check` ran five rules that are defects in any codebase, and its help said the system's own rules are not run over consumer code.
 
-**Status.** Ruled 2026-11-03. On 2026-11-03 `radix-stylesheet` joined, scoped to a run that imports dsiab, and a rule for a missing `dsiab/styles.css` was declined, as **Not a rule** records.
+**Status.** Ruled 2026-11-03. On 2026-11-03 `radix-stylesheet` joined, scoped to a run that imports dsiab, and a rule for a missing `dsiab/styles.css` was declined, as **Not a rule** records. On 2026-11-04 `ds-check` began to take several paths, and they make ONE run rather than one run each, because `radix-stylesheet` and `unknown-token` read the whole run: a dsiab import in one path makes a Radix sheet in another a finding only when both are in the same run. A path inside another is read once, and `--init` still takes one directory.
 
 ### compiled-component-reference
 

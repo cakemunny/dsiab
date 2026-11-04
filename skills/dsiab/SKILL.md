@@ -124,7 +124,7 @@ is ready, made without a `ds-check` run in the same session, is invalid and must
 
 ```bash
 npx ds-check                 # the current directory
-npx ds-check src/features    # a subtree, or a single file
+npx ds-check src/features    # a subtree, a single file, or several paths as one run
 npx ds-check --rules         # every rule in full, and the allowance grammar
 ```
 

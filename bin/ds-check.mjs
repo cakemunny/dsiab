@@ -27,7 +27,7 @@
  * package. It also exports the ownership marker and the Claude Code agent table, which
  * `scripts/agents.mjs` reuses, and it runs as a command only when invoked directly.
  *
- * Usage:  npx ds-check [path]          (default: the current directory)
+ * Usage:  npx ds-check [path...]       (default: the current directory; several paths run as one check)
  *         npx ds-check --init [dir]    write the agent files into a project (default: here)
  *         npx ds-check --init --force  also replace the package's copies that differ
  *         npx ds-check --help
@@ -299,7 +299,7 @@ function main() {
   /* ---- arguments ---- */
 
   const argv = process.argv.slice(2);
-  let target = null;
+  const targets = [];
   let mode = "check";
   let force = false;
 
@@ -311,11 +311,13 @@ function main() {
     else if (arg.startsWith("-")) {
       process.stderr.write(`ds-check: unknown option \`${arg}\`. Run \`ds-check --help\`.\n`);
       process.exit(2);
-    } else if (target === null) target = arg;
-    else {
-      process.stderr.write(`ds-check: only one path is accepted (got \`${target}\` and \`${arg}\`).\n`);
-      process.exit(2);
-    }
+    } else targets.push(arg);
+  }
+  const target = targets[0] ?? null;
+
+  if (mode === "init" && targets.length > 1) {
+    process.stderr.write(`ds-check --init: one project directory, not ${targets.length} (got \`${targets.join("` `")}\`).\n`);
+    process.exit(2);
   }
 
   if (force && mode !== "init") {
@@ -331,7 +333,8 @@ function main() {
         "ds-check: check product code against the rules this design system enforces on everyone.",
         "",
         "USAGE",
-        "  npx ds-check [path]          check a directory (default: .) or a single file",
+        "  npx ds-check [path...]       check directories or files (default: .); several paths run",
+        "                               as one check, so a rule that reads the whole run sees all of them",
         "  npx ds-check --init [dir]    write the agent files into a project (default: .)",
         "  npx ds-check --init --force  also replace the package's copies that differ",
         "  npx ds-check --rules         print the rules and the allowance grammar",
@@ -413,32 +416,37 @@ function main() {
 
   /* ---- check ---- */
 
-  const root = resolve(target ?? ".");
-  if (!existsSync(root)) {
-    process.stderr.write(`ds-check: no such path \`${target ?? "."}\` (resolved to ${root}).\n`);
-    process.exit(2);
-  }
-  let stat;
-  try {
-    stat = statSync(root);
-  } catch (err) {
-    process.stderr.write(`ds-check: cannot read \`${root}\`: ${err && err.message ? err.message : err}\n`);
-    process.exit(2);
-  }
-  if (!stat.isDirectory() && !stat.isFile()) {
-    process.stderr.write(`ds-check: \`${root}\` is neither a file nor a directory.\n`);
-    process.exit(2);
+  const paths = targets.length ? targets : ["."];
+  const roots = [];
+  for (const p of paths) {
+    const root = resolve(p);
+    if (!existsSync(root)) {
+      process.stderr.write(`ds-check: no such path \`${p}\` (resolved to ${root}).\n`);
+      process.exit(2);
+    }
+    let stat;
+    try {
+      stat = statSync(root);
+    } catch (err) {
+      process.stderr.write(`ds-check: cannot read \`${root}\`: ${err && err.message ? err.message : err}\n`);
+      process.exit(2);
+    }
+    if (!stat.isDirectory() && !stat.isFile()) {
+      process.stderr.write(`ds-check: \`${root}\` is neither a file nor a directory.\n`);
+      process.exit(2);
+    }
+    roots.push(root);
   }
 
   let report;
   try {
-    report = checkTree(root);
+    report = checkTree(roots.length === 1 ? roots[0] : roots);
   } catch (err) {
-    process.stderr.write(`ds-check: failed while scanning \`${root}\`: ${err && err.stack ? err.stack : err}\n`);
+    process.stderr.write(`ds-check: failed while scanning \`${roots.join("`, `")}\`: ${err && err.stack ? err.stack : err}\n`);
     process.exit(2);
   }
 
-  process.stdout.write(`ds-check  ${root}\n\n`);
+  process.stdout.write(`ds-check  ${roots.join("  ")}\n\n`);
   process.stdout.write(`${formatReport(report)}\n`);
   process.exit(report.counts.failures > 0 ? 1 : 0);
 }
