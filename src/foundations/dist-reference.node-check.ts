@@ -175,9 +175,11 @@ describe("the compiled component reference ([[compiled-component-reference]])", 
     expect(problemsOf(planted("Button.md", (t) => t + "x".repeat(MAX_FILE)))).toContain(`Button.md: over ${MAX_FILE} bytes`);
   });
 
+  // A second whole TypeScript program over the source: 3.3 s on one core alone, past vitest's 5 s
+  // default on a loaded two-core CI runner. The limit names that cost instead of hiding it.
   test("two builds give identical bytes", () => {
     expect([...buildReference()]).toEqual([...files]);
-  });
+  }, 30_000);
 });
 
 describe("the props are the right props", () => {
