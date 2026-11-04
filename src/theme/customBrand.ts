@@ -120,3 +120,35 @@ export function applyCustomBrand(root: HTMLElement, seedInput: string): ParseRes
 export function clearCustomBrand(root: HTMLElement): void {
   for (const name of customBrandPropertyNames()) root.style.removeProperty(name);
 }
+
+/* Every seeded `Provider` writes to the same page root, so the root keeps a stack of the brands written to it
+   ([[nested-brand-ownership]]). The last brand held is the one on the root, which is the order the writes landed
+   in before the stack existed. */
+const held = new WeakMap<HTMLElement, { props: Record<string, string> }[]>();
+
+const writeBrand = (root: HTMLElement, props: Record<string, string>) => {
+  for (const [k, v] of Object.entries(props)) root.style.setProperty(k, v);
+};
+
+/**
+ * Write a brand on the root for as long as the caller holds it, and return the release. A release removes only
+ * the caller's own brand: when it was on the root, the brand held before it goes back on, and the properties are
+ * cleared only when no brand is held. A Provider with no seed holds nothing, so it never clears another
+ * Provider's brand.
+ */
+export function holdCustomBrand(root: HTMLElement, props: Record<string, string>): () => void {
+  const stack = held.get(root) ?? [];
+  held.set(root, stack);
+  const entry = { props };
+  stack.push(entry);
+  writeBrand(root, props);
+  return () => {
+    const i = stack.indexOf(entry);
+    if (i < 0) return;
+    stack.splice(i, 1);
+    if (i !== stack.length) return;
+    const next = stack[stack.length - 1];
+    if (next) writeBrand(root, next.props);
+    else clearCustomBrand(root);
+  };
+}
