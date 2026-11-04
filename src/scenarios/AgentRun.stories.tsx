@@ -376,32 +376,6 @@ function FailedStep() {
   );
 }
 
-/** A settings row: the label LEADS and the switch sits at the row's trailing edge (the shape
-    Switch.stories rules, resolved against the writing direction so RTL mirrors for free). */
-function SettingRow({
-  id,
-  label,
-  description,
-  defaultChecked,
-}: {
-  id: string;
-  label: string;
-  description: string;
-  defaultChecked?: boolean;
-}) {
-  return (
-    <Flex align="center" justify="between" gap="3">
-      <Flex direction="column" gap="1" style={{ minWidth: 0 }}>
-        <Text as="label" htmlFor={id} style={{ color: "var(--ds-text-strong)" }}>
-          {label}
-        </Text>
-        <Meta>{description}</Meta>
-      </Flex>
-      <Switch id={id} defaultChecked={defaultChecked} style={{ flexShrink: 0 }} />
-    </Flex>
-  );
-}
-
 function RunMeta() {
   const [retryLimit, setRetryLimit] = useState(5);
   return (
@@ -430,17 +404,12 @@ function RunMeta() {
         <Text weight="medium">
           Run settings
         </Text>
-        <SettingRow
-          id="auto-approve"
+        <Switch
           label="Auto-approve tool calls"
           description="Writes outside the workspace still ask."
           defaultChecked
         />
-        <SettingRow
-          id="stop-on-failure"
-          label="Stop on first failure"
-          description="Halt every remaining step when one fails."
-        />
+        <Switch label="Stop on first failure" description="Halt every remaining step when one fails." />
         {/* A FIELD, not a stray box. No `size` (it rides the control lane with the switches above
             it) and no `width` cap: the old 96px cap held the whole field shell, which is what kept
             the description out and left a 24px box floating in a 340px rail at every tier. Full

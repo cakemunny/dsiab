@@ -330,21 +330,6 @@ function Composer() {
   );
 }
 
-/* The switch row this rail repeats, in the system's one switch shape: the label LEADS and the switch
- * sits on the trailing edge, so the states line up in a single scannable column. `htmlFor` is what
- * names the control. This row predates Switch's own `label` prop ([[switch-field-label]]), which
- * renders the same arrangement as a field; moving the rail onto it is a separate, visible change. */
-function SettingSwitch({ id, label, defaultChecked }: { id: string; label: string; defaultChecked?: boolean }) {
-  return (
-    <Flex align="center" justify="between" gap="3">
-      <Text as="label" htmlFor={id} size="2">
-        {label}
-      </Text>
-      <Switch id={id} defaultChecked={defaultChecked} style={{ flexShrink: 0 }} />
-    </Flex>
-  );
-}
-
 /* The settings this conversation carries: the documents it may read, how long an answer should run,
  * how literal it should be, and which tools it may reach for. The rail is where an assistant's
  * settings actually live — the composer holds the ones you change every turn, this holds the ones you
@@ -422,9 +407,11 @@ function SettingsRail() {
         <Text size="2" weight="medium">
           Tools
         </Text>
-        <SettingSwitch id="setting-web-search" label="Web search" defaultChecked />
-        <SettingSwitch id="setting-extended-thinking" label="Extended thinking" />
-        <SettingSwitch id="setting-citations" label="Cite sources" defaultChecked />
+        {/* Each switch names itself through its own `label`: the label leads and the switch sits on the
+            trailing edge, so the states line up in one scannable column ([[switch-field-label]]). */}
+        <Switch label="Web search" defaultChecked />
+        <Switch label="Extended thinking" />
+        <Switch label="Cite sources" defaultChecked />
       </Flex>
     </Flex>
   );

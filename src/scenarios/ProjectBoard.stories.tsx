@@ -481,9 +481,9 @@ function BoardColumn({
 /* The rail — board CHROME, not a form. Each picker is the shape its data deserves: labels are a short
  * fixed vocabulary, so they list as plain checkboxes; the four priority grades each earn a glyph, so
  * they get the chunky card picker; "group by" is one-of-three, so it is radio; and a display setting
- * that takes effect immediately is a Switch. None of these roots renders a label of its own (the
- * FieldGroup shell that would supply one is unexported by ruling [[group-validation]]), so each is named by the small
- * heading above it through `aria-labelledby`.
+ * that takes effect immediately is a Switch. None of the three group roots renders a label of its own
+ * (the FieldGroup shell that would supply one is unexported by ruling [[group-validation]]), so each is named by
+ * the small heading above it through `aria-labelledby`. Each switch names itself through its own `label`.
  *
  * The rail owns the hairline on its right; the canvas beside it stays bare — one seam, one owner. */
 function BoardFilters() {
@@ -494,8 +494,6 @@ function BoardFilters() {
   const priorityId = `${uid}-priority`;
   const labelsId = `${uid}-labels`;
   const groupId = `${uid}-group`;
-  const subtasksId = `${uid}-subtasks`;
-  const compactId = `${uid}-compact`;
 
   return (
     <Flex
@@ -566,16 +564,9 @@ function BoardFilters() {
 
           <Flex direction="column" gap="3">
             {/* A Switch is the control for a setting that takes hold the moment it is flipped — no
-                Apply, no form. The row's Text names it here; Switch's own `label` prop
-                ([[switch-field-label]]) renders the same row as a field. */}
-            <Flex align="center" justify="between" gap="3">
-              <Text id={subtasksId}>Show sub-tasks</Text>
-              <Switch defaultChecked aria-labelledby={subtasksId} />
-            </Flex>
-            <Flex align="center" justify="between" gap="3">
-              <Text id={compactId}>Compact cards</Text>
-              <Switch aria-labelledby={compactId} />
-            </Flex>
+                Apply, no form. Each names itself through its own `label` ([[switch-field-label]]). */}
+            <Switch label="Show sub-tasks" defaultChecked />
+            <Switch label="Compact cards" />
           </Flex>
         </Flex>
       </ScrollArea>
