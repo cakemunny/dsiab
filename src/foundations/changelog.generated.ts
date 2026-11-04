@@ -12,8 +12,250 @@ export type ChangelogEntry = {
 
 export const CHANGELOG: { generatedFrom: string; kept: number; entries: ChangelogEntry[] } = {
   "generatedFrom": "HEAD",
-  "kept": 31,
+  "kept": 61,
   "entries": [
+    {
+      "date": "2026-11-04",
+      "type": "fix",
+      "scope": "DateInput",
+      "summary": "a page can reset a controlled field to empty (#43)",
+      "hash": "cae35f2",
+      "refs": []
+    },
+    {
+      "date": "2026-11-04",
+      "type": "fix",
+      "scope": "typeahead",
+      "summary": "a resting pointer no longer takes the keyboard's highlight",
+      "hash": "388a2a7",
+      "refs": []
+    },
+    {
+      "date": "2026-11-04",
+      "type": "feat",
+      "scope": "palette",
+      "summary": "search the helper layers the named accents carry",
+      "hash": "c789ce0",
+      "refs": []
+    },
+    {
+      "date": "2026-11-04",
+      "type": "feat",
+      "scope": "daterangeinput",
+      "summary": "give the linked layout the narrow-screen treatment",
+      "hash": "9b50e4a",
+      "refs": []
+    },
+    {
+      "date": "2026-11-04",
+      "type": "feat",
+      "scope": "palette",
+      "summary": "the filled-button search and one typed analysis of a seed",
+      "hash": "c2c1a7c",
+      "refs": []
+    },
+    {
+      "date": "2026-11-04",
+      "type": "feat",
+      "scope": "daterangeinput",
+      "summary": "lift the presets above the split calendars on a narrow screen",
+      "hash": "aa088a3",
+      "refs": []
+    },
+    {
+      "date": "2026-11-04",
+      "type": "feat",
+      "scope": "switch",
+      "summary": "take label, description and validation, rendered as a field",
+      "hash": "21670f0",
+      "refs": []
+    },
+    {
+      "date": "2026-11-04",
+      "type": "feat",
+      "scope": "palette",
+      "summary": "one table of the floors, inks and surfaces the guards measure on",
+      "hash": "3f4733f",
+      "refs": []
+    },
+    {
+      "date": "2026-11-04",
+      "type": "fix",
+      "scope": "calendar",
+      "summary": "review fixes for the range role and split layout",
+      "hash": "454b07f",
+      "refs": []
+    },
+    {
+      "date": "2026-11-04",
+      "type": "feat",
+      "scope": "palette",
+      "summary": "port APCA for runtime use, under the apca-w3 licence",
+      "hash": "0a2f75b",
+      "refs": []
+    },
+    {
+      "date": "2026-11-04",
+      "type": "feat",
+      "scope": "check",
+      "summary": "hex-colour, a hex value in a style in a dsiab file",
+      "hash": "c96ea29",
+      "refs": []
+    },
+    {
+      "date": "2026-11-04",
+      "type": "fix",
+      "scope": "palette",
+      "summary": "hold a seeded brand's soft labels at 4.5:1 as they paint",
+      "hash": "6f382be",
+      "refs": []
+    },
+    {
+      "date": "2026-11-04",
+      "type": "feat",
+      "scope": "reference",
+      "summary": "compare Tabs.Nav parts against Radix TabNav",
+      "hash": "c609eb9",
+      "refs": []
+    },
+    {
+      "date": "2026-11-04",
+      "type": "fix",
+      "scope": "theme",
+      "summary": "a Provider removes only the seeded brand it wrote",
+      "hash": "fdbf9f2",
+      "refs": []
+    },
+    {
+      "date": "2026-11-04",
+      "type": "feat",
+      "scope": "check",
+      "summary": "ds-check takes several paths and checks them as one run",
+      "hash": "030c594",
+      "refs": []
+    },
+    {
+      "date": "2026-11-03",
+      "type": "fix",
+      "scope": "acceptance",
+      "summary": "remove the throwaway app when the install step fails",
+      "hash": "4be5868",
+      "refs": []
+    },
+    {
+      "date": "2026-11-03",
+      "type": "feat",
+      "scope": "check",
+      "summary": "flag a second Radix stylesheet in a project that imports dsiab",
+      "hash": "2e00959",
+      "refs": []
+    },
+    {
+      "date": "2026-11-03",
+      "type": "feat",
+      "scope": "calendar",
+      "summary": "a role calendar's hover paints the range a click would make",
+      "hash": "7e418a9",
+      "refs": []
+    },
+    {
+      "date": "2026-11-03",
+      "type": "feat",
+      "scope": "eval",
+      "summary": "an eval set v0 with an offline grader and a harness-agnostic runner",
+      "hash": "3957001",
+      "refs": []
+    },
+    {
+      "date": "2026-11-03",
+      "type": "feat",
+      "scope": "reference",
+      "summary": "publish the component reference and an llms.txt on the docs site",
+      "hash": "279be28",
+      "refs": []
+    },
+    {
+      "date": "2026-11-03",
+      "type": "fix",
+      "scope": "ds-check",
+      "summary": "ignore template text outside the motion rules, and let a JSX allowance cover the line below",
+      "hash": "aaf14c6",
+      "refs": []
+    },
+    {
+      "date": "2026-11-03",
+      "type": "fix",
+      "scope": "ds-check",
+      "summary": "read JSX text as text, so page words never hide a finding [[jsx-text-masking]]",
+      "hash": "a77a016",
+      "refs": [
+        "jsx-text-masking"
+      ]
+    },
+    {
+      "date": "2026-11-03",
+      "type": "feat",
+      "scope": "skill",
+      "summary": "route to the component reference, add a read-back step, list the silent install failures",
+      "hash": "2dab568",
+      "refs": []
+    },
+    {
+      "date": "2026-11-03",
+      "type": "feat",
+      "scope": "reference",
+      "summary": "ship a compiled reference per component as dsiab/components/<Name>.md",
+      "hash": "d14145c",
+      "refs": []
+    },
+    {
+      "date": "2026-11-03",
+      "type": "feat",
+      "scope": "check",
+      "summary": "ds-check runs four dsiab rules over consumer code",
+      "hash": "4bc7d33",
+      "refs": []
+    },
+    {
+      "date": "2026-11-03",
+      "type": "feat",
+      "scope": "calendar",
+      "summary": "range role, spillover band, and DateRangeInput split layout",
+      "hash": "a7bf11f",
+      "refs": []
+    },
+    {
+      "date": "2026-11-02",
+      "type": "fix",
+      "scope": "docs",
+      "summary": "stack the measured token rows when the table is narrower than 640px",
+      "hash": "3e59eb1",
+      "refs": []
+    },
+    {
+      "date": "2026-10-26",
+      "type": "fix",
+      "scope": "docs",
+      "summary": "stack the Motion easing lanes when the box is narrower than a lane",
+      "hash": "bce2283",
+      "refs": []
+    },
+    {
+      "date": "2026-10-26",
+      "type": "fix",
+      "scope": "docs",
+      "summary": "let the Motion caption token names break at 320px",
+      "hash": "fe936a0",
+      "refs": []
+    },
+    {
+      "date": "2026-10-26",
+      "type": "fix",
+      "scope": "docs",
+      "summary": "stop the Motion easing lanes from squeezing at 375px",
+      "hash": "7e69e65",
+      "refs": []
+    },
     {
       "date": "2026-10-26",
       "type": "fix",
