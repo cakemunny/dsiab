@@ -26,7 +26,7 @@ import { join } from "node:path";
 import { describe, test, expect } from "vitest";
 import { findLineageMatches } from "./lineageTerms";
 import { bannedIn } from "../../scripts/dist-decisions.mjs";
-import { buildReference, DOCS_WIN, OUT_DIR } from "../../scripts/dist-reference.mjs";
+import { buildReference, DOCS_WIN, OUT_DIR, PART_WRAPS } from "../../scripts/dist-reference.mjs";
 import { docsUrlFor } from "../../bin/docs-url.mjs";
 
 interface Entry {
@@ -191,6 +191,16 @@ describe("the props are the right props", () => {
     expect(text).toContain("Only the props listed below apply.");
     expect(text).toMatch(/^- Inherited from Radix: .*`asChild`/m);
     expect(text).toContain('`import { type ButtonPriority, type ButtonTone, type ButtonProps, Button } from "dsiab";`');
+  });
+
+  test("a nested part compares against the Radix component it wraps, named in the roster", () => {
+    // `Tabs.Nav.Link` wraps Radix `TabNav.Link`, not a part of Radix `Tabs`, and refuses its `asChild`.
+    expect(files.get("Tabs.md")!).toContain("- Not accepted from Radix `TabNav.Link`: `asChild`.");
+    const registry = JSON.parse(readFileSync("registry.json", "utf8")) as { name: string; buildingBlock?: string }[];
+    for (const [name, pairs] of Object.entries(PART_WRAPS)) {
+      const block = registry.find((e) => e.name === name)?.buildingBlock ?? "";
+      for (const [, radix] of pairs) expect(block, `${name}: buildingBlock names ${radix}`).toMatch(new RegExp(`\\b${radix}\\b`));
+    }
   });
 
   test("a compound lists its parts, and each part its own props", () => {

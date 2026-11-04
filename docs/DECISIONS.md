@@ -1040,7 +1040,7 @@ This ledger records the rulings that shape the design system and the reason behi
 
 **Changed from.** Nothing. The package shipped the declarations and the roster and no per-component reference.
 
-**Status.** Ruled 2026-11-03. On 2026-11-03 the docs site gained the same files and an `llms.txt`.
+**Status.** Ruled 2026-11-03. On 2026-11-03 the docs site gained the same files and an `llms.txt`. On 2026-11-04 an entry whose parts wrap more than one Radix component gained an explicit map from each part to the component it mirrors, because one `wraps` cannot name two: `Tabs.Nav.*` compares against Radix `TabNav` and the rest of `Tabs` against Radix `Tabs`, so `Tabs.Nav.Link` lists the `asChild` it refuses. Each mapped name must appear in the entry's `buildingBlock`.
 
 ### skill-read-back-step
 
