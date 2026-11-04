@@ -3524,6 +3524,7 @@ On a partial acceptance the accepted files commit and the rejection shows on the
 - [box-law-scope](#box-law-scope) puts the palette's input row on the control box ladder, 24, 32 and 40px.
 - [focus-return-on-close](#focus-return-on-close) returns focus to the opener when the palette closes, because a palette driven from `open` registers no trigger.
 - [selected-row-cue](#selected-row-cue) sets the picked option label at `--ds-font-weight-strong` in `--ds-text-strong` and draws its icon solid.
+- [resting-pointer-guard](#resting-pointer-guard) moves the guard against a resting pointer into the shared engine, so `Typeahead` keeps it too.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 
@@ -7534,3 +7535,23 @@ A bare focus opens nothing. `activationMode="manual"` keeps manual, so arrow key
 **Changed from.** `Switch` took no label, and [text-element-attributes](#text-element-attributes) left the question open. Every labelled row on the Switch page was composed by hand from `Text` and a bare switch.
 
 **Status.** Ruled 2026-11-04. It closes the open question in [text-element-attributes](#text-element-attributes). No later ruling amends it.
+
+### resting-pointer-guard
+
+**Tags.** `COMPONENTS`, `ACCESSIBILITY`. **Ruled.** 2026-11-04.
+
+**In every list on the combobox engine, a row takes the highlight from the pointer only after the pointer has really moved since the last key press.**
+
+**Why.** A browser hovers whatever slides under a pointer that has not moved: a row the keyboard scrolls into place, or a list that opens or re-renders beneath it. In `Typeahead`, that hover took the highlight from the keyboard. Measured on 2026-11-04 with a real mouse resting over the list, End scrolled to row 21 of 21 and the highlight then jumped to row 15. A keyboard user whose mouse happens to sit over the list lost their place.
+
+**Mechanism.** `useListboxNavigation` owns the guard, so every list on the engine keeps it.
+
+- `notePointerMove` arms the pointer. A component calls it from a `mousemove` over its list.
+- `notePointerIdle` disarms it. A component calls it at the top of every keydown.
+- `highlightFromPointer` acts only while the pointer is armed, and it still never scrolls the list.
+- `Typeahead` highlights a row on `mousemove` as well as on `mouseenter`, so the first row a moving pointer reaches lights at once.
+- `CommandPalette` arms from a `mousemove` on its scroll container, as before.
+
+**Changed from.** [command-palette](#command-palette) held the guard inside `CommandPalette`, and `Typeahead` had none. The palette's behaviour is unchanged.
+
+**Status.** Ruled 2026-11-04. It moves the guard of [command-palette](#command-palette) into the shared engine. No later ruling amends it.

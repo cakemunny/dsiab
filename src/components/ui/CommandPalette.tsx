@@ -126,10 +126,6 @@ function CommandPaletteBody<TAux>({
   // The visible spinner mounts only after a 150ms grace (a fast async resolve never flashes it) — the
   // busy flag is immediate for logic (search.isLoading), the MOUNT is delayed.
   const [showSpinner, setShowSpinner] = useState(false);
-  // Pointer-vs-keyboard guard: a keyboard-driven scroll can slide the list under a stationary cursor and
-  // fire mouseenter WITHOUT a real mousemove, "stealing" the active row. We only honour mouseenter after
-  // the pointer has actually MOVED since the last keydown.
-  const pointerMovedRef = useRef(false);
 
   const isPicker = value !== undefined;
 
@@ -236,9 +232,9 @@ function CommandPaletteBody<TAux>({
 
   const onInputKeyDown = useCallback(
     (e: KeyboardEvent<HTMLInputElement>) => {
-      // Any key press resets the pointer-moved flag — a mouseenter that follows a keyboard scroll (with
-      // no real movement) must NOT steal the active row.
-      pointerMovedRef.current = false;
+      // Any key press disarms the pointer — a mouseenter that follows a keyboard scroll (with no real
+      // movement) must NOT steal the active row. The guard lives in the shared engine.
+      nav.notePointerIdle();
       if (nav.handleNavigationKeyDown(e)) return; // Arrow / Home / End — the shared roving-cursor machine
       if (e.key === "Enter") {
         e.preventDefault();
@@ -293,9 +289,7 @@ function CommandPaletteBody<TAux>({
         // Keep DOM focus on the input (activedescendant model) — a mousedown on the row would blur it.
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => selectItem(item)}
-        onMouseEnter={() => {
-          if (pointerMovedRef.current) nav.highlightFromPointer(index);
-        }}
+        onMouseEnter={() => nav.highlightFromPointer(index)}
       >
         {/* The option draws its icon inside the caller's row content, so the whole label span takes the
             row's selection weight ([[selected-row-cue]]): solid for the picked row, outline for every other one. */}
@@ -357,7 +351,7 @@ function CommandPaletteBody<TAux>({
       </div>
       <div className="rt-ds-cmdk-divider" />
 
-      <div className="rt-ds-cmdk-scroll" onMouseMove={() => (pointerMovedRef.current = true)}>
+      <div className="rt-ds-cmdk-scroll" onMouseMove={nav.notePointerMove}>
         {hasError ? (
           // The error panel sits OUTSIDE the listbox (a listbox's children must be options). Restrained
           // system-failure treatment (weak error tint + alert glyph, NOT the solid validation paint);
