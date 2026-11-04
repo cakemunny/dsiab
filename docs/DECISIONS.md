@@ -332,6 +332,59 @@ This ledger records the rulings that shape the design system and the reason behi
 
 > **Contrast checks are sRGB-gated; colour parsing is gamut-safe (2026-06-21).** `parseColor` (`_assert.ts`) rasterises the computed colour on an sRGB 2d canvas and reads `getImageData`, rather than regex-parsing `rgb()` — so a P3 display's `color(display-p3 …)` (which the old regex threw on, a real interaction failure on a P3 monitor, invisible to non-P3 CI/headless) parses fine. But WCAG ratios are **sRGB-defined**, and on a P3 display `getComputedStyle` hands back Radix's P3 *variant*, which maps to slightly lower sRGB contrast than the sRGB fallback (e.g. orange-11 on white is 4.40 in sRGB but **4.27 on P3**) — and the sRGB fallback can't be read back on a P3 monitor. So the contrast-**ratio** checks run **only in an sRGB context** (CI / headless, detected via `matchMedia('(color-gamut: p3)')` in the Swatches play; a `console.info` notes the skip); the gamut-robust **collision + hue** checks always run. CI/headless is the source of truth for the WCAG floors. *(Implication: on a P3 display the shifted step-11 warning/link text renders ~0.1 below its sRGB ratio — accepted under the same colour-not-alone basis as [brand-collision-shift-table](#brand-collision-shift-table)'s step-11 ruling.)*
 
+### palette-surface-table
+
+**Tags.** `COLOUR`, `ACCESSIBILITY`. **Ruled.** 2026-11-04.
+
+**`src/palette/surfaces.ts` is the one copy, for code in the palette folder, of the floors, the label inks, the hover overlays, the press filter and the fifteen surfaces the browser guards measure on, for all six neutrals in both appearances. A live agreement test holds it to the rendered theme.**
+
+**What you see.** Nothing changes on screen. The module exports:
+
+- `FLOORS`: text 4.5:1, strong text 7:1, a label on a fill 4.5:1 with APCA Lc 60, and a part without text 3:1 with Lc 30.
+- `INKS`: white and `#21201c`.
+- `HOVER_OVERLAY`: `--black-a2` under a white label and `--white-a4` under a dark one.
+- `PRESS_FILTER`: Radix's `brightness(0.92) saturate(1.1)` in light and `brightness(1.08)` in dark.
+- `NEUTRAL_STEPS`: each neutral's steps 1, 2 and 3 and alpha steps 3 and 4, as Radix Themes 3.3 ships them.
+- Three functions that compose the surfaces, named and ordered as `FOCUS_SURFACES` in `_assert.ts`: `neutralSurfaces`, `tintSurfaces` and `allSurfaces`.
+
+Nothing published imports the module. The custom-accent generator and its assessment will.
+
+**Why.** A generated brand has to be measured the way the guards measure a named accent, and code in the palette folder can read neither the guards, which are the test lane, nor the CSS, which a pure function does not have. Without one copy, each search would carry its own surfaces, as the soft-label fix in a separate pull request does for the soft fill, and the copies would drift.
+
+**Three kinds of value.**
+
+1. **Static.** The floors, inks, overlays, press filter and the eight neutral surfaces, which depend only on the neutral and the appearance: page, subtle, sunken, card, panel, track, track on a card and highlighted row.
+2. **Accent.** The accent tint on the page and on a card (alpha step 3) and the selected tint (alpha step 5), computed from the brand's own scale.
+3. **Status.** The four validation tints, each family's alpha step 3. The caller passes the step, because a brand can move a status family to another scale ([[seeded-brand-collisions]]).
+
+The three black and white alpha steps are kept in Radix's own `rgba()` form, because their alphas (0.1, 0.2 and 0.4) have no exact hex byte.
+
+**Guarded by** `_internal/Surface table` in `src/foundations/_surface-table.stories.tsx`.
+
+- **StaticPartMatchesTheTokens** reads the eight neutral surfaces off a fresh theme root for every neutral and appearance, composed by the guards' own `surfaceColour`, and holds each table value within one byte (96 readings). It also holds:
+  - the names, order and neutrals to the guards' lists;
+  - the floors to `SOLID_TEXT_MIN` and `FOCUS_RING`;
+  - the near-black ink to amber's rendered label;
+  - both hover overlays to the rendered `--ds-fill-accent-hover`;
+  - the press filter to Radix's rendered `--base-button-solid-active-filter`.
+- **TintRecipeMatchesNamedAccents** feeds the tint recipe each of the 27 named accents' live alpha steps, and each status family's under that accent's shift, and holds the seven tinted surfaces to the ones the guards compose (2,268 readings).
+
+Both went red on planted defects:
+
+- a dark mauve step 2 moved by three bytes (subtle, card and track on a card);
+- the dark press filter set to 1.1 (all six neutrals);
+- the selected tint built on alpha step 3 instead of 5 (351 readings).
+
+`palette-imports.node-check.ts` holds that a runtime module in `src/palette` imports only from inside `src/palette`, so the arithmetic never reaches `src/theme` or the test lane. It went red on a planted import of `src/theme/customBrand`. `surfaces.logic.test.ts` holds the parser, the layering and the shape of the result.
+
+**The one-byte tolerance.** The guards read a translucent colour back through an 8-bit canvas, so the comparison allows one byte per channel. Neighbouring neutral steps differ by three bytes or more, so the tolerance cannot hide a wrong step.
+
+**Not covered.** The table holds sRGB values only, as [[srgb-contrast-checks]] rules. Wiring the generator's own soft-fill surfaces to this table waits until the soft-label fix and this ruling are both on `main`.
+
+**Changed from.** Nothing. The values lived only in the guards and the token CSS.
+
+**Status.** Ruled 2026-11-04. No later ruling amends it.
+
 ### component-registry
 
 **Tags.** `CONTRIBUTING`, `COMPONENTS`. **Ruled.** 2026-07-08.
