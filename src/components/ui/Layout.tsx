@@ -68,7 +68,7 @@ function slotKindOf(child: ReactNode): SlotKind | undefined {
 /* Slot components                                                            */
 /* -------------------------------------------------------------------------- */
 
-/** Common props every slot forwards honestly (D12 — never accept-and-discard). */
+/** Common props every slot forwards honestly: no prop is accepted and then discarded. */
 interface SlotBaseProps extends Omit<ComponentPropsWithoutRef<"div">, "children"> {
   children?: ReactNode;
   /** Ref forwarded to the slot's root element. */

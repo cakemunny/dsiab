@@ -41,7 +41,7 @@ export interface ClickableCardProps extends Omit<CardProps, "asChild" | "title">
   headingSize?: ComponentProps<typeof Heading>["size"];
   /** Extra attrs for the overlay link (`target`, `rel`, `onClick`, …); `href` is set from the prop above. */
   linkProps?: Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href">;
-  /** Refused. The stretched-link pattern (D6) needs the Card's own box to be the positioned container
+  /** Refused. The stretched-link pattern needs the Card's own box to be the positioned container
    *  that the overlay `::after` covers, and the heading plus the teaser are two children, so there is
    *  no single element to hand over. Already absent from `CardProps` through the `Omit` above, and
    *  declared here as well so the refusal reads as a decision. Destructured away below so a spread

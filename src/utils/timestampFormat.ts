@@ -94,7 +94,7 @@ export function getRelativeParts(diffSeconds: number): RelativeParts {
 }
 
 /**
- * Locale-correct relative string via `Intl.RelativeTimeFormat` (the D15 fix). `numeric: "auto"` yields the
+ * Locale-correct relative string via `Intl.RelativeTimeFormat` ([[relative-timestamp]]). `numeric: "auto"` yields the
  * idiomatic special-cases per locale — "now", "yesterday"/"tomorrow", "last week" — instead of the
  * English-only "1 day ago". Pass `locale` to pin it; omit for the runtime default.
  */

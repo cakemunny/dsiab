@@ -10,7 +10,7 @@
  * layer of B5 PowerSearch. Normalizations vs upstream:
  *   - `SearchSource`/`SearchableItem` (Astryx Typeahead) → our `TypeaheadSource`/
  *     `TypeaheadOption` (`src/components/ui/Typeahead`).
- *   - `nested` stays a typed-but-unbuilt union member (deferred D20 flat-AND-only);
+ *   - `nested` stays a typed-but-unbuilt union member (deferred: v1 combines conditions with a flat AND only, [[power-search]]);
  *     the evaluator treats it as passthrough.
  */
 

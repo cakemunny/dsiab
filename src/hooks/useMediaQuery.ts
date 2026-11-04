@@ -55,7 +55,7 @@ export const NAV_BREAKPOINTS: Record<Exclude<NavBreakpoint, "none">, number> = {
 const NEVER_QUERY = "(width < 0px)";
 
 /**
- * Resolve a nav breakpoint to an `isMobile` boolean for AppShell (D7). AppShell swaps its sidenav /
+ * Resolve a nav breakpoint to an `isMobile` boolean for AppShell ([[app-shell]]). AppShell swaps its sidenav /
  * topnav into the mobile drawer when the viewport is BELOW `breakpoint`. `defaultIsMobile` seeds the
  * SSR snapshot so a mobile client does not layout-flash from desktop→drawer after hydration.
  *

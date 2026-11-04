@@ -67,7 +67,7 @@ export function deltaForKey(
 }
 
 /** The state a keyboard/collapse transition reads and produces. `preCollapseSize` remembers the
- * expanded size while collapsed so an expand can restore it (the D5 fix). */
+ * expanded size while collapsed so an expand can restore it ([[resize-handle]]). */
 export interface ResizeState {
   /** The pane's expanded pixel size, always kept within `[minSizePx, maxSizePx]`. */
   size: number;
@@ -87,7 +87,7 @@ export interface ResizeBounds {
 /**
  * The size to restore when EXPANDING a collapsed pane.
  *
- * THE D5 FIX: restores the remembered `preCollapseSize` (clamped to bounds), falling back to
+ * Restores the remembered `preCollapseSize` (clamped to bounds), falling back to
  * `minSizePx` only when nothing was remembered (the pane was never collapsed from an expanded
  * state). Upstream Astryx incorrectly restored to `minSizePx` unconditionally, losing the user's
  * sizing — this is the bug we do NOT carry.
@@ -103,7 +103,7 @@ export function restoreSize(
 /**
  * Toggle the collapsed state, returning the next `ResizeState`.
  * - COLLAPSE (expanded → collapsed): remembers the current `size` as `preCollapseSize`.
- * - EXPAND (collapsed → expanded): restores `preCollapseSize` via `restoreSize` (the D5 fix), then
+ * - EXPAND (collapsed → expanded): restores `preCollapseSize` via `restoreSize`, then
  *   clears the remembered size.
  *
  * Pure — the hook and Enter/double-click handlers compose this; `localStorage` is written from the
