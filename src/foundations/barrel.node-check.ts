@@ -188,6 +188,7 @@ const INTERNAL_MODULES: Readonly<Record<string, string>> = {
   "palette/collision": "the brand and status collision check that customBrand runs.",
   "palette/collisionTable": "the status-colour table that collision reads.",
   "palette/generate": "the step generator that customBrand calls.",
+  "palette/helperLayers": "the helper-layer searches the named accents' layers came from ([[generated-helper-layers]]).",
   "palette/oklch": "the OKLab maths under the palette modules. Kept apart from foundations/_assert.ts on purpose, and its header says why.",
   "palette/parseSeed": "the brand seed parser that Provider and customBrand call.",
   "palette/surfaces": "the floors, inks and surfaces the generator measures on ([[palette-surface-table]]). Nothing publishes it.",

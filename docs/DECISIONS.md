@@ -453,6 +453,54 @@ Phase 4 publishes it unchanged.
 
 **Status.** Ruled 2026-11-04. No later ruling amends it.
 
+### generated-helper-layers
+
+**Tags.** `COLOUR`, `ACCESSIBILITY`. **Ruled.** 2026-11-04.
+
+**The helper layers the named accents carry are searched, for any fill, by the rule each was picked by, measured as the guards measure, with a small margin above the floors. Fed the 27 named accents' own colours, the searches reproduce `theme.css` on 267 of 270 rows, and pick one step heavier on the other three, each listed with its reason.**
+
+**What you see.** Nothing changes on screen. `src/palette/helperLayers.ts` exports five searches. None is wired into the brand analysis or the page yet.
+
+- **`ringStack`** ([[focus-ring]]): the lightest black (light) or white (dark) alpha whose stack on the ring's fill clears 3:1 and Lc 30 against the fifteen focus surfaces of [[palette-surface-table]] on all six neutrals.
+- **`scrimStack`**: the same over grey media 0 to 255 under the dark or the light scrim.
+- **`partEdge`** ([[part-fill-edge]], [[status-dot-edges]]): the lightest alpha that clears against the page, the subtle recess, a card and a panel, and a track on each.
+- **`thumbStroke`** ([[textless-part-fills]]).
+
+**Measured as the guards measure.** The guards read every translucent token through an 8-bit canvas, which stores the alpha in a byte and the channels premultiplied. `asReadBack` in `surfaces.ts` reproduces that, and the searches read every translucent layer through it, the stack included. The surface functions take it as an option, so 1.2's composition is unchanged by default.
+
+**The margin, `LAYER_MARGIN`: 0.05:1 and Lc 0.5 above the non-text floors.** Without it the searches pick a lighter step than the theme on 5 rows:
+
+- pink on the dark scrim and purple on the light scrim, in both appearances;
+- violet's dark page ring.
+
+In each the theme recorded that step reading just under the floor in the browser. With it the searches pick one step heavier than the theme on 3 rows:
+
+- indigo on the light scrim, in both appearances, which reads 3.045:1 at `--black-a5` in the model;
+- blue's dark page ring, Lc 30.39 at `--white-a4`.
+
+Purple and indigo on the light scrim read 3.039 and 3.045 in the model, and 2.99 and 3.00 in the browser. Violet and blue on the dark ring read Lc 30.34 and Lc 30.39. Those pairs sit inside the guards' own rounding, so no model separates them, and the margin is set so a search never picks a step a guard would fail. The parity story lists the three heavier rows by name, and fails if one stops differing.
+
+**The thumb stroke, and Jason's answer K.**
+
+- The census measured the dark thumb stroke against step 9, and against step 9 only a 4.5:1 tier reproduced step 7, which became answer K.
+- The switch paints `--accent-track`, which for the five pale accents in dark is Radix's own track, darker than step 9: `rgb(210, 185, 41)` on yellow and `rgb(226, 172, 55)` on amber.
+- Against that track, step 8 reads under 3:1 on all six accents. Step 7 clears it on amber, lime, mint, sky and yellow (3.14 to 4.03:1), and orange first clears at step 6 (3.58:1).
+- So the theme's own wording, "the lightest step that clears 3:1", reproduces step 7 and step 6 exactly. K's 4.5:1 tier would move yellow and amber to step 6, against answer H, which keeps step 7.
+- `thumbStroke` follows the theme's wording, measured on the painted track, and `theme.css` keeps its comment. Jason confirmed on 4 November 2026 ("K yes, drop the 4.5 tier"): answer K now means the theme's own rule, and the 4.5:1 tier is dropped.
+
+**Yellow's light part edge,** which the census left open, matches `theme.css` (`--black-a6`) under these searches.
+
+**Guarded by:**
+
+- **`_internal/Helper layer parity` → EveryLayerMatchesTheTheme**, in `src/foundations/_helper-layer-parity.stories.tsx`. It feeds each search each named accent's rendered colours in both appearances, and holds the step it picks to the colour `theme.css` paints for that accent (270 rows). The only exception is the listed heavier rows. It also holds the black and white alpha scales to Radix's tokens. It went red with the margin removed (8 rows).
+- **`helperLayers.logic.test.ts`** holds the read-back and the searches' shape.
+
+**Not covered here.** These searches are not yet wired into the brand analysis: that needs each candidate status family's alpha step 3 in both appearances, which the surface table does not hold. The mark edge, the slider thumb stack, the drop dash, the status-dot edges, a part's own shade, and the 16 ms timing story come next.
+
+**Changed from.** Nothing. The layers existed only as `theme.css` values for the named accents.
+
+**Status.** Ruled 2026-11-04. No later ruling amends it.
+
 ### component-registry
 
 **Tags.** `CONTRIBUTING`, `COMPONENTS`. **Ruled.** 2026-07-08.
