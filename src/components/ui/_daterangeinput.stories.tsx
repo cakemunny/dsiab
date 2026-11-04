@@ -24,6 +24,13 @@ async function waitFor<T>(fn: () => T | null | undefined | false, timeout = 1500
     await sleep(20);
   }
 }
+
+/** A real pointer press leaves the one shared mouse resting where it pressed, and the story suite runs other files
+ *  in frames laid over this one. A list that later scrolls under that resting pointer takes a hover from it, which is
+ *  how these plays failed the Typeahead "Hover Does Not Scroll" play on CI. Every play that presses with real input
+ *  parks the pointer in the frame's empty top-left corner when it ends, pass or fail. */
+const parkPointer = () => userEvent.hover(document.documentElement, { position: { x: 1, y: 1 } });
+
 const triggerOf = (root: ParentNode = document) =>
   root.querySelector<HTMLButtonElement>('button[aria-haspopup="dialog"]');
 const dialogOf = (trigger: HTMLButtonElement) => {
@@ -390,20 +397,24 @@ export const SplitLayoutSpilloverClickCommits: Story = {
     </Box>
   ),
   play: async ({ canvasElement }) => {
-    const scope = canvasElement.querySelector<HTMLElement>('[data-testid="dr-split-spill"]')!;
-    const trigger = triggerOf(scope)!;
-    await userEvent.click(trigger);
-    const dialog = await waitFor(() => dialogOf(trigger));
-    const startPane = await waitFor(() => paneNamed(dialog, "Start date"));
-    // 2026-06-30 is a leading spillover day of the July grid; the start role may move back to it.
-    const spill = await waitFor(() => startPane.querySelector<HTMLButtonElement>('button[data-date="2026-06-30"]'));
-    reset("drSplitSpill");
-    await userEvent.click(spill);
-    await waitFor(() => focusedOnInMonth("2026-06-30"));
-    await waitFor(() => calls("drSplitSpill").length > 0);
-    const last = calls("drSplitSpill").at(-1)!;
-    if (last.start !== "2026-06-30" || last.end !== "2026-07-20")
-      throw new Error(`a real press on a spillover day must commit it as the start; got ${JSON.stringify(last)}`);
+    try {
+      const scope = canvasElement.querySelector<HTMLElement>('[data-testid="dr-split-spill"]')!;
+      const trigger = triggerOf(scope)!;
+      await userEvent.click(trigger);
+      const dialog = await waitFor(() => dialogOf(trigger));
+      const startPane = await waitFor(() => paneNamed(dialog, "Start date"));
+      // 2026-06-30 is a leading spillover day of the July grid; the start role may move back to it.
+      const spill = await waitFor(() => startPane.querySelector<HTMLButtonElement>('button[data-date="2026-06-30"]'));
+      reset("drSplitSpill");
+      await userEvent.click(spill);
+      await waitFor(() => focusedOnInMonth("2026-06-30"));
+      await waitFor(() => calls("drSplitSpill").length > 0);
+      const last = calls("drSplitSpill").at(-1)!;
+      if (last.start !== "2026-06-30" || last.end !== "2026-07-20")
+        throw new Error(`a real press on a spillover day must commit it as the start; got ${JSON.stringify(last)}`);
+    } finally {
+      await parkPointer();
+    }
   },
 };
 
@@ -415,18 +426,22 @@ export const LinkedSpilloverClickCommits: Story = {
     </Box>
   ),
   play: async ({ canvasElement }) => {
-    const scope = canvasElement.querySelector<HTMLElement>('[data-testid="dr-linked-spill"]')!;
-    const trigger = triggerOf(scope)!;
-    await userEvent.click(trigger);
-    const dialog = await waitFor(() => dialogOf(trigger));
-    reset("drLinkedSpill");
-    await userEvent.click(await waitFor(() => dialog.querySelector<HTMLElement>('button[data-date="2026-06-30"]')));
-    await waitFor(() => focusedOnInMonth("2026-06-30"));
-    await userEvent.click(await waitFor(() => dialog.querySelector<HTMLElement>('button[data-date="2026-07-05"]')));
-    await waitFor(() => focusedOnInMonth("2026-07-05"));
-    await waitFor(() => calls("drLinkedSpill").length > 0);
-    const last = calls("drLinkedSpill").at(-1)!;
-    if (last.start !== "2026-06-30" || last.end !== "2026-07-05")
-      throw new Error(`two real presses must commit the normalized range; got ${JSON.stringify(last)}`);
+    try {
+      const scope = canvasElement.querySelector<HTMLElement>('[data-testid="dr-linked-spill"]')!;
+      const trigger = triggerOf(scope)!;
+      await userEvent.click(trigger);
+      const dialog = await waitFor(() => dialogOf(trigger));
+      reset("drLinkedSpill");
+      await userEvent.click(await waitFor(() => dialog.querySelector<HTMLElement>('button[data-date="2026-06-30"]')));
+      await waitFor(() => focusedOnInMonth("2026-06-30"));
+      await userEvent.click(await waitFor(() => dialog.querySelector<HTMLElement>('button[data-date="2026-07-05"]')));
+      await waitFor(() => focusedOnInMonth("2026-07-05"));
+      await waitFor(() => calls("drLinkedSpill").length > 0);
+      const last = calls("drLinkedSpill").at(-1)!;
+      if (last.start !== "2026-06-30" || last.end !== "2026-07-05")
+        throw new Error(`two real presses must commit the normalized range; got ${JSON.stringify(last)}`);
+    } finally {
+      await parkPointer();
+    }
   },
 };

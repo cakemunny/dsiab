@@ -42,6 +42,12 @@ async function waitFor<T>(fn: () => T | null | undefined | false, timeout = 1500
   }
 }
 
+/** A real pointer press leaves the one shared mouse resting where it pressed, and the story suite runs other files
+ *  in frames laid over this one. A list that later scrolls under that resting pointer takes a hover from it, which is
+ *  how these plays failed the Typeahead "Hover Does Not Scroll" play on CI. Every play that presses with real input
+ *  parks the pointer in the frame's empty top-left corner when it ends, pass or fail. */
+const parkPointer = () => userEvent.hover(document.documentElement, { position: { x: 1, y: 1 } });
+
 // Pin an ISO literal without fighting the template-literal type at every call site.
 const D = (s: string): ISODateString => s as ISODateString;
 const addDays = (s: string, n: number) => plainDateToISO(plainDateAddDays(plainDateFromISO(D(s)), n));
@@ -1170,17 +1176,21 @@ export const SpilloverClickCommitsWithPointer: Story = {
     </Box>
   ),
   play: async ({ canvasElement }) => {
-    const scope = canvasElement.querySelector<HTMLElement>('[data-testid="cal-pointer"]')!;
-    // 2026-06-29 is a leading spillover day of the July grid. The first press starts a range and pages to June.
-    await userEvent.click(await waitFor(() => dayBtn(scope, "2026-06-29")));
-    await waitFor(() => activeDate() === "2026-06-29" && document.activeElement?.hasAttribute("data-outside") === false);
-    // 2026-07-03 is a trailing spillover day of the June grid: the second press commits, and pages back to July.
-    await userEvent.click(await waitFor(() => dayBtn(scope, "2026-07-03")));
-    await waitFor(() => activeDate() === "2026-07-03" && document.activeElement?.hasAttribute("data-outside") === false);
-    await waitFor(() => dayBtn(scope, "2026-07-03")!.getAttribute("data-range") === "end");
-    if (!dayBtn(scope, "2026-06-29")!.hasAttribute("data-range-outside"))
-      throw new Error("the committed spillover start must carry the spillover band");
-    if (dayBtn(scope, "2026-07-03")!.getAttribute("data-range") !== "end")
-      throw new Error("the second press must commit 2026-07-03 as the range end");
+    try {
+      const scope = canvasElement.querySelector<HTMLElement>('[data-testid="cal-pointer"]')!;
+      // 2026-06-29 is a leading spillover day of the July grid. The first press starts a range and pages to June.
+      await userEvent.click(await waitFor(() => dayBtn(scope, "2026-06-29")));
+      await waitFor(() => activeDate() === "2026-06-29" && document.activeElement?.hasAttribute("data-outside") === false);
+      // 2026-07-03 is a trailing spillover day of the June grid: the second press commits, and pages back to July.
+      await userEvent.click(await waitFor(() => dayBtn(scope, "2026-07-03")));
+      await waitFor(() => activeDate() === "2026-07-03" && document.activeElement?.hasAttribute("data-outside") === false);
+      await waitFor(() => dayBtn(scope, "2026-07-03")!.getAttribute("data-range") === "end");
+      if (!dayBtn(scope, "2026-06-29")!.hasAttribute("data-range-outside"))
+        throw new Error("the committed spillover start must carry the spillover band");
+      if (dayBtn(scope, "2026-07-03")!.getAttribute("data-range") !== "end")
+        throw new Error("the second press must commit 2026-07-03 as the range end");
+    } finally {
+      await parkPointer();
+    }
   },
 };
