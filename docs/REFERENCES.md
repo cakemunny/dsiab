@@ -176,6 +176,14 @@ component, so each row names the ruling it informed.
 | [Radix Colors, Understanding the scale](https://www.radix-ui.com/colors/docs/palette-composition/understanding-the-scale) | [[textless-part-fills]]. ADOPTED: steps 6 to 8 are the border steps, which is where the dark thumb stroke lands (step 7, and step 6 on orange). READ: an alpha step composites to its solid step over the page of its own appearance, so a dark alpha laid over a light track stays light. |
 | [Radix Themes, code.css](https://raw.githubusercontent.com/radix-ui/themes/main/packages/radix-ui-themes/src/components/code.css) | [[textless-part-fills]]. READ: the solid chip paints `--accent-a9` under `--accent-contrast` and hovers a linked chip to `--accent-10`. REJECTED: both, for the [[text-on-solid-fill-contrast]] text fill and the [[interaction-state-alphas]] overlay. |
 
+## A switch's own label ([[switch-field-label]])
+
+| Source | What it informed |
+|---|---|
+| [Radix Themes, switch.css](https://raw.githubusercontent.com/radix-ui/themes/main/packages/radix-ui-themes/src/components/switch.css) | [[switch-field-label]]. READ with its sibling component source in the installed 3.3.0 package: the Themes switch takes no label prop and renders its root as a `button`, a labelable element, so a field label names it through `htmlFor`. ADOPTED: the wrap adds the label around Radix's switch and leaves the track, the thumb and every prop as Radix ships them. |
+| Radix Primitives, `@radix-ui/react-switch` 1.4.1 source, the installed package | [[switch-field-label]]. READ: the button carries `role="switch"` and `aria-checked`, and renders a hidden input only inside a form. ADOPTED: `name`, `value` and `required` keep Radix's form semantics, and the field adds only `id`, `aria-describedby` and `aria-invalid`. |
+| WAI-ARIA Authoring Practices, Switch pattern, not fetched in this change because the network was closed | [[switch-field-label]]. ADOPTED: a visible label as the accessible name of a switch. No URL is recorded until the page is read again. |
+
 ## Parts without text on light colours ([[part-fill-edge]])
 
 | Source | What it informed |

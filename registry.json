@@ -346,7 +346,8 @@
     "controlBox": "exempt",
     "buildingBlock": "Radix Switch",
     "storyPath": "src/components/ui/Switch.stories.tsx",
-    "note": "control size lane; reuses Radix's accent-aware track skin (no --ds-* roles); labeled-row pattern; BOOLEAN_CHOICE comparison; behavior play in _internal"
+    "note": "control size lane; reuses Radix's accent-aware track skin (no --ds-* roles); label/description/validation props render the labelled row as a Field (label leads, switch trails); BOOLEAN_CHOICE comparison; behavior play in _internal",
+    "priorArt": "Radix Themes Switch, its component source read from the installed 3.3.0 package beside the recorded switch.css (https://raw.githubusercontent.com/radix-ui/themes/main/packages/radix-ui-themes/src/components/switch.css): READ that it takes no label prop and renders its root as a button, a labelable element, so a Field label names it through htmlFor with no aria-labelledby; ADOPTED that the wrap adds the label around Radix's switch and leaves the track, thumb and props untouched ([[switch-field-label]]); Radix Primitives Switch, the installed @radix-ui/react-switch 1.4.1 source: READ that the button carries role=switch and aria-checked and renders a hidden input only inside a form, so name, value and required keep Radix's form semantics and the Field adds only id, aria-describedby and aria-invalid; WAI-ARIA Authoring Practices Switch pattern, not fetched in this change because the network was closed, so no URL is cited for it: ADOPTED a visible label as the switch's accessible name; this system's Checkbox: ADOPTED its label, description and validation props and its child-control mechanism, REJECTED its arrangement (control leading, message at full width under the row), because the Switch page rules that the label leads and the switch trails."
   },
   {
     "name": "Slider",
