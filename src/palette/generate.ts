@@ -118,6 +118,10 @@ export interface BrandScale {
   /** Radix aliases both to step 9. */
   indicator: string;
   track: string;
+  /** Whether each text step reached its floor, step 11 on its soft fill as it paints and step 12
+   *  against step 3. A miss ships the nearest step the search found and is reported, never hidden
+   *  ([[generated-button-fill]] carries it into the brand analysis). */
+  textFloors: { eleven: boolean; twelve: boolean };
 }
 
 const hex2 = (n: number) => Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2, "0");
@@ -262,6 +266,7 @@ export function generateBrandScale(seed: RGB, appearance: Appearance): BrandScal
     surface: `${solidRgb[1] ? toHex(solidRgb[1]) : toHex(bg)}${appearance === "light" ? "cc" : "80"}`,
     indicator: toHex(nine),
     track: toHex(nine),
+    textFloors: { eleven: eleven.met, twelve: twelve.met },
   };
 }
 

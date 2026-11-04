@@ -385,6 +385,74 @@ Both went red on planted defects:
 
 **Status.** Ruled 2026-11-04. No later ruling amends it.
 
+### generated-button-fill
+
+**Tags.** `COLOUR`, `ACCESSIBILITY`. **Ruled.** 2026-11-04.
+
+**A generated brand's filled button follows the rule the 16 deepened named accents follow: where neither white nor `#21201c` reaches WCAG 4.5:1 and APCA Lc 60 on step 9 at rest, on hover and under the press filter, the button takes a shade of the brand's hue, chosen by lightness in the direction that keeps more chroma. The generator measures this and everything else about a seed in one typed result. Nothing it returns is written to the page yet.**
+
+**What you see.** Nothing changes on screen. `src/palette/buttonFill.ts` asks question 2 (`labelOnFill`) and runs the search (`searchFill`). `src/palette/brandAnalysis.ts` returns `analyseBrand(seed)`, a `BrandAnalysis`. `Provider` writes what it wrote before. A later change writes these values, and the custom-accent assessment reads them.
+
+**Question 2.** Both inks are measured on the fill in three states, each at 4.5:1 and Lc 60, with the overlays and the filter from [[palette-surface-table]]:
+
+- rest;
+- hover, under `--black-a2` for white or `--white-a4` for the dark ink;
+- press, under Radix's press filter applied to the hovered fill and the ink.
+
+An ink passes when it clears all three. The button takes the passing ink with the higher weakest |Lc|, or, when none passes, the one that comes nearer. Each state is measured on the bytes that paint.
+
+**The search.**
+
+- It steps OKLCH lightness by 0.0025 away from the seed in each direction, at the seed's hue and chroma, gamut-clamped, to the nearest lightness that passes question 2.
+- Of the two directions it takes the one that keeps more chroma, as Jason's answer I, option b chose.
+- If both keep chroma within 0.005 of each other, it takes the nearer lightness, and if that is equal too, the darker.
+- The clamp may lower chroma, which Jason's answer F accepts. The loss is measured on the painted hex.
+- If no lightness passes in either direction, the seed is returned unadjusted, with its failing reading, so the miss is reported rather than hidden.
+
+Measured: #3b82f6 goes to `#2b72e5` darker, #ff6b5e to `#d4433a` darker, #e91e63 to `#e51760` darker and #8fa9ff to `#5c72c3` darker, all in both appearances. #00a86b goes lighter, to `#43ca8a` in light and `#42c98a` in dark, and #ff8c00 goes lighter to `#ff9a40`, 12.2% less saturated. #6e56cf, #c8102e, #fff59d and #0b1a3a pass as typed.
+
+**Two shades differ from the custom-accent census by one step,** #00a86b and #ff8c00 in light, because the census blended the hover and press states unrounded. Both shades pass question 2 measured either way.
+
+**Byte rounding alone moves chroma by a few ten-thousandths,** for example coral's 0.0001. Wording such as "less saturated" therefore needs a threshold above that, set where the wording is written.
+
+**The status families are chosen once, for every brand colour.** `chooseSemanticScalesFor` in `collision.ts` runs the existing exhaustive search against several colours at once. The analysis passes the seed and each appearance's adjusted shade, so a family that clears the seed but not the button's shade still moves. With one colour it is `chooseSemanticScales`, and every existing collision test still passes. `Provider` still writes the single-colour choice until the writer adopts this one.
+
+**The error fill.** Each family the error search may choose has a ruled fill, `ERROR_FILL`, the one `theme.css` pins for the named accents ([[text-on-solid-fill-contrast]]). Red and ruby take their light step 11, `#ce2c31` and `#ca244d`, because white on their step 9 misses 4.5:1. Oxblood takes its own step 9, `#8a2119`, which passes. The ink is white.
+
+**The result, `BrandAnalysis`.** Per appearance (`AppearanceAnalysis`):
+
+- `step9`, the seed as typed;
+- `button`, the `ButtonFill`: the fill, whether it was adjusted, the direction, the chroma lost, the ΔE-OK from the seed, and question 2 on the painted fill with both inks' readings;
+- `glyphInk`, the APCA contrast mode's ink on step 9, the higher |Lc| of the two;
+- `page`, question 1a: step 9 against the page, worst over the six neutrals, with the neutral each worst value came from;
+- `text`, question 3: whether steps 11 and 12 reached their floors (now exposed as `BrandScale.textFloors`), step 11 and step 12 against step 3, step 11 against the page worst over the neutrals (the 4.39:1 link pairing), and whether steps 11 and 12 differ;
+- `error`, the family, its ruled fill, its ink and question 2 on it.
+
+Across both appearances it holds the seed, `statusFamilies`, and `apca`, the base algorithm version.
+
+**The published shape, `BrandAssessment`, fixed here and produced later.** It is `BrandAnalysis` with each appearance extended by:
+
+- `verdict`, a list of clauses as data: `as-is`, `shade` with its direction and whether it is less saturated, `part-shade` naming the part, and `text-miss` naming the text and its floor;
+- `shortVerdict`, the toolbar's wording;
+- `partShades`, the parts no helper layer could make visible, each with its own shade.
+
+Phase 4 publishes it unchanged.
+
+**Guarded by:**
+
+- **`_internal/Button fill parity`, in `src/foundations/_button-fill-parity.stories.tsx`.**
+  - **Question2MatchesTheDeepenedFills** reads each named accent's `--accent-9` and `--accent-solid` in light. It holds question 2 failing on exactly the accents the theme deepens (16, read off the theme, not listed), and holds each adjusted shade at 4.5:1 and Lc 60 at rest and on hover, measured with the guards' own WCAG and reference APCA. Light only, because in dark gray's step 9 passes and the pins hold one value for both appearances.
+  - **Question1aMatchesThePartEdges** holds question 1a on each accent's `--accent-indicator` failing exactly amber, lime, mint, sky and yellow in light, and plum, purple, violet, iris, indigo, gray and oxblood in dark. Every accent it fails must carry a rendered `--accent-part-edge`.
+  - Both went red with the floors loosened to Lc 45 and Lc 20.
+- **`brand-analysis.node-check.ts`** reads the red, ruby and oxblood pins back out of `theme.css`, and holds `ERROR_FILL` to exactly the error search's candidates. It went red with ruby's fill moved by one byte.
+- **`brandAnalysis.logic.test.ts`** holds the measured examples above, the press filter, the APCA glyph ink, the error fills, and the status choice for several colours.
+
+**Not covered here.** The helper-layer searches and a part's own shade come in their own change, and `partShades` stays empty until then. The wording of the verdict comes with the assessment.
+
+**Changed from.** [[seeded-brand-collisions]], whose search saw the seed only. A generated brand's filled button painted the raw step 9 under the ink that read better by WCAG alone.
+
+**Status.** Ruled 2026-11-04. No later ruling amends it.
+
 ### component-registry
 
 **Tags.** `CONTRIBUTING`, `COMPONENTS`. **Ruled.** 2026-07-08.
