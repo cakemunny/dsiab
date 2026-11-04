@@ -30,8 +30,8 @@
    ============================================================================= */
 
 /** Tier A — multi-word / unambiguous phrases, matched case-insensitively as a
- *  plain substring. `lifted use` also covers the "lifted useGridFocus" hook form
- *  (it is a prefix substring of every `lifted use<Hook>`). */
+ *  plain substring. The last entry is a prefix of every hook name that can follow
+ *  it, so one entry covers the hook form for every hook. */
 export const PHRASES: readonly string[] = [
   "astryx",
   "upstream",
@@ -49,8 +49,8 @@ export const PHRASES: readonly string[] = [
 ];
 
 /** Tier B — dangerous BARE words, matched \b-word-boundaried + case-insensitive.
- *  `ported` / `porting` are their own entries (not a `port` prefix) so the \b-boundary
- *  keeps `supported` / `reported` / `imported` / `transported` from tripping. */
+ *  Each inflection is its own entry rather than a prefix of the shortest, so the
+ *  \b-boundary keeps `supported` / `reported` / `imported` / `transported` from tripping. */
 export const BARE_WORDS: readonly string[] = ["port", "ported", "porting", "wave"];
 
 /** Tokenized forms that need their own pattern (not a plain phrase or a \bword\b). */

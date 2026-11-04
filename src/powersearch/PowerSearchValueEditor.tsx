@@ -3,7 +3,7 @@
 
 "use client";
 
-/**
+/*
  * @file PowerSearchValueEditor.tsx
  * @input OperatorValue + its stored FilterValue + an onChange committer
  * @output The correct OUR input for the operator's value type, wired to commit the right FilterValue shape

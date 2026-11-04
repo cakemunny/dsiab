@@ -19,8 +19,6 @@
  * generatePageRange(1, 10, 1) → [1, 2, 3, 4, 5, '...', 10]   // near-start window = 3 + 2*siblingCount = 5 pages
  * generatePageRange(1, 5, 1)  → [1, 2, 3, 4, 5]
  * ```
- * (Upstream's JSDoc showed the near-start case as `[1, 2, 3, '...', 10]`; that under-counts the
- * `leftRange = 3 + 2*siblingCount` window the code below actually emits — corrected here, source wins.)
  */
 export function generatePageRange(
   currentPage: number,
@@ -77,8 +75,8 @@ export function generatePageRange(
  * Coerce a `pageSize` to a positive integer. `pageSize` is typed as `number`, so 0, NaN, negatives,
  * and ±Infinity are valid at the type level but yield Infinity/NaN page counts — and
  * `Array.from({ length: Infinity })` crashes the `dots` variant. Non-finite values fall back to the
- * default (10); finite values floor and clamp to at least 1. Lifted verbatim from the Astryx
- * component body ([[catalog-as-specification]]) so the guard travels with the range logic it protects.
+ * default (10); finite values floor and clamp to at least 1. The guard sits beside the range logic it
+ * protects, so every caller coerces the same way ([[pagination-control]]).
  */
 export function coercePageSize(pageSize: number): number {
   return Number.isFinite(pageSize) ? Math.max(1, Math.floor(pageSize)) : 10;

@@ -1,7 +1,7 @@
 // Copyright (c) Meta Platforms, Inc. and affiliates.
 // Portions derived from facebook/astryx packages/core/src/PowerSearch/types.ts @ 88c95e4 (MIT, © Meta Platforms)
 
-/**
+/*
  * @file types.ts
  * @output PowerSearch model-layer type definitions
  * @position Type definitions; consumed by all PowerSearch modules
@@ -366,8 +366,8 @@ export interface PowerSearchAuxData {
   readonly filterIndex?: number;
 }
 
-/** One typeahead row in the PowerSearch field picker — our `TypeaheadOption` carrying
- *  `PowerSearchAuxData` (replaces Astryx `SearchableItem<PowerSearchAuxData>`). */
+/** One typeahead row in the PowerSearch field picker: a `TypeaheadOption` carrying
+ *  `PowerSearchAuxData`, so the picker reuses `Typeahead` as it is ([[power-search]]). */
 export type PowerSearchItem = TypeaheadOption<PowerSearchAuxData>;
 
 // =============================================================================

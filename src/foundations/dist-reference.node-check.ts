@@ -254,14 +254,18 @@ describe("the shipped type declarations", () => {
   // The .d.ts carry the JSDoc of every export, including the ones the reference never prints, and a
   // consumer's editor shows them on hover. The build writes them, so this reads dist/ when it exists:
   // CI builds before this lane, and a local run without a build has nothing to read.
-  test("carry no internal section code", () => {
+  test("carry no internal section code and no lineage term", () => {
     if (!existsSync("dist/index.d.ts")) {
       expect(process.env.CI, "CI builds before this lane, so dist/ must exist there").toBeFalsy();
       return;
     }
-    const found = declarations("dist").flatMap(([file, text]) => sectionCodes(text).map((c) => `${file}: ${c}`));
+    const found = declarations("dist").flatMap(([file, text]) => [
+      ...sectionCodes(text).map((c) => `${file}: ${c}`),
+      ...findLineageMatches(text).map((m) => `${file}: lineage term "${m.term}" ("${m.matched}")`),
+    ]);
     expect(found).toEqual([]);
-    // RED: a planted code in a hover doc is found.
+    // RED: a planted code and a planted lineage term in a hover doc are each found.
     expect(sectionCodes("/** Restores the size (the D5 fix). */")).toEqual(["D5"]);
+    expect(findLineageMatches("/** The upstream version restored the minimum. */").map((m) => m.term)).toEqual(["upstream"]);
   });
 });

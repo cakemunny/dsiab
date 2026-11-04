@@ -89,8 +89,8 @@ export interface ResizeBounds {
  *
  * Restores the remembered `preCollapseSize` (clamped to bounds), falling back to
  * `minSizePx` only when nothing was remembered (the pane was never collapsed from an expanded
- * state). Upstream Astryx incorrectly restored to `minSizePx` unconditionally, losing the user's
- * sizing — this is the bug we do NOT carry.
+ * state). Restoring the remembered size keeps the user's sizing across a collapse and an expand
+ * ([[resize-handle]]).
  */
 export function restoreSize(
   preCollapseSize: number | null,

@@ -1,7 +1,7 @@
 // Copyright (c) Meta Platforms, Inc. and affiliates.
 // Portions derived from facebook/astryx packages/core/src/PowerSearch/formatFilterValue.ts @ 88c95e4 (MIT, © Meta Platforms)
 
-/**
+/*
  * @file formatFilterValue.ts
  * @input OperatorValue, FilterValue, config
  * @output Formatted display string for a filter value (drives token chips)
