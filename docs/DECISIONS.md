@@ -486,7 +486,7 @@ Purple and indigo on the light scrim read 3.039 and 3.045 in the model, and 2.99
 - The switch paints `--accent-track`, which for the five pale accents in dark is Radix's own track, darker than step 9: `rgb(210, 185, 41)` on yellow and `rgb(226, 172, 55)` on amber.
 - Against that track, step 8 reads under 3:1 on all six accents. Step 7 clears it on amber, lime, mint, sky and yellow (3.14 to 4.03:1), and orange first clears at step 6 (3.58:1).
 - So the theme's own wording, "the lightest step that clears 3:1", reproduces step 7 and step 6 exactly. K's 4.5:1 tier would move yellow and amber to step 6, against answer H, which keeps step 7.
-- `thumbStroke` follows the theme's wording, measured on the painted track, and `theme.css` keeps its comment. This is put to Jason, because it replaces answer K's rule.
+- `thumbStroke` follows the theme's wording, measured on the painted track, and `theme.css` keeps its comment. Jason confirmed on 4 November 2026 ("K yes, drop the 4.5 tier"): answer K now means the theme's own rule, and the 4.5:1 tier is dropped.
 
 **Yellow's light part edge,** which the census left open, matches `theme.css` (`--black-a6`) under these searches.
 
