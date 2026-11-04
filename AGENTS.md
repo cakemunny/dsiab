@@ -284,6 +284,11 @@ choice on the tasks in `evals/tasks.json` against a tarball from `npm run pack`,
 to the ignored .evals folder. Run it before a release, and on a change to `rules.md` or `skills/dsiab/`
 compare the HEAD tarball with the branch tarball in one session.
 
+**Before a release, check apca-w3 upstream** ([[apca-runtime-port]]). `src/palette/apca.ts` is a port of
+apca-w3, and its licence requires the latest non-breaking release. If npm has a newer one, install it:
+`apca-port.node-check.ts` then fails until `src/palette/apca.logic.test.ts` passes against it and the
+recorded version and `THIRD-PARTY-NOTICES` are updated.
+
 ## What a done-claim requires
 
 **`npx ds-check` must exit 0 before you say anything works.** Run it over the code you touched and read

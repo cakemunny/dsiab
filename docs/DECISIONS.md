@@ -1820,6 +1820,53 @@ Both clear WCAG 1.4.3 AA at 4.5:1. The two scrims are opposites, and white on `-
 
 ## Accessibility rulings (made during implementation, verified in tests)
 
+### apca-runtime-port
+
+**Tags.** `ACCESSIBILITY`, `CONTRIBUTING`. **Ruled.** 2026-11-04.
+
+**The system carries its own TypeScript port of APCA in `src/palette/apca.ts`, for runtime use, under five conditions taken from the apca-w3 licence. The guards keep measuring with the reference package.**
+
+**What you see.** `src/palette/apca.ts` exports `apcaY`, `apcaLcFromY` and `apcaLc`, with the constant set `SA98G`, `APCA_W3_VERSION` ("0.1.9") and `APCA_ALGORITHM` ("0.0.98G-4g"). Nothing published imports it yet. The generator and the published assessment of the custom-accent work will. The apca-w3 package stays a development dependency, and `src/foundations/apca.ts`, the test lane's adapter, still measures with it.
+
+**Why a port.** The generator needs APCA at runtime to pick inks and shades, and a published assessment needs it in a consumer's browser. The reference package is a development dependency under a limited licence, so runtime code cannot import it. And the code that picks a colour must not be the code that checks it, so the guards keep the reference.
+
+**The licence, as read.** The text is the licence file of apca-w3 0.1.9, reproduced in `THIRD-PARTY-NOTICES` section 8. This is the maintainer's reading of it, not legal advice.
+
+- Port clause: files "may be used or incorporated only in tools for web-based content or web related content in support of the WCAG accessibility guidelines, and such use must be without modification to the essential elements of the code or specific approved constants, except as required to port to a given language."
+- Constants clause: an implementation "found to be non-compliant with the correct operation and methodology as defined for APCA contrast, including but not limited to the correct indication of polarity, and use of the current approved constants, shall be deemed in breech of license".
+- Naming clause: the name APCA "is only permitted for code that is properly implementing the APCA algorithm, and maintaining sync with the current version", 0.0.98G-4g or later, and the APCA logo and "Powered by APCA" mark need written consent.
+- Keep-current clause: developers "have a duty to ensure that the most recent version of this code is used".
+- Commercial clause: "Commercial use is prohibited without a written and signed commercial license agreement, except as provided by the W3 cooperative agreement for web content only." The same licence lets apca-w3 "be used for predicting contrast for web content used for that specific purpose without royalty".
+
+A port to another language is the one change the licence names as allowed, and choosing inks and shades so that web UI meets contrast floors is predicting the contrast of web content. So the reading allows the port.
+
+**The five conditions.**
+
+1. **Exact constants and polarity.** The port keeps every 0.0.98G-4g constant and the reference's order of operations, and returns a signed Lc. `src/palette/apca.logic.test.ts` compares it with the reference with `Object.is` on 132,192 pairs: every grey on every grey, a 6-level colour cube, and 20,000 seeded random pairs, both polarities. It fails when any of 15 constants changes by 1%, and when `normBG` in the port moves from 0.56 to 0.561. The sixteenth constant, `deltaYmin`, cannot be seen in any output, because any two luminances that close already fall under `loClip`, so `apca-port.node-check.ts` also compares the whole constant block with the reference source.
+2. **Full notice.** `THIRD-PARTY-NOTICES` section 8 carries the Myndex copyright, a statement of what was ported and changed, and the apca-w3 licence unchanged, including the W3C Software and Document Notice it incorporates. The port's own header says the same.
+3. **Keep current.** `apca-port.node-check.ts` fails when the installed apca-w3 differs from `APCA_W3_VERSION`, or when the notice names a different release. `AGENTS.md` adds a pre-release step: check npm for a newer non-breaking apca-w3 and install it, which turns that check red until the port is re-checked.
+4. **Naming.** The code and the documentation may call it APCA while conditions 1 and 3 hold. No APCA logo or "Powered by APCA" mark appears anywhere.
+5. **Scope.** The notice says the calculation is licensed for predicting the contrast of web content in support of WCAG only.
+
+**Guarded by** `src/foundations/apca-port.node-check.ts`, with five arms besides a non-vacuity check, and `src/palette/apca.logic.test.ts`:
+
+- Only `src/foundations/apca.ts` and the agreement test import apca-w3, and both still do.
+- The port imports nothing.
+- No file in `src/foundations` imports the port.
+- The port's recorded version equals the installed apca-w3, and the notice names it (condition 3).
+- Every constant equals the reference source's.
+
+Each arm went red on a planted defect: an apca-w3 import in `src/utils`, an import inside the port, an import of the port in `src/foundations`, the version set to 0.1.8, and `revBG` set to 0.651.
+
+**Not covered, and for later.**
+
+- The commercial clause is the one sentence a cautious reader could hold against this use, because consumers of the package may be commercial. The text exempts web-content use under the W3 agreement, and that is the use. The licence's own route to certainty is a question in the discussion tab of the apca-w3 repository, which is optional.
+- When the port first reaches the built bundle, through the published assessment, `THIRD-PARTY-NOTICES` section 8's line saying it is not yet bundled changes, and the package's SPDX licence expression needs review, because it names MIT and OFL-1.1 only.
+
+**Changed from.** [[apca-contrast-mode]] used APCA only through the reference package in the test lane.
+
+**Status.** Ruled 2026-11-04. No later ruling amends it.
+
 ### warning-contrast-ink
 
 **Tags.** `COLOUR`, `ACCESSIBILITY`. **Ruled.** No date recorded.
