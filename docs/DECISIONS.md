@@ -1304,6 +1304,20 @@ In each the theme recorded that step reading just under the floor in the browser
 
 **Status.** Ruled 2026-11-03. No later ruling amends it.
 
+### visual-references-required
+
+**Tags.** `CONTRIBUTING`. **Ruled.** 2026-11-04.
+
+**The `visual` job on a pull request fails when it has no reference images to compare with, instead of skipping every page and passing.**
+
+**What you see.** The job takes its reference images from the push run of the pull request's base commit. When that run is still going, the job waits for it, up to 30 minutes. It fails with an error that names the run and the fix when the base commit has no push run, when the run ended without a `visual-references` artifact, because its visual job failed or was cancelled or its images are older than the 90-day artifact, or when the artifact holds no images. On success it notes how many images it compares against. A page with no image of its own, such as a new page, is still skipped. The label `visual-change-approved` does not excuse a missing set, because there is no difference for a reviewer to have looked at.
+
+**Why.** On 2026-11-04 two pull requests opened minutes after `main` moved, before `main`'s run had uploaded its images. The job logged a notice, skipped all 220 pages, and showed green, so a check that never ran read as a pass. A change that intended a visual difference showed none.
+
+**Changed from.** A base run without images was a notice, and every page passed unchecked.
+
+**Status.** Ruled 2026-11-04. No later ruling amends it.
+
 ## Token additions (2026-06-18)
 
 ### serif-em-and-quote
@@ -3276,13 +3290,13 @@ The field otherwise rests in its neutral state. A red border on a field that rev
 
 **Tab order.** The calendar button, an `IconButton inset` with `CalendarBlank` and `aria-label="Choose date"`, is a real tab stop, because it opens a whole picking surface. The optional `hasClear` control stays at `tabIndex=-1` ([field-family-anatomy](#field-family-anatomy)).
 
-**API.** `value?: ISODateString`, a required `onValueChange(value | undefined)`, no `null`, ISO strings on the wire, and `isDateDisabled(iso)` passed straight to `Calendar`. The only new CSS is the panel class `.radix-themes.rt-ds-dateinput-panel` on the shared overlay tokens ([floating-surface-fill](#floating-surface-fill)), with no new tokens.
+**API.** `value?: ISODateString`, a required `onValueChange(value | undefined)`, no `null`, ISO strings on the wire, and `isDateDisabled(iso)` passed straight to `Calendar`. Because `undefined` is the empty value, the field is controlled when the caller passes `value` at all, even as `undefined`, and `defaultValue` is then ignored, so a page clears the field by setting its value back to `undefined`. The only new CSS is the panel class `.radix-themes.rt-ds-dateinput-panel` on the shared overlay tokens ([floating-surface-fill](#floating-surface-fill)), with no new tokens.
 
 **Not covered.** The `changeAction` async optimistic layer with `isLoading` and a Spinner, and composition with `InputGroup`, are deferred.
 
 **Changed from.** No earlier ruling covered this.
 
-**Status.** Ruled 2026-07-10. No later ruling amends it.
+**Status.** Ruled 2026-07-10. Amended 2026-11-04: the field was controlled only while `value` held a date. A page that started a field empty, filled it, then reset it to `undefined` handed the field back to its own stale value, and it kept showing the old date. The first eval run hit it in a form reset (due-date run 4). Held by `_internal/DateInput behavior` → ControlledResetToEmpty.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 
