@@ -149,7 +149,7 @@ export function Provider({
 }: ProviderProps) {
   // Keyed on the SEED STRING, never on the object. `{ seed: "#ff6b5e" }` written
   // inline in JSX is a new object every render, so keying on identity would
-  // regenerate ~112 properties and rewrite them on each pass.
+  // re-run the analysis and rewrite its 184 properties on each pass.
   const custom = isCustomBrand(accentColor) ? accentColor.seed : null;
   const brandProps = useMemo(() => {
     if (custom === null) return null;

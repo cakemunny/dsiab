@@ -5,11 +5,13 @@
    feature. Kept out of `Provider.tsx` so the write, its ordering rules and its
    cleanup live together and can be reasoned about in one screen.
    ============================================================================= */
-import { generateBrand } from "../palette/generate";
+import { analyseBrand, type AppearanceAnalysis, type BrandAnalysis, type LayerName } from "../palette/brandAnalysis";
+import { generateBrand, type Appearance, type BrandScale } from "../palette/generate";
+import { BLACK_A, WHITE_A, type LayerStep } from "../palette/helperLayers";
 import { parseSeed, type ParseResult } from "../palette/parseSeed";
 import type { RGB } from "../palette/oklch";
-import { chooseSemanticScales } from "../palette/collision";
 import { LIGHT_TARGET_SCALES, DARK_ON_SOLID, type SemFamily } from "../palette/collisionTable";
+import { INKS } from "../palette/surfaces";
 
 /** The attribute value the static block in `tokens/custom-brand.css` keys on. */
 export const CUSTOM_ACCENT = "ds-custom";
@@ -26,14 +28,87 @@ export const isCustomBrand = (v: unknown): v is CustomBrand =>
 /** The four semantic families, in the order the shift properties are emitted. */
 const SEM_FAMILIES: SemFamily[] = ["error", "warning", "success", "info"];
 
-/** Every property name this module writes — the cleanup list, derived rather
- *  than typed twice, so a token added to the scale cannot be left behind. */
+/* THE KEY LIST ([[seeded-brand-writer]]). Every property this module writes comes from one of the
+   tables below, and so does the cleanup list, so a property added to the writer cannot be left
+   behind on the root. Each value is a LITERAL colour. A `var()` written on the document root is
+   resolved there, under the root's appearance, so `var(--accent-7)` would not resolve at all and
+   `var(--red-3)` would paint its light value inside a dark theme. */
+
+/** The helper layer each per-appearance property paints, as `custom-brand.css` routes it. */
+const LAYER_KEYS: Record<LayerName, string> = {
+  ringStack: "ring-stack",
+  darkScrimStack: "ring-stack-scrim",
+  lightScrimStack: "ring-stack-scrim-light",
+  partEdge: "part-edge",
+  thumbStroke: "thumb-stroke",
+  markEdge: "mark-edge",
+  dashStack: "dash-stack",
+  sliderThumbStack: "slider-thumb-stack",
+  warningDotEdge: "warning-dot-edge",
+  successDotEdge: "success-dot-edge",
+  errorDotEdge: "error-dot-edge",
+};
+
+/** Where a search finds no step, the layer takes the heaviest step of its own scale, the nearest it
+ *  comes to visible. No seed measured reaches this: the assessment names such a part instead. */
+function heaviest(layer: LayerName, appearance: Appearance): LayerStep {
+  if (layer === "thumbStroke") return "accent-12";
+  if (layer === "darkScrimStack") return "white-a12";
+  if (layer === "lightScrimStack" || layer === "sliderThumbStack") return "black-a12";
+  return appearance === "light" ? "black-a12" : "white-a12";
+}
+
+/** The colour a layer step paints, from the appearance's own scale. */
+function paint(step: LayerStep, scale: BrandScale): string {
+  if (step === "none") return "rgba(0, 0, 0, 0)";
+  const m = /^(black-a|white-a|accent-a|accent-)(\d+)$/.exec(step);
+  if (!m) throw new Error(`customBrand: no paint for the layer step ${step}`);
+  const i = Number(m[2]) - 1;
+  const table = { "black-a": BLACK_A, "white-a": WHITE_A, "accent-a": scale.alpha, "accent-": scale.solid }[m[1]!]!;
+  const value = table[i];
+  if (value === undefined) throw new Error(`customBrand: the layer step ${step} is outside its scale`);
+  return value;
+}
+
+type Source = { scale: BrandScale; analysis: AppearanceAnalysis; appearance: Appearance };
+
+/** The per-appearance properties, written as `--ds-brand-<key>` and `--ds-brand-dark-<key>`. */
+const PER_APPEARANCE: Record<string, (s: Source) => string> = {
+  ...Object.fromEntries(Array.from({ length: 12 }, (_, i) => [
+    [`${i + 1}`, (s: Source) => s.scale.solid[i]!],
+    [`a${i + 1}`, (s: Source) => s.scale.alpha[i]!],
+  ]).flat()),
+  contrast: (s) => s.scale.contrast,
+  surface: (s) => s.scale.surface,
+  indicator: (s) => s.scale.indicator,
+  track: (s) => s.scale.track,
+  // The filled button: the generator's fill, the seed itself wherever question 2 passes on it, and
+  // the ink question 2 chose ([[generated-button-fill]]).
+  solid: (s) => s.analysis.button.fill,
+  "on-solid": (s) => INKS[s.analysis.button.label.ink],
+  ...Object.fromEntries((Object.entries(LAYER_KEYS) as [LayerName, string][]).map(([layer, key]) => [
+    key, (s: Source) => paint(s.analysis.layers[layer] ?? heaviest(layer, s.appearance), s.scale),
+  ])),
+};
+
+/** The properties written once for both appearances. */
+const SHARED: Record<string, (a: BrandAnalysis) => string> = {
+  // The ruled fill of the error family the generator chose. It is a literal, the same in both
+  // appearances, as `theme.css` pins it for the named accents.
+  "--ds-brand-error-solid": (a) => a.light.error.fill,
+  // The APCA contrast mode's glyph ink on step 9. `contrast.css` reads it in light only, as it
+  // overrides every named accent's glyph ink in light only.
+  "--ds-brand-apca-contrast": (a) => INKS[a.light.glyphInk],
+};
+
+const PREFIX: Record<Appearance, string> = { light: "--ds-brand", dark: "--ds-brand-dark" };
+
+/** Every property name this module writes: the cleanup list, read off the same tables the writer
+ *  uses. */
 export function customBrandPropertyNames(): string[] {
   const names: string[] = [];
-  for (const prefix of ["--ds-brand", "--ds-brand-dark"]) {
-    for (let i = 1; i <= 12; i++) names.push(`${prefix}-${i}`, `${prefix}-a${i}`);
-    for (const k of ["contrast", "surface", "indicator", "track"]) names.push(`${prefix}-${k}`);
-  }
+  for (const prefix of Object.values(PREFIX)) for (const key of Object.keys(PER_APPEARANCE)) names.push(`${prefix}-${key}`);
+  names.push(...Object.keys(SHARED));
   for (const f of SEM_FAMILIES) {
     for (let i = 1; i <= 12; i++) names.push(`--ds-brand-${f}-${i}`, `--ds-brand-${f}-a${i}`);
     names.push(`--ds-brand-${f}-contrast`);
@@ -42,55 +117,44 @@ export function customBrandPropertyNames(): string[] {
 }
 
 /**
- * The semantic shift for a seeded brand, as CSS custom properties.
+ * The semantic shift for a seeded brand, as CSS custom properties, from the scale each family
+ * uses (`BrandAnalysis.statusFamilies`, the generator's one choice for the seed and every shade
+ * its button paints).
  *
- * WHY THESE ARE `var()` REFERENCES, NOT COLOUR VALUES. The chooser returns a
- * scale NAME — "error goes to oxblood" — and the vendor already ships every
- * scale in both appearances. Emitting `var(--oxblood-9)` rather than a resolved
- * hex means the dark-mode value comes from the same place the named blocks get
- * theirs, so this path needs no light/dark arm of its own. That is the whole
- * reason `theme.css` writes its twenty blocks as references too.
+ * They are `var()` references because the choice is a scale NAME, "error goes to oxblood", and
+ * the vendor already ships every scale. A reference resolves where it is written, on the document
+ * root, so in a theme whose appearance differs from the root's the family tints paint the root's
+ * appearance, a defect [[seeded-brand-writer]] records and does not fix.
  *
- * The one literal is the on-solid foreground. A family routed to a pale scale
- * takes the dark ink: white on `orange-9` measures 2.97:1 against a 3.0 gate, so
- * `theme.css` already flips it for every warning->orange and success->lime block.
- * A shift that moved the fill and left the foreground would pass a colour-
- * separation check and still be unreadable.
+ * The one literal is the on-solid foreground. A family routed to a pale scale takes the dark ink:
+ * white on `orange-9` measures 2.97:1, so `theme.css` already flips it for every warning->orange
+ * and success->lime block.
  */
-export function semanticShiftProperties(seed: RGB): Record<string, string> {
-  const chosen = chooseSemanticScales(seed);
+export function semanticShiftProperties(families: Record<SemFamily, string>): Record<string, string> {
   const out: Record<string, string> = {};
   for (const family of SEM_FAMILIES) {
-    const scale = chosen[family];
+    const scale = families[family];
     for (let i = 1; i <= 12; i++) {
       out[`--ds-brand-${family}-${i}`] = `var(--${scale}-${i})`;
       out[`--ds-brand-${family}-a${i}`] = `var(--${scale}-a${i})`;
     }
-    out[`--ds-brand-${family}-contrast`] =
-      LIGHT_TARGET_SCALES.has(scale) ? DARK_ON_SOLID : "#fff";
+    out[`--ds-brand-${family}-contrast`] = LIGHT_TARGET_SCALES.has(scale) ? DARK_ON_SOLID : "#fff";
   }
   return out;
 }
 
 /** Build the full property map for a parsed seed. Pure — no DOM. */
 export function customBrandProperties(seed: RGB): Record<string, string> {
-  const { light, dark } = generateBrand(seed);
+  const scales = generateBrand(seed);
+  const analysis = analyseBrand(seed);
   const out: Record<string, string> = {};
-  const put = (prefix: string, s: typeof light) => {
-    s.solid.forEach((v, i) => (out[`${prefix}-${i + 1}`] = v));
-    s.alpha.forEach((v, i) => (out[`${prefix}-a${i + 1}`] = v));
-    out[`${prefix}-contrast`] = s.contrast;
-    out[`${prefix}-surface`] = s.surface;
-    out[`${prefix}-indicator`] = s.indicator;
-    out[`${prefix}-track`] = s.track;
-  };
-  put("--ds-brand", light);
-  put("--ds-brand-dark", dark);
-  // The semantic shift ships in the SAME map, because this is the function
-  // `Provider` calls (`Provider.tsx:88`). Putting it anywhere else — including in
-  // `applyCustomBrand` below, which `Provider` never touches — leaves the live
-  // path with an accent ramp and no shift, which is the defect being closed.
-  Object.assign(out, semanticShiftProperties(seed));
+  for (const appearance of ["light", "dark"] as const) {
+    const source: Source = { scale: scales[appearance], analysis: analysis[appearance], appearance };
+    for (const [key, value] of Object.entries(PER_APPEARANCE)) out[`${PREFIX[appearance]}-${key}`] = value(source);
+  }
+  for (const [name, value] of Object.entries(SHARED)) out[name] = value(analysis);
+  // The semantic shift ships in the SAME map, because this is the function `Provider` calls.
+  Object.assign(out, semanticShiftProperties(analysis.statusFamilies));
   return out;
 }
 

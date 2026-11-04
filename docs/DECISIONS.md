@@ -451,7 +451,7 @@ Phase 4 publishes it unchanged.
 
 **Changed from.** [[seeded-brand-collisions]], whose search saw the seed only. A generated brand's filled button painted the raw step 9 under the ink that read better by WCAG alone.
 
-**Status.** Ruled 2026-11-04. No later ruling amends it.
+**Status.** Ruled 2026-11-04. [seeded-brand-writer](#seeded-brand-writer) writes its fill, its ink and the error fill to the page.
 
 ### generated-helper-layers
 
@@ -507,7 +507,7 @@ In each the theme recorded that step reading just under the floor in the browser
 
 **Changed from.** Nothing. The layers existed only as `theme.css` values for the named accents.
 
-**Status.** Ruled 2026-11-04. No later ruling amends it.
+**Status.** Ruled 2026-11-04. [seeded-brand-writer](#seeded-brand-writer) writes every layer to the page.
 
 ### brand-assessment
 
@@ -550,6 +550,63 @@ In each the theme recorded that step reading just under the floor in the browser
 **Not covered here.** Showing the words, which Phase 3 does. Publishing them, which Phase 4 does. The 4.39:1 page pairing for link text is reported in the analysis but not worded: [[seeded-soft-text-as-painted]]'s painted floor is the one the words name, and no APCA floor for link text is ruled.
 
 **Changed from.** Nothing. There was no assessment.
+
+**Status.** Ruled 2026-11-04. No later ruling amends it.
+
+### seeded-brand-writer
+
+**Tags.** `COLOUR`, `ACCESSIBILITY`, `TOKENS`. **Ruled.** 2026-11-04.
+
+**A seeded brand now paints what the generator decided for it: the filled button's fill and ink, every helper layer, the error family's ruled fill and the APCA mode's glyph ink, in each appearance. Before, it matched no row of the theme's tables and took every base value.**
+
+**What you see.** Under `accentColor={{ seed }}`:
+
+- **The filled button** paints the generator's fill and ink ([generated-button-fill](#generated-button-fill)). Where question 2 passes on the seed, that is the seed itself. `#3b82f6` moves from the seed under black, which fails 4.5:1, to `#2b72e5` under white, in both appearances. `#fff59d` keeps its colour and takes `#21201c` in place of black.
+- **The focus ring, part edge, switch-thumb stroke, mark edge, drop-target dash, Slider-thumb stack and the three status-dot edges** take the step each search picks ([generated-helper-layers](#generated-helper-layers)). `#fff59d` in light now carries `--black-a7` on its ring and part edge and `--black-a9` on the light scrim. Before, every one of them was transparent.
+- **The destructive button** paints the ruled fill of the error family the generator chose, `#ce2c31`, `#ca244d` or `#8a2119`, in place of that family's step 9.
+- **Under `contrast="apca"`, in light,** the glyph on step 9 takes the ink with the higher Lc, as `contrast.css` does for the named accents.
+
+Every other part paints step 9, the seed, as before.
+
+**The mechanism.**
+
+- `theme/customBrand.ts` runs `analyseBrand` once per seed. It writes two properties per role, `--ds-brand-<role>` for light and `--ds-brand-dark-<role>` for dark.
+- `custom-brand.css` puts the live appearance's values in `--ds-custom-<role>`, under both dark selector shapes.
+- A last block in `theme.css`, `.radix-themes[data-accent-color="ds-custom"]`, maps them onto `--accent-solid`, `--on-accent` and the eleven layer tokens. It sits at (0,2,0), after every table, so it wins over the base arms and over the dark Slider-thumb base by source order. It names the theme root alone, so a part given its own colour keeps that colour's row.
+- `--error-solid` reads `--ds-brand-error-solid`, which is written once, because the pins are the same literal in both appearances.
+
+**The values are literals.** A `var()` written on the document root is resolved there, under the root's appearance. `var(--accent-7)` would not resolve at all, and a vendor scale step would take the root's appearance, not the theme's. So the writer writes each layer as the colour its step paints, read from Radix's black and white alpha scales (which the parity story holds to Radix's tokens) or from the seed's own scale.
+
+**One key list.** Every property the writer writes comes from one table, and the clean-up list is read off the same table. `clearCustomBrand` therefore removes everything `customBrandProperties` writes, and a test holds the two lists equal.
+
+**The status families** are the generator's one choice for the seed and every shade its button paints (`BrandAnalysis.statusFamilies`). The writer no longer runs the collision search itself.
+
+**Where a search finds no step,** the layer takes the heaviest step of its scale, the nearest it comes to visible. No seed the census or the 162-seed grid measured reaches this. The writer does not paint a part's own shade: the assessment names that part, and painting it is left for its own change.
+
+**Two values differ from the plan's census table:**
+
+- `#3b82f6`'s dark ring stack is `--white-a3`, not `--white-a4`.
+- `#fff59d`'s dark thumb stroke is step 7, not step 6, as answer K's rule picks on the named dark yellow.
+
+Both are what the ruled searches return, and the searches are held to `theme.css` on the named accents.
+
+**Found on the way, recorded and not fixed.** The status-family properties stay `var()` references to the vendor scales, written on the document root ([seeded-brand-collisions](#seeded-brand-collisions)), so they resolve under the root's appearance. A seeded theme whose appearance differs from the root's paints the root's family tints. Measured: with `--ds-brand-error-3: var(--red-3)` on a root with no appearance class, an explicitly dark theme reads `#feebec`, red's light step 3, where its own `--red-3` is `#3b1219`. Step 9 hides this on red, because red's step 9 is one hex in both appearances. The fix needs the families written per appearance, or written on the theme element.
+
+**Guarded by:**
+
+- **`src/theme/customBrand.logic.test.ts`.**
+  - The written names equal the clean-up list for eight seeds. Applying a brand and clearing it, or holding two brands and releasing both, leaves no property behind.
+  - Every value but the family references is a literal.
+  - For each seed, the button fill in both appearances and the error family equal what `assessBrand` reports.
+  - The plan's acceptance values for `#fff59d`, `#3b82f6`, `#0b1a3a` and `#6e56cf`.
+- **`_internal/Seeded brand roles` → EveryRoleReachesTheTheme**, in `src/theme/_seeded-brand-roles.stories.tsx`.
+  - It mounts a seeded `Provider` for eight seeds in four modes: light, dark, an inherited dark, and light under the APCA mode.
+  - On each theme root it holds every routed role to the value the writer wrote (456 rows), and `--accent-solid` to the assessment's fill.
+  - It went red with the ring-stack line removed from the new `theme.css` block: 16 rows.
+
+Whether each layer then clears its surfaces on a generated brand is the generated-colour sweeps' question, which a later change adds.
+
+**Changed from.** A seeded brand took the base value of every table: no ring stack, no part edge, transparent dot edges, the base Slider-thumb stack and thumb stroke, the seed under its WCAG-chosen pole as the button, and its error family's step 9 as the destructive fill. [text-on-solid-fill-contrast](#text-on-solid-fill-contrast), [part-fill-edge](#part-fill-edge), [focus-ring](#focus-ring), [neutral-part-stacks](#neutral-part-stacks) and [status-dot-edges](#status-dot-edges) each recorded their part of that as a gap.
 
 **Status.** Ruled 2026-11-04. No later ruling amends it.
 
@@ -1688,6 +1745,7 @@ White on `orange-9` measured 2.97:1, under the 3:1 floor of 2026-06-20 for text 
 
 - [text-on-solid-fill-contrast](#text-on-solid-fill-contrast) raises the floor for text on a solid fill to 4.5:1 and records a seeded brand's error fill, which stays on its own step 9, as an open gap.
 - [nested-brand-ownership](#nested-brand-ownership) rules which `Provider` may remove a seeded brand from the page root.
+- [seeded-brand-writer](#seeded-brand-writer) writes the generator's family choice and records that the references resolve under the root's appearance.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 
@@ -6935,7 +6993,7 @@ The gray pin follows the neutral. Pink passes at step 10 by 0.001 and takes step
 
 **Changed from.** Text on a solid fill was held to 3:1 as large or bold text, and every solid fill painted step 9.
 
-**Status.** Ruled 2026-09-25.
+**Status.** Ruled 2026-09-25. [seeded-brand-writer](#seeded-brand-writer) closes its seeded-brand gap on 2026-11-04.
 
 - [textless-part-fills](#textless-part-fills) points the parts without text in the 16 deepened colours at `--accent-solid` in light, and gives the solid `Code` chip the pair of the button.
 - [part-colour-parity](#part-colour-parity) gives a part with its own `color` the fill of a page in that colour, which closes the gap this ruling recorded for a button given the Radix `color` prop.
@@ -7008,7 +7066,7 @@ Each is the lightest step whose stack on the fill clears WCAG 3:1 and APCA Lc 30
 
 **Changed from.** After [textless-part-fills](#textless-part-fills), light amber, lime, mint, sky and yellow and dark oxblood kept a part fill at 1.31 to 2.08:1 against the page, because their ink passes as text on step 9 and [text-on-solid-fill-contrast](#text-on-solid-fill-contrast) did not deepen them. This ruling closes the gap [textless-part-fills](#textless-part-fills) recorded.
 
-**Status.** Ruled 2026-09-25.
+**Status.** Ruled 2026-09-25. [seeded-brand-writer](#seeded-brand-writer) closes its seeded-brand gap on 2026-11-04.
 
 - [radio-cards-band-edge](#radio-cards-band-edge) gives the selected RadioCards band the same edge.
 - [indicator-mark-edges](#indicator-mark-edges) stacks the edge on seven more marks that paint the part fill.
@@ -7185,7 +7243,7 @@ On a scrim only the stack changes, to `--accent-ring-stack-scrim` on the dark sc
 
 **Changed from.** Text fields drew a 1px neutral `gray-12` ring and buttons a 2px one, nine Radix controls kept Radix's accent-8 ring at as low as 1.47:1 against a tint, each scrim drew its own ring, and the menu and Select rows spent the ring token on their highlight edge. This ruling supersedes the first neutral focus ring and [validation-focus-paint](#validation-focus-paint) on colour and width, deletes `--ds-stroke-focus-hairline`, and supersedes [scrim-focus-ring](#scrim-focus-ring) and [light-scrim-focus-ring](#light-scrim-focus-ring) on the scrim rings.
 
-**Status.** Ruled 2026-09-25.
+**Status.** Ruled 2026-09-25. [seeded-brand-writer](#seeded-brand-writer) closes its seeded-brand gap on 2026-11-04.
 
 - [card-picker-focus-width](#card-picker-focus-width) rings a focused CheckboxCards or RadioCards card at 4px, selected or not.
 - [part-colour-parity](#part-colour-parity) keeps the page accent on the ring of a part given its own colour.
@@ -7342,7 +7400,7 @@ On a scrim only the stack changes, to `--accent-ring-stack-scrim` on the dark sc
 
 **Changed from.** An inactive dot was a `--ds-fill-press` fill that read as low as 1.29:1 against its surface, the current dot differed from it by colour alone, and under forced colours every dot painted Canvas on Canvas. The Slider thumb, the selected segment and the ScrollArea thumb read under 3:1 against their range, track or lane.
 
-**Status.** Ruled 2026-09-26.
+**Status.** Ruled 2026-09-26. [seeded-brand-writer](#seeded-brand-writer) closes its seeded-brand gap on 2026-11-04.
 
 - [colour-prop-and-high-contrast](#colour-prop-and-high-contrast) extends the Slider thumb stack to `highContrast` and to a slider given Radix's `color` prop.
 - [part-colour-parity](#part-colour-parity) adds oxblood to the base arm of the Slider thumb stack.
@@ -7546,7 +7604,7 @@ Light error and dark warning and success clear on the fill alone and keep the tr
 
 **Changed from.** The three status dots painted their fill alone and failed 3:1 on all 27 colours, warning and success in light and error in dark. The part edge failed on light amber and on eight dark colours, and a selected row's description read in weak ink, under 4.5:1 on 25 light colours and all 27 dark ones.
 
-**Status.** Ruled 2026-09-27. No later ruling amends it.
+**Status.** Ruled 2026-09-27. [seeded-brand-writer](#seeded-brand-writer) closes its seeded-brand gap on 2026-11-04.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 
