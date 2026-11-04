@@ -792,6 +792,12 @@
   box-shadow: var(--ds-shadow-overlay);
   padding: var(--space-3);
   z-index: var(--ds-z-panel);
+  /* Radix sets the available width and height on the panel. Holding the panel to the width is what lets the
+     calendars below wrap on a narrow screen, and holding it to the height lets a wrapped, taller panel scroll
+     instead of running off the screen. On a wide screen neither bound is reached. */
+  max-width: var(--radix-popover-content-available-width);
+  max-height: var(--radix-popover-content-available-height);
+  overflow-y: auto;
 }
 .radix-themes .rt-ds-daterange-layout { display: flex; flex-direction: column; gap: var(--space-3); }
 .radix-themes .rt-ds-daterange-body { display: flex; flex-direction: row; align-items: flex-start; gap: var(--space-5); }
@@ -801,13 +807,10 @@
    The caption is a Text on the text lane, so it steps with the dialog's type, and it paints in the weak text token.
    The row wraps, so on a narrow screen the end calendar drops below the start calendar instead of overflowing. */
 .radix-themes .rt-ds-daterange-split { display: flex; flex-direction: row; flex-wrap: wrap; align-items: flex-start; gap: var(--space-5); }
-/* Radix sets the available width and height on the panel. Holding the split panel to the width is what lets the row
-   above wrap, and holding it to the height lets the wrapped, taller panel scroll instead of running off the screen. */
-.radix-themes.rt-ds-daterange-panel[data-layout="split"] {
-  max-width: var(--radix-popover-content-available-width);
-  max-height: var(--radix-popover-content-available-height);
-  overflow-y: auto;
-}
+/* Linked layout: the range calendar's two months wrap the same way, so on a narrow screen the second month drops
+   below the first. The prev chevron stays on the first month's caption and the next chevron on the second's. */
+.radix-themes .rt-ds-daterange-panel .rt-ds-calendar-months,
+.radix-themes.rt-ds-daterange-panel .rt-ds-calendar-months { flex-wrap: wrap; }
 .radix-themes .rt-ds-daterange-pane { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; }
 .radix-themes .rt-ds-daterange-caption { color: var(--ds-text-weak); }
 
@@ -847,17 +850,17 @@
   color: var(--ds-text-strong);
 }
 
-/* Split layout on a narrow screen: the presets move ABOVE the calendars, as a wrapping row ruled off by a block-end
+/* Narrow screen, both layouts: the presets move ABOVE the calendars, as a wrapping row ruled off by a block-end
    hairline, so the calendars get the panel's full width. Beside them, the preset column took 9rem of a phone screen,
-   squeezed the end calendar until its caption wrapped, and pushed Done out of view. 42rem is where the split panel
-   stops fitting with the column beside it: the column, the gap and two one-month calendars measure about 621px at
-   the default size. The linked layout keeps its column; it has no narrow-screen rules of its own. */
+   squeezed the calendars until a caption wrapped, and pushed Done out of view. 42rem is where the panel stops fitting
+   with the column beside it: the column, the gap and two one-month grids measure about 621px at the default size, in
+   either layout. */
 @media (max-width: 42rem) {
-  .radix-themes.rt-ds-daterange-panel[data-layout="split"] .rt-ds-daterange-body {
+  .radix-themes .rt-ds-daterange-body {
     flex-direction: column;
     gap: var(--space-3);
   }
-  .radix-themes.rt-ds-daterange-panel[data-layout="split"] .rt-ds-daterange-presets {
+  .radix-themes .rt-ds-daterange-presets {
     flex-direction: row;
     flex-wrap: wrap;
     min-width: 0;
@@ -866,7 +869,7 @@
     border-inline-end: none;
     border-block-end: 1px solid var(--ds-stroke-weak);
   }
-  .radix-themes.rt-ds-daterange-panel[data-layout="split"] .rt-ds-daterange-preset { width: auto; }
+  .radix-themes .rt-ds-daterange-preset { width: auto; }
 }
 
 /* (The DateRange placeholder tone is no longer pinned here — the family-wide

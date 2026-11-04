@@ -3095,7 +3095,9 @@ The field otherwise rests in its neutral state. A red border on a field that rev
 
 **Keyboard and speech.** Keyboard paging stops at `min` and `max` in every calendar, so a bound set by the other end cannot strand focus. Each endpoint label of a role calendar reads the whole range, and a committed click is announced politely.
 
-**Split layout.** `DateRangeInput` takes `layout="split"`, which is opt-in. It shows a start calendar and an end calendar side by side, one month each. Each calendar is a `role="group"` named by its visible caption, and each pages on its own. On a screen 42rem wide or less, the presets move above the calendars as a wrapping row, and where the popover still has less room than two calendars need, the end calendar wraps below the start calendar. The default `linked` layout keeps one range calendar.
+**Split layout.** `DateRangeInput` takes `layout="split"`, which is opt-in. It shows a start calendar and an end calendar side by side, one month each. Each calendar is a `role="group"` named by its visible caption, and each pages on its own. The default `linked` layout keeps one range calendar.
+
+**Narrow screen.** In both layouts, on a screen 42rem wide or less, the presets move above the calendars as a wrapping row. The panel holds to the room Radix reports and scrolls inside it. Where two months still do not fit side by side, the second wraps below the first: the end calendar in the split layout, the second month in the linked one, which keeps the previous-month chevron on the first month and the next-month chevron on the second.
 
 **Why.** A date span can run past one month, so one calendar cannot always show both ends. Editing one end per click keeps a half-set range out of the value, because `DateRange` stays whole.
 
