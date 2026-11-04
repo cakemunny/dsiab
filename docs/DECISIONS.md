@@ -3091,11 +3091,11 @@ The field otherwise rests in its neutral state. A red border on a field that rev
 
 **Hover.** While a role calendar hovers a day, it paints the range a click on that day would produce. Days the result keeps take the committed band, days it adds take the preview band, and committed days it drops paint nothing. The result's endpoints carry the chip. `aria-selected` still reads the committed range, because hover is not selection.
 
-**Spillover band.** A day outside the month that falls inside a range takes the neutral `--ds-fill-weak` band, so the run reads across the month edge. A disabled day inside the run still caps it. In a two-month view, only the spillover that no sibling pane shows in its own month is banded.
+**Spillover band.** A day outside the month that falls inside a range takes the neutral `--ds-fill-weak` band, so the run reads across the month edge. A disabled day inside the run still caps it, and a disabled spillover day takes no band. In a two-month view, only the spillover that no sibling pane shows in its own month is banded.
 
 **Keyboard and speech.** Keyboard paging stops at `min` and `max` in every calendar, so a bound set by the other end cannot strand focus. Each endpoint label of a role calendar reads the whole range, and a committed click is announced politely.
 
-**Split layout.** `DateRangeInput` takes `layout="split"`, which is opt-in. It shows a start calendar and an end calendar side by side, one month each. Each calendar is a `role="group"` named by its visible caption, and each pages on its own. The default `linked` layout keeps one range calendar.
+**Split layout.** `DateRangeInput` takes `layout="split"`, which is opt-in. It shows a start calendar and an end calendar side by side, one month each. Each calendar is a `role="group"` named by its visible caption, and each pages on its own. Where the popover has less room than two calendars need, the end calendar wraps below the start calendar. The default `linked` layout keeps one range calendar.
 
 **Why.** A date span can run past one month, so one calendar cannot always show both ends. Editing one end per click keeps a half-set range out of the value, because `DateRange` stays whole.
 

@@ -14,6 +14,7 @@ import {
   isRangeHighlighted,
   isPreviewHighlighted,
   computeRoleHoverPaint,
+  bandAttr,
   type DayCellStateInput,
 } from './dayCellUtils';
 import type {ISODateString} from './dateTypes';
@@ -701,5 +702,48 @@ describe('computeRoleHoverPaint', () => {
       committed,
     });
     expect(dropped.spill).toBe(false);
+  });
+});
+
+describe('disabled spillover day', () => {
+  const spill = {
+    date: plainDateFromISO('2024-03-14'),
+    dayIndex: 0,
+    mode: 'range' as const,
+    rangeStart: plainDateFromISO('2024-03-10'),
+    rangeEnd: plainDateFromISO('2024-03-18'),
+    isOutside: true,
+    bandsOutside: true,
+    isDisabled: true,
+  };
+
+  it('is never banded in the committed range, because the run treats it as a break', () => {
+    expect(computeDayCellState(makeInput(spill)).isOutsideInRange).toBe(false);
+  });
+
+  it('is never banded in the hover preview', () => {
+    const preview = {...spill, rangeStart: null, rangeEnd: null, previewStart: spill.rangeStart, previewEnd: spill.rangeEnd};
+    expect(computeDayCellState(makeInput(preview)).isOutsideInPreview).toBe(false);
+  });
+
+  it('is never banded in a role hover', () => {
+    const paint = computeRoleHoverPaint({
+      date: spill.date,
+      isOutside: true,
+      isDisabled: true,
+      bandsOutside: true,
+      result: {start: spill.rangeStart, end: spill.rangeEnd},
+      committed: null,
+    });
+    expect(paint.spill).toBe(false);
+  });
+});
+
+describe('bandAttr', () => {
+  it('lets an endpoint win over the middle, and the start win on a one-day range', () => {
+    expect(bandAttr(true, true, true)).toBe('start');
+    expect(bandAttr(true, false, true)).toBe('end');
+    expect(bandAttr(true, false, false)).toBe('middle');
+    expect(bandAttr(false, false, false)).toBeNull();
   });
 });

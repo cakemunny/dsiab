@@ -57,7 +57,8 @@ export interface DayCellStateInput {
  * month's pane (#2715).
  *
  * The spillover band is the one exception: `bandsOutside` lets an outside day carry its own
- * `isOutsideIn*` flags, never a selection or an endpoint.
+ * `isOutsideIn*` flags, never a selection or an endpoint. A disabled outside day is never banded,
+ * because the run it would join treats it as a break.
  */
 export function computeDayCellState(input: DayCellStateInput): DayCellState {
   const {
@@ -122,6 +123,7 @@ export function computeDayCellState(input: DayCellStateInput): DayCellState {
     isOutsideInRange: !!(
       bandsOutside &&
       isOutside &&
+      !isDisabled &&
       mode === 'range' &&
       rangeStart &&
       rangeEnd &&
@@ -130,6 +132,7 @@ export function computeDayCellState(input: DayCellStateInput): DayCellState {
     isOutsideInPreview: !!(
       bandsOutside &&
       isOutside &&
+      !isDisabled &&
       previewStart &&
       previewEnd &&
       plainDateIsInRange(date, [previewStart, previewEnd])
@@ -357,6 +360,13 @@ export function computeDayNeighborContinuity(input: {
   };
 }
 
+/** The `data-range` / `data-preview` value of a day in a band: its endpoint, a middle day, or none. An endpoint wins. */
+export function bandAttr(inside: boolean, start: boolean, end: boolean): 'start' | 'middle' | 'end' | null {
+  if (start) {return 'start';}
+  if (end) {return 'end';}
+  return inside ? 'middle' : null;
+}
+
 /** A span of days, both ends inclusive. */
 export interface DaySpan {
   start: PlainDate;
@@ -386,14 +396,16 @@ function spanHas(span: DaySpan | null, date: PlainDate): boolean {
 export function computeRoleHoverPaint(input: {
   date: PlainDate;
   isOutside: boolean;
+  /** A disabled day: an outside one is never banded, the same rule `computeDayCellState` applies. */
+  isDisabled?: boolean;
   bandsOutside: boolean;
   result: DaySpan;
   committed: DaySpan | null;
 }): RoleHoverPaint {
-  const {date, isOutside, bandsOutside, result, committed} = input;
-  if (isOutside) return {band: null, preview: null, spill: bandsOutside && spanHas(result, date)};
-  if (!spanHas(result, date)) return {band: null, preview: null, spill: false};
-  const edge = plainDateIsEqual(date, result.start) ? 'start' : plainDateIsEqual(date, result.end) ? 'end' : 'middle';
+  const {date, isOutside, isDisabled, bandsOutside, result, committed} = input;
+  if (isOutside) {return {band: null, preview: null, spill: bandsOutside && !isDisabled && spanHas(result, date)};}
+  if (!spanHas(result, date)) {return {band: null, preview: null, spill: false};}
+  const edge = bandAttr(true, plainDateIsEqual(date, result.start), plainDateIsEqual(date, result.end));
   return spanHas(committed, date)
     ? {band: edge, preview: null, spill: false}
     : {band: null, preview: edge, spill: false};

@@ -179,7 +179,7 @@ const INTERNAL_MODULES: Readonly<Record<string, string>> = {
   "dates/timeParser": "the typed-time parser that TimeInput, DateTimeInput and PowerSearch share.",
   "dates/useCalendarConstraints": "Calendar's min, max and disabled-day logic, and Calendar is its only caller.",
   "dates/useCalendarDays": "Calendar's visible-day grid, and Calendar is its only caller.",
-  "dates/useRangeRole": "Calendar's rangeRole bounds, other end and click value, and Calendar is its only caller.",
+  "dates/useRangeRole": "Calendar's rangeRole bounds and click value, and Calendar is its only caller.",
 
   // src/palette. The brand-colour maths behind customBrand and Provider.
   "palette/collision": "the brand and status collision check that customBrand runs.",

@@ -57,6 +57,7 @@ import {
   computeDayCellState,
   computeDayNeighborContinuity,
   computeRoleHoverPaint,
+  bandAttr,
   type DaySpan,
 } from "../../dates/dayCellUtils";
 import { useGridFocus } from "../../hooks/useGridFocus";
@@ -176,13 +177,6 @@ function initialAnchor(props: CalendarProps): PlainDate {
     if (v) return plainDateFromISO(v);
   }
   return plainDateToday();
-}
-
-// The `data-range` / `data-preview` value of a day in a band: its endpoint, a middle day, or none. An endpoint wins.
-function bandAttr(inside: boolean, start: boolean, end: boolean): "start" | "middle" | "end" | null {
-  if (start) return "start";
-  if (end) return "end";
-  return inside ? "middle" : null;
 }
 
 /* ---- caption (nav chrome + the two view controls) ------------------------ */
@@ -628,6 +622,7 @@ function CalendarMonth(props: CalendarMonthProps) {
       ? computeRoleHoverPaint({
           date: day.date,
           isOutside: day.isOutside,
+          isDisabled: constraintDisabled,
           bandsOutside: bandsOutsideDay(day.date),
           result: roleResult,
           committed: rangeStart && rangeEnd ? { start: rangeStart, end: rangeEnd } : null,
@@ -929,22 +924,27 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(function Calen
     return { rangeStart: null, rangeEnd: null, previewStart: null, previewEnd: null };
   }, [isRange, anchor, hoverDate, rangeValue]);
 
-  // The range a click on the hovered day would make: the start role keeps the value's end, the end role its start.
+  // The range a click on the hovered day would make, read from the same function the click writes with, so the
+  // preview and the commit cannot disagree. On an empty value that is the one-day range the first click gives.
   const roleResult = useMemo<DaySpan | null>(() => {
-    if (!role || !hoverDate || !bounds.otherEnd) return null;
-    const other = plainDateFromISO(bounds.otherEnd);
-    return role === "start" ? { start: hoverDate, end: other } : { start: other, end: hoverDate };
-  }, [role, hoverDate, bounds.otherEnd]);
+    if (!role || !hoverDate) return null;
+    const next = applyRangeRole(role, plainDateToISO(hoverDate), rangeValue);
+    return { start: plainDateFromISO(next.start), end: plainDateFromISO(next.end) };
+  }, [role, hoverDate, rangeValue]);
 
   /* --- interaction handlers ------------------------------------------------- */
   const onDaySelect = useCallback(
     (day: CalendarDay) => {
       if (isDateDisabled(day.date)) return;
-      if (day.isOutside) setViewStart(firstOfMonth(day.date));
       // A spillover click pages the view, which remounts the button under the pointer. Hand focus to the clicked
-      // day's in-month button in its new month, so the keyboard carries on from the day that was picked.
-      pendingFocus.current = day.iso;
-      pendingFocusIfLost.current = true;
+      // day's in-month button in its new month, so the keyboard carries on from the day that was picked. Only a
+      // spillover click sets this: an in-month click keeps its button, and a flag set by a click that renders
+      // nothing would outlive it and veto the next keyboard move.
+      if (day.isOutside) {
+        setViewStart(firstOfMonth(day.date));
+        pendingFocus.current = day.iso;
+        pendingFocusIfLost.current = true;
+      }
 
       if (!isRange) {
         if (singleControlled === undefined) setSingleUncontrolled(day.iso);
