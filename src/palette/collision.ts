@@ -102,7 +102,24 @@ function scaleSample(scale: string): Sample {
  * agrees with twenty decisions already made by hand.
  */
 export function chooseSemanticScales(seedInput: string | RGB): Record<SemFamily, string> {
-  const seed = sample(seedInput);
+  return chooseFor([sample(seedInput)]);
+}
+
+/**
+ * Pick the semantic scales that clear every one of several brand colours at once.
+ *
+ * A generated brand paints more than its seed: where the filled button takes an
+ * adjusted shade ([[generated-button-fill]]), that shade is a brand colour too, and
+ * a status family that clears the seed but not the shade still reads as the brand
+ * on the button. One assignment for all of them keeps the shift a single set of
+ * references for both appearances. With one colour this is `chooseSemanticScales`.
+ */
+export function chooseSemanticScalesFor(inputs: readonly (string | RGB)[]): Record<SemFamily, string> {
+  if (!inputs.length) throw new Error("collision: chooseSemanticScalesFor needs at least one colour");
+  return chooseFor(inputs.map(sample));
+}
+
+function chooseFor(seeds: readonly Sample[]): Record<SemFamily, string> {
 
   // WHY AN EXHAUSTIVE SEARCH RATHER THAN FIXING EACH FAMILY IN TURN.
   // A per-family pass deadlocks, and the hand table records the case that proves
@@ -144,7 +161,7 @@ export function chooseSemanticScales(seedInput: string | RGB): Record<SemFamily,
             violations++;
             deficit += Math.max(0, MIN_BRAND_DELTA_E - deltaEOK(a.lab, b.lab));
           };
-          for (const s of samples) rate(seed, s);
+          for (const seed of seeds) for (const s of samples) rate(seed, s);
           for (let a = 0; a < samples.length; a++)
             for (let b = a + 1; b < samples.length; b++) rate(samples[a], samples[b]);
 
