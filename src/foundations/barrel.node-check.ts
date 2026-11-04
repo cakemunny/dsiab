@@ -181,6 +181,7 @@ const INTERNAL_MODULES: Readonly<Record<string, string>> = {
   "dates/useCalendarDays": "Calendar's visible-day grid, and Calendar is its only caller.",
 
   // src/palette. The brand-colour maths behind customBrand and Provider.
+  "palette/apca": "the runtime APCA calculation ([[apca-runtime-port]]). It ships inside the assessment and is never published under its own name.",
   "palette/collision": "the brand and status collision check that customBrand runs.",
   "palette/collisionTable": "the status-colour table that collision reads.",
   "palette/generate": "the step generator that customBrand calls.",
