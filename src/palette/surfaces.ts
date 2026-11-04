@@ -158,9 +158,27 @@ export function layOver(top: string, under: RGB): RGB {
   };
 }
 
+/** A translucent colour as an 8-bit canvas hands it back: stored with its alpha in a byte and its
+ *  channels premultiplied by that alpha, each rounded, then divided out again. The guards read
+ *  every token this way (`parseColor` in `_assert.ts`), so a search that must agree with a guard
+ *  on a value near the floor measures the colour the guard sees. An opaque colour is unchanged. */
+export function asReadBack(colour: string): string {
+  const c = parseColour(colour);
+  const A = Math.round(c.a * 255);
+  if (A === 255) return `rgba(${c.r}, ${c.g}, ${c.b}, 1)`;
+  if (A === 0) return "rgba(0, 0, 0, 0)";
+  const back = (v: number) => Math.min(255, Math.round((Math.round((v * A) / 255) * 255) / A));
+  return `rgba(${back(c.r)}, ${back(c.g)}, ${back(c.b)}, ${A / 255})`;
+}
+
+/** How a layer is read before it is composited: as written, or `asReadBack` to measure as the
+ *  guards do. */
+export type Read = (colour: string) => string;
+const asWritten: Read = (c) => c;
+
 /** Paint `layers`, bottom first. The bottom layer is the page and is opaque. */
-function paint(...layers: string[]): RGB {
-  const [bottom, ...rest] = layers;
+function paint(read: Read, ...layers: string[]): RGB {
+  const [bottom, ...rest] = layers.map(read);
   const base = parseColour(bottom!);
   if (base.a !== 1) throw new Error(`surfaces: the bottom layer ${bottom} is not opaque`);
   let under: RGB = { r: base.r, g: base.g, b: base.b };
@@ -170,20 +188,20 @@ function paint(...layers: string[]): RGB {
 
 /** The eight surfaces that depend only on the neutral and the appearance, named as the focus-ring
  *  guards name them (`FOCUS_SURFACES` in `_assert.ts`), each built from the same layers. */
-export function neutralSurfaces(neutral: Neutral, appearance: SurfaceAppearance): Record<NeutralSurfaceName, RGB> {
+export function neutralSurfaces(neutral: Neutral, appearance: SurfaceAppearance, read: Read = asWritten): Record<NeutralSurfaceName, RGB> {
   const n = NEUTRAL_STEPS[neutral][appearance];
   const card = appearance === "light" ? LIGHT_RAISED : n.s2;
   const panel = appearance === "light" ? LIGHT_RAISED : n.s3;
   const sunken = appearance === "light" ? n.s2 : DARK_SUNKEN;
   return {
-    page: paint(n.s1),
-    subtle: paint(n.s1, n.s2),
-    sunken: paint(n.s1, sunken),
-    card: paint(n.s1, card),
-    panel: paint(n.s1, panel),
-    track: paint(n.s1, n.a3),
-    "track on a card": paint(n.s1, card, n.a3),
-    "highlighted row": paint(n.s1, panel, n.a4),
+    page: paint(read, n.s1),
+    subtle: paint(read, n.s1, n.s2),
+    sunken: paint(read, n.s1, sunken),
+    card: paint(read, n.s1, card),
+    panel: paint(read, n.s1, panel),
+    track: paint(read, n.s1, n.a3),
+    "track on a card": paint(read, n.s1, card, n.a3),
+    "highlighted row": paint(read, n.s1, panel, n.a4),
   };
 }
 
@@ -209,23 +227,23 @@ export const TINT_SURFACE_NAMES = [
 export type TintSurfaceName = (typeof TINT_SURFACE_NAMES)[number];
 
 /** The seven tinted surfaces, from the brand's and the status families' own steps. */
-export function tintSurfaces(neutral: Neutral, appearance: SurfaceAppearance, t: TintSteps): Record<TintSurfaceName, RGB> {
+export function tintSurfaces(neutral: Neutral, appearance: SurfaceAppearance, t: TintSteps, read: Read = asWritten): Record<TintSurfaceName, RGB> {
   const n = NEUTRAL_STEPS[neutral][appearance];
   const card = appearance === "light" ? LIGHT_RAISED : n.s2;
   return {
-    "error tint": paint(n.s1, t.errorA3),
-    "warning tint": paint(n.s1, t.warningA3),
-    "success tint": paint(n.s1, t.successA3),
-    "info tint": paint(n.s1, t.infoA3),
-    "accent tint": paint(n.s1, t.accentA3),
-    "accent tint on a card": paint(n.s1, card, t.accentA3),
-    "selected tint": paint(n.s1, t.accentA5),
+    "error tint": paint(read, n.s1, t.errorA3),
+    "warning tint": paint(read, n.s1, t.warningA3),
+    "success tint": paint(read, n.s1, t.successA3),
+    "info tint": paint(read, n.s1, t.infoA3),
+    "accent tint": paint(read, n.s1, t.accentA3),
+    "accent tint on a card": paint(read, n.s1, card, t.accentA3),
+    "selected tint": paint(read, n.s1, t.accentA5),
   };
 }
 
 export type SurfaceName = NeutralSurfaceName | TintSurfaceName;
 
 /** All fifteen surfaces a focus ring or a mark is measured on, in the guards' order. */
-export function allSurfaces(neutral: Neutral, appearance: SurfaceAppearance, t: TintSteps): Record<SurfaceName, RGB> {
-  return { ...neutralSurfaces(neutral, appearance), ...tintSurfaces(neutral, appearance, t) };
+export function allSurfaces(neutral: Neutral, appearance: SurfaceAppearance, t: TintSteps, read: Read = asWritten): Record<SurfaceName, RGB> {
+  return { ...neutralSurfaces(neutral, appearance, read), ...tintSurfaces(neutral, appearance, t, read) };
 }
