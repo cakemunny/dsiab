@@ -201,12 +201,15 @@ export function analyseBrand(seed: RGB): BrandAnalysis {
   const brandColours: RGB[] = [seed];
   for (const b of Object.values(buttons)) if (b.adjusted) brandColours.push(parseColour(b.fill));
   const statusFamilies = chooseSemanticScalesFor(brandColours);
+  // The scrim stacks depend on the button's fill alone, not the appearance, and both appearances
+  // usually share one fill, so each fill's pair is searched once per analysis.
+  const scrims = new Map<string, { dark: LayerStep | null; light: LayerStep | null }>();
 
   const per = (appearance: Appearance): AppearanceAnalysis => {
     const scale = generateBrandScale(seed, appearance);
     const step9 = parseColour(scale.solid[8]!);
     const error = errorFill(statusFamilies.error, appearance);
-    const { layers, partShades } = helperLayers(scale.solid, scale.alpha, parseColour(buttons[appearance].fill), statusFamilies, error.fill, appearance);
+    const { layers, partShades } = helperLayers(scale.solid, scale.alpha, parseColour(buttons[appearance].fill), statusFamilies, error.fill, appearance, scrims);
     return {
       step9: scale.solid[8]!,
       button: buttons[appearance],
@@ -227,7 +230,11 @@ export function analyseBrand(seed: RGB): BrandAnalysis {
 function helperLayers(
   solid: readonly string[], alpha: readonly string[], buttonFill: RGB,
   families: Record<SemFamily, string>, errorFillHex: string, appearance: Appearance,
+  scrims: Map<string, { dark: LayerStep | null; light: LayerStep | null }>,
 ): { layers: HelperLayers; partShades: PartShade[] } {
+  const fillKey = `${buttonFill.r},${buttonFill.g},${buttonFill.b}`;
+  if (!scrims.has(fillKey)) scrims.set(fillKey, { dark: scrimStack(buttonFill, "dark"), light: scrimStack(buttonFill, "light") });
+  const scrimPair = scrims.get(fillKey)!;
   const step9 = parseColour(solid[8]!);
   const a3 = (f: SemFamily) => SCALE_ALPHA_3[families[f]]![appearance];
   const tints: TintSteps = {
@@ -238,8 +245,8 @@ function helperLayers(
   // a shade of that fill.
   const searches: Record<LayerName, { on: RGB; run: (fill: RGB) => LayerStep | null }> = {
     ringStack: { on: buttonFill, run: (f) => ringStack(f, appearance, tints) },
-    darkScrimStack: { on: buttonFill, run: (f) => scrimStack(f, "dark") },
-    lightScrimStack: { on: buttonFill, run: (f) => scrimStack(f, "light") },
+    darkScrimStack: { on: buttonFill, run: (f) => (f === buttonFill ? scrimPair.dark : scrimStack(f, "dark")) },
+    lightScrimStack: { on: buttonFill, run: (f) => (f === buttonFill ? scrimPair.light : scrimStack(f, "light")) },
     partEdge: { on: step9, run: (f) => partEdge(f, appearance) },
     thumbStroke: { on: step9, run: (f) => thumbStroke(solid, alpha, f) },
     markEdge: { on: step9, run: (f) => markEdge(f, appearance, tints.accentA3, tints.accentA5) },

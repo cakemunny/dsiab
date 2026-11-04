@@ -496,7 +496,7 @@ In each the theme recorded that step reading just under the floor in the browser
 
 **In the brand analysis.** The ring stacks sit on the button's fill, the adjusted shade where question 2 moved it ([[generated-button-fill]]). The part edge, thumb stroke, mark edge and Slider thumb sit on step 9, and the dash on step 7. The dots sit on the status families' fills: their step 9, and the ruled error fill. The status tints come from `SCALE_ALPHA_3` in `collisionTable.ts`, each candidate scale's alpha step 3 in both appearances, which the parity story re-reads off the theme. Across 162 seeds over the hue, lightness and chroma grid, no search came back empty, so no seed took a part's own shade. The census found the same. The own-shade path is held by a unit test.
 
-**Timing.** `_internal/Brand analysis timing` → OneSeedUnderAFrame runs the full analysis for five seeds, nine times each after three warm-up runs. It holds each median under 16 ms in the browser. Measured: 1.3 to 3.4 ms.
+**Timing.** `_internal/Brand analysis timing` → OneSeedUnderAFrame runs the full analysis for five seeds, nine times each after three warm-up runs. It holds each median under 16 ms in the browser. It failed once in CI's dark lane under full-suite load, #3b82f6 at 21.5 ms, so the searches now cache each colour's WCAG and APCA luminance (the same formulas, rounded to the byte that paints), and one analysis searches each fill's scrim stacks once instead of once per appearance. Nothing is kept between seeds except those luminances. Measured after: 1.0 to 2.5 ms in the browser, and #3b82f6 from 6.2 to 1.7 ms in Bun.
 
 **Guarded by:**
 
