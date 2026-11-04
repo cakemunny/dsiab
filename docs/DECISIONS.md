@@ -509,6 +509,50 @@ In each the theme recorded that step reading just under the floor in the browser
 
 **Status.** Ruled 2026-11-04. No later ruling amends it.
 
+### brand-assessment
+
+**Tags.** `COLOUR`, `DOCUMENTATION`. **Ruled.** 2026-11-04.
+
+**`assessBrand` says, in one fixed set of words, what the system does with a typed brand colour: for each appearance, whether filled buttons and focus rings use it as typed or a darker or lighter shade, which part takes a shade of its own, and which text step missed its floor. It is a pure reading of the brand analysis and runs no search of its own.**
+
+**What you see.** Nothing changes on screen. `src/palette/assessment.ts` exports `assessBrand(input)`, `assessAnalysis(analysis)` and `LESS_SATURATED`. `assessBrand` returns `{ ok: true, assessment }`, a `BrandAssessment` ([[generated-button-fill]]), or `{ ok: false, reason }` with the parser's own reason for a colour it refuses. Nothing publishes it yet: the docs toolbar and the Customize page read it in Phase 3, and the package publishes it in Phase 4.
+
+**The words.** They are Jason's answer M, and every caller shows these and no others:
+
+- **The long verdict,** `words`: one sentence per clause, each said once for both appearances where they agree, with the filled-button sentence first:
+  - "Filled buttons and focus rings use your colour as is in light mode and in dark mode."
+  - "Filled buttons and focus rings use a darker shade in light mode." and its lighter form.
+  - "Filled buttons and focus rings use a lighter, less saturated shade in light mode and in dark mode." where the gamut clamp lowered chroma.
+  - "Switch thumbs use a shade of their own in dark mode." for a part no helper layer can make visible.
+  - "Strong text and link text in dark mode are the same colour. Your colour is applied as typed." and the link and strong text forms, which name the ruled floor.
+  - "Works as is." alone, when both appearances use the colour as typed and nothing missed.
+- **The short verdict,** `shortVerdict` per appearance: "as is", "darker shade" or "lighter shade", with ", less saturated", or "as is, switch thumbs adjusted".
+- **Never named:** helper layers, because the named accents carry them silently too, and a miss on question 1a, because the part edge and the ring stack already fix it.
+
+**The clauses are data.** Each appearance's `verdict` is a list of clauses: `as-is`, `shade` with its direction and whether it is less saturated, `part-shade`, and `text-miss` with its text and floor. The words are built from the clauses, so a caller that wants other wording, a translation for instance, reads the clauses, not the sentences.
+
+**"Less saturated" starts at a 2% chroma loss** (`LESS_SATURATED`). Rounding the painted hex alone moves chroma by about 0.0001, which no one can see, and the smallest loss the census measured from the gamut clamp itself was about 2%. #ff8c00 loses 12.2% and reads "less saturated". #ff6b5e loses 0.01% and does not.
+
+**Measured,** on the census examples, all matching the plan's example verdicts:
+
+- #6e56cf, #0b1a3a and #c8102e read "Works as is.", though each fails question 1a in one appearance.
+- #3b82f6 and #ff6b5e read "a darker shade in light mode and in dark mode", to `#2b72e5` and `#d4433a`.
+- #ff8c00 reads "a lighter, less saturated shade".
+- #fff59d reads as is in both, with the dark text line.
+
+**Guarded by** `src/palette/assessment.logic.test.ts`:
+
+- the census table, each example with its result per appearance;
+- a constructed part-shade row, because no real seed produces one;
+- each refusal reason, held equal to the parser's;
+- for six seeds, the assessment's button and layers equal to what `analyseBrand` returns.
+
+**Not covered here.** Showing the words, which Phase 3 does. Publishing them, which Phase 4 does. The 4.39:1 page pairing for link text is reported in the analysis but not worded: [[seeded-soft-text-as-painted]]'s painted floor is the one the words name, and no APCA floor for link text is ruled.
+
+**Changed from.** Nothing. There was no assessment.
+
+**Status.** Ruled 2026-11-04. No later ruling amends it.
+
 ### component-registry
 
 **Tags.** `CONTRIBUTING`, `COMPONENTS`. **Ruled.** 2026-07-08.

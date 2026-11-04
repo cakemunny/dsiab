@@ -138,6 +138,9 @@ export interface AppearanceAssessment extends AppearanceAnalysis {
 export interface BrandAssessment extends Omit<BrandAnalysis, "light" | "dark"> {
   light: AppearanceAssessment;
   dark: AppearanceAssessment;
+  /** The long verdict, one sentence per clause, each said once for both appearances where they
+   *  agree, the filled-button sentence first. "Works as is." alone when there is nothing to say. */
+  words: string[];
 }
 
 /* --- the analysis ------------------------------------------------------------- */
