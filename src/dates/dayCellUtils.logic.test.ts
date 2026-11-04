@@ -13,8 +13,11 @@ import {
   isEndpoint,
   isRangeHighlighted,
   isPreviewHighlighted,
+  computeRoleHoverPaint,
+  bandAttr,
   type DayCellStateInput,
 } from './dayCellUtils';
+import type {ISODateString} from './dateTypes';
 import {plainDateFromISO, plainDateIsEqual} from './plainDate';
 
 function makeInput(
@@ -486,6 +489,137 @@ describe('computeDayNeighborContinuity', () => {
   });
 });
 
+describe('spillover band (bandsOutside)', () => {
+  const day = (iso: ISODateString, isOutside = false) => ({date: plainDateFromISO(iso), isOutside});
+  // A row that opens on a spillover day: Mar 14 (outside the month) then Mar 15–18 in month.
+  const spillWeek = [
+    day('2024-03-14', true),
+    day('2024-03-15'),
+    day('2024-03-16'),
+    day('2024-03-17'),
+    day('2024-03-18'),
+  ];
+  const rangeIn = {
+    mode: 'range' as const,
+    rangeStart: plainDateFromISO('2024-03-14'),
+    rangeEnd: plainDateFromISO('2024-03-18'),
+    previewStart: null,
+    previewEnd: null,
+    isDisabled: () => false,
+  };
+  const bandAll = () => true;
+  const mar15 = plainDateFromISO('2024-03-15');
+
+  it('paints an outside day in the committed range only when it is banded', () => {
+    const spill = {
+      date: plainDateFromISO('2024-03-14'),
+      dayIndex: 0,
+      rangeStart: rangeIn.rangeStart,
+      rangeEnd: rangeIn.rangeEnd,
+      mode: 'range' as const,
+      isOutside: true,
+    };
+    expect(computeDayCellState(makeInput({...spill, bandsOutside: true})).isOutsideInRange).toBe(true);
+    expect(computeDayCellState(makeInput({...spill, bandsOutside: false})).isOutsideInRange).toBe(false);
+    expect(computeDayCellState(makeInput(spill)).isOutsideInRange).toBe(false);
+  });
+
+  it('never selects or endpoints an outside day, banded or not', () => {
+    const state = computeDayCellState(
+      makeInput({
+        date: plainDateFromISO('2024-03-14'),
+        dayIndex: 0,
+        mode: 'range',
+        rangeStart: plainDateFromISO('2024-03-14'),
+        rangeEnd: plainDateFromISO('2024-03-18'),
+        isOutside: true,
+        bandsOutside: true,
+      }),
+    );
+    expect(state.isInRange).toBe(false);
+    expect(state.isRangeStart).toBe(false);
+    expect(state.isRangeEnd).toBe(false);
+  });
+
+  it('paints an outside day in the hover preview only when it is banded', () => {
+    const spill = {
+      date: plainDateFromISO('2024-03-14'),
+      dayIndex: 0,
+      mode: 'range' as const,
+      previewStart: plainDateFromISO('2024-03-14'),
+      previewEnd: plainDateFromISO('2024-03-18'),
+      isOutside: true,
+    };
+    expect(computeDayCellState(makeInput({...spill, bandsOutside: true})).isOutsideInPreview).toBe(true);
+    expect(computeDayCellState(makeInput(spill)).isOutsideInPreview).toBe(false);
+  });
+
+  it('lets a banded outside day continue the run across the month edge', () => {
+    const c = computeDayNeighborContinuity({...rangeIn, week: spillWeek, dayIndex: 1, bandsOutside: bandAll});
+    expect(c.prevInRange).toBe(true);
+    const unbanded = computeDayNeighborContinuity({...rangeIn, week: spillWeek, dayIndex: 1});
+    expect(unbanded.prevInRange).toBe(false);
+  });
+
+  it('caps a run at a disabled neighbour even when the spillover is banded', () => {
+    const disabledMar15 = (date: {year: number; month: number; day: number}) => plainDateIsEqual(date, mar15);
+    const before = computeDayNeighborContinuity({
+      ...rangeIn,
+      week: spillWeek,
+      dayIndex: 0,
+      bandsOutside: bandAll,
+      isDisabled: disabledMar15,
+    });
+    expect(before.nextInRange).toBe(false);
+    const after = computeDayNeighborContinuity({
+      ...rangeIn,
+      week: spillWeek,
+      dayIndex: 2,
+      bandsOutside: bandAll,
+      isDisabled: disabledMar15,
+    });
+    expect(after.prevInRange).toBe(false);
+  });
+
+  it('keeps an unbanded outside day breaking the run', () => {
+    const c = computeDayNeighborContinuity({...rangeIn, week: spillWeek, dayIndex: 1, bandsOutside: () => false});
+    expect(c.prevInRange).toBe(false);
+  });
+
+  it('reads the committed range and the hover preview as one run', () => {
+    const inMonth = [day('2024-03-15'), day('2024-03-16'), day('2024-03-17'), day('2024-03-18'), day('2024-03-19')];
+    const union = {
+      week: inMonth,
+      mode: 'range' as const,
+      rangeStart: plainDateFromISO('2024-03-15'),
+      rangeEnd: plainDateFromISO('2024-03-17'),
+      previewStart: plainDateFromISO('2024-03-17'),
+      previewEnd: plainDateFromISO('2024-03-19'),
+      isDisabled: () => false,
+    };
+    // Mar 17 is the committed end and the preview start: the next day, Mar 18, is in the preview only.
+    const atSeam = computeDayNeighborContinuity({...union, dayIndex: 2});
+    expect(atSeam.nextInRange).toBe(false);
+    expect(atSeam.nextInRun).toBe(true);
+    expect(atSeam.prevInRun).toBe(true);
+    const lastOfPreview = computeDayNeighborContinuity({...union, dayIndex: 4});
+    expect(lastOfPreview.nextInRun).toBe(false);
+  });
+
+  it('keeps an outside day highlighted in isRangeHighlighted only when it is banded', () => {
+    const base = {
+      date: plainDateFromISO('2024-03-14'),
+      mode: 'range' as const,
+      rangeStart: plainDateFromISO('2024-03-14'),
+      rangeEnd: plainDateFromISO('2024-03-18'),
+      isDisabled: false,
+      isOutside: true,
+    };
+    expect(isRangeHighlighted({...base, outsideBands: true})).toBe(true);
+    expect(isRangeHighlighted(base)).toBe(false);
+  });
+});
+
 describe('isEndpoint', () => {
   it('true when selected', () => {
     const state = computeDayCellState(
@@ -515,5 +649,101 @@ describe('isEndpoint', () => {
       }),
     );
     expect(isEndpoint(state)).toBe(false);
+  });
+});
+
+describe('computeRoleHoverPaint', () => {
+  const dateOf = (iso: ISODateString) => plainDateFromISO(iso);
+  const committed = {start: dateOf('2024-11-10'), end: dateOf('2024-12-09')};
+  // Hovering Nov 20 as the start role: the click would make Nov 20 – Dec 9.
+  const shrink = {start: dateOf('2024-11-20'), end: dateOf('2024-12-09')};
+  // Hovering Nov 2 as the start role: the click would make Nov 2 – Dec 9.
+  const extend = {start: dateOf('2024-11-02'), end: dateOf('2024-12-09')};
+
+  it('a committed day the result keeps is the committed band, and the result endpoint is its chip', () => {
+    const start = computeRoleHoverPaint({date: dateOf('2024-11-20'), isOutside: false, bandsOutside: false, result: shrink, committed});
+    expect(start).toEqual({band: 'start', preview: null, spill: false});
+    const end = computeRoleHoverPaint({date: dateOf('2024-12-09'), isOutside: false, bandsOutside: false, result: shrink, committed});
+    expect(end).toEqual({band: 'end', preview: null, spill: false});
+  });
+
+  it('a committed day the result drops paints nothing', () => {
+    const dropped = computeRoleHoverPaint({date: dateOf('2024-11-15'), isOutside: false, bandsOutside: false, result: shrink, committed});
+    expect(dropped).toEqual({band: null, preview: null, spill: false});
+  });
+
+  it('a committed day the result keeps but is no endpoint is a middle band day', () => {
+    const kept = computeRoleHoverPaint({date: dateOf('2024-11-10'), isOutside: false, bandsOutside: false, result: extend, committed});
+    expect(kept).toEqual({band: 'middle', preview: null, spill: false});
+  });
+
+  it('a day the result adds takes the preview band, and its endpoint the preview chip', () => {
+    const added = computeRoleHoverPaint({date: dateOf('2024-11-05'), isOutside: false, bandsOutside: false, result: extend, committed});
+    expect(added).toEqual({band: null, preview: 'middle', spill: false});
+    const addedStart = computeRoleHoverPaint({date: dateOf('2024-11-02'), isOutside: false, bandsOutside: false, result: extend, committed});
+    expect(addedStart).toEqual({band: null, preview: 'start', spill: false});
+  });
+
+  it('with no committed range, the whole result is preview', () => {
+    const none = computeRoleHoverPaint({date: dateOf('2024-11-20'), isOutside: false, bandsOutside: false, result: shrink, committed: null});
+    expect(none).toEqual({band: null, preview: 'start', spill: false});
+  });
+
+  it('an outside day follows the result and bands only in a pane that bands it', () => {
+    const covered = computeRoleHoverPaint({date: dateOf('2024-12-01'), isOutside: true, bandsOutside: true, result: extend, committed});
+    expect(covered).toEqual({band: null, preview: null, spill: true});
+    const unbanded = computeRoleHoverPaint({date: dateOf('2024-12-01'), isOutside: true, bandsOutside: false, result: extend, committed});
+    expect(unbanded.spill).toBe(false);
+    const dropped = computeRoleHoverPaint({
+      date: dateOf('2024-12-01'),
+      isOutside: true,
+      bandsOutside: true,
+      result: {start: dateOf('2024-11-20'), end: dateOf('2024-11-30')},
+      committed,
+    });
+    expect(dropped.spill).toBe(false);
+  });
+});
+
+describe('disabled spillover day', () => {
+  const spill = {
+    date: plainDateFromISO('2024-03-14'),
+    dayIndex: 0,
+    mode: 'range' as const,
+    rangeStart: plainDateFromISO('2024-03-10'),
+    rangeEnd: plainDateFromISO('2024-03-18'),
+    isOutside: true,
+    bandsOutside: true,
+    isDisabled: true,
+  };
+
+  it('is never banded in the committed range, because the run treats it as a break', () => {
+    expect(computeDayCellState(makeInput(spill)).isOutsideInRange).toBe(false);
+  });
+
+  it('is never banded in the hover preview', () => {
+    const preview = {...spill, rangeStart: null, rangeEnd: null, previewStart: spill.rangeStart, previewEnd: spill.rangeEnd};
+    expect(computeDayCellState(makeInput(preview)).isOutsideInPreview).toBe(false);
+  });
+
+  it('is never banded in a role hover', () => {
+    const paint = computeRoleHoverPaint({
+      date: spill.date,
+      isOutside: true,
+      isDisabled: true,
+      bandsOutside: true,
+      result: {start: spill.rangeStart, end: spill.rangeEnd},
+      committed: null,
+    });
+    expect(paint.spill).toBe(false);
+  });
+});
+
+describe('bandAttr', () => {
+  it('lets an endpoint win over the middle, and the start win on a one-day range', () => {
+    expect(bandAttr(true, true, true)).toBe('start');
+    expect(bandAttr(true, false, true)).toBe('end');
+    expect(bandAttr(true, false, false)).toBe('middle');
+    expect(bandAttr(false, false, false)).toBeNull();
   });
 });

@@ -332,7 +332,8 @@ function Composer() {
 
 /* The switch row this rail repeats, in the system's one switch shape: the label LEADS and the switch
  * sits on the trailing edge, so the states line up in a single scannable column. `htmlFor` is what
- * names the control — a Switch takes no label of its own. */
+ * names the control. This row predates Switch's own `label` prop ([[switch-field-label]]), which
+ * renders the same arrangement as a field; moving the rail onto it is a separate, visible change. */
 function SettingSwitch({ id, label, defaultChecked }: { id: string; label: string; defaultChecked?: boolean }) {
   return (
     <Flex align="center" justify="between" gap="3">

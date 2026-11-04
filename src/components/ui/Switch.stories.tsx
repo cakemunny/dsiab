@@ -10,7 +10,7 @@ import { Switch } from "./Switch";
 import { useResolvedSize } from "../../theme/SizeContext";
 import {
   Caption, Decision, DoDont, DODONT_LABEL, HexThemeKey, LiteTokenSpec, MeasuredRow, MeasuredSpec, Mono, NoteRow,
-  Page, PageHeader, PropsLead, type PropDef, PropTable, Rule, Section, toHex,
+  Page, PageHeader, PropsLead, type PropDef, PropTable, Rule, Scenario, Section, toHex,
 } from "./_storyKit";
 import { assertMeasuredRows } from "../../foundations/_assert";
 import { ComparisonSection, BOOLEAN_CHOICE_COMPARISON } from "./_comparisons";
@@ -43,36 +43,18 @@ function firstGradientColor(bgImage: string): string | null {
    not carried by any colour property a row can read off the element; the base track fill under it is,
    and that is the measured row below. */
 
-/** The system's switch row — the ONE shape every specimen on this page uses.
- *
- *  The LABEL LEADS and the switch sits at the row's TRAILING edge. Stated logically, not as left/right:
- *  `justify="between"` on a row flexbox resolves against the writing direction, so an RTL page mirrors the
- *  whole row for free (label at the right, switch at the left) with no extra rule. The label tracks the
- *  size toolbar; an optional supporting line stacks beneath it, inside the label column.
- *
- *  The label is painted --ds-text-strong in every state, which is what this row really produces. A
- *  Switch takes no `label` of its own — it is a lite wrap and the labelled row is a pattern the caller
- *  composes — so it has no Field shell, and the rule that dims a disabled field's name (components.css)
- *  has nothing to key off here. This row used to fake that dim with a ternary of its own, which showed
- *  readers a disabled state the pattern does not actually hand them. */
-function LabeledSwitch({ id, label, description, style, ...props }: { id: string; label: string; description?: string } & Omit<ComponentProps<typeof Switch>, "id">) {
-  const labelSize = useResolvedSize<ComponentProps<typeof Text>["size"]>("text", undefined);
-  return (
-    <Flex align="center" justify="between" gap="4" style={{ width: "100%", ...style }}>
-      <Flex direction="column" gap="1" style={{ minWidth: 0 }}>
-        <Text as="label" htmlFor={id} size={labelSize} style={{ color: "var(--ds-text-strong)" }}>{label}</Text>
-        {description && <Text size="1" style={{ color: "var(--ds-text-weak)", lineHeight: 1.5 }}>{description}</Text>}
-      </Flex>
-      <Switch id={id} {...props} style={{ flexShrink: 0 }} />
-    </Flex>
-  );
-}
+/* The system's switch row is the shipped `label` prop ([[switch-field-label]]), so every specimen on
+   this page that shows the row renders `<Switch label …>` itself — the code a reader copies is the code
+   the page draws. The LABEL LEADS and the switch sits at the row's TRAILING edge, stated logically and
+   not as left/right: `justify="between"` resolves against the writing direction, so an RTL page mirrors
+   the row for free. Because the row is a Field, a disabled switch dims its own name through the shell's
+   disabled-label rule (components.css), the same as every other field. */
 
-/** One row of a settings card — the shared row shape, plus the card's divider + padding. */
-function SettingRow({ id, title, desc, defaultChecked, first, testid }: { id: string; title: string; desc: string; defaultChecked?: boolean; first?: boolean; testid?: string }) {
+/** One row of a settings card — the shipped labelled row, plus the card's divider + padding. */
+function SettingRow({ title, desc, defaultChecked, first, testid }: { title: string; desc: string; defaultChecked?: boolean; first?: boolean; testid?: string }) {
   return (
     <Box style={{ padding: "14px 20px", borderTop: first ? undefined : "1px solid var(--ds-stroke-weak)" }}>
-      <LabeledSwitch id={id} label={title} description={desc} defaultChecked={defaultChecked} data-testid={testid} />
+      <Switch label={title} description={desc} defaultChecked={defaultChecked} data-testid={testid} />
     </Box>
   );
 }
@@ -81,9 +63,9 @@ function SettingRow({ id, title, desc, defaultChecked, first, testid }: { id: st
 function SettingsCard() {
   return (
     <Box style={{ borderRadius: "var(--ds-radius-4)", border: "1px solid var(--ds-stroke-weak)", overflow: "hidden", background: "var(--ds-bg-subtle)", maxWidth: 460 }}>
-      <SettingRow first id="set-email" title="Email notifications" desc="Get an email when someone mentions you." defaultChecked testid="switch-on" />
-      <SettingRow id="set-push" title="Push notifications" desc="Send alerts to your devices in real time." defaultChecked />
-      <SettingRow id="set-digest" title="Weekly digest" desc="A Monday summary of activity in your workspace." />
+      <SettingRow first title="Email notifications" desc="Get an email when someone mentions you." defaultChecked testid="switch-on" />
+      <SettingRow title="Push notifications" desc="Send alerts to your devices in real time." defaultChecked />
+      <SettingRow title="Weekly digest" desc="A Monday summary of activity in your workspace." />
     </Box>
   );
 }
@@ -137,6 +119,9 @@ function SwitchOnTrackSpec() {
 }
 
 const SWITCH_PROPS: PropDef[] = [
+  { name: "label", type: "ReactNode", desc: <>Promotes the bare switch into a single field — the label leads, the switch sits on the row's trailing edge, and the label is its accessible name. Omit it to keep the switch <strong>bare</strong>, named by an <Code>aria-label</Code> or a label you place beside it.</>, source: "Switch.tsx" },
+  { name: "description", type: "ReactNode", desc: <>Persistent helper line under the label — calm guidance. A <Code>validation</Code> message replaces it while set. Only renders when <Code>label</Code> is set.</>, source: "Switch.tsx" },
+  { name: "validation", type: `{ tone; message }`, desc: <>A status glyph + message under the label, in the tone's accent-aware colour. <Code>tone</Code> is <Code>"error" | "warning" | "success" | "info"</Code>; <Code>error</Code> also marks the switch <Code>aria-invalid</Code> and announces the message. Only renders when <Code>label</Code> is set.</>, source: "Switch.tsx" },
   { name: "size", type: `"1" | "2" | "3"`, def: `control lane (1 at small)`, desc: <>Control size. Unset, it resolves from the global <Code>uiSize</Code> control lane (default <Code>small</Code> → <Code>1</Code>); Radix's own default is <Code>2</Code>.</>, source: "Switch.tsx · Radix" },
   { name: "variant", type: `"surface" | "classic"`, def: `"surface"`, desc: <>The track's visual style. Both pass through, and <Code>surface</Code> is the default, an inset track that reads as a control. <Code>soft</Code> is not offered: its pale track read 1.24:1 against the page, and a switch given it is a type error ([[colour-prop-and-high-contrast]]).</>, source: "Radix" },
   { name: "checked", type: "boolean", desc: <>Controlled on/off state. A switch flips <em>immediately</em> — pair it with an <Code>onCheckedChange</Code> that applies the setting, not a deferred Save.</>, source: "Radix" },
@@ -161,7 +146,8 @@ const meta: Meta<typeof Switch> = {
           "lane; its checked track reuses Radix’s accent-aware skin (`--accent-track`), " +
           "so the ON state follows the brand accent with no `--ds-*` role of its own. A switch is always " +
           "paired with a label, and the label always **leads** with the switch on the row's **trailing** " +
-          "edge. It’s a **lite-tier** wrap — one Usage story (settings " +
+          "edge — pass `label` (plus an optional `description` or `validation`) and the switch renders that " +
+          "row itself. It’s a **lite-tier** wrap — one Usage story (settings " +
           "specimen · live token spec · comparison · do/don’ts) plus a Props.",
       },
     },
@@ -198,6 +184,22 @@ export const Usage: Story = {
 
         <Rule />
 
+        <Section title="Label, description, validation" lead={<>Pass <Code>label</Code> and the switch renders its own field: the label leads and names the switch, a <Code>description</Code> adds a calm helper line under it, and a <Code>validation</Code> message replaces that line while it is set. Omit <Code>label</Code> and the switch is bare.</>}>
+          <Grid columns={{ initial: "1", sm: "3" }} gapX="6" gapY="5" data-testid="labeled-states">
+            <Scenario label="LABEL" caption="The label is the accessible name, and clicking it flips the switch.">
+              <Switch label="Auto-save drafts" defaultChecked data-testid="labeled-plain" />
+            </Scenario>
+            <Scenario label="WITH DESCRIPTION" caption="A persistent helper line under the label, in the leading column.">
+              <Switch label="Share usage data" description="Anonymous counts that help us fix crashes sooner." data-testid="labeled-desc" />
+            </Scenario>
+            <Scenario label="WITH VALIDATION" caption="An error message replaces the description, marks the switch invalid and is announced.">
+              <Switch label="Public profile" description="Anyone with the link can see it." defaultChecked validation={{ tone: "error", message: "Verify your email before you make your profile public." }} data-testid="labeled-error" />
+            </Scenario>
+          </Grid>
+        </Section>
+
+        <Rule />
+
         <ComparisonSection comparison={BOOLEAN_CHOICE_COMPARISON} highlight="Switch" />
 
         <Rule />
@@ -206,7 +208,7 @@ export const Usage: Story = {
           <Flex direction="column" gap="3">
             <Grid columns={{ initial: "1", sm: "2" }} gap="3">
               <DoDont kind="do" bare note="A clear adjacent label, for a setting that applies the moment it flips — the label is the accessible name and the reader knows exactly what toggles.">
-                <LabeledSwitch id="do-switch" label="Dark mode" defaultChecked />
+                <Switch label="Dark mode" defaultChecked />
               </DoDont>
               <DoDont kind="dont" bare note="A bare switch has no accessible name and no context. And if the change only takes effect on Save, it isn't a switch at all — that's a Checkbox.">
                 <Switch defaultChecked />
@@ -215,9 +217,9 @@ export const Usage: Story = {
             <Grid columns={{ initial: "1", sm: "2" }} gap="3">
               <DoDont kind="do" bare note="Label leading, switch on the trailing edge. Read the setting, then its state — and in a stack the switches line up in one column you can scan for what's on.">
                 <Flex direction="column" gap="2" width="100%">
-                  <LabeledSwitch id="do-side-a" label="Two-factor authentication" defaultChecked />
-                  <LabeledSwitch id="do-side-b" label="Sign-in alerts" defaultChecked />
-                  <LabeledSwitch id="do-side-c" label="Trusted devices" />
+                  <Switch label="Two-factor authentication" defaultChecked />
+                  <Switch label="Sign-in alerts" defaultChecked />
+                  <Switch label="Trusted devices" />
                 </Flex>
               </DoDont>
               <DoDont kind="dont" bare note="Don't lead with the switch — that's the Checkbox's arrangement, where the box is part of reading the option. Here it scatters the states across the row and makes a switch look like a checkbox. And don't mix the two arrangements on one screen.">
@@ -266,6 +268,30 @@ export const Usage: Story = {
     const want = tokenHex(themeRoot, "--accent-track");
     if (got !== want) throw new Error(`switch ON-track must resolve --accent-track; got ${got} vs ${want}`);
 
+    // The `label` prop's wiring: the Field label names the switch, the description describes it, and an
+    // error message replaces the description, describes the switch and marks it invalid. Each switch is a
+    // CHILD of its Field.Root, so an aria read from the outer (null) context would fail all three.
+    const named = (id: string) => {
+      const sw = canvasElement.querySelector<HTMLElement>(`[data-testid="${id}"]`);
+      if (!sw || sw.getAttribute("role") !== "switch") throw new Error(`${id}: the labelled switch must render role="switch" with the data-testid`);
+      const label = canvasElement.querySelector<HTMLLabelElement>(`label[for="${CSS.escape(sw.id)}"]`);
+      if (!sw.id || !label) throw new Error(`${id}: the Field label must name the switch through htmlFor`);
+      return { sw, label };
+    };
+    const plain = named("labeled-plain");
+    if (plain.label.textContent !== "Auto-save drafts") throw new Error(`labeled-plain: wrong label "${plain.label.textContent}"`);
+    if (plain.sw.hasAttribute("aria-describedby")) throw new Error("labeled-plain: a switch with no description must not be described");
+    const desc = named("labeled-desc");
+    const descNode = document.getElementById(desc.sw.getAttribute("aria-describedby") ?? "");
+    if (descNode?.textContent !== "Anonymous counts that help us fix crashes sooner.") throw new Error("labeled-desc: aria-describedby must point at the description");
+    const err = named("labeled-error");
+    if (err.sw.getAttribute("aria-invalid") !== "true") throw new Error("labeled-error: an error must mark the switch aria-invalid");
+    const msg = document.getElementById(err.sw.getAttribute("aria-describedby") ?? "");
+    if (msg?.getAttribute("role") !== "alert" || !msg.textContent?.includes("Verify your email")) throw new Error("labeled-error: aria-describedby must point at the alert message");
+    if (err.sw.closest("[data-direction]")?.textContent?.includes("Anyone with the link")) throw new Error("labeled-error: the message must replace the description");
+    // The label leads: in a left-to-right page the label's box ends before the switch's begins.
+    if (plain.label.getBoundingClientRect().right > plain.sw.getBoundingClientRect().left) throw new Error("labeled-plain: the label must lead and the switch trail");
+
     // The token table's EVIDENCE, asserted at runtime: the track-base row read a real switch node,
     // resolved its claim somewhere else, and the two agree.
     const rows = assertMeasuredRows(canvasElement);
@@ -276,6 +302,9 @@ export const Usage: Story = {
 };
 
 type PropsArgs = {
+  label: string;
+  description: string;
+  validation: "none" | "error" | "warning" | "success" | "info";
   size: "auto" | "1" | "2" | "3";
   variant: "surface" | "classic";
   checked: boolean;
@@ -283,10 +312,27 @@ type PropsArgs = {
   onCheckedChange?: (checked: boolean) => void;
 };
 
-/** Props — the live, args-driven Switch in a labeled row. Drive size, variant, checked, disabled. */
+/** Props — the live, args-driven Switch in its labelled row. Drive the label, description, validation,
+ *  size, variant, checked and disabled; clear `label` to see the bare switch. */
 export const Props: StoryObj<PropsArgs> = {
-  args: { size: "auto", variant: "surface", checked: false, disabled: false },
+  args: { label: "Reduce motion", description: "", validation: "none", size: "auto", variant: "surface", checked: false, disabled: false },
   argTypes: {
+    label: { control: "text", description: "Clear it to render the bare switch (then named by aria-label).", table: { category: "Field" } },
+    description: { control: "text", description: "Helper line under the label; renders only with a label.", table: { category: "Field" } },
+    // inline-radio over a `mapping` to the real { tone, message } object — `none` → undefined.
+    validation: {
+      control: "inline-radio",
+      options: ["none", "error", "warning", "success", "info"],
+      mapping: {
+        none: undefined,
+        error: { tone: "error", message: "Motion settings could not be saved. Try again." },
+        warning: { tone: "warning", message: "Some animations ignore this on older browsers." },
+        success: { tone: "success", message: "Saved — applies on every device." },
+        info: { tone: "info", message: "Your system setting also reduces motion." },
+      },
+      description: "Status line under the label; replaces the description; renders only with a label.",
+      table: { category: "Field" },
+    },
     size: { control: "inline-radio", options: ["auto", "1", "2", "3"], description: '"auto" tracks the global uiSize toolbar (unset → the control lane); a step pins the track.', table: { category: "Variant" } },
     variant: { control: "inline-radio", options: ["surface", "classic"], description: "The track's visual style.", table: { category: "Variant" } },
     checked: { control: "boolean", description: "On/off state (drive it from Controls; the change also logs in Actions).", table: { category: "State" } },
@@ -294,15 +340,22 @@ export const Props: StoryObj<PropsArgs> = {
     onCheckedChange: { action: "checkedChange" },
   },
   parameters: { controls: { disable: false } },
-  render: ({ size, variant, checked, disabled, onCheckedChange }: PropsArgs) => (
+  // `validation` arrives as a string key that Storybook resolves to the real object via `mapping`.
+  render: ({ label, description, validation, size, variant, checked, disabled, onCheckedChange }: PropsArgs) => (
     <Page maxWidth="none">
       <PageHeader title="Switch · Props" standfirst={<>{DEFINITION} The row below is the system's one switch shape — label leading, switch on the trailing edge.</>} />
       <Box style={{ padding: "16px 0 8px", maxWidth: 360 }}>
-        <LabeledSwitch id="pg-switch" label="Reduce motion" size={size === "auto" ? undefined : size} variant={variant} checked={checked} disabled={disabled} onCheckedChange={onCheckedChange} />
+        <Switch
+          label={label || undefined}
+          aria-label={label ? undefined : "Reduce motion"}
+          description={description || undefined}
+          validation={validation as unknown as ComponentProps<typeof Switch>["validation"]}
+          size={size === "auto" ? undefined : size} variant={variant} checked={checked} disabled={disabled} onCheckedChange={onCheckedChange}
+        />
       </Box>
       <PropsLead />
       <Rule />
-      <Section title="Props reference" lead={<>Every prop <Code>Switch</Code> accepts — <Code>size</Code> resolves from the <Code>uiSize</Code> control lane when unset, the rest pass through to Radix's <Code>Switch</Code>.</>}>
+      <Section title="Props reference" lead={<>Every prop <Code>Switch</Code> accepts — <Code>label</Code>/<Code>description</Code>/<Code>validation</Code> promote it into a single field, <Code>size</Code> resolves from the <Code>uiSize</Code> control lane when unset, and the rest pass through to Radix's <Code>Switch</Code>.</>}>
         <PropTable rows={SWITCH_PROPS} />
       </Section>
     </Page>
@@ -342,6 +395,13 @@ export const History: Story = {
             A switch is never shipped bare — it is always paired with an adjacent text <Code>&lt;label&gt;</Code>{" "}
             (the accessible name), the same labeled-row rule the Checkbox follows.
           </Decision>
+          <Decision id="[[switch-field-label]] · The label prop">
+            <Code>label</Code>, <Code>description</Code> and <Code>validation</Code> are props on the switch, the
+            Checkbox mechanism: with <Code>label</Code> it renders its own field — label leading, switch on the
+            trailing edge, the helper line or the status message under the label in the leading column. A
+            validation message replaces the description, and an error marks the switch invalid. Without{" "}
+            <Code>label</Code> the switch renders bare, exactly as before.
+          </Decision>
           <Decision id="Label side">
             <strong>The label leads; the switch sits on the row's trailing edge.</strong> One arrangement, no
             exceptions — a page that mixes both makes the reader re-find the control on every row. Three
@@ -367,6 +427,11 @@ export const History: Story = {
 
       <Section title="Changelog" lead="Notable changes, newest first — grows as the component evolves.">
         <Flex direction="column" gap="3">
+          <Decision id="Unreleased">
+            Switch takes <Code>label</Code>, <Code>description</Code> and <Code>validation</Code>, so a switch row
+            can carry a helper line or a validation message without a hand-built <Code>&lt;label&gt;</Code>. Every
+            labelled row on this page now renders the prop. A switch without <Code>label</Code> is unchanged.
+          </Decision>
           <Decision id="0.9.0">
             The checked thumb's ring deepens on the light tracks where a white thumb fell under 3:1 (lime
             1.35:1 in light, yellow 1.96:1 in dark), and the ON track follows the one shade every part without

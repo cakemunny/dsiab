@@ -566,7 +566,8 @@ function BoardFilters() {
 
           <Flex direction="column" gap="3">
             {/* A Switch is the control for a setting that takes hold the moment it is flipped — no
-                Apply, no form. It carries no label of its own, so the row's Text names it. */}
+                Apply, no form. The row's Text names it here; Switch's own `label` prop
+                ([[switch-field-label]]) renders the same row as a field. */}
             <Flex align="center" justify="between" gap="3">
               <Text id={subtasksId}>Show sub-tasks</Text>
               <Switch defaultChecked aria-labelledby={subtasksId} />

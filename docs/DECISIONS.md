@@ -3157,6 +3157,7 @@ Cells are flush so a band runs unbroken, and only the outer corners and the corn
 - [textless-part-fills](#textless-part-fills) paints the today bar in `--accent-indicator` in place of `--ds-fill-accent`.
 - [indicator-mark-edges](#indicator-mark-edges) adds a 1px edge to the today bar where it paints the accent.
 - [mark-on-tint-edge](#mark-on-tint-edge) gives the today bar inside a range an edge step of its own.
+- [calendar-range-role](#calendar-range-role) lets an adjacent-month day continue a range run in the neutral spillover band, and a disabled day still caps it.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 
@@ -3344,10 +3345,41 @@ The field otherwise rests in its neutral state. A red border on a field that rev
 - [published-aschild-props](#published-aschild-props) repairs `Popover.Anchor`, which anchored nothing for this component before.
 - [focus-ring](#focus-ring) replaces the trigger's focus ring with the 2px accent ring of every control.
 - [input-focus-ring-offset](#input-focus-ring-offset) moves the trigger's ring to 2px outside its edge, the Select trigger rule.
+- [calendar-range-role](#calendar-range-role) adds `layout="split"`, where one click sets one end of the range. The linked layout keeps its two clicks.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 
 > **DateRangeInput — a range picker: MultiSelect-trigger chrome + a preset sidebar + a range-calendar dialog (2026-07-10).** The **range sibling of DateInput** ([date-input](#date-input)), but a **different shape at both ends** — it composes three already-shipped surfaces and adds almost no new logic. **(1) The trigger is the MultiSelect/Select `.rt-SelectTrigger` chrome, NOT a free-text field.** A range is entered by **picking**, so the trigger is a single `<button className="rt-reset rt-SelectTrigger rt-variant-surface">` reusing the surface fill + border + the **[validation-focus-paint](#validation-focus-paint) dual-tone focus ring** + the `.rt-ds-select-affix`/`-lead`/`-clear` scaffolding **for free**. It carries a leading `CalendarBlank` glyph (`--ds-icon-neutral`), `aria-haspopup="dialog"` (**NOT** `listbox`), `aria-expanded`/`aria-controls`, and **deliberately NO caret** — a caret signals a *dropdown*, but this opens a picking **dialog**; stated so nobody adds one back. It is **ONE tab stop / one Field control**; the optional clear ✕ stays `tabIndex=-1` with **Backspace/Delete parity** on the focused trigger ([field-family-anatomy](#field-family-anatomy)). The keyboard-first *exact-date* range-entry alternative is **two `DateInput`s in a `FieldGroup`** — a named deferral, **not** a bespoke range text-parser. **(2) The popover is DateInput's mechanism verbatim.** `<Theme>`-wrapped `Popover.Content asChild` with the **COMPOUND** `.radix-themes.rt-ds-daterange-panel` selector on the pre-bundled `@radix-ui/react-popover` (the same opaque overlay surface as the DateInput/Typeahead/Select menus — `--ds-bg-overlay` ([floating-surface-fill](#floating-surface-fill)), `--ds-shadow-overlay`, `--ds-radius-3`); Radix's hardcoded **`role="dialog"` is KEPT** (named `aria-label="Choose date range"`), `onInteractOutside` exempts the anchor, and **`onOpenAutoFocus` moves focus INTO the range grid's roving day** (queries `button.rt-ds-calendar-day[tabindex="0"]` in the dialog) — the Calendar uses **real roving-tabindex focus**, so keeping focus outside would leave the grid keyboard-**INOPERABLE** (WCAG 2.1.1). Inside, a flex row: the **preset sidebar** (logical-start) beside `<Calendar mode="range" numberOfMonths={2}>`. **(3) The preset sidebar is a `role="group"` of Tab-order ghost `Button`s — NOT a listbox** (presets are *shortcuts*, not the selection surface, so no `aria-selected`/roving). The **ACTIVE** preset — its `getRange()` equals the committed value (an `isRangeEqual` helper) — carries **`aria-current="true"`** (the string `"true"`, **NOT** `"date"`) and paints from **`--ds-fill-selected-subtle` (a5, the [calendar-grid](#calendar-grid) committed-BAND tier) + `--ds-text-strong`**, deliberately **NOT `--ds-fill-selected` (a9)**: a9 would fight the calendar's OWN a9 range endpoints inside the same dialog, and the a5 band tier ties the preset to the *range it produces*; hover stays `--ds-fill-accent-weak` (a3, the ghost Button's own skin, reused). Clicking a preset fires `onValueChange(range)`, drives the Calendar's controlled `value` + `focusDate` (so the grid **shows** the range) and **KEEPS THE DIALOG OPEN** — a **deliberate divergence** from DateInput's day-select-closes: a range benefits from confirm/refine; a trailing **"Done"** button, Escape, or outside-click close it (a committed two-click calendar range also keeps the dialog open, same reason). **(4) Value + display.** `value?: DateRange` (`{start,end}` ISO), a *required* `onValueChange(v | undefined)` (`undefined` = empty — the `null` upstream carries is normalized to `undefined` at **this** boundary only), ISO strings on the wire. The trigger shows a **smart format** — `Intl.DateTimeFormat(undefined, …).formatRange(start, end)` (native, locale-correct part-dropping): **same-year drops the year, cross-year keeps it, `start==end` collapses to a single date**, separator a **spaced en dash (– U+2013)** — with a **`VisuallyHidden` full form** ("July 3 to July 10, 2026") so the dash is never mis-announced. **No partial state is flickered into the trigger** — the Calendar commits `{start,end}` **atomically** (in-progress range lives in the grid preview, [calendar-grid](#calendar-grid)). Empty → a `--ds-text-weak` placeholder ("Select dates") via `data-placeholder`. **(5) Soft-disable ([disabled-reason](#disabled-reason)) on a button trigger.** `disabled` + a non-empty `disabledReason` soft-disables via **`aria-disabled` alone** (readOnly is meaningless on a `<button>`) so it stays focusable — and since Radix greys `.rt-SelectTrigger` only on `:disabled`, its **own disabled skin values are re-applied** via the shared `[data-disabled-reason]` wrapper hook (the sanctioned reuse-a-Radix-skin exception, exactly as [disabled-reason](#disabled-reason)). **DEFERRED (named, not built):** the `changeAction`/`isLoading` async-optimistic layer; a live-partial-range echoed into the trigger while picking (would need exposing Calendar's internal anchor — a net-new Calendar affordance); InputGroup composition; and the two-`DateInput`-in-a-`FieldGroup` reuse-alternative. **The only earned net-new is the panel + preset-column + active-preset + no-caret-clear-offset + soft-disable-trigger CSS** (geometric / reusing overlay + `--ds-fill-*`/`--ds-text-*` roles + Radix's own disabled skin), `isRangeEqual`, and the `Intl.formatRange` formatter; **zero net-new tokens.** No `!important`; `.radix-themes`-scoped. Ported under [catalog-as-specification](#catalog-as-specification).
+
+### calendar-range-role
+
+**Tags.** `COMPONENTS`, `ACCESSIBILITY`. **Ruled.** 2026-11-03.
+
+**A range calendar can edit one end at a time, and a day outside the month continues a range across the month edge.**
+
+**The start or end role.** `Calendar` takes `rangeRole="start"` or `rangeRole="end"`. A role calendar sets only its own end of the shared value, in one click. On an empty value, the first click gives a one-day range. The start calendar stops at the value's end, and the end calendar stops at its start. Without `rangeRole`, the calendar keeps the two-click range.
+
+**Hover.** While a role calendar hovers a day, it paints the range a click on that day would produce. Days the result keeps take the committed band, days it adds take the preview band, and committed days it drops paint nothing. The result's endpoints carry the chip. `aria-selected` still reads the committed range, because hover is not selection.
+
+**Spillover band.** A day outside the month that falls inside a range takes the neutral `--ds-fill-weak` band, so the run reads across the month edge. A disabled day inside the run still caps it, and a disabled spillover day takes no band. In a two-month view, only the spillover that no sibling pane shows in its own month is banded.
+
+**Keyboard and speech.** Keyboard paging stops at `min` and `max` in every calendar, so a bound set by the other end cannot strand focus. Each endpoint label of a role calendar reads the whole range, and a committed click is announced politely.
+
+**Split layout.** `DateRangeInput` takes `layout="split"`, which is opt-in. It shows a start calendar and an end calendar side by side, one month each. Each calendar is a `role="group"` named by its visible caption, and each pages on its own. The default `linked` layout keeps one range calendar.
+
+**Narrow screen.** In both layouts, on a screen 42rem wide or less, the presets move above the calendars as a wrapping row. The panel holds to the room Radix reports and scrolls inside it. Where two months still do not fit side by side, the second wraps below the first: the end calendar in the split layout, the second month in the linked one, which keeps the previous-month chevron on the first month and the next-month chevron on the second.
+
+**Why.** A date span can run past one month, so one calendar cannot always show both ends. Editing one end per click keeps a half-set range out of the value, because `DateRange` stays whole.
+
+**Known gap.** Forced colours has no calendar rules. Under Windows high contrast, the range band, the chips and the today bar vanish, so the endpoints differ from the days between them only by weight. This is recorded, not fixed here, and it stays open until a forced-colours treatment for the calendar is ruled.
+
+**Measured.** Contrast was read on 2026-11-03 off the rendered Calendar in Storybook, each colour composited over its background and rasterised in sRGB. Over the page, the spillover numeral on the grey band reads 5.22:1 in light and 7.57:1 in dark, and the grey band against the page reads 1.14:1 in light and 1.19:1 in dark. Over the DateRangeInput popover panel, the design-system-steward review read the spillover numeral at 5.22:1 in light and 6.19:1 in dark, the grey band at 1.14:1 and 1.22:1, and the in-month band at 1.34:1 and 1.63:1. The band carries continuity only, and the endpoints and `aria-selected` carry the state, so the band is not held to the 3:1 floor for a part that shows state.
+
+**Guidance.** The maintainer ruled, on 2026-10-30, that a date span may run past one month, so the start and the end must page on their own. On 2026-11-02 the maintainer chose a start or end role on range mode and asked for it on `DateRangeInput` as well. On 2026-11-03 the maintainer approved the first-click one-day range from a prototype, with three defaults: the hover paints the result, paging stops at the bounds in every calendar, and the split layout is opt-in.
+
+**Changed from.** [calendar-grid](#calendar-grid) said an adjacent-month day caps a range run. It now continues the run where the spillover band paints it, and a disabled day still caps it. [date-range-input](#date-range-input) said a range is picked with two clicks. In the split layout one click sets one end, and the linked layout keeps two clicks.
+
+**Status.** Ruled 2026-11-03. It amends [calendar-grid](#calendar-grid) and [date-range-input](#date-range-input). No later ruling amends it.
 
 ### number-input
 
@@ -3572,6 +3604,7 @@ On a partial acceptance the accepted files commit and the rejection shows on the
 - [box-law-scope](#box-law-scope) puts the palette's input row on the control box ladder, 24, 32 and 40px.
 - [focus-return-on-close](#focus-return-on-close) returns focus to the opener when the palette closes, because a palette driven from `open` registers no trigger.
 - [selected-row-cue](#selected-row-cue) sets the picked option label at `--ds-font-weight-strong` in `--ds-text-strong` and draws its icon solid.
+- [resting-pointer-guard](#resting-pointer-guard) moves the guard against a resting pointer into the shared engine, so `Typeahead` keeps it too.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 
@@ -5574,11 +5607,11 @@ The supported replacement for both is `type Foo = TextProps & { … }`.
 **Not covered.**
 
 - On 2026-08-12, 104 story files and 12 other source files, several shipped components among them, imported the Radix `Text`. Rewrapping the shipped components would apply `useResolvedSize` twice, so neither set changed.
-- Whether `Switch` takes a `label` prop of its own is a separate question. The asymmetry with `Checkbox`, which takes `label` and renders `Field.Root` itself, stands.
+- Whether `Switch` takes a `label` prop of its own was a separate question. [switch-field-label](#switch-field-label) answered it on 2026-11-04: `Switch` takes `label` and renders `Field.Root` itself, as `Checkbox` does.
 
 **Changed from.** `<Text as="label" htmlFor>` failed to compile with TS2322, while `as="label"` alone compiled. A consumer could build a labelled row with a plain `<label>` or the Radix `Text`, a peer dependency, but not with a label that follows the global UI size, because `useResolvedSize` and `Field.Root` were absent from the package's public entry point. The labelled-switch row the Switch page teaches compiled only because its story imported the Radix `Text`.
 
-**Status.** Ruled 2026-08-12. No later ruling amends it.
+**Status.** Ruled 2026-08-12. No later ruling amends it. [switch-field-label](#switch-field-label) closed its open `Switch` question on 2026-11-04.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 
@@ -7559,3 +7592,46 @@ A bare focus opens nothing. `activationMode="manual"` keeps manual, so arrow key
 > **Changed from.** A clickable Token was a button with no `aria-pressed`, and nothing in its paint showed a pressed state.
 >
 > **Status.** Ruled 2026-10-01. It amends [token-chip](#token-chip) with the `pressed` prop. No later ruling amends it.
+
+### switch-field-label
+
+**Tags.** `COMPONENTS`, `ACCESSIBILITY`. **Ruled.** 2026-11-04.
+
+**`Switch` takes `label`, `description` and `validation`, and with `label` it renders its own field, the label leading and the switch on the row's trailing edge.**
+
+**Why.** An agent in an evaluation run had to wrap a `Switch` in a hand-built `label`, so the row could carry no helper text and no validation message. The field shell that would supply both is internal, so the props on the control are the only supported route, the rule every other input already follows.
+
+**What you see.**
+
+- With `label`, the label and the switch share one row: the label leads, and the switch sits on the trailing edge, as the Switch page already rules for the side of the label.
+- A `description` or the `validation` message sits under the label, in the leading column, so it keeps the label's leading edge and never runs under the switch. A message replaces the description while it is set.
+- An error marks the switch `aria-invalid`, describes it with the message and announces the message. A disabled switch dims its label, through the same rule as every other field.
+- Without `label`, the switch renders the bare Radix switch exactly as before, measured pixel for pixel in light and dark.
+
+**Mechanism.** The `Checkbox` mechanism: the control is a child component rendered inside the field, so `useFieldControl()` reads that field and not the empty context above it. The ref reaches the Radix switch element in both modes.
+
+**Refused.** The `Checkbox` arrangement, the control leading with the message at full width under the row, because a switch's label leads.
+
+**Changed from.** `Switch` took no label, and [text-element-attributes](#text-element-attributes) left the question open. Every labelled row on the Switch page was composed by hand from `Text` and a bare switch.
+
+**Status.** Ruled 2026-11-04. It closes the open question in [text-element-attributes](#text-element-attributes). No later ruling amends it.
+
+### resting-pointer-guard
+
+**Tags.** `COMPONENTS`, `ACCESSIBILITY`. **Ruled.** 2026-11-04.
+
+**In every list on the combobox engine, a row takes the highlight from the pointer only after the pointer has really moved since the last key press.**
+
+**Why.** A browser hovers whatever slides under a pointer that has not moved: a row the keyboard scrolls into place, or a list that opens or re-renders beneath it. In `Typeahead`, that hover took the highlight from the keyboard. Measured on 2026-11-04 with a real mouse resting over the list, End scrolled to row 21 of 21 and the highlight then jumped to row 15. A keyboard user whose mouse happens to sit over the list lost their place.
+
+**Mechanism.** `useListboxNavigation` owns the guard, so every list on the engine keeps it.
+
+- `notePointerMove` arms the pointer. A component calls it from a `mousemove` over its list.
+- `notePointerIdle` disarms it. A component calls it at the top of every keydown.
+- `highlightFromPointer` acts only while the pointer is armed, and it still never scrolls the list.
+- `Typeahead` highlights a row on `mousemove` as well as on `mouseenter`, so the first row a moving pointer reaches lights at once.
+- `CommandPalette` arms from a `mousemove` on its scroll container, as before.
+
+**Changed from.** [command-palette](#command-palette) held the guard inside `CommandPalette`, and `Typeahead` had none. The palette's behaviour is unchanged.
+
+**Status.** Ruled 2026-11-04. It moves the guard of [command-palette](#command-palette) into the shared engine. No later ruling amends it.

@@ -6,10 +6,11 @@ import {
   useRef,
   useState,
   type KeyboardEvent,
+  type ComponentProps,
   type ReactNode,
 } from "react";
 import * as Popover from "@radix-ui/react-popover";
-import { Box, Theme, VisuallyHidden } from "@radix-ui/themes";
+import { Box, Text, Theme, VisuallyHidden } from "@radix-ui/themes";
 import { CalendarBlank, X } from "@phosphor-icons/react";
 import { useResolvedSize } from "../../theme/SizeContext";
 import {
@@ -21,7 +22,7 @@ import {
 } from "./Field";
 import { IconButton } from "./IconButton";
 import { Button } from "./Button";
-import { Calendar } from "./Calendar";
+import { Calendar, type CalendarRangeProps } from "./Calendar";
 import type { DateRange, ISODateString } from "../../dates/dateTypes";
 import { plainDateFromISO, plainDateToDate, plainDateFormat, DATE_FORMAT_LONG } from "../../dates/plainDate";
 import { DEV_WARN } from "../../theme/detectAndWarn";
@@ -74,6 +75,9 @@ export interface DateRangePreset {
   getRange: () => DateRange;
 }
 
+/** How the popover lays out the range. "linked" is one range calendar, two clicks pick it. "split" is a start calendar and an end calendar side by side. */
+export type DateRangeInputLayout = "linked" | "split";
+
 export interface DateRangeInputProps {
   /** Controlled selected range ({start,end} ISO YYYY-MM-DD). */
   value?: DateRange;
@@ -87,8 +91,15 @@ export interface DateRangeInputProps {
   max?: ISODateString;
   /** Custom disable predicate — receives an ISO date, returns **true to disable** (forwarded to Calendar). */
   isDateDisabled?: (date: ISODateString) => boolean;
-  /** Show 1 or 2 months side by side in the popover. @default 2 */
+  /** Show 1 or 2 months side by side in the popover. Ignored by the split layout, which shows one month per calendar. @default 2 */
   numberOfMonths?: 1 | 2;
+  /**
+   * "linked" (the default) is one range calendar: two clicks pick the start and the end. "split" is a Start date
+   * calendar and an End date calendar side by side, each paging alone. It is opt-in, because it changes the
+   * interaction every consumer of the default already has.
+   * @default "linked"
+   */
+  layout?: DateRangeInputLayout;
   /** Shortcut ranges rendered as a preset sidebar (role="group" of Tab-order ghost buttons). */
   presets?: ReadonlyArray<DateRangePreset>;
   /** Greyed hint while empty. @default "Select dates" */
@@ -188,6 +199,7 @@ interface BodyProps {
   max?: ISODateString;
   isDateDisabled?: (date: ISODateString) => boolean;
   numberOfMonths: 1 | 2;
+  layout: DateRangeInputLayout;
   presets?: ReadonlyArray<DateRangePreset>;
   placeholder: string;
   hasClear: boolean;
@@ -206,6 +218,7 @@ function DateRangeInputBody({
   max,
   isDateDisabled,
   numberOfMonths,
+  layout,
   presets,
   placeholder,
   hasClear,
@@ -219,6 +232,10 @@ function DateRangeInputBody({
   const dr = useDisabledReason({ disabled, disabledReason });
 
   const dialogId = useId();
+  // The split layout names each calendar's group by its visible caption, and the caption follows the text lane.
+  const startCaptionId = useId();
+  const endCaptionId = useId();
+  const captionSize = useResolvedSize<ComponentProps<typeof Text>["size"]>("text", undefined) ?? "1";
   const triggerRef = useRef<HTMLButtonElement>(null);
   const anchorRef = useRef<HTMLSpanElement>(null);
 
@@ -226,6 +243,9 @@ function DateRangeInputBody({
   // Controlled focused day for the popover Calendar — driven so a preset click navigates the grid to the
   // new range's start, and kept in sync as the calendar's own keyboard nav moves the roving day.
   const [focusDate, setFocusDate] = useState<ISODateString | undefined>(value?.start);
+  // Split layout: each calendar keeps its own focused day, seeded to its end of the value on open and on a preset.
+  const [startFocus, setStartFocus] = useState<ISODateString | undefined>(value?.start);
+  const [endFocus, setEndFocus] = useState<ISODateString | undefined>(value?.end);
 
   const setTriggerRef = useCallback(
     (node: HTMLButtonElement | null) => {
@@ -239,6 +259,8 @@ function DateRangeInputBody({
   const openPopover = useCallback(() => {
     if (disabled) return; // soft OR hard: bail ([[disabled-reason]] consumer contract — handlers early-return while soft)
     setFocusDate(value?.start); // land the calendar on the range's start month (undefined ⇒ today)
+    setStartFocus(value?.start);
+    setEndFocus(value?.end);
     setOpen(true);
   }, [disabled, value]);
 
@@ -290,6 +312,8 @@ function DateRangeInputBody({
     (range: DateRange) => {
       onValueChange(range);
       setFocusDate(range.start);
+      setStartFocus(range.start);
+      setEndFocus(range.end);
     },
     [onValueChange],
   );
@@ -321,6 +345,17 @@ function DateRangeInputBody({
       ? `${ariaLabel}, ${formatRangeSR(value)}`
       : ariaLabel
     : undefined;
+
+  // Both layouts take the same value, bounds and paint; only the roles and the focus each calendar holds differ.
+  const calendarShared: Omit<CalendarRangeProps, "rangeRole"> = {
+    mode: "range" as const,
+    value,
+    onValueChange: handleCalendarChange,
+    min,
+    max,
+    isDateDisabled,
+    size: resolvedSize,
+  };
 
   return (
     <Popover.Root open={open} onOpenChange={(o) => (o ? openPopover() : closePopover(false))}>
@@ -450,18 +485,29 @@ function DateRangeInputBody({
                     })}
                   </div>
                 )}
-                <Calendar
-                  mode="range"
-                  value={value}
-                  onValueChange={handleCalendarChange}
-                  min={min}
-                  max={max}
-                  isDateDisabled={isDateDisabled}
-                  numberOfMonths={numberOfMonths}
-                  size={resolvedSize}
-                  focusDate={focusDate}
-                  onFocusDateChange={setFocusDate}
-                />
+                {layout === "split" ? (
+                  <div className="rt-ds-daterange-split">
+                    <div role="group" aria-labelledby={startCaptionId} className="rt-ds-daterange-pane">
+                      <Text as="span" id={startCaptionId} size={captionSize} className="rt-ds-daterange-caption">
+                        Start date
+                      </Text>
+                      <Calendar {...calendarShared} rangeRole={"start" as const} focusDate={startFocus} onFocusDateChange={setStartFocus} />
+                    </div>
+                    <div role="group" aria-labelledby={endCaptionId} className="rt-ds-daterange-pane">
+                      <Text as="span" id={endCaptionId} size={captionSize} className="rt-ds-daterange-caption">
+                        End date
+                      </Text>
+                      <Calendar {...calendarShared} rangeRole={"end" as const} focusDate={endFocus} onFocusDateChange={setEndFocus} />
+                    </div>
+                  </div>
+                ) : (
+                  <Calendar
+                    {...calendarShared}
+                    numberOfMonths={numberOfMonths}
+                    focusDate={focusDate}
+                    onFocusDateChange={setFocusDate}
+                  />
+                )}
               </div>
               <div className="rt-ds-daterange-footer">
                 <Button type="button" priority="secondary" size={resolvedSize} onClick={() => closePopover()}>
@@ -485,6 +531,7 @@ export const DateRangeInput = forwardRef<HTMLButtonElement, DateRangeInputProps>
     max,
     isDateDisabled,
     numberOfMonths = 2,
+    layout = "linked",
     presets,
     placeholder = "Select dates",
     hasClear = true,
@@ -540,6 +587,7 @@ export const DateRangeInput = forwardRef<HTMLButtonElement, DateRangeInputProps>
       max={max}
       isDateDisabled={isDateDisabled}
       numberOfMonths={numberOfMonths === 1 ? 1 : 2}
+      layout={layout}
       presets={presets}
       placeholder={placeholder}
       hasClear={hasClear}

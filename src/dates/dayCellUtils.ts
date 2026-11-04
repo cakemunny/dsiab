@@ -20,6 +20,10 @@ export interface DayCellState {
   isInPreview: boolean;
   isPreviewStart: boolean;
   isPreviewEnd: boolean;
+  /** An outside-month day that the spillover band paints inside the committed range. */
+  isOutsideInRange: boolean;
+  /** An outside-month day that the spillover band paints inside the hover preview. */
+  isOutsideInPreview: boolean;
   isFirstColumn: boolean;
   isLastColumn: boolean;
 }
@@ -36,6 +40,12 @@ export interface DayCellStateInput {
   today: PlainDate;
   isDisabled: boolean;
   isOutside: boolean;
+  /**
+   * Whether the calendar paints this outside-month day as spillover. Only this flag lets an outside day
+   * carry range or preview state, so the caller decides which spillover is banded (a two-month view bands
+   * only the spillover no sibling pane shows in-month).
+   */
+  bandsOutside?: boolean;
 }
 
 /**
@@ -45,6 +55,10 @@ export interface DayCellStateInput {
  * state: in the two-month layout the same date renders in both panes, and
  * highlighting the spillover copy would duplicate the selection onto the wrong
  * month's pane (#2715).
+ *
+ * The spillover band is the one exception: `bandsOutside` lets an outside day carry its own
+ * `isOutsideIn*` flags, never a selection or an endpoint. A disabled outside day is never banded,
+ * because the run it would join treats it as a break.
  */
 export function computeDayCellState(input: DayCellStateInput): DayCellState {
   const {
@@ -59,6 +73,7 @@ export function computeDayCellState(input: DayCellStateInput): DayCellState {
     today,
     isDisabled,
     isOutside,
+    bandsOutside,
   } = input;
 
   return {
@@ -104,6 +119,23 @@ export function computeDayCellState(input: DayCellStateInput): DayCellState {
       !isOutside &&
       previewEnd &&
       plainDateIsEqual(date, previewEnd)
+    ),
+    isOutsideInRange: !!(
+      bandsOutside &&
+      isOutside &&
+      !isDisabled &&
+      mode === 'range' &&
+      rangeStart &&
+      rangeEnd &&
+      plainDateIsInRange(date, [rangeStart, rangeEnd])
+    ),
+    isOutsideInPreview: !!(
+      bandsOutside &&
+      isOutside &&
+      !isDisabled &&
+      previewStart &&
+      previewEnd &&
+      plainDateIsInRange(date, [previewStart, previewEnd])
     ),
     isFirstColumn: dayIndex === 0,
     isLastColumn: dayIndex === 6,
@@ -172,7 +204,8 @@ export function isEndpoint(state: DayCellState): boolean {
 
 /**
  * Whether a day is part of an unbroken highlight run (enabled, in-month, inside
- * the given span). Outside and disabled days break the run, producing end caps.
+ * the given span). Disabled days break the run, producing end caps. Outside days
+ * break it too, unless the spillover band paints them (`outsideBands`).
  */
 function isSpanHighlighted(input: {
   date: PlainDate;
@@ -180,10 +213,11 @@ function isSpanHighlighted(input: {
   spanEnd: PlainDate | null;
   isDisabled: boolean;
   isOutside: boolean;
+  outsideBands?: boolean;
 }): boolean {
-  const {date, spanStart, spanEnd, isDisabled, isOutside} = input;
+  const {date, spanStart, spanEnd, isDisabled, isOutside, outsideBands} = input;
   return !!(
-    !isOutside &&
+    (!isOutside || outsideBands) &&
     !isDisabled &&
     spanStart &&
     spanEnd &&
@@ -199,6 +233,7 @@ export function isRangeHighlighted(input: {
   rangeEnd: PlainDate | null;
   isDisabled: boolean;
   isOutside: boolean;
+  outsideBands?: boolean;
 }): boolean {
   if (input.mode !== 'range') {return false;}
   return isSpanHighlighted({
@@ -207,6 +242,7 @@ export function isRangeHighlighted(input: {
     spanEnd: input.rangeEnd,
     isDisabled: input.isDisabled,
     isOutside: input.isOutside,
+    outsideBands: input.outsideBands,
   });
 }
 
@@ -217,6 +253,7 @@ export function isPreviewHighlighted(input: {
   previewEnd: PlainDate | null;
   isDisabled: boolean;
   isOutside: boolean;
+  outsideBands?: boolean;
 }): boolean {
   return isSpanHighlighted({
     date: input.date,
@@ -224,6 +261,7 @@ export function isPreviewHighlighted(input: {
     spanEnd: input.previewEnd,
     isDisabled: input.isDisabled,
     isOutside: input.isOutside,
+    outsideBands: input.outsideBands,
   });
 }
 
@@ -231,13 +269,17 @@ export function isPreviewHighlighted(input: {
  * Continuity of the highlighted run through a day's immediate neighbours in the
  * same week row, for both the committed range and the hover preview. A day gets
  * an end cap on whichever side its neighbour does not continue the run (see
- * {@link computeRangeRounding} / {@link computePreviewRounding}).
+ * {@link computeRangeRounding} / {@link computePreviewRounding}). `prevInRun` and
+ * `nextInRun` read the committed range and the preview as ONE run, which is how a
+ * role calendar's hover reads.
  */
 export interface DayNeighborContinuity {
   prevInRange: boolean;
   nextInRange: boolean;
   prevInPreview: boolean;
   nextInPreview: boolean;
+  prevInRun: boolean;
+  nextInRun: boolean;
 }
 
 /** Minimal shape needed from a week's day cells to derive neighbour continuity. */
@@ -250,6 +292,10 @@ export interface NeighborDay {
  * Derives whether the previous/next day in the same week row continues the
  * highlighted run, for both range and preview. Broken out from the render path
  * so the neighbour logic is unit-testable in isolation.
+ *
+ * `bandsOutside` names the outside days the spillover band paints. Those days
+ * continue the run; every other outside day still breaks it, so a run never
+ * reaches a day it does not paint.
  */
 export function computeDayNeighborContinuity(input: {
   week: ReadonlyArray<NeighborDay>;
@@ -260,6 +306,7 @@ export function computeDayNeighborContinuity(input: {
   previewStart: PlainDate | null;
   previewEnd: PlainDate | null;
   isDisabled: (date: PlainDate) => boolean;
+  bandsOutside?: (date: PlainDate) => boolean;
 }): DayNeighborContinuity {
   const {
     week,
@@ -270,6 +317,7 @@ export function computeDayNeighborContinuity(input: {
     previewStart,
     previewEnd,
     isDisabled,
+    bandsOutside,
   } = input;
 
   const prev = week[dayIndex - 1];
@@ -284,6 +332,7 @@ export function computeDayNeighborContinuity(input: {
       rangeEnd,
       isDisabled: isDisabled(day.date),
       isOutside: day.isOutside,
+      outsideBands: !!bandsOutside?.(day.date),
     });
 
   const previewContinues = (day: NeighborDay | undefined): boolean =>
@@ -294,12 +343,70 @@ export function computeDayNeighborContinuity(input: {
       previewEnd,
       isDisabled: isDisabled(day.date),
       isOutside: day.isOutside,
+      outsideBands: !!bandsOutside?.(day.date),
     });
 
+  const prevInRange = rangeContinues(prev);
+  const nextInRange = rangeContinues(next);
+  const prevInPreview = previewContinues(prev);
+  const nextInPreview = previewContinues(next);
   return {
-    prevInRange: rangeContinues(prev),
-    nextInRange: rangeContinues(next),
-    prevInPreview: previewContinues(prev),
-    nextInPreview: previewContinues(next),
+    prevInRange,
+    nextInRange,
+    prevInPreview,
+    nextInPreview,
+    prevInRun: prevInRange || prevInPreview,
+    nextInRun: nextInRange || nextInPreview,
   };
+}
+
+/** The `data-range` / `data-preview` value of a day in a band: its endpoint, a middle day, or none. An endpoint wins. */
+export function bandAttr(inside: boolean, start: boolean, end: boolean): 'start' | 'middle' | 'end' | null {
+  if (start) {return 'start';}
+  if (end) {return 'end';}
+  return inside ? 'middle' : null;
+}
+
+/** A span of days, both ends inclusive. */
+export interface DaySpan {
+  start: PlainDate;
+  end: PlainDate;
+}
+
+/** What paints one day while a role calendar hovers: the result of the click it previews, not the committed value. */
+export interface RoleHoverPaint {
+  /** `data-range` on the day: a committed day the result keeps. Null where the result drops it or it was never committed. */
+  band: 'start' | 'middle' | 'end' | null;
+  /** `data-preview` on the day: a day the result adds to the committed band. */
+  preview: 'start' | 'middle' | 'end' | null;
+  /** The spillover band: an outside day the result covers, in a pane that bands it. */
+  spill: boolean;
+}
+
+function spanHas(span: DaySpan | null, date: PlainDate): boolean {
+  return span != null && plainDateIsInRange(date, [span.start, span.end]);
+}
+
+/**
+ * Paint while a role calendar hovers a day. The paint is the range a click would make, `result`. A day the result
+ * keeps and the committed range already held takes the committed band; a day the result adds takes the preview band;
+ * a committed day the result drops paints nothing. The result's endpoints carry the chip. Hover is not selection, so
+ * aria-selected stays on the committed value and is read from the committed range by the caller.
+ */
+export function computeRoleHoverPaint(input: {
+  date: PlainDate;
+  isOutside: boolean;
+  /** A disabled day: an outside one is never banded, the same rule `computeDayCellState` applies. */
+  isDisabled?: boolean;
+  bandsOutside: boolean;
+  result: DaySpan;
+  committed: DaySpan | null;
+}): RoleHoverPaint {
+  const {date, isOutside, isDisabled, bandsOutside, result, committed} = input;
+  if (isOutside) {return {band: null, preview: null, spill: bandsOutside && !isDisabled && spanHas(result, date)};}
+  if (!spanHas(result, date)) {return {band: null, preview: null, spill: false};}
+  const edge = bandAttr(true, plainDateIsEqual(date, result.start), plainDateIsEqual(date, result.end));
+  return spanHas(committed, date)
+    ? {band: edge, preview: null, spill: false}
+    : {band: null, preview: edge, spill: false};
 }

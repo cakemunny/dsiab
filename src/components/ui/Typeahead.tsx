@@ -394,6 +394,9 @@ function TypeaheadBody<TAux>({
   // leaves the input; navigation only moves the virtual cursor (aria-activedescendant).
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLInputElement>) => {
+      // Any key press disarms the pointer, so a row the keyboard scrolls under a resting pointer keeps the
+      // keyboard's highlight. Only a real pointer move hands it back.
+      nav.notePointerIdle();
       if (!open) {
         // Closed: ArrowDown opens (if there are cached results or an open-on-focus picker).
         if (e.key === "ArrowDown" && (openOnFocus || query.length > 0)) {
@@ -612,6 +615,12 @@ function TypeaheadBody<TAux>({
                     // would otherwise blur the input.
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => handleSelect(option)}
+                    // A real move over a row arms the pointer and highlights that row, so the first row the
+                    // pointer moves onto lights at once. A mouseenter alone acts only once the pointer is armed.
+                    onMouseMove={() => {
+                      nav.notePointerMove();
+                      nav.highlightFromPointer(i);
+                    }}
                     onMouseEnter={() => nav.highlightFromPointer(i)}
                   >
                     <span className="rt-ds-typeahead-label">

@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { type ReactNode } from "react";
 import { Box, Grid, Theme } from "@radix-ui/themes";
+import { userEvent } from "@vitest/browser/context";
 import { Typeahead, createStaticSource, type TypeaheadOption, type TypeaheadSource } from "./Typeahead";
 import { assertMenuOptionBox, deltaEOK, oklab, themeRoot, withAccent } from "../../foundations/_assert";
 
@@ -391,7 +392,9 @@ export const HoverDoesNotScroll: Story = {
     const clippedIndex = options().indexOf(clipped);
 
     const before = list.scrollTop;
-    clipped.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
+    // A real hover arrives as movement over the row. A bare mouseover, with no move, is what a resting pointer
+    // gets when the list slides under it, and RestingPointerKeepsKeyboardHighlight holds that it is ignored.
+    clipped.dispatchEvent(new MouseEvent("mousemove", { bubbles: true }));
     await waitFor(() => activeIdx() === clippedIndex);
     await sleep(80);
     if (list.scrollTop !== before)
@@ -403,5 +406,52 @@ export const HoverDoesNotScroll: Story = {
     await waitFor(() => list.scrollTop > before, 1000).catch(() => {
       throw new Error("a keyboard move must still scroll the highlighted row into view");
     });
+  },
+};
+
+/** A resting pointer never takes the highlight. When the keyboard scrolls the list, rows slide under a pointer that
+ *  has not moved, and the browser hovers whichever row lands beneath it. Only a real pointer move hands the
+ *  highlight to the pointer, so End keeps the last row highlighted. Driven with the real mouse, because a synthetic
+ *  event cannot show what the browser does under a resting pointer. */
+export const RestingPointerKeepsKeyboardHighlight: Story = {
+  render: () => (
+    <Box p="4" data-testid="ta-resting" style={{ maxWidth: 300 }}>
+      <Typeahead label="Fruit" source={fruitSource} placeholder="Search fruit…" debounceMs={0} maxItems={30} />
+    </Box>
+  ),
+  play: async ({ canvasElement }) => {
+    try {
+      const input = combobox(canvasElement.querySelector<HTMLElement>('[data-testid="ta-resting"]')!)!;
+      input.focus();
+      typeInto(input, "e");
+      const list = await waitFor(() => document.querySelector<HTMLElement>(".rt-ds-typeahead-listbox"));
+      await waitFor(() => list.scrollHeight > list.clientHeight);
+      const options = () => [...list.querySelectorAll<HTMLElement>('[role="option"]')];
+      const activeIdx = () => {
+        const a = input.getAttribute("aria-activedescendant");
+        return a ? options().findIndex((o) => o.id === a) : -1;
+      };
+
+      // The real mouse comes to rest over the middle of the list, and the pointer takes the row beneath it.
+      await userEvent.hover(list);
+      await waitFor(() => activeIdx() >= 0);
+      const rested = activeIdx();
+
+      // End scrolls the list under the resting pointer. The highlight must stay on the last row.
+      input.focus();
+      press(input, "End");
+      const last = options().length - 1;
+      await waitFor(() => activeIdx() === last);
+      await waitFor(() => list.scrollTop > 0);
+      await sleep(250);
+      if (activeIdx() !== last)
+        throw new Error(
+          `a row that slides under a resting pointer must not take the highlight: End reached row ${last}, ` +
+            `then the highlight moved to row ${activeIdx()} (the pointer first rested on row ${rested})`,
+        );
+    } finally {
+      // Park the one shared mouse in the frame's empty corner, so it rests over no other file's list.
+      await userEvent.hover(document.documentElement, { position: { x: 1, y: 1 } });
+    }
   },
 };

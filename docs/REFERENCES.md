@@ -176,6 +176,14 @@ component, so each row names the ruling it informed.
 | [Radix Colors, Understanding the scale](https://www.radix-ui.com/colors/docs/palette-composition/understanding-the-scale) | [[textless-part-fills]]. ADOPTED: steps 6 to 8 are the border steps, which is where the dark thumb stroke lands (step 7, and step 6 on orange). READ: an alpha step composites to its solid step over the page of its own appearance, so a dark alpha laid over a light track stays light. |
 | [Radix Themes, code.css](https://raw.githubusercontent.com/radix-ui/themes/main/packages/radix-ui-themes/src/components/code.css) | [[textless-part-fills]]. READ: the solid chip paints `--accent-a9` under `--accent-contrast` and hovers a linked chip to `--accent-10`. REJECTED: both, for the [[text-on-solid-fill-contrast]] text fill and the [[interaction-state-alphas]] overlay. |
 
+## A switch's own label ([[switch-field-label]])
+
+| Source | What it informed |
+|---|---|
+| [Radix Themes, switch.css](https://raw.githubusercontent.com/radix-ui/themes/main/packages/radix-ui-themes/src/components/switch.css) | [[switch-field-label]]. READ with its sibling component source in the installed 3.3.0 package: the Themes switch takes no label prop and renders its root as a `button`, a labelable element, so a field label names it through `htmlFor`. ADOPTED: the wrap adds the label around Radix's switch and leaves the track, the thumb and every prop as Radix ships them. |
+| Radix Primitives, `@radix-ui/react-switch` 1.4.1 source, the installed package | [[switch-field-label]]. READ: the button carries `role="switch"` and `aria-checked`, and renders a hidden input only inside a form. ADOPTED: `name`, `value` and `required` keep Radix's form semantics, and the field adds only `id`, `aria-describedby` and `aria-invalid`. |
+| WAI-ARIA Authoring Practices, Switch pattern, not fetched in this change because the network was closed | [[switch-field-label]]. ADOPTED: a visible label as the accessible name of a switch. No URL is recorded until the page is read again. |
+
 ## Parts without text on light colours ([[part-fill-edge]])
 
 | Source | What it informed |
@@ -283,6 +291,21 @@ These sources shaped the ledger itself rather than a component, so each row name
 |---|---|
 | [CSS Custom Properties for Cascading Variables Level 1, Guaranteed-invalid values](https://drafts.csswg.org/css-variables-1/#guaranteed-invalid) | [[missing-provider-warning]]. READ: a custom property with no declaration holds the guaranteed-invalid value, which serializes as the empty string and makes any property that references it invalid at computed-value time. ADOPTED: an empty `--ds-fill-accent` on `.radix-themes` as the sign of an absent stylesheet, and the same rule as the reason every `calc()` fails without the attributes `Provider` writes. |
 
+## A range across two calendars (Calendar, DateRangeInput)
+
+Read on 2026-11-03 for the start or end role on a range Calendar and the split layout of DateRangeInput. Each row names the registry entry whose `priorArt` carries it.
+
+| Source | What it informed |
+|---|---|
+| [Material UI X, DateRangeCalendar API](https://mui.com/x/api/date-pickers/date-range-calendar/) | Calendar. READ: a `rangePosition` prop of `'start'` or `'end'` names the end being edited, `availableRangePositions` limits which ends can be picked, and `shouldDisableDate` receives the position. No prop pages the visible calendars apart. ADOPTED: a role that edits one end of a shared range. REJECTED: its value, a pair of dates where either may be null, because a one-day first click keeps the range whole. |
+| [react-dates, README](https://github.com/react-dates/react-dates) | Calendar. READ: `focusedInput` is `START_DATE`, `END_DATE` or null, and a date can be picked only while one is set. `isDayHighlighted` paints days on both the single and the range picker. ADOPTED: the start or end role as the switch for what a click edits. |
+| [React Aria, useCalendarCell source](https://github.com/adobe/react-spectrum/blob/main/packages/react-aria/src/calendar/useCalendarCell.ts) | Calendar. READ: every selectable day in the range carries `aria-selected`, and the first and last selected days prefix their label with the selected range description, which the calendar also announces politely on change. ADOPTED: the full range read on each endpoint label of a role calendar, and a polite announcement after a role click. |
+| [React Aria, RangeCalendar](https://react-aria.adobe.com/RangeCalendar) | Calendar. READ: `visibleDuration` shows several months from one visible range, and `pageBehavior` only chooses whether a page step is one month or the whole span. REJECTED: independent paging inside one multi-month grid, which it does not offer. |
+| [react-day-picker, DayPicker source](https://github.com/gpbl/react-day-picker/blob/main/packages/react-day-picker/src/DayPicker.tsx) | Calendar. READ: `aria-selected` follows the `selected` modifier only, range modifiers are added for a range value, and `pagedNavigation` steps by the number of months shown, so the months page together. REJECTED: independent paging inside one grid, for the same reason. |
+| [react-day-picker, custom modifiers](https://daypicker.dev/guides/custom-modifiers) | Calendar. READ: a custom modifier styles matching days in any selection mode and never marks them selected. REJECTED: a band modifier on single mode, because a single-select grid would paint a range it does not select, and a screen reader would learn nothing of it. |
+| [Zag, date-picker connect source](https://github.com/chakra-ui/zag/blob/main/packages/machines/date-picker/src/date-picker.connect.ts) | Calendar. READ: a day is `aria-selected` when selected or in range, and `numOfMonths` renders from one visible range. ADOPTED: in-range days exposed as selected. REJECTED: paging apart, which it does not offer. |
+| [PatternFly, Date picker design guidelines](https://www.patternfly.org/components/date-and-time/date-picker/design-guidelines) | DateRangeInput. READ: "Two date pickers can be used together to specify a date range. The first one functions as a start ('from') date and the second one functions as an end ('to') date." ADOPTED: the split layout as a start calendar and an end calendar. |
+| [Carbon, Date picker usage](https://carbondesignsystem.com/components/date-picker/usage/) | DateRangeInput. READ: range inputs are labelled with a start and an end label, and the calendar shows one month at a time. ADOPTED: a visible "Start date" and "End date" caption on each calendar of the split layout. |
 ## Checking consumer code against the token layer ([[ds-check-dsiab-rules]])
 
 | Source | What it informed |
