@@ -35,13 +35,26 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 /** Where the files land, relative to the package root. The guard holds `exports` to it. */
 export const OUT_DIR = "dist/components";
 
-/** The Radix label and refused names for the entry's own component (or a part) when it wraps Radix `wraps`. */
+/**
+ * Entries whose parts wrap more than one Radix component, which a single `wraps` cannot name: each
+ * pair is an export path prefix and the Radix component the parts under it mirror, longest prefix
+ * first. `Tabs.Nav.*` is Radix `TabNav`, the rest of `Tabs` is Radix `Tabs`. Every name here must
+ * appear in the entry's `buildingBlock`, which `dist-reference.node-check.ts` holds.
+ */
+export const PART_WRAPS = { Tabs: [["Tabs.Nav", "TabNav"], ["Tabs", "Tabs"]] };
+
+/** The Radix label and refused names for an export (or a part) that wraps a Radix component. */
 function refusalFor(program, entry, model) {
-  const { wraps } = entry;
-  const segments = (model.path ?? model.name).split(".");
-  if (!wraps || !model.props || segments[0] !== entry.name || segments.length > 2) return null;
-  const part = segments.length === 2 ? segments[1] : undefined;
-  return { label: part ? `${wraps}.${part}` : wraps, names: program.notAccepted(model.props, wraps, part) };
+  if (!model.props) return null;
+  const path = model.path ?? model.name;
+  const pairs = PART_WRAPS[entry.name] ?? (entry.wraps ? [[entry.name, entry.wraps]] : []);
+  for (const [prefix, radix] of pairs) {
+    if (path !== prefix && !path.startsWith(`${prefix}.`)) continue;
+    const part = path.slice(prefix.length + 1) || undefined;
+    if (part?.includes(".")) return null;
+    return { label: part ? `${radix}.${part}` : radix, names: program.notAccepted(model.props, radix, part) };
+  }
+  return null;
 }
 
 /**
