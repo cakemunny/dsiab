@@ -349,7 +349,7 @@ This ledger records the rulings that shape the design system and the reason behi
 
 Nothing published imports the module. The custom-accent generator and its assessment will.
 
-**Why.** A generated brand has to be measured the way the guards measure a named accent, and code in the palette folder can read neither the guards, which are the test lane, nor the CSS, which a pure function does not have. Without one copy, each search would carry its own surfaces, as the soft-label fix in a separate pull request does for the soft fill, and the copies would drift.
+**Why.** A generated brand has to be measured the way the guards measure a named accent, and code in the palette folder can read neither the guards, which are the test lane, nor the CSS, which a pure function does not have. Without one copy, each search would carry its own surfaces, as `generate.ts` already does for the soft fill ([[seeded-soft-text-as-painted]]), and the copies would drift.
 
 **Three kinds of value.**
 
@@ -379,7 +379,7 @@ Both went red on planted defects:
 
 **The one-byte tolerance.** The guards read a translucent colour back through an 8-bit canvas, so the comparison allows one byte per channel. Neighbouring neutral steps differ by three bytes or more, so the tolerance cannot hide a wrong step.
 
-**Not covered.** The table holds sRGB values only, as [[srgb-contrast-checks]] rules. Wiring the generator's own soft-fill surfaces to this table waits until the soft-label fix and this ruling are both on `main`.
+**Not covered.** The table holds sRGB values only, as [[srgb-contrast-checks]] rules. `generate.ts` still carries its own soft-fill surfaces from [[seeded-soft-text-as-painted]]. Pointing it at this table is a follow-up of its own.
 
 **Changed from.** Nothing. The values lived only in the guards and the token CSS.
 
