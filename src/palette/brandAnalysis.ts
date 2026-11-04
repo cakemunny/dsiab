@@ -22,10 +22,12 @@
 import { APCA_ALGORITHM, apcaLc } from "./apca";
 import { type ButtonFill, type Direction, type LabelOnFill, labelOnFill, searchFill } from "./buttonFill";
 import { chooseSemanticScalesFor } from "./collision";
-import { SCALE_STEP_9, type SemFamily } from "./collisionTable";
+import { SCALE_ALPHA_3, SCALE_STEP_9, type SemFamily } from "./collisionTable";
+import { partEdge, ringStack, scrimStack, thumbStroke, type LayerStep } from "./helperLayers";
+import { dashStack, dotEdge, markEdge, ownShade, sliderThumbStack } from "./markLayers";
 import { contrastRatio, generateBrandScale, type Appearance } from "./generate";
 import type { RGB } from "./oklch";
-import { FLOORS, INKS, NEUTRALS, NEUTRAL_STEPS, parseColour, type InkName, type Neutral } from "./surfaces";
+import { FLOORS, INKS, NEUTRALS, NEUTRAL_STEPS, parseColour, type InkName, type Neutral, type TintSteps } from "./surfaces";
 
 /** How step 9 reads against the page, worst case over the six neutrals (question 1a). A miss
  *  keeps the colour: the part edge and the focus-ring stack make it visible. */
@@ -65,6 +67,24 @@ export interface ErrorFill {
   label: LabelOnFill;
 }
 
+/** The helper layers a generated brand carries, each the step its ruling's search picks
+ *  ([[generated-helper-layers]]). Null where no step makes the part visible: that part then has
+ *  its own shade in `partShades`. */
+export interface HelperLayers {
+  ringStack: LayerStep | null;
+  darkScrimStack: LayerStep | null;
+  lightScrimStack: LayerStep | null;
+  partEdge: LayerStep | null;
+  thumbStroke: LayerStep | null;
+  markEdge: LayerStep | null;
+  dashStack: LayerStep | null;
+  sliderThumbStack: LayerStep | null;
+  warningDotEdge: LayerStep | null;
+  successDotEdge: LayerStep | null;
+  errorDotEdge: LayerStep | null;
+}
+export type LayerName = keyof HelperLayers;
+
 export interface AppearanceAnalysis {
   /** Step 9, the seed as typed. Every part but the filled button paints it. */
   step9: string;
@@ -75,6 +95,10 @@ export interface AppearanceAnalysis {
   page: PageReading;
   text: TextReading;
   error: ErrorFill;
+  layers: HelperLayers;
+  /** The parts no helper layer could make visible, each with its own shade. Empty on every seed
+   *  the custom-accent census measured. */
+  partShades: PartShade[];
 }
 
 export interface BrandAnalysis {
@@ -99,7 +123,7 @@ export type VerdictClause =
 
 /** A part no helper layer could make visible, and the shade it takes instead. */
 export interface PartShade {
-  part: string;
+  part: LayerName;
   fill: string;
   direction: Direction;
 }
@@ -109,7 +133,6 @@ export interface AppearanceAssessment extends AppearanceAnalysis {
   /** "as is", "darker shade", "lighter shade", with ", less saturated" where the clamp moved
    *  chroma, or "as is, <part> adjusted". */
   shortVerdict: string;
-  partShades: PartShade[];
 }
 
 export interface BrandAssessment extends Omit<BrandAnalysis, "light" | "dark"> {
@@ -182,14 +205,60 @@ export function analyseBrand(seed: RGB): BrandAnalysis {
   const per = (appearance: Appearance): AppearanceAnalysis => {
     const scale = generateBrandScale(seed, appearance);
     const step9 = parseColour(scale.solid[8]!);
+    const error = errorFill(statusFamilies.error, appearance);
+    const { layers, partShades } = helperLayers(scale.solid, scale.alpha, parseColour(buttons[appearance].fill), statusFamilies, error.fill, appearance);
     return {
       step9: scale.solid[8]!,
       button: buttons[appearance],
       glyphInk: glyphInk(step9),
       page: pageReading(step9, appearance),
       text: textReading(scale.solid, scale.textFloors, appearance),
-      error: errorFill(statusFamilies.error, appearance),
+      error,
+      layers,
+      partShades,
     };
   };
   return { seed: toHex(seed), apca: APCA_ALGORITHM, statusFamilies, light: per("light"), dark: per("dark") };
+}
+
+/** Every helper layer for one appearance of a generated brand, and the own shade of any part no
+ *  layer can make visible. The ring sits on the button's fill, which is the adjusted shade where
+ *  question 2 moved it ([[focus-ring]]); every other part paints step 9. */
+function helperLayers(
+  solid: readonly string[], alpha: readonly string[], buttonFill: RGB,
+  families: Record<SemFamily, string>, errorFillHex: string, appearance: Appearance,
+): { layers: HelperLayers; partShades: PartShade[] } {
+  const step9 = parseColour(solid[8]!);
+  const a3 = (f: SemFamily) => SCALE_ALPHA_3[families[f]]![appearance];
+  const tints: TintSteps = {
+    accentA3: alpha[2]!, accentA5: alpha[4]!,
+    errorA3: a3("error"), warningA3: a3("warning"), successA3: a3("success"), infoA3: a3("info"),
+  };
+  // Each search, as a function of the fill it stacks on, so a part it cannot fix can be re-run on
+  // a shade of that fill.
+  const searches: Record<LayerName, { on: RGB; run: (fill: RGB) => LayerStep | null }> = {
+    ringStack: { on: buttonFill, run: (f) => ringStack(f, appearance, tints) },
+    darkScrimStack: { on: buttonFill, run: (f) => scrimStack(f, "dark") },
+    lightScrimStack: { on: buttonFill, run: (f) => scrimStack(f, "light") },
+    partEdge: { on: step9, run: (f) => partEdge(f, appearance) },
+    thumbStroke: { on: step9, run: (f) => thumbStroke(solid, alpha, f) },
+    markEdge: { on: step9, run: (f) => markEdge(f, appearance, tints.accentA3, tints.accentA5) },
+    dashStack: { on: parseColour(solid[6]!), run: (f) => dashStack(f, appearance, tints.accentA3) },
+    sliderThumbStack: { on: step9, run: (f) => sliderThumbStack(f, appearance) },
+    warningDotEdge: { on: parseColour(SCALE_STEP_9[families.warning]!), run: (f) => dotEdge(f, appearance) },
+    successDotEdge: { on: parseColour(SCALE_STEP_9[families.success]!), run: (f) => dotEdge(f, appearance) },
+    errorDotEdge: { on: parseColour(errorFillHex), run: (f) => dotEdge(f, appearance) },
+  };
+  const layers = {} as HelperLayers;
+  const partShades: PartShade[] = [];
+  for (const name of Object.keys(searches) as LayerName[]) {
+    const { on, run } = searches[name];
+    const step = run(on);
+    layers[name] = step;
+    if (step === null) {
+      const shade = ownShade(on, (c) => run(c) !== null);
+      if (shade) partShades.push({ part: name, ...shade });
+    }
+  }
+  return { layers, partShades };
 }
