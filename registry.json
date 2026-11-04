@@ -932,6 +932,7 @@
     "controlBox": "exempt",
     "buildingBlock": "custom date grid on lifted Astryx date math (src/dates/* + useGridFocus)",
     "storyPath": "src/components/ui/Calendar.stories.tsx",
+    "priorArt": "Range role and spillover band (2026-11-03). ADOPTED: a start or end role that edits one end of a shared range, from MUI X DateRangeCalendar rangePosition (https://mui.com/x/api/date-pickers/date-range-calendar/) and react-dates focusedInput (https://github.com/react-dates/react-dates); ADOPTED: every day in a range exposed as selected, and the full range read on the endpoint labels, from React Aria useCalendarCell (https://github.com/adobe/react-spectrum/blob/main/packages/react-aria/src/calendar/useCalendarCell.ts) and the in-range selected exposure of Zag date-picker (https://github.com/chakra-ui/zag/blob/main/packages/machines/date-picker/src/date-picker.connect.ts); REJECTED: independent paging inside one two-month range grid, which no source checked ships: React Aria RangeCalendar pageBehavior (https://react-aria.adobe.com/RangeCalendar), react-day-picker pagedNavigation (https://github.com/gpbl/react-day-picker/blob/main/packages/react-day-picker/src/DayPicker.tsx) and Zag numOfMonths (https://github.com/chakra-ui/zag/blob/main/packages/machines/date-picker/src/date-picker.connect.ts) all page together; REJECTED: a band modifier on single mode, from react-day-picker custom modifiers (https://daypicker.dev/guides/custom-modifiers), because a single-select grid would paint a range it does not select.",
     "note": "single + range on the lifted Astryx date math (DECISIONS [[catalog-as-specification]] @ 88c95e4); UI from scratch on --ds-* \u2014 selected = accent-9 fill ([[select-selected-row]]), today = a 2px accent bar (third channel), range = an a3->a5->a9 intensity ramp painted flush with selective logical-corner rounding, an inset 2px accent focus ring on the day ([[calendar-grid]] divergence from the [[input-focus-ring-offset]] +2px outset ring, [[focus-ring]]). [[calendar-grid]] a11y: aria-current ADDED on today + RTL arrow-nav WIRED into the pre-existing useGridFocus isRtl swap; aria-selected on the gridcell is a faithful port. isDateDisabled polarity/arg flipped at the useCalendarConstraints boundary (ISO-in/true=disabled)"
   },
   {
@@ -954,9 +955,11 @@
     "name": "DateRangeInput",
     "astryxName": "Date Range Input",
     "module": "DateRangeInput",
+    "priorArt": "Split layout (2026-11-03). ADOPTED: two date pickers used together as a from date and a to date, from PatternFly (https://www.patternfly.org/components/date-and-time/date-picker/design-guidelines); ADOPTED: a visible start and end label on each calendar, from the start and end labelled range inputs of Carbon (https://carbondesignsystem.com/components/date-picker/usage/); ADOPTED: opt-in rather than the default, so the shipped two-click linked range stays for existing consumers; REJECTED: a half-finished range value with either end null, from MUI X (https://mui.com/x/api/date-pickers/date-range-calendar/), because a one-day first click keeps DateRange whole.",
     "exports": [
       "DateRangePreset",
       "DateRangeInputProps",
+      "DateRangeInputLayout",
       "isRangeEqual",
       "DateRangeInput"
     ],

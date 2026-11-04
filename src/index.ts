@@ -215,6 +215,7 @@ export {
   DateInput,
   type DateInputProps,
   DateRangeInput,
+  type DateRangeInputLayout,
   type DateRangeInputProps,
   type DateRangePreset,
   DateTimeInput,

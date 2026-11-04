@@ -50,11 +50,11 @@ interface Entry { name: string; status: string; priorArt?: string }
 /** Entries that predate the rule, recorded at adoption on 2026-09-20. */
 const GRANDFATHERED = new Set<string>([
   "AlertDialog", "AppShell", "AspectRatio", "Avatar", "AvatarGroup", "Badge", "Blockquote",
-  "Breadcrumbs", "Button", "ButtonGroup", "Calendar", "Callout", "Card", "Carousel",
+  "Breadcrumbs", "Button", "ButtonGroup", "Callout", "Card", "Carousel",
   "ChatComposer", "ChatLayout", "ChatMessage", "ChatMessageList", "ChatMessageMetadata",
   "ChatSystemMessage", "ChatToolCalls", "Checkbox", "CheckboxCards", "CheckboxGroup", "Citation",
   "ClickableCard", "Code", "CodeBlock", "Collapsible", "CommandPalette", "ContextMenu",
-  "DataList", "DateInput", "DateRangeInput", "DateTimeInput", "Dialog", "DropdownMenu",
+  "DataList", "DateInput", "DateTimeInput", "Dialog", "DropdownMenu",
   "EmptyState", "Field", "FileInput", "FormLayout", "Grid", "Heading", "HoverCard", "Icon",
   "IconButton", "Kbd", "Layout", "Lightbox", "Link", "List", "Markdown", "MobileNav", "MoreMenu",
   "MultiSelect", "NumberInput", "Outline", "OverflowList", "Overlay", "Pagination", "Popover",

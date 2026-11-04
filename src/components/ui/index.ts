@@ -103,6 +103,7 @@ export {
 export { DateInput, type DateInputProps } from "./DateInput";
 export {
   DateRangeInput,
+  type DateRangeInputLayout,
   type DateRangeInputProps,
   type DateRangePreset,
   isRangeEqual,
