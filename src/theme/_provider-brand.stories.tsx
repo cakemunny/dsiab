@@ -64,7 +64,7 @@ function expectFill(canvas: HTMLElement, seed: string, when: string, button?: st
   if (!same(fill, seed)) throw new Error(`${when}: the fill outside the inner Provider reads ${fill}, expected the seed ${seed}`);
   if (button !== undefined) {
     const now = getComputedStyle(canvas.querySelector('[data-testid="outer-button"]')!).backgroundColor;
-    if (now !== button) throw new Error(`${when}: the outer solid Button reads ${now}, it read ${button} before`);
+    if (now !== button) throw new Error(`${when}: the outer Button reads ${now}, it read ${button} before`);
   }
 }
 
