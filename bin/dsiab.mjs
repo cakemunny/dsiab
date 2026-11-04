@@ -128,7 +128,7 @@ function delegateToDocs(args) {
  */
 const COMMANDS = {
   check: {
-    args: "[path]",
+    args: "[path...]",
     blurb: "check your code against the rules this system ships",
     run: (rest) => delegateToCheck(rest),
   },

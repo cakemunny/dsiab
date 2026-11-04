@@ -291,6 +291,34 @@ describe("the repository and the CLI", () => {
     }
   });
 
+  it("several paths are ONE run: a dsiab import in one makes a Radix sheet in another a finding", () => {
+    const dir = mkdtempSync(join(tmpdir(), "dsiab-paths-"));
+    const run = (...paths: string[]) => {
+      try {
+        return { status: 0, out: execFileSync("node", [join(ROOT, "bin/ds-check.mjs"), ...paths], { encoding: "utf8" }) };
+      } catch (err) {
+        const { stdout, status } = err as { stdout: string; status: number };
+        return { status, out: stdout };
+      }
+    };
+    try {
+      mkdirSync(join(dir, "app"));
+      mkdirSync(join(dir, "styles"));
+      writeFileSync(join(dir, "app", "App.tsx"), 'import { Button } from "dsiab";\nexport const App = () => <Button>Go</Button>;\n');
+      writeFileSync(join(dir, "styles", "global.css"), '@import "@radix-ui/themes/styles.css";\n');
+      // RED: the sheet alone is not a dsiab project, so it passes; with the app beside it, it fails.
+      expect(run(join(dir, "styles")).status).toBe(0);
+      const both = run(join(dir, "app"), join(dir, "styles"));
+      expect([both.status, both.out.includes("styles/global.css:1  [radix-stylesheet]")]).toEqual([1, true]);
+      // A path inside another is read once, and an --init takes one directory only.
+      const once = checkTree([dir, join(dir, "styles")]);
+      expect([...once.reach.scannedByExt.values()].reduce((n: number, c: number) => n + c, 0)).toBe(2);
+      expect(run("--init", join(dir, "app"), join(dir, "styles")).status).toBe(2);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it("the dsiab skill lists no rule ids and no rule count, and every id it allows is real", () => {
     // The skill points at `npx ds-check --rules`, so a list or a count there goes stale with each new rule.
     const problems = (text: string) => [
