@@ -43,7 +43,10 @@ is out of scope.
 **Read the roster before you build anything.** `import roster from "dsiab/registry.json"` gives you
 every component's `name`, `status`, `tier`, `exports[]` and `wraps`. The `wraps` field names the Radix
 Themes primitive a component thinly wraps, or holds `null` for a custom composition with no props
-passthrough to assume. Never trust a remembered list, including any count in this file.
+passthrough to assume. An available entry also carries `kinds`, which says whether each exported
+name is a `component`, `hook`, `function`, `constant` or `type`, and `roots`, the names that stand for
+the whole component when its uses are counted. More kinds may come, so treat a kind you do not know as
+not countable. Never trust a remembered list, including any count in this file.
 
 ```bash
 # does a dialog already exist?

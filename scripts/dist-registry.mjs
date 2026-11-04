@@ -27,6 +27,14 @@
  *   tier     yes — how much documentation exists for it.
  *   exports  yes — the single most actionable field: the exact names to import.
  *   wraps    yes, DERIVED. See below.
+ *   kinds    yes, DERIVED, on available entries: each exported name mapped to `component`, `hook`,
+ *            `function`, `constant` or `type`, from the same classification the compiled reference
+ *            uses. A map beside `exports`, so every reader of `exports` keeps working. A reader
+ *            treats a kind it does not know as not countable, because more may come.
+ *   roots    yes, DERIVED, on available entries: the names whose placement counts as one use of the
+ *            whole component, such as `Button`, `DropdownMenu.Root`, or both `Select` and its alias
+ *            `Select.Root`. Empty when the entry publishes nothing or only types. One documentation
+ *            page is one component ([[local-usage-scan]]).
  *   reason   yes, and ONLY on entries that are not available. "Why can I not have this, and may I
  *            build my own?" is a consumer question. The root note answers it in maintainer
  *            shorthand citing a spec that does not ship, so these are written here instead.
@@ -119,12 +127,100 @@ function wrapsOf(buildingBlock) {
 }
 
 /**
+ * The kind a consumer reads, from the kind the compiled reference gives an export
+ * (`scripts/reference/types.mjs`). One classification serves both, so the roster and the reference
+ * cannot disagree about what an export is. A `compound`, such as `DropdownMenu` or a React context,
+ * is a component. A `value`, such as `interactiveLayer`, is a constant.
+ */
+export const SHIPPED_KIND = {
+  type: "type",
+  hook: "hook",
+  function: "function",
+  component: "component",
+  compound: "component",
+  value: "constant",
+};
+
+/**
+ * The root of each entry that publishes no export of its own name. Every other entry's root is
+ * worked out, so a new entry without its own name fails the build until it is written here.
+ */
+export const ROOT_OVERRIDES = {
+  Field: "useOptionalFieldControl",
+  Toast: "ToastProvider",
+};
+
+/**
+ * The names whose placement counts as one use of the whole component: the override, or the export
+ * named after the entry, plus its `Root` when it has one. A compound that renders on its own, such
+ * as `Select`, keeps `Select.Root` as the same component under its Radix name, so both count. A
+ * compound that is only an object of parts, such as `DropdownMenu`, is placed by its `Root` alone.
+ * An export spelled `<Name>Root`, such as `ToolbarRoot`, is that same `Root` under a flat name, so
+ * it counts too. Empty when the entry publishes nothing or only types, such as `AccentColor`, because nothing of it
+ * can be counted.
+ *
+ * @param {object} entry a root registry entry
+ * @param {Map<string, object>} models each export's model from `describe`
+ * @returns {string[]}
+ */
+function rootsOf(entry, models) {
+  if ([...models.values()].every((model) => model.kind === "type")) return [];
+  const name = ROOT_OVERRIDES[entry.name] ?? entry.name;
+  const model = models.get(name);
+  if (!model) {
+    throw new Error(
+      `dist-registry: ${entry.name} has no export named ${name}, so nothing stands for the whole ` +
+        `component when a use is counted. Add its root to ROOT_OVERRIDES in scripts/dist-registry.mjs.`,
+    );
+  }
+  if (model.kind === "type") {
+    throw new Error(`dist-registry: the root of ${entry.name}, ${name}, is a type, which is never counted.`);
+  }
+  const hasRoot = model.kind === "compound" && model.parts.some((part) => part.path === `${name}.Root`);
+  const flat = hasRoot && models.has(`${name}Root`) ? [`${name}Root`] : [];
+  if (model.kind !== "compound" || model.callable) return hasRoot ? [name, `${name}.Root`, ...flat] : [name];
+  if (hasRoot) return [`${name}.Root`, ...flat];
+  throw new Error(
+    `dist-registry: ${name} is only an object of parts and has no Root, so nothing places it. ` +
+      `Add its root to ROOT_OVERRIDES in scripts/dist-registry.mjs.`,
+  );
+}
+
+/**
+ * The kinds and the root of one available entry.
+ *
+ * @param {object} entry a root registry entry
+ * @param {(name: string) => object} describe the compiled reference's model of one export
+ * @returns {{kinds: Record<string, string>, roots: string[]}}
+ */
+export function typeFactsOf(entry, describe) {
+  const models = new Map(entry.exports.map((name) => [name, describe(name)]));
+  const kinds = {};
+  for (const [name, model] of models) {
+    const kind = SHIPPED_KIND[model.kind];
+    if (!kind) {
+      throw new Error(
+        `dist-registry: ${entry.name} exports ${name}, whose kind "${model.kind}" has no shipped ` +
+          `equivalent. Add one to SHIPPED_KIND in scripts/dist-registry.mjs.`,
+      );
+    }
+    kinds[name] = kind;
+  }
+  return { kinds, roots: rootsOf(entry, models) };
+}
+
+/**
  * Project the maintainer's registry onto the consumer roster. Pure: no reads, no writes, no clock.
  *
+ * `describe`, when given, adds `kinds` and `roots` to each available entry. The build always passes
+ * it. A caller that needs only status, tier and `wraps`, such as the compiled reference, leaves it
+ * out and skips the type program.
+ *
  * @param {Array<object>} registry parsed contents of the root registry.json
+ * @param {(name: string) => object} [describe] the compiled reference's model of one export
  * @returns {object} the object written to dist/registry.json
  */
-export function buildDistRegistry(registry) {
+export function buildDistRegistry(registry, describe) {
   const components = registry.map((entry) => {
     const status = STATUS[entry.status];
     if (!status) {
@@ -142,6 +238,8 @@ export function buildDistRegistry(registry) {
       wraps: wrapsOf(entry.buildingBlock),
       exports: entry.exports,
     };
+
+    if (status === "available" && describe) Object.assign(projected, typeFactsOf(entry, describe));
 
     if (status !== "available") {
       const reason = status === "planned" ? PLANNED_REASON : OUT_OF_SCOPE_REASONS[entry.name];
@@ -164,8 +262,11 @@ export function buildDistRegistry(registry) {
     about:
       "The component roster for this package: what exists, what to import, and what is deliberately " +
       "absent. `wraps` names the Radix Themes primitive a component thinly wraps, so that component's " +
-      "own props apply; null means a custom composition with no passthrough to assume. Generated from " +
-      "the maintainer's registry with build-log fields removed.",
+      "own props apply; null means a custom composition with no passthrough to assume. `kinds` maps " +
+      "each exported name of an available component to component, hook, function, constant or type; " +
+      "treat a kind you do not know as not countable, because more may come. `roots` names what stands " +
+      "for the whole component when its uses are counted, so a dropdown with three items is one " +
+      "dropdown. Generated from the maintainer's registry with build-log fields removed.",
     generatedBy: "scripts/dist-registry.mjs",
     counts: { total: components.length, available, unavailable: components.length - available },
     components,
@@ -179,7 +280,10 @@ function isEntryPoint() {
 
 if (isEntryPoint()) {
   const registry = JSON.parse(readFileSync(SOURCE_PATH, "utf8"));
-  const projection = buildDistRegistry(registry);
+  // Loaded here and not at the top, so a reader of the pure projection never opens the type program.
+  const { openProgram } = await import("./reference/types.mjs");
+  const program = openProgram(ROOT);
+  const projection = buildDistRegistry(registry, (name) => program.describe(name));
   mkdirSync(dirname(OUT_PATH), { recursive: true });
   writeFileSync(OUT_PATH, `${JSON.stringify(projection, null, 2)}\n`);
   const wrapped = projection.components.filter((c) => c.wraps !== null).length;

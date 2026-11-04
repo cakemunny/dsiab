@@ -52,7 +52,7 @@ exist?
   component under the GUIDELINES conventions, or surface the gap.
 
 The package ships a projection of this file as `dsiab/registry.json`, built by
-`scripts/dist-registry.mjs`. It differs in five ways:
+`scripts/dist-registry.mjs`. It differs in six ways:
 
 - The entries sit under `components`, beside `about`, `generatedBy` and `counts`.
 - `status` reads `available` instead of `ported`.
@@ -60,8 +60,14 @@ The package ships a projection of this file as `dsiab/registry.json`, built by
   `Radix <Name>`, and it holds `null` otherwise.
 - An entry that is not available carries a `reason`, written in the script for a package reader, in
   place of its `note`, which cites specs that do not ship.
+- An available entry carries `kinds`, which maps each exported name to `component`, `hook`,
+  `function`, `constant` or `type`, and `roots`, the names whose placement counts as one use of the
+  whole component ([[local-usage-scan]]). Both are derived at build time from the same classification
+  the compiled reference uses, and `export-kinds.node-check.ts` fails on a name with no kind or a
+  component with no root.
 - Every other field is gone, `module`, `controlBox` and `priorArt` among them, so an entry holds
-  `name`, `status`, `tier`, `wraps`, `exports` and, when it is not available, `reason`.
+  `name`, `status`, `tier`, `wraps`, `exports`, and, when it is available, `kinds` and `roots`, or,
+  when it is not, `reason`.
 
 The package also ships `dsiab/components/<Name>.md`, one file per available entry plus an index,
 built by `scripts/dist-reference.mjs` from the source types and that projection, and never committed

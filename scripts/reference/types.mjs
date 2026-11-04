@@ -209,6 +209,9 @@ function describeSymbol(ctx, name, symbol) {
     return {
       ...base,
       kind: "compound",
+      // A compound that renders on its own (`<SideNav>`) stands for itself in a count. One that is
+      // only an object of parts (`DropdownMenu`) is placed by its `Root` ([[local-usage-scan]]).
+      callable: signatures.length > 0,
       props: propsType ? splitProps(checker, propsType) : null,
       parts: parts.map((p) => describePart(ctx, `${name}.${p.name}`, p)),
     };

@@ -264,7 +264,14 @@ This ledger records the rulings that shape the design system and the reason behi
 - A use the scan cannot trace is listed as untraced, with its file, line and reason, and is never counted as zero.
 - When nothing imports from `dsiab`, the report says so instead of calling every component unused.
 
-**The kind of each export.** The published roster gains a kind for each exported name: `component`, `hook`, `function`, `constant` or `type`, worked out at build time from the compiled type declarations. The kinds sit in a separate map beside `exports`, so every existing reader of `exports` keeps working, and a reader treats a kind it does not know as not countable.
+**The kind of each export.** The published roster gains a kind for each exported name: `component`, `hook`, `function`, `constant` or `type`, worked out at build time by the same classification the compiled reference uses, over the types the package publishes. The kinds sit in a separate map, `kinds`, beside `exports`, so every existing reader of `exports` keeps working, and a reader treats a kind it does not know as not countable.
+
+**The roots of each component.** Each available entry also carries `roots`, the names whose placement counts as one use of the whole component.
+
+- The export named after the entry is a root.
+- When that export is only an object of parts, such as `DropdownMenu`, its `Root` part is the root instead.
+- When a component that renders on its own also keeps its Radix spelling, such as `Select` and `Select.Root`, both are roots, because both name the same component.
+- An entry with no export of its own name, which today means `Field` and `Toast`, names its root in a short written list, and the build fails on a new entry that has neither.
 
 **Order of work.** The scan and the command come first. The page is built only after a run over a real project answers at least one question that the project's owner wrote down before the run. The first page uses tables and counts made from existing components. A chart component waits for three real uses, as [contribution-threshold](#contribution-threshold) requires.
 

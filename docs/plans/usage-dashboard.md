@@ -13,7 +13,8 @@ The plan answers kanban task t_ad0bf9c3 with a local usage scan of each project'
 | Rule checker fix, the prerequisite | Merged into main as cakemunny/dsiab#23 (`aa25061`). |
 | Phase 0, the record | Drafted on `claude/affectionate-knuth-c742av` (`036be16`, amended by the counting, project and report decisions). Waits for Jason's review. |
 | Phase 1a, the shared source modules | Built on `claude/affectionate-knuth-c742av`. Waits for review with Phase 0. |
-| Phase 1b and 1c, the kind field, the scanner and the usage command | Not started. |
+| Phase 1b, the kind field and the roots | Built on `claude/affectionate-knuth-c742av`. Waits for review with Phase 0 and 1a. |
+| Phase 1c, the scanner and the usage command | Not started. |
 | Need check | Waits for Jason's personal project to hold a finished screen. Runs on a locally packed build, before any release ships Phase 1. |
 | Phase 2, the Usage page | Waits for the Need check. |
 
@@ -95,7 +96,7 @@ The rule checker's method for skipping comments and text misread page text, and 
 
 ### Phase 1b: the kind field
 
-- The build step that writes the published component list works out each export's kind from the compiled type declarations, by one written rule in this order:
+- The build step that writes the published component list works out each export's kind by the classification the compiled reference already uses (`scripts/reference/types.mjs`), over a TypeScript program with the options the shipped declarations are emitted with. One rule then serves both the reference and the roster. Its six kinds map onto the five shipped ones: a `compound` is a `component` and a `value` is a `constant`. The rule, in order:
   1. A name exported only as a type is a `type`.
   2. A function whose name is `use` followed by a capital letter is a `hook`.
   3. A `component` is any of these, as the declarations write them:
@@ -105,11 +106,18 @@ The rule checker's method for skipping comments and text misread page text, and 
      - an object whose members are all components, such as `DropdownMenu`
   4. Any other callable is a `function`.
   5. Anything else is a `constant`.
-- The same step records each entry's **root**, the export that stands for the whole component in a count: the export named after the entry, or, when that export is an object of parts, its `Root` member. The script holds a short written list for the entries that have no export of their own name, which today are `Field` and `Toast`, and a guard fails on any new entry whose root cannot be worked out. An entry with no exports, such as `TypeaheadItem`, is never counted.
+- The same step records each entry's **roots**, a list of the names whose placement counts as one use of the whole component:
+  - the export named after the entry, such as `Button`, or `SideNav`, a compound that renders on its own;
+  - its `Root` part instead, when that export is only an object of parts, such as `DropdownMenu.Root`;
+  - both, when a component that renders on its own keeps its Radix spelling as an alias: `Select` and `Select.Root`, `TextField` and `TextField.Root`, `CheckboxGroup`, `RadioGroup`;
+  - a flat `<Name>Root` export that is the same part under a flat name, which today means `ToolbarRoot`;
+  - for an entry with no export of its own name, a short written list in the script, which today is `Field` (`useOptionalFieldControl`) and `Toast` (`ToastProvider`). The build fails on any new entry whose root cannot be worked out.
+
+  An entry that publishes nothing, such as `TypeaheadItem`, or only types, such as `AccentColor`, has no roots and is never counted. A list, not a single root, because the scan needs `<Select.Root>` to count as one Select.
 - The shipped consumer rules say that more kinds may come, and that a reader treats an unknown kind as not countable.
 - Four documents name the published list's fields and change together: the repository guide, the shipped consumer rules, the field table in the build script, and the description the build script writes into the list. The consumer rules stay under their size cap of 23,700 bytes, and they measure 13,319 today.
 
-**Done when** a guard fails on any export with no kind and names it, a guard fails on any available entry with no root, and a test asserts the kind of Button, Breadcrumbs, ButtonProps, useAnnounce, interactiveLayer, DropdownMenu, AvatarHostSizedContext and AccentColor, and the root of Button, DropdownMenu, Field and Toast.
+**Done when** a guard fails on any export with no kind and names it, a guard fails on any available entry with no root, and a test asserts the kind of Button, Breadcrumbs, ButtonProps, useAnnounce, interactiveLayer, DropdownMenu, BreadcrumbContext and AccentColor, and the roots of Button, DropdownMenu, Select, Toolbar, SideNav, Field, Toast, AccentColor and TypeaheadItem. `BreadcrumbContext` replaces `AvatarHostSizedContext`, which is an internal export the roster never publishes.
 
 ### Phase 1c: the scanner and the usage command
 
