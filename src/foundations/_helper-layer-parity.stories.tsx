@@ -1,8 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Box } from "@radix-ui/themes";
-import { themeRoot, cssVarColour, withAccent, ALL_ACCENTS, FOCUS_RING, type RGBA } from "./_assert";
-import { BLACK_A, WHITE_A, partEdge, ringStack, scrimStack, thumbStroke, type LayerStep } from "../palette/helperLayers";
-import { parseColor } from "./_assert";
+import { themeRoot, cssVarColour, withAccent, flatten, contrastRatio, ALL_ACCENTS, FOCUS_RING, type RGBA } from "./_assert";
+import { apcaContrast } from "./apca";
+import { BLACK_A, WHITE_A, partEdge, ringStack, scrimStack, thumbStroke, withoutMargin, type LayerStep } from "../palette/helperLayers";
+import { parseColor, NEUTRALS } from "./_assert";
+import { RAIL, dashStack, dotEdge, markEdge, sliderThumbStack } from "../palette/markLayers";
+import { SCALE_ALPHA_3 } from "../palette/collisionTable";
 import type { TintSteps } from "../palette/surfaces";
 
 /* THE GENERATOR'S HELPER LAYERS AGAINST THE ONES THE THEME PICKED ([[generated-helper-layers]]).
@@ -16,19 +19,31 @@ import type { TintSteps } from "../palette/surfaces";
      the light-scrim stack        --accent-ring-stack-scrim-light
      the part edge                --accent-part-edge, on --accent-indicator
      the switch-thumb stroke      --accent-thumb-stroke, on --accent-track
+     the mark edge                --accent-mark-edge, on --accent-indicator
+     the drop dash                --accent-dash-stack, on --ds-stroke-accent
+     the Slider thumb stack       --accent-slider-thumb-stack, by --accent-track
+     the warning dot edge         --warning-dot-edge, on --ds-fill-warning
+     the success dot edge         --success-dot-edge, on --ds-fill-success
+     the error dot edge           --error-dot-edge, on --ds-fill-error
 
    A step is compared by the colour it paints, read through the guards' own
-   rasteriser, so "none" matches a transparent token. 270 rows.
+   rasteriser, so "none" matches a transparent token. 594 rows.
 
-   ONE KIND OF DIFFERENCE IS ALLOWED, AND EACH ONE IS NAMED. The searches hold
-   a margin above the floors (`LAYER_MARGIN`), because a few of the theme's
-   steps were decided within 0.01 of the floor, inside the guards' own canvas
-   rounding: purple's light-scrim step reads 2.99 and indigo's 3.00 in the
-   browser, and no model can split them. With the margin the search never
-   picks a step a guard fails, and where the theme's step sits inside the
-   margin it picks the next heavier one. HEAVIER lists every such row with the
-   theme's step and the search's. A listed row that stops differing fails
-   too, so the list cannot keep a stale entry. */
+   TWO KINDS OF DIFFERENCE ARE ALLOWED, AND EACH IS PROVED, NOT LISTED.
+   1. HEAVIER BY THE MARGIN. The searches hold a margin above the floors
+      (`LAYER_MARGIN`), because a few of the theme's steps were decided within
+      0.01 of the floor, inside the guards' own canvas rounding: purple's
+      light-scrim step reads 2.99 and indigo's 3.00 in the browser, and no model
+      can split them. A search may pick a heavier step than the theme only where
+      the same search with no margin (`withoutMargin`) picks exactly the theme's
+      step, so the margin alone is the reason. At most 40 rows may do this.
+   2. THE LIGHT SLIDER THUMB. The theme gives every light colour one step,
+      `--black-a5`, set by amber's light range. Per colour most need less. A
+      lighter step stands only where the thumb then reads against its range and
+      its track on every surface of every neutral, measured with the guards' own
+      arithmetic ([[neutral-part-stacks]]).
+   The gray accent's colours follow the neutral, so its step is the heaviest
+   over the six. */
 
 const meta: Meta = { title: "_internal/Helper layer parity" };
 export default meta;
@@ -60,59 +75,133 @@ function samePaint(a: RGBA, b: RGBA): boolean {
   return Math.abs(a.a - b.a) <= 0.01 && Math.abs(a.r - b.r) <= 1 && Math.abs(a.g - b.g) <= 1 && Math.abs(a.b - b.b) <= 1;
 }
 
-/** Rows where the search picks exactly one step heavier than the theme, because the theme's step
- *  sits within `LAYER_MARGIN` of the floor. "appearance layer accent" -> [theme, search]. */
-const HEAVIER: Record<string, [LayerStep, LayerStep]> = {
-  "light light-scrim stack indigo": ["black-a5", "black-a6"], // 3.045:1 at black-a5 in the model
-  "dark light-scrim stack indigo": ["black-a5", "black-a6"], // the scrim table has no dark arm
-  "dark ring stack blue": ["white-a4", "white-a5"], // Lc 30.39 at white-a4 in the model
-};
+/** The alpha index a step paints: "none" is 0, `black-a6` is 6. Null for a step on the accent's own scale. */
+function alphaIndex(step: LayerStep): number | null {
+  if (step === "none") return 0;
+  const m = /^(?:black|white)-a(\d+)$/.exec(step);
+  return m ? Number(m[1]) : null;
+}
+
+/** The heavier of two steps on the same alpha scale. */
+function heavier(a: LayerStep | null, b: LayerStep | null): LayerStep | null {
+  if (a === null || b === null) return null;
+  const ia = alphaIndex(a), ib = alphaIndex(b);
+  if (ia === null || ib === null) return a === b ? a : null;
+  return ia >= ib ? a : b;
+}
+
+/** Whether the Slider thumb with `step` on its ring reads against its range and its track on every
+ *  surface of every neutral, measured with the guards' own arithmetic: its white face or its ring
+ *  at 3:1 and Lc 30 ([[neutral-part-stacks]]). */
+function sliderReads(probe: HTMLElement, step: LayerStep, range: RGBA): boolean {
+  const ring = flatten(stepColour(probe, step), flatten(cssVarColour(probe, "--black-a4"), range));
+  const white = { r: 255, g: 255, b: 255, a: 1 };
+  const reads = (n: RGBA) => [white, ring].some((c) => contrastRatio(c, n) >= FOCUS_RING.min && apcaContrast(c, n) >= FOCUS_RING.minLc);
+  const before = probe.getAttribute("data-gray-color");
+  try {
+    for (const neutral of NEUTRALS) {
+      probe.setAttribute("data-gray-color", neutral);
+      const track = cssVarColour(probe, "--gray-a3");
+      for (const surface of ["--ds-bg-base", "--ds-bg-subtle", "--ds-bg-raised", "--ds-bg-overlay"]) {
+        const under = cssVarColour(probe, surface);
+        const opaque = under.a < 1 ? flatten(under, cssVarColour(probe, "--ds-bg-base")) : under;
+        if (!reads(flatten(track, opaque))) return false;
+      }
+    }
+    return reads(range);
+  } finally {
+    if (before) probe.setAttribute("data-gray-color", before);
+  }
+}
+
+type Layer = { name: string; token: string; run: (probe: HTMLElement, appearance: "light" | "dark") => LayerStep | null };
+
+function tintsOf(probe: HTMLElement): TintSteps {
+  return {
+    accentA3: rgba(cssVarColour(probe, "--accent-a3")),
+    accentA5: rgba(cssVarColour(probe, "--accent-a5")),
+    errorA3: rgba(cssVarColour(probe, "--error-a3")),
+    warningA3: rgba(cssVarColour(probe, "--warning-a3")),
+    successA3: rgba(cssVarColour(probe, "--success-a3")),
+    infoA3: rgba(cssVarColour(probe, "--info-a3")),
+  };
+}
+const read = (probe: HTMLElement, token: string) => rgbOf(cssVarColour(probe, token));
+
+const LAYERS: Layer[] = [
+  { name: "ring stack", token: "--accent-ring-stack", run: (p, a) => ringStack(read(p, FOCUS_RING.fill), a, tintsOf(p)) },
+  { name: "dark-scrim stack", token: "--accent-ring-stack-scrim", run: (p) => scrimStack(read(p, FOCUS_RING.fill), "dark") },
+  { name: "light-scrim stack", token: "--accent-ring-stack-scrim-light", run: (p) => scrimStack(read(p, FOCUS_RING.fill), "light") },
+  { name: "part edge", token: "--accent-part-edge", run: (p, a) => partEdge(read(p, "--accent-indicator"), a) },
+  {
+    name: "thumb stroke", token: "--accent-thumb-stroke",
+    run: (p) => thumbStroke(
+      Array.from({ length: 12 }, (_, i) => hex(cssVarColour(p, `--accent-${i + 1}`))),
+      Array.from({ length: 12 }, (_, i) => rgba(cssVarColour(p, `--accent-a${i + 1}`))),
+      read(p, "--accent-track"),
+    ),
+  },
+  { name: "mark edge", token: "--accent-mark-edge", run: (p, a) => markEdge(read(p, "--accent-indicator"), a, tintsOf(p).accentA3, tintsOf(p).accentA5) },
+  { name: "drop dash", token: "--accent-dash-stack", run: (p, a) => dashStack(read(p, "--ds-stroke-accent"), a, tintsOf(p).accentA3) },
+  { name: "slider thumb stack", token: "--accent-slider-thumb-stack", run: (p, a) => sliderThumbStack(read(p, "--accent-track"), a) },
+  { name: "warning dot edge", token: "--warning-dot-edge", run: (p, a) => dotEdge(read(p, "--ds-fill-warning"), a) },
+  { name: "success dot edge", token: "--success-dot-edge", run: (p, a) => dotEdge(read(p, "--ds-fill-success"), a) },
+  { name: "error dot edge", token: "--error-dot-edge", run: (p, a) => dotEdge(read(p, "--ds-fill-error"), a) },
+];
+
+/** A layer's step for the accent on `probe`. The gray accent's colours follow the neutral, so its
+ *  step is the heaviest over the six. */
+function stepFor(probe: HTMLElement, accent: string, appearance: "light" | "dark", layer: Layer): LayerStep | null {
+  if (accent !== "gray") return layer.run(probe, appearance);
+  const before = probe.getAttribute("data-gray-color");
+  try {
+    let worst: LayerStep | null | undefined;
+    for (const neutral of NEUTRALS) {
+      probe.setAttribute("data-gray-color", neutral);
+      const step = layer.run(probe, appearance);
+      worst = worst === undefined ? step : heavier(worst, step);
+    }
+    return worst ?? null;
+  } finally {
+    if (before) probe.setAttribute("data-gray-color", before);
+  }
+}
 
 export const EveryLayerMatchesTheTheme: Story = {
   render: () => <Box data-testid="probe" />,
   play: async ({ canvasElement }) => {
     const root = themeRoot(canvasElement);
     const rows: string[] = [];
-    const seen = new Set<string>();
-    let read = 0;
+    const heavierRows: string[] = [];
+    const lighterSlider: string[] = [];
+    let readCount = 0;
     for (const appearance of ["light", "dark"] as const) {
       const probe = probeFor(root, appearance);
       try {
         for (const accent of ALL_ACCENTS) {
           const restore = withAccent(probe, accent);
           try {
-            const tints: TintSteps = {
-              accentA3: rgba(cssVarColour(probe, "--accent-a3")),
-              accentA5: rgba(cssVarColour(probe, "--accent-a5")),
-              errorA3: rgba(cssVarColour(probe, "--error-a3")),
-              warningA3: rgba(cssVarColour(probe, "--warning-a3")),
-              successA3: rgba(cssVarColour(probe, "--success-a3")),
-              infoA3: rgba(cssVarColour(probe, "--info-a3")),
-            };
-            const fill = rgbOf(cssVarColour(probe, FOCUS_RING.fill));
-            const solid = Array.from({ length: 12 }, (_, i) => hex(cssVarColour(probe, `--accent-${i + 1}`)));
-            const alpha = Array.from({ length: 12 }, (_, i) => rgba(cssVarColour(probe, `--accent-a${i + 1}`)));
-            const layers: [string, string, LayerStep | null][] = [
-              ["ring stack", "--accent-ring-stack", ringStack(fill, appearance, tints)],
-              ["dark-scrim stack", "--accent-ring-stack-scrim", scrimStack(fill, "dark")],
-              ["light-scrim stack", "--accent-ring-stack-scrim-light", scrimStack(fill, "light")],
-              ["part edge", "--accent-part-edge", partEdge(rgbOf(cssVarColour(probe, "--accent-indicator")), appearance)],
-              ["thumb stroke", "--accent-thumb-stroke", thumbStroke(solid, alpha, rgbOf(cssVarColour(probe, "--accent-track")))],
-            ];
-            for (const [name, token, step] of layers) {
-              read++;
-              const theme = cssVarColour(probe, token);
-              if (step === null) { rows.push(`${appearance} ${accent} ${name}: the search found no step, the theme paints ${rgba(theme)}`); continue; }
-              const key = `${appearance} ${name} ${accent}`;
-              const allowed = HEAVIER[key];
-              if (allowed) {
-                seen.add(key);
-                if (!samePaint(stepColour(probe, allowed[0]), theme) || step !== allowed[1]) {
-                  rows.push(`${key}: listed as theme ${allowed[0]} and search ${allowed[1]}, read theme ${rgba(theme)} and search ${step}`);
-                }
+            for (const layer of LAYERS) {
+              readCount++;
+              const key = `${appearance} ${layer.name} ${accent}`;
+              const theme = cssVarColour(probe, layer.token);
+              const step = stepFor(probe, accent, appearance, layer);
+              if (step === null) { rows.push(`${key}: the search found no step, the theme paints ${rgba(theme)}`); continue; }
+              if (samePaint(stepColour(probe, step), theme)) continue;
+              // Heavier, and only because of the margin: with no margin it is the theme's step.
+              const bare = withoutMargin(() => stepFor(probe, accent, appearance, layer));
+              const si = alphaIndex(step), bi = bare === null ? null : alphaIndex(bare);
+              if (bare !== null && samePaint(stepColour(probe, bare), theme) && si !== null && bi !== null && si > bi) {
+                heavierRows.push(`${key}: ${bare} to ${step}`);
                 continue;
               }
-              if (!samePaint(stepColour(probe, step), theme)) rows.push(`${key}: search ${step}, theme ${rgba(theme)}`);
+              // The light Slider thumb takes one step on every colour in the theme, set by amber. A lighter
+              // step for one colour stands if it reads as the guard measures it.
+              if (layer.name === "slider thumb stack" && appearance === "light" && sliderReads(probe, step, cssVarColour(probe, "--accent-track"))) {
+                lighterSlider.push(`${accent}: ${step}`);
+                continue;
+              }
+              rows.push(`${key}: search ${step}${bare && bare !== step ? ` (${bare} with no margin)` : ""}, theme ${rgba(theme)}`);
             }
           } finally {
             restore();
@@ -122,7 +211,6 @@ export const EveryLayerMatchesTheTheme: Story = {
         probe.remove();
       }
     }
-    for (const key of Object.keys(HEAVIER)) if (!seen.has(key)) rows.push(`${key}: listed in HEAVIER and never read`);
     // The two alpha scales the searches stack are Radix's own.
     const scales = probeFor(root, "light");
     try {
@@ -134,8 +222,31 @@ export const EveryLayerMatchesTheTheme: Story = {
     } finally {
       scales.remove();
     }
-    const want = 2 * ALL_ACCENTS.length * 5;
-    if (read !== want) throw new Error(`read ${read} layers, expected ${want}`);
-    if (rows.length) throw new Error(`${rows.length} of ${want} layers differ from the theme ([[generated-helper-layers]]):\n${rows.join("\n")}`);
+    // The Outline rail the mark edge is held on is each neutral's --gray-a6.
+    for (const appearance of ["light", "dark"] as const) {
+      const p = probeFor(root, appearance);
+      try {
+        for (const neutral of NEUTRALS) {
+          p.setAttribute("data-gray-color", neutral);
+          if (!samePaint(parseColor(RAIL[neutral][appearance]), cssVarColour(p, "--gray-a6"))) rows.push(`${appearance} ${neutral}: the rail table holds ${RAIL[neutral][appearance]}`);
+        }
+        // The status tints the brand analysis composes are each scale's own alpha step 3.
+        for (const [family, steps] of Object.entries(SCALE_ALPHA_3)) {
+          if (!samePaint(parseColor(steps[appearance]), cssVarColour(p, `--${family}-a3`))) rows.push(`${appearance} ${family}: the alpha-3 table holds ${steps[appearance]}`);
+        }
+      } finally {
+        p.remove();
+      }
+    }
+    const want = 2 * ALL_ACCENTS.length * LAYERS.length;
+    if (readCount !== want) throw new Error(`read ${readCount} layers, expected ${want}`);
+    if (rows.length) {
+      throw new Error(
+        `${rows.length} of ${want} layers differ from the theme ([[generated-helper-layers]]):\n${rows.join("\n")}` +
+          `\n\nheavier by the margin (${heavierRows.length}):\n${heavierRows.join("\n")}\n\nlighter light Slider thumbs that read (${lighterSlider.length}): ${lighterSlider.join(", ")}`,
+      );
+    }
+    // Bounds, so a drift that makes the allowed classes swallow the table cannot pass quietly.
+    if (heavierRows.length > 40) throw new Error(`${heavierRows.length} rows went heavier by the margin, more than the 40 this story allows:\n${heavierRows.join("\n")}`);
   },
 };

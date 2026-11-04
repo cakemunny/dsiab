@@ -38,9 +38,9 @@
 
    Pure arithmetic over `surfaces.ts` and `apca.ts`. No DOM.
    ============================================================================= */
-import { apcaLc } from "./apca";
+import { apcaLcFromY, apcaY } from "./apca";
 import { contrastRatio, type Appearance } from "./generate";
-import type { RGB } from "./oklch";
+import { linearFromByte, type RGB } from "./oklch";
 import {
   FLOORS, NEUTRALS, NEUTRAL_STEPS, allSurfaces, asReadBack, layOver, parseColour, type TintSteps,
 } from "./surfaces";
@@ -55,19 +55,51 @@ export const LAYER_MARGIN = { wcag: 0.05, lc: 0.5 } as const;
 
 export type LayerStep = "none" | `black-a${number}` | `white-a${number}` | `accent-a${number}` | `accent-${number}`;
 
-const bytes = (c: RGB): [number, number, number] => [Math.round(c.r), Math.round(c.g), Math.round(c.b)];
 const round = (c: RGB): RGB => ({ r: Math.round(c.r), g: Math.round(c.g), b: Math.round(c.b) });
 
 /** A non-text layer `fg` reads against `bg` at the floors plus the margin. */
-function clears(fg: RGB, bg: RGB): boolean {
-  return (
-    contrastRatio(round(fg), round(bg)) >= FLOORS.nonText.wcag + LAYER_MARGIN.wcag &&
-    Math.abs(apcaLc(bytes(fg), bytes(bg))) >= FLOORS.nonText.lc + LAYER_MARGIN.lc
-  );
+export function clears(fg: RGB, bg: RGB): boolean {
+  const f = luminances(fg), b = luminances(bg);
+  const ratio = (Math.max(f.wcag, b.wcag) + 0.05) / (Math.min(f.wcag, b.wcag) + 0.05);
+  return ratio >= FLOORS.nonText.wcag + active.wcag && Math.abs(apcaLcFromY(f.apca, b.apca)) >= FLOORS.nonText.lc + active.lc;
+}
+
+/** The WCAG relative luminance and the APCA screen luminance of a colour, rounded to the byte that
+ *  paints. Cached, because every search measures the same few hundred surfaces over and over: the
+ *  256 scrim media alone are re-read for every step of every stack. The same formulas as
+ *  `contrastRatio` in `generate.ts` and `apcaY` in `apca.ts`, so a cached value is the value. */
+const LUMINANCE = new Map<number, { wcag: number; apca: number }>();
+export function luminances(c: RGB): { wcag: number; apca: number } {
+  const r = Math.round(c.r), g = Math.round(c.g), b = Math.round(c.b);
+  const key = (r << 16) | (g << 8) | b;
+  let hit = LUMINANCE.get(key);
+  if (!hit) {
+    if (LUMINANCE.size > 65536) LUMINANCE.clear();
+    hit = {
+      wcag: 0.2126 * linearFromByte(r) + 0.7152 * linearFromByte(g) + 0.0722 * linearFromByte(b),
+      apca: apcaY([r, g, b]),
+    };
+    LUMINANCE.set(key, hit);
+  }
+  return hit;
+}
+
+let active: { wcag: number; lc: number } = LAYER_MARGIN;
+
+/** Run `f` with the searches held at the bare floors, no margin. For the parity story only: it
+ *  proves that where a search picks a heavier step than the theme, the margin alone is why. */
+export function withoutMargin<T>(f: () => T): T {
+  const before = active;
+  active = { wcag: 0, lc: 0 };
+  try {
+    return f();
+  } finally {
+    active = before;
+  }
 }
 
 /** The fill alone if it clears, else the lightest step of `scale` whose stack on it clears. */
-function firstStack(fill: RGB, scale: readonly string[], prefix: "black" | "white", ok: (c: RGB) => boolean): LayerStep | null {
+export function firstStack(fill: RGB, scale: readonly string[], prefix: "black" | "white", ok: (c: RGB) => boolean): LayerStep | null {
   if (ok(fill)) return "none";
   for (let i = 0; i < scale.length; i++) if (ok(layOver(asReadBack(scale[i]!), fill))) return `${prefix}-a${i + 1}`;
   return null;

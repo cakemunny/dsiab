@@ -140,6 +140,28 @@ export const SCALE_STEP_9: Record<string, string> = {
 };
 
 /**
+ * Alpha step 3 of every scale the chooser reasons about, light and dark, sRGB. A status tint is
+ * this step laid over the page ([[palette-surface-table]]), so the brand analysis needs it for
+ * whichever scale each status family lands on. `_internal/Helper layer parity` re-reads each one
+ * off a live theme root.
+ */
+export const SCALE_ALPHA_3: Record<string, { light: string; dark: string }> = {
+  red: { light: "#f3000d14", dark: "#ff173f2d" },
+  ruby: { light: "#f3002515", dark: "#ff235d2c" },
+  oxblood: { light: "#ef190120", dark: "#ff6c6336" },
+  amber: { light: "#ffde003d", dark: "#fa820022" },
+  yellow: { light: "#ffee0047", dark: "#ffaa001e" },
+  orange: { light: "#ff9c0029", dark: "#fb6a0025" },
+  green: { light: "#00a43319", dark: "#22ff991e" },
+  grass: { light: "#00970016", dark: "#70fe8c1b" },
+  lime: { light: "#96c80029", dark: "#9bfd4c1a" },
+  cyan: { light: "#00c2d121", dark: "#00befd28" },
+  blue: { light: "#008ff519", dark: "#0077ff3a" },
+  indigo: { light: "#0047f112", dark: "#2f62ff3c" },
+  iris: { light: "#0011ee0f", dark: "#525bff3b" },
+};
+
+/**
  * Scales whose step-9 is light enough that white text on it drops under the 3.0
  * non-text gate, so a family routed here must flip its `--<family>-contrast` to
  * the dark ink. Not a guess: `theme.css` already does exactly this for every

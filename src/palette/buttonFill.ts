@@ -23,8 +23,9 @@
 
    Pure arithmetic over `surfaces.ts` and `apca.ts`. No DOM.
    ============================================================================= */
-import { apcaLc } from "./apca";
-import { contrastRatio, type Appearance } from "./generate";
+import { apcaLcFromY } from "./apca";
+import { luminances } from "./helperLayers";
+import type { Appearance } from "./generate";
 import {
   type RGB, deltaEOK, gamutClamp, oklabToOklch, oklabToSrgb, oklchToOklab, srgbToOklab,
 } from "./oklch";
@@ -61,7 +62,6 @@ const STEP = 0.0025;
 const CHROMA_TIE = 0.005;
 
 const round = (c: RGB): RGB => ({ r: Math.round(c.r), g: Math.round(c.g), b: Math.round(c.b) });
-const bytes = (c: RGB): [number, number, number] => [Math.round(c.r), Math.round(c.g), Math.round(c.b)];
 
 /** A colour under Radix's press filter. CSS `brightness()` scales each sRGB channel, and
  *  `saturate()` is the Filter Effects matrix, both on the encoded values, as the census measured. */
@@ -78,7 +78,10 @@ export function pressed(c: RGB, appearance: Appearance): RGB {
 }
 
 function reading(ink: RGB, fill: RGB): LabelReading {
-  return { ratio: contrastRatio(round(ink), round(fill)), lc: apcaLc(bytes(ink), bytes(fill)) };
+  // The cached luminances are the same formulas as `contrastRatio` and `apcaLc`, rounded to the
+  // byte that paints; the search reads the same two inks at every step.
+  const i = luminances(ink), f = luminances(fill);
+  return { ratio: (Math.max(i.wcag, f.wcag) + 0.05) / (Math.min(i.wcag, f.wcag) + 0.05), lc: apcaLcFromY(i.apca, f.apca) };
 }
 
 const clears = (r: LabelReading) => r.ratio >= FLOORS.textOnFill.wcag && Math.abs(r.lc) >= FLOORS.textOnFill.lc;
