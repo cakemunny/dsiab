@@ -458,6 +458,8 @@ function DateRangeInputBody({
             id={dialogId}
             aria-label="Choose date range"
             className={`rt-ds-daterange-panel rt-r-size-${resolvedSize}`}
+            // The split panel's narrow-screen rules key off this: it wraps, scrolls, and lifts the presets above.
+            data-layout={layout}
           >
             <div className="rt-ds-daterange-layout">
               <div className="rt-ds-daterange-body">
