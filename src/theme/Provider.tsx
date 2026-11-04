@@ -4,7 +4,7 @@ import { SizeContext, type UISize } from "./SizeContext";
 import { ButtonOrderContext, type ButtonOrder } from "./ButtonOrderContext";
 import {
   CUSTOM_ACCENT, type CustomBrand, isCustomBrand,
-  customBrandProperties, clearCustomBrand,
+  customBrandProperties, holdCustomBrand,
 } from "./customBrand";
 import { applyTypefaces, clearTypefaces, type TypefaceSet } from "./typefaces";
 import { parseSeed } from "../palette/parseSeed";
@@ -172,14 +172,12 @@ export function Provider({
   // consuming app that wants no flash sets the same properties on `<html style>`
   // server-side, which this mechanism makes possible and an injected stylesheet
   // would not.
+  //
+  // A Provider with no seed of its own writes and clears nothing: the root is shared, and an outer or inner
+  // Provider's brand may be on it. A seeded Provider's cleanup removes only its own brand ([[nested-brand-ownership]]).
   useInsertionEffect(() => {
-    const root = document.documentElement;
-    if (!brandProps) {
-      clearCustomBrand(root);
-      return;
-    }
-    for (const [k, v] of Object.entries(brandProps)) root.style.setProperty(k, v);
-    return () => clearCustomBrand(root);
+    if (!brandProps) return;
+    return holdCustomBrand(document.documentElement, brandProps);
   }, [brandProps]);
 
   useInsertionEffect(() => {
