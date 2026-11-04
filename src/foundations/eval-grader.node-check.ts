@@ -58,10 +58,10 @@ const IMP = "!" + "important";
 const SHELL = `import { Provider, Text } from "dsiab";\nexport default function App() { return <Provider><Text>Hello</Text></Provider>; }\n`;
 const PLANTS: [string, string, string, Record<string, string>, string[]][] = [
   ["ds-check", "the dsiab rules", "settings-form", {
-    "src/plant.css": `.radix-themes .x { color: ${v("ds-text-danger")}; background: ${v("gray-9")} ${IMP}; }\n`,
+    "src/plant.css": `.radix-themes .x { color: ${v("ds-text-danger")}; background: ${v("gray-9")} ${IMP}; fill: #eeeeee; }\n`,
     "src/plant.tsx": 'import { Callout } from "@radix-ui/themes";\nexport const C = Callout;\n',
     "src/global.css": '@import "@radix-ui/themes/styles.css";\n',
-  }, ["unknown-token@", "bare-scale-step@", "important-flag@", "radix-duplicate@", "radix-stylesheet@"]],
+  }, ["unknown-token@", "bare-scale-step@", "hex-colour@", "important-flag@", "radix-duplicate@", "radix-stylesheet@"]],
   ["escape-hatch", "an allowance", "settings-form", {
     "src/plant.css": `.radix-themes .x {\n  /* ds-allow important-flag — the vendor sheet wins this one */\n  color: ${v("ds-text-strong")} ${IMP};\n}\n`,
   }, ["ds-allow important-flag@src/plant.css:3"]],
@@ -76,9 +76,7 @@ const PLANTS: [string, string, string, Record<string, string>, string[]][] = [
     "src/App.tsx": app("brand-colours").replace('<Button priority="primary">Open workspace</Button>', "{/* <Button> */}<a href=\"#open\">Open workspace</a>"),
   }, ["missing: Button"]],
   ["require", "the outcome left out", "brand-colours", { "src/App.tsx": app("brand-colours").replace(' accentColor="purple"', "") }, ["missing: the accent is set on Provider"]],
-  ["forbid", "a hex value in a style", "brand-colours", {
-    "src/App.tsx": app("brand-colours").replace('<Card variant="filled">', '<Card variant="filled" style={{ background: "#eeeeee" }}>'),
-  }, ["#eeeeee@src/App.tsx:7"]],
+  ["forbid", "a native input", "settings-form", { "src/plant.tsx": "export const I = () => <input />;\n" }, ["<input@src/plant.tsx:1"]],
 ];
 
 describe("RED: solution plus one plant fails that check alone", () => {
@@ -94,9 +92,9 @@ describe("RED: solution plus one plant fails that check alone", () => {
     expect(bin(workspace("settings-form"))).toBe(0);
   });
 
-  test("forbid: a hex-shaped anchor outside a style is not a colour", async () => {
+  test("ds-check: a hex-shaped anchor outside a style is not a colour", async () => {
     const src = app("brand-colours").replace("Welcome back", '<a href="#feed">Welcome back</a> #123');
-    expect(byId((await gradeWorkspace(workspace("brand-colours", { "src/App.tsx": src }), task("brand-colours"))).checks, "forbid").status).toBe("pass");
+    expect(byId((await gradeWorkspace(workspace("brand-colours", { "src/App.tsx": src }), task("brand-colours"))).checks, "ds-check").status).toBe("pass");
   });
 
   test("uses: an aliased and a namespace import both count", async () => {

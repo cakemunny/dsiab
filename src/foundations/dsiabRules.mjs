@@ -66,6 +66,21 @@ export const DSIAB_RULES = [
       "places `unknown-token` reads. `--accent-contrast`, `--accent-surface` and `--color-*` are not caught.",
   },
   {
+    id: "hex-colour",
+    title: "a hex colour where a `--ds-*` role belongs",
+    why:
+      "A hex value is one colour forever. It ignores the light and dark appearance, the brand swap and " +
+      "the accent shift that the `--ds-*` roles follow, so it is right on the screen it was picked on " +
+      "and wrong on the next theme, and nothing reports it.",
+    fix:
+      "Paint from the `--ds-*` role for what the colour means (`--ds-text-*`, `--ds-fill-*`, " +
+      "`--ds-stroke-*`, `--ds-bg-*`), or set the brand through `Provider`'s `accentColor`.",
+    reads:
+      "dsiab files only, in the same places `bare-scale-step` reads, which includes a Tailwind " +
+      "`bg-[#…]` class. A `#` in a selector, in `url(#…)` and in an HTML entity is not a colour. " +
+      "`rgb()`, `hsl()` and named colours are not caught.",
+  },
+  {
     // The three strings that name the flag are template literals, which `ds-check` does not read, so
     // this file's own description of the rule is not reported by the rule.
     id: "important-flag",
@@ -173,6 +188,7 @@ const SHEET_CODE_RE = new RegExp(`\\b(?:import\\s*\\(?|require\\(|from)\\s*["']$
 const SHEET_CSS_RE = new RegExp(`@import\\s+(?:url\\(\\s*)?["']?${SHEET}`, "g");
 const TOKEN_RE = new RegExp(`var\\(\\s*(${NAME})(?![\\w$-])`, "g");
 const IMPORTANT_RE = /!\s*important\b/gi;
+const HEX_RE = /(?<![\w&#-])#(?:[0-9a-f]{8}|[0-9a-f]{6}|[0-9a-f]{3,4})(?![\w-])/gi;
 const RADIX_IMPORT_RE = /(?:^|[;\n{}])[ \t]*(?:import|export)\s+(?!type\b)\{([^}]*)\}\s*from\s*["']@radix-ui\/themes["']/g;
 const STYLE_KEY_RE = /(?::|\b(?:style|className|class)\s*=\s*\{?)\s*$/;
 const ATTR_RE = /\b(?:class|className)\s*=\s*(["'])([^"'\n]*)\1/g;
@@ -225,13 +241,13 @@ export function dsiabFindings(src, regions, { markup = false, tree, file = {} } 
   if (file.selfSrc) tree.self++;
   if (isDsiab) tree.dsiab++;
   else tree.other++;
-  if (!isDsiab) ["bare-scale-step", "important-flag"].forEach((id) => skipped.add(id));
-  if (file.selfLayer) skipped.add("bare-scale-step");
+  if (!isDsiab) ["bare-scale-step", "hex-colour", "important-flag"].forEach((id) => skipped.add(id));
+  if (file.selfLayer) ["bare-scale-step", "hex-colour"].forEach((id) => skipped.add(id));
   if (file.selfSrc) ["radix-duplicate", "radix-stylesheet"].forEach((id) => skipped.add(id));
   if (!tree.importsDsiab && !importsDsiab(regions)) skipped.add("radix-stylesheet");
   const runs = (id) => !skipped.has(id);
 
-  const text = src.includes("var(") || src.includes("important") ? styleText(regions, markup) : "";
+  const text = src.includes("var(") || src.includes("important") || src.includes("#") ? styleText(regions, markup) : "";
   if (runs("unknown-token") && text.includes("--ds-")) {
     const { known, families } = lookup(facts);
     for (const m of text.matchAll(TOKEN_RE)) {
@@ -243,6 +259,15 @@ export function dsiabFindings(src, regions, { markup = false, tree, file = {} } 
   if (runs("bare-scale-step") && text.includes("var(")) {
     for (const m of text.matchAll(scaleRegex(facts))) {
       add("bare-scale-step", m.index, `${m[0]})`, `\`--${m[1]}-${m[2]}${m[3]}\` is a raw scale step. ${suggestForStep(m[1], m[2], m[3], facts)}`);
+    }
+  }
+  if (runs("hex-colour") && text.includes("#")) {
+    for (const m of text.matchAll(HEX_RE)) {
+      if (/url\(\s*['"]?$/i.test(text.slice(Math.max(0, m.index - 6), m.index))) continue;
+      // A selector (`#fade {`) reaches `{` before any `;` or `}`; a value does not.
+      const after = /[{;}]/.exec(text.slice(m.index, m.index + 300));
+      if (after && after[0] === "{") continue;
+      add("hex-colour", m.index, m[0], `\`${m[0]}\` is a fixed colour. Use the \`--ds-*\` role for what it means.`);
     }
   }
   if (runs("important-flag") && text.includes("important")) {
@@ -346,21 +371,21 @@ export function suggestForStep(scale, alpha, step, facts) {
 /** The block `formatReach` prints for these rules. */
 export function formatDsiabReach(tree, notEvaluated) {
   if (!tree) return [];
-  const out = ["", "  The dsiab rules (unknown-token, bare-scale-step, important-flag, radix-duplicate, radix-stylesheet):"];
+  const out = ["", "  The dsiab rules (unknown-token, bare-scale-step, hex-colour, important-flag, radix-duplicate,", "  radix-stylesheet):"];
   if (tree.facts) out.push(`      · facts read from ${tree.source}.`);
   else out.push(`      · NOT RUN: ${FACT_RULES.join(", ")}, because ${tree.error}.`, "        Reinstall the package.");
   out.push(
-    `      · ${tree.dsiab} dsiab file(s) and ${tree.other} other file(s). bare-scale-step and important-flag`,
-    "        ran only in the dsiab files.",
+    `      · ${tree.dsiab} dsiab file(s) and ${tree.other} other file(s). bare-scale-step, hex-colour and`,
+    "        important-flag ran only in the dsiab files.",
     tree.importsDsiab
       ? "      · radix-stylesheet ran, because a file here imports dsiab."
       : "      · NOT RUN: radix-stylesheet, because no file here imports dsiab.",
   );
   if (tree.self) {
     out.push(
-      `      · ${tree.self} file(s) of the dsiab package's own source. bare-scale-step skipped src/tokens and`,
-      "        the stories, and radix-duplicate and radix-stylesheet skipped all of src/: the layer they",
-      "        protect.",
+      `      · ${tree.self} file(s) of the dsiab package's own source. bare-scale-step and hex-colour skipped`,
+      "        src/tokens and the stories, and radix-duplicate and radix-stylesheet skipped all of src/: the",
+      "        layer they protect.",
     );
   }
   if (notEvaluated) {

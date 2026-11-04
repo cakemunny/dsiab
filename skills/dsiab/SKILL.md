@@ -111,7 +111,7 @@ ruling name rather than re-argue it.
 Before you run the check, read back every file you changed, once, for the drift the check cannot
 see, and replace it:
 
-- a hex, `rgb()` or named colour → the `--ds-*` role, or `Provider`'s `accentColor` for the brand
+- an `rgb()`, `hsl()` or named colour → the `--ds-*` role, or `Provider`'s `accentColor` for the brand
 - a label, help text or error beside an input → its `label`, `description` and `validation` props
 - a hand-built alert, menu, popover or date input → the roster component that does it
 - a number the system does not specify → surface the gap

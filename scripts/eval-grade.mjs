@@ -20,10 +20,8 @@ export const SOLUTIONS = join(ROOT, "evals/solutions");
 export const loadTasks = (path = TASKS_PATH) => JSON.parse(readFileSync(path, "utf8"));
 
 const SCRIPT = /\.(?:[cm]?[jt]sx?)$/;
-const STYLE_FILE = /\.(?:css|scss|less|pcss|postcss)$/;
 const PROTECTED = /^(?:tsconfig\.json|AGENTS\.md|\.agents\/|\.claude\/|node_modules\/dsiab\/)/;
 const DS_DECL = /(?<![\w-])(--ds-[A-Za-z0-9-]*[A-Za-z0-9])\s*:|["'](--ds-[A-Za-z0-9-]*[A-Za-z0-9])["']\s*:/g;
-const STYLE_SPAN = /style\s*=\s*\{\{[\s\S]*?\}\}|\b(?:color|background\w*|border\w*|fill|stroke|\w*[Ss]hadow)\s*:\s*(["'`])[^"'`\n]*\1/g;
 
 /** Comments to spaces, newlines kept, so line numbers survive. `//` after a `:` is a URL. */
 const blank = (src) => src.replace(/\/\*[\s\S]*?\*\/|(?<![:\\])\/\/[^\n]*|<!--[\s\S]*?-->/g, (m) => m.replace(/[^\n]/g, " "));
@@ -138,11 +136,7 @@ function checkPatterns(files, task) {
   const found = [];
   for (const rule of task.forbid ?? []) {
     for (const f of files) {
-      const spans = rule.scope !== "style" || STYLE_FILE.test(f.rel)
-        ? [[f.code, 0]] : [...f.code.matchAll(STYLE_SPAN)].map((m) => [m[0], m.index]);
-      for (const [text, off] of spans) {
-        for (const m of text.matchAll(new RegExp(rule.pattern, "g"))) found.push(`${rule.why}: ${m[0]}@${hit(f, f.code, off + m.index)}`);
-      }
+      for (const m of f.code.matchAll(new RegExp(rule.pattern, "g"))) found.push(`${rule.why}: ${m[0]}@${hit(f, f.code, m.index)}`);
     }
   }
   return [req, result("forbid", found.length === 0, found.join(", ") || "none", found.length)];
