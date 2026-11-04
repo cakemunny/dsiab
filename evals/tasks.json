@@ -48,8 +48,7 @@
       "prompt": "Our brand is purple. Make the primary button purple, and show the content in a card with a soft grey background.",
       "uses": ["Button", "Card"],
       "why": "The brand is a Provider prop and the card has a filled skin; a hex value or an invented token is the failure.",
-      "require": [{ "pattern": "accentColor\\s*[=:]\\s*\\{?[\"']purple[\"']", "why": "the accent is set on Provider" }, { "pattern": "<Card[^>]*variant\\s*=\\s*[\"']filled[\"']|--ds-[a-z-]+\\s*:", "why": "the card is grey by a variant or a role override" }],
-      "forbid": [{ "pattern": "#[0-9a-fA-F]{3,8}\\b", "scope": "style", "why": "a hand-typed colour" }]
+      "require": [{ "pattern": "accentColor\\s*[=:]\\s*\\{?[\"']purple[\"']", "why": "the accent is set on Provider" }, { "pattern": "<Card[^>]*variant\\s*=\\s*[\"']filled[\"']|--ds-[a-z-]+\\s*:", "why": "the card is grey by a variant or a role override" }]
     }
   ]
 }

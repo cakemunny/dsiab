@@ -186,9 +186,10 @@ nothing else.
 
 Beside defects in any codebase, it checks these of the rules above ([[ds-check-dsiab-rules]]):
 `unknown-token`, a `--ds-*` name this system does not define, with the real name suggested;
-`bare-scale-step`, a raw scale step where a `--ds-*` role belongs; `important-flag`;
+`bare-scale-step`, a raw scale step where a `--ds-*` role belongs; `hex-colour`, a hex value where a
+role belongs; `important-flag`;
 `radix-duplicate`, a component imported from `@radix-ui/themes` that the roster ships; and
-`radix-stylesheet`, an import of a `@radix-ui/themes` stylesheet. `bare-scale-step` and
+`radix-stylesheet`, an import of a `@radix-ui/themes` stylesheet. `bare-scale-step`, `hex-colour` and
 `important-flag` run only in a file that builds on dsiab, one that imports it or holds `var(--ds-` or
 `.radix-themes`. `radix-stylesheet` runs in every file when any file in the run imports dsiab. A missing
 `dsiab/styles.css` import is not checked, and the console warning in development is its signal.

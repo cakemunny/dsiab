@@ -65,7 +65,7 @@ describe("unknown-token", () => {
     expect(run("a.css", "/* var(--ds-text-danger) */\n.x { color: red; }")).toEqual([]);
     expect(run("a.tsx", 'const c = (t: string) => ({ color: `var(--ds-text-${t})` });\n')).toEqual([]);
     expect(run("a.tsx", 'log("var(--ds-text-danger) is a fixture, not a style");\n')).toEqual([]);
-    const declared = tree(undefined, [{ src: ":root { --ds-text-brandname: #123456; }" }]);
+    const declared = tree(undefined, [{ src: ":root { --ds-text-brandname: red; }" }]);
     expect(run("a.css", ".x { color: var(--ds-text-brandname); }", { tree: declared })).toEqual([]);
   });
 });
@@ -114,6 +114,29 @@ describe("bare-scale-step and important-flag: dsiab files only", () => {
     expect(rules("t.css", ".radix-themes { --ds-x: var(--gray-a6); color: red !important; }", self)).toEqual([
       "important-flag@1",
     ]);
+  });
+});
+
+describe("hex-colour: dsiab files only", () => {
+  it("RED: a hex in CSS, in a style object, in a className and in a template, each in a dsiab file", () => {
+    expect(run("a.css", `${USES}.x { color: #fff; border: 1px solid #1A2B3C80; }`)).toEqual([
+      "hex-colour@2: `#fff` is a fixed colour. Use the `--ds-*` role for what it means.",
+      "hex-colour@2: `#1A2B3C80` is a fixed colour. Use the `--ds-*` role for what it means.",
+    ]);
+    expect(rules("a.tsx", `${USES}export const s = { background: "#0a0a0a" };\n`)).toEqual(["hex-colour@2"]);
+    expect(rules("a.tsx", `${USES}export const A = () => <div className="bg-[#ff0066] p-2" />;\n`)).toEqual(["hex-colour@2"]);
+  });
+
+  it("GREEN: a selector, url(#…), an entity, a non-colour string, and a file with no marker", () => {
+    expect(rules("a.css", `${USES}#fade, #abc:hover { color: var(--ds-text-strong); }`)).toEqual([]);
+    expect(rules("a.css", `${USES}.x { mask: url(#fade); fill: url('#bad'); }`)).toEqual([]);
+    expect(rules("a.tsx", `${USES}export const n = "&#123;";\nlog("#fff is a fixture");\n`)).toEqual([]);
+    expect(rules("plain.css", ".x { color: #fff; }")).toEqual([]);
+  });
+
+  it("SELF: the token layer and the stories skip it, like bare-scale-step", () => {
+    const self = { tree: tree(), file: { selfSrc: true, selfLayer: true } };
+    expect(rules("t.css", ".radix-themes { --ds-x: #fff; }", self)).toEqual([]);
   });
 });
 
