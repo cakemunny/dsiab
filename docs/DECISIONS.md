@@ -5526,11 +5526,11 @@ The supported replacement for both is `type Foo = TextProps & { … }`.
 **Not covered.**
 
 - On 2026-08-12, 104 story files and 12 other source files, several shipped components among them, imported the Radix `Text`. Rewrapping the shipped components would apply `useResolvedSize` twice, so neither set changed.
-- Whether `Switch` takes a `label` prop of its own is a separate question. The asymmetry with `Checkbox`, which takes `label` and renders `Field.Root` itself, stands.
+- Whether `Switch` takes a `label` prop of its own was a separate question. [switch-field-label](#switch-field-label) answered it on 2026-11-04: `Switch` takes `label` and renders `Field.Root` itself, as `Checkbox` does.
 
 **Changed from.** `<Text as="label" htmlFor>` failed to compile with TS2322, while `as="label"` alone compiled. A consumer could build a labelled row with a plain `<label>` or the Radix `Text`, a peer dependency, but not with a label that follows the global UI size, because `useResolvedSize` and `Field.Root` were absent from the package's public entry point. The labelled-switch row the Switch page teaches compiled only because its story imported the Radix `Text`.
 
-**Status.** Ruled 2026-08-12. No later ruling amends it.
+**Status.** Ruled 2026-08-12. No later ruling amends it. [switch-field-label](#switch-field-label) closed its open `Switch` question on 2026-11-04.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 
@@ -7511,3 +7511,26 @@ A bare focus opens nothing. `activationMode="manual"` keeps manual, so arrow key
 > **Changed from.** A clickable Token was a button with no `aria-pressed`, and nothing in its paint showed a pressed state.
 >
 > **Status.** Ruled 2026-10-01. It amends [token-chip](#token-chip) with the `pressed` prop. No later ruling amends it.
+
+### switch-field-label
+
+**Tags.** `COMPONENTS`, `ACCESSIBILITY`. **Ruled.** 2026-11-04.
+
+**`Switch` takes `label`, `description` and `validation`, and with `label` it renders its own field, the label leading and the switch on the row's trailing edge.**
+
+**Why.** An agent in an evaluation run had to wrap a `Switch` in a hand-built `label`, so the row could carry no helper text and no validation message. The field shell that would supply both is internal, so the props on the control are the only supported route, the rule every other input already follows.
+
+**What you see.**
+
+- With `label`, the label and the switch share one row: the label leads, and the switch sits on the trailing edge, as the Switch page already rules for the side of the label.
+- A `description` or the `validation` message sits under the label, in the leading column, so it keeps the label's leading edge and never runs under the switch. A message replaces the description while it is set.
+- An error marks the switch `aria-invalid`, describes it with the message and announces the message. A disabled switch dims its label, through the same rule as every other field.
+- Without `label`, the switch renders the bare Radix switch exactly as before, measured pixel for pixel in light and dark.
+
+**Mechanism.** The `Checkbox` mechanism: the control is a child component rendered inside the field, so `useFieldControl()` reads that field and not the empty context above it. The ref reaches the Radix switch element in both modes.
+
+**Refused.** The `Checkbox` arrangement, the control leading with the message at full width under the row, because a switch's label leads.
+
+**Changed from.** `Switch` took no label, and [text-element-attributes](#text-element-attributes) left the question open. Every labelled row on the Switch page was composed by hand from `Text` and a bare switch.
+
+**Status.** Ruled 2026-11-04. It closes the open question in [text-element-attributes](#text-element-attributes). No later ruling amends it.
