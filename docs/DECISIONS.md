@@ -1204,6 +1204,20 @@ Phase 4 publishes it unchanged.
 
 **Status.** Ruled 2026-11-03. No later ruling amends it.
 
+### visual-references-required
+
+**Tags.** `CONTRIBUTING`. **Ruled.** 2026-11-04.
+
+**The `visual` job on a pull request fails when it has no reference images to compare with, instead of skipping every page and passing.**
+
+**What you see.** The job takes its reference images from the push run of the pull request's base commit. When that run is still going, the job waits for it, up to 30 minutes. It fails with an error that names the run and the fix when the base commit has no push run, when the run ended without a `visual-references` artifact, because its visual job failed or was cancelled or its images are older than the 90-day artifact, or when the artifact holds no images. On success it notes how many images it compares against. A page with no image of its own, such as a new page, is still skipped. The label `visual-change-approved` does not excuse a missing set, because there is no difference for a reviewer to have looked at.
+
+**Why.** On 2026-11-04 two pull requests opened minutes after `main` moved, before `main`'s run had uploaded its images. The job logged a notice, skipped all 220 pages, and showed green, so a check that never ran read as a pass. A change that intended a visual difference showed none.
+
+**Changed from.** A base run without images was a notice, and every page passed unchecked.
+
+**Status.** Ruled 2026-11-04. No later ruling amends it.
+
 ## Token additions (2026-06-18)
 
 ### serif-em-and-quote

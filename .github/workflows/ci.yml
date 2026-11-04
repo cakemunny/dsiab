@@ -17,8 +17,9 @@
 # The `visual` job compares the first story of each docs page against a reference image
 # (.storybook/visual.setup.ts). No image is committed. A push to `main` takes every image again and
 # uploads it as the artifact `visual-references`, kept 90 days. A pull request compares against the
-# images of its own base commit, skips a page with no image, and on a mismatch uploads the actual
-# image and the diff as the artifact `visual-diffs`. The job runs beside `checks`, so a mismatch from
+# images of its own base commit, waits for that commit's run if it is unfinished, fails when it holds
+# no images at all ([[visual-references-required]]), skips a single page with no image, and on a mismatch
+# uploads the actual image and the diff as the artifact `visual-diffs`. The job runs beside `checks`, so a mismatch from
 # an intended visual change does not hide the four checks. After looking at the diffs, a reviewer adds
 # the label `visual-change-approved`, and the job reports the mismatch without failing.
 
@@ -79,7 +80,7 @@ jobs:
   visual:
     # A fixed runner image, so a runner update cannot move a font and fail every page.
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 75
     permissions:
       contents: read
       actions: read
@@ -100,21 +101,40 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       # The images come from the push run of the pull request's own base commit, so they show the same
-      # main the pull request is compared with. A base run that is unfinished, failed or expired holds no
-      # images, and every page is then skipped.
+      # main the pull request is compared with. That run starts when the base commit lands, often only
+      # minutes before this one, so an unfinished run is waited for. A base commit with no push run, or a
+      # run that ended without images (failed, cancelled, or older than the 90-day artifact), FAILS this
+      # step: with nothing to compare against, a green job would claim a check that never ran
+      # ([[visual-references-required]]). The label visual-change-approved does not excuse it, because
+      # there is no difference for a reviewer to have looked at. A single page with no image of its own,
+      # a new page, is still skipped by the compare step.
       - name: Download the reference images of the base commit
         if: github.event_name == 'pull_request'
+        timeout-minutes: 30
         env:
           GH_TOKEN: ${{ github.token }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           run_id=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yml --commit "$BASE_SHA" --event push --limit 1 --json databaseId --jq '.[0].databaseId // empty')
           if [ -z "$run_id" ]; then
-            echo "::notice::No push run exists for base commit $BASE_SHA, so every page is skipped."
-            exit 0
+            echo "::error::No push run exists for base commit $BASE_SHA, so there are no reference images to compare with. Merge main into this branch, or re-run this job once main's CI run has finished."
+            exit 1
           fi
-          gh run download "$run_id" --repo "$GITHUB_REPOSITORY" -n visual-references -D src \
-            || echo "::notice::Run $run_id holds no reference images, so every page is skipped."
+          status=$(gh run view "$run_id" --repo "$GITHUB_REPOSITORY" --json status --jq .status)
+          if [ "$status" != "completed" ]; then
+            echo "::notice::Run $run_id for base commit $BASE_SHA is $status. Waiting for it to finish."
+            gh run watch "$run_id" --repo "$GITHUB_REPOSITORY" --interval 30 > /dev/null
+          fi
+          if ! gh run download "$run_id" --repo "$GITHUB_REPOSITORY" -n visual-references -D src; then
+            echo "::error::Run $run_id for base commit $BASE_SHA holds no reference images, so nothing can be compared. Its visual job may have failed or been cancelled, or its images expired. Re-run that run's visual job, or merge main into this branch, then re-run this job."
+            exit 1
+          fi
+          count=$(find src -path '*/__screenshots__/*-chromium-linux.png' | wc -l)
+          if [ "$count" -eq 0 ]; then
+            echo "::error::Run $run_id's visual-references artifact held no images."
+            exit 1
+          fi
+          echo "::notice::Comparing against $count reference images from run $run_id."
 
       # An intended visual change differs from main's images until it merges. The reviewer looks at the
       # visual-diffs artifact and adds the label visual-change-approved; the mismatch is then reported and
