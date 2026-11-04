@@ -56,10 +56,12 @@ describe("the docs site's llms.txt ([[compiled-component-reference]])", () => {
 });
 
 describe("the site publishes the package's bytes", () => {
+  // A second whole TypeScript program over the source: 2.1 s on two cores, 2.6 s on the CI runner,
+  // against vitest's 5 s default. The limit names that cost, as its twin in dist-reference does.
   test("components/ is exactly the package reference, byte for byte", () => {
     const site = [...files].filter(([p]) => p.startsWith("components/")).map(([p, t]) => [p.slice(11), t]);
     expect(site).toEqual([...buildReference()]);
-  });
+  }, 30_000);
 
   test("a linked story id missing from index.json is reported (RED proof of the build-time check)", () => {
     const ids = [...new Set([...files.values()].flatMap((t) => [...t.matchAll(/\?path=\/story\/([a-z0-9-]+)/g)].map((m) => m[1])))];

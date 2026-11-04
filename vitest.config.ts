@@ -107,8 +107,8 @@ export default defineConfig({
     // THE CI RUNNER IS SLOWER. A GitHub-hosted Linux runner has two cores, and the two lanes share
     // them, so a story runs about eight times slower there. Measured on the first CI runs: the 27-accent
     // sweep in `_non-text-contrast` took 21.5s against 2.7s on a laptop, and Decisions `Interactions`,
-    // which opens every ruling once and takes 7.1s on a laptop, passed 60s without any of its own 2s waits
-    // timing out. On CI the limit is 180s. A local run keeps the 15s default, so a story that grows slow
+    // which then opened every ruling once and took 7.1s on a laptop, passed 60s without any of its own 2s
+    // waits timing out. It now reads every ruling in one render. On CI the limit is 180s. A local run keeps the 15s default, so a story that grows slow
     // still shows up locally.
     // The image capture runs in an afterEach hook, so hooks get the same limit as tests.
     ...(process.env.CI ? { testTimeout: 180_000, hookTimeout: 180_000 } : {}),
