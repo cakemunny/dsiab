@@ -74,9 +74,10 @@ type Tone = "error" | "warning" | "success" | "info";
 type Validation = { tone: Tone; message: ReactNode };
 
 export interface DateInputProps {
-  /** Controlled selected date (ISO YYYY-MM-DD). */
+  /** Controlled selected date (ISO YYYY-MM-DD). Passing the prop at all makes the field controlled,
+   *  and `undefined` then means empty, so setting it back to `undefined` clears the field. */
   value?: ISODateString;
-  /** Uncontrolled initial date (ISO). */
+  /** Uncontrolled initial date (ISO). Ignored while `value` is passed. */
   defaultValue?: ISODateString;
   /** Required. Fires with the committed ISO date, or `undefined` when cleared. */
   onValueChange: (value: ISODateString | undefined) => void;
@@ -479,8 +480,8 @@ function outOfRangeMessage(iso: ISODateString, min?: ISODateString, max?: ISODat
   return "That date isn’t available.";
 }
 
-export const DateInput = forwardRef<HTMLInputElement, DateInputProps>(function DateInput(
-  {
+export const DateInput = forwardRef<HTMLInputElement, DateInputProps>(function DateInput(props, ref) {
+  const {
     value,
     defaultValue,
     onValueChange,
@@ -501,11 +502,11 @@ export const DateInput = forwardRef<HTMLInputElement, DateInputProps>(function D
     width,
     "aria-label": ariaLabel,
     "aria-labelledby": ariaLabelledby,
-  },
-  ref,
-) {
+  } = props;
   const resolvedSize = (useResolvedSize<Size>("control", size) ?? "1") as Size;
-  const isControlled = value !== undefined;
+  // Controlled when the caller PASSES `value`, even as undefined: undefined is this API's empty
+  // ([[date-input]]), so a page that resets its date to undefined must still own the field.
+  const isControlled = "value" in props;
   const [internal, setInternal] = useState<ISODateString | undefined>(defaultValue);
   const current = isControlled ? value : internal;
 

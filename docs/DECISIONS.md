@@ -3238,13 +3238,13 @@ The field otherwise rests in its neutral state. A red border on a field that rev
 
 **Tab order.** The calendar button, an `IconButton inset` with `CalendarBlank` and `aria-label="Choose date"`, is a real tab stop, because it opens a whole picking surface. The optional `hasClear` control stays at `tabIndex=-1` ([field-family-anatomy](#field-family-anatomy)).
 
-**API.** `value?: ISODateString`, a required `onValueChange(value | undefined)`, no `null`, ISO strings on the wire, and `isDateDisabled(iso)` passed straight to `Calendar`. The only new CSS is the panel class `.radix-themes.rt-ds-dateinput-panel` on the shared overlay tokens ([floating-surface-fill](#floating-surface-fill)), with no new tokens.
+**API.** `value?: ISODateString`, a required `onValueChange(value | undefined)`, no `null`, ISO strings on the wire, and `isDateDisabled(iso)` passed straight to `Calendar`. Because `undefined` is the empty value, the field is controlled when the caller passes `value` at all, even as `undefined`, and `defaultValue` is then ignored, so a page clears the field by setting its value back to `undefined`. The only new CSS is the panel class `.radix-themes.rt-ds-dateinput-panel` on the shared overlay tokens ([floating-surface-fill](#floating-surface-fill)), with no new tokens.
 
 **Not covered.** The `changeAction` async optimistic layer with `isLoading` and a Spinner, and composition with `InputGroup`, are deferred.
 
 **Changed from.** No earlier ruling covered this.
 
-**Status.** Ruled 2026-07-10. No later ruling amends it.
+**Status.** Ruled 2026-07-10. Amended 2026-11-04: the field was controlled only while `value` held a date. A page that started a field empty, filled it, then reset it to `undefined` handed the field back to its own stale value, and it kept showing the old date. The first eval run hit it in a form reset (due-date run 4). Held by `_internal/DateInput behavior` → ControlledResetToEmpty.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 

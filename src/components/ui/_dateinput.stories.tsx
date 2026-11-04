@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { useState } from "react";
 import { Box } from "@radix-ui/themes";
 import { DateInput } from "./DateInput";
 import type { ISODateString } from "../../dates/dateTypes";
@@ -148,6 +149,46 @@ export const CommitOnBlur: Story = {
     if (input.value !== "April 20, 2026")
       throw new Error(`commit-on-blur must show the formatted value; got "${input.value}"`);
     if (calls("diCommit").at(-1) !== "2026-04-20") throw new Error("the committed ISO must be the last fired value");
+  },
+};
+
+/** A page-owned value that STARTS empty stays page-owned. The field gets a date, then the page resets
+ *  it to `undefined` (a form reset after submit): the field must show empty, and a later pick must still
+ *  go through the page. Read as "uncontrolled" whenever `value` was undefined, it showed the old date. */
+function ResetForm() {
+  const [due, setDue] = useState<ISODateString | undefined>(undefined);
+  return (
+    <Box p="4" data-testid="di-reset" style={{ maxWidth: 320 }}>
+      <DateInput label="Due date" value={due} onValueChange={(v) => { record("diReset")(v); setDue(v); }} />
+      <button type="button" onClick={() => setDue(undefined)}>Reset</button>
+      <button type="button" onClick={() => setDue("2026-06-01")}>Set June 1</button>
+      <output data-testid="di-reset-state">{due ?? "empty"}</output>
+    </Box>
+  );
+}
+export const ControlledResetToEmpty: Story = {
+  render: () => <ResetForm />,
+  play: async ({ canvasElement }) => {
+    const scope = canvasElement.querySelector<HTMLElement>('[data-testid="di-reset"]')!;
+    const input = combobox(scope)!;
+    const [reset, setJune] = Array.from(scope.querySelectorAll("button[type=button]")).filter(
+      (b) => b.textContent === "Reset" || b.textContent === "Set June 1",
+    ) as HTMLButtonElement[];
+    input.focus();
+    typeInto(input, "2026-04-20");
+    input.blur();
+    await waitFor(() => input.value === "April 20, 2026");
+
+    reset.click();
+    await sleep(50);
+    if (input.value !== "")
+      throw new Error(`a page reset to undefined must empty the field; it still shows "${input.value}"`);
+
+    setJune.click();
+    await waitFor(() => input.value === "June 1, 2026");
+    reset.click();
+    await sleep(50);
+    if (input.value !== "") throw new Error(`a second reset must empty the field too; got "${input.value}"`);
   },
 };
 

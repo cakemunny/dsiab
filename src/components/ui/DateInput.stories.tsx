@@ -298,7 +298,7 @@ export const Keyboard: Story = {
 
 /* ---- Props ---------------------------------------------------------- */
 const PROPS: PropDef[] = [
-  { name: "value / defaultValue", type: "ISODateString", desc: <>Controlled / uncontrolled date, an ISO <Code>YYYY-MM-DD</Code> string. <Code>PlainDate</Code> stays internal.</>, source: "DateInput.tsx" },
+  { name: "value / defaultValue", type: "ISODateString", desc: <>Controlled / uncontrolled date, an ISO <Code>YYYY-MM-DD</Code> string. Passing <Code>value</Code> at all makes the field controlled, so setting it back to <Code>undefined</Code> clears it. <Code>PlainDate</Code> stays internal.</>, source: "DateInput.tsx" },
   { name: "onValueChange", type: "(v: ISODateString | undefined) => void", desc: <>Required. Fires with the committed ISO date, or <Code>undefined</Code> when cleared. No <Code>null</Code>.</>, source: "DateInput.tsx" },
   { name: "min / max", type: "ISODateString", desc: <>Selectable bounds — earlier/later dates are disabled in the calendar and rejected on commit. A committed value out of bounds surfaces a STANDING validation error.</>, source: "DateInput.tsx" },
   { name: "isDateDisabled", type: "(iso) => boolean", desc: <>Custom disable predicate — <Code>true</Code> = disabled (forwarded to Calendar, which bridges the polarity).</>, source: "DateInput.tsx" },
