@@ -59,15 +59,29 @@ const bytes = (c: RGB): [number, number, number] => [Math.round(c.r), Math.round
 const round = (c: RGB): RGB => ({ r: Math.round(c.r), g: Math.round(c.g), b: Math.round(c.b) });
 
 /** A non-text layer `fg` reads against `bg` at the floors plus the margin. */
-function clears(fg: RGB, bg: RGB): boolean {
+export function clears(fg: RGB, bg: RGB): boolean {
   return (
-    contrastRatio(round(fg), round(bg)) >= FLOORS.nonText.wcag + LAYER_MARGIN.wcag &&
-    Math.abs(apcaLc(bytes(fg), bytes(bg))) >= FLOORS.nonText.lc + LAYER_MARGIN.lc
+    contrastRatio(round(fg), round(bg)) >= FLOORS.nonText.wcag + active.wcag &&
+    Math.abs(apcaLc(bytes(fg), bytes(bg))) >= FLOORS.nonText.lc + active.lc
   );
 }
 
+let active: { wcag: number; lc: number } = LAYER_MARGIN;
+
+/** Run `f` with the searches held at the bare floors, no margin. For the parity story only: it
+ *  proves that where a search picks a heavier step than the theme, the margin alone is why. */
+export function withoutMargin<T>(f: () => T): T {
+  const before = active;
+  active = { wcag: 0, lc: 0 };
+  try {
+    return f();
+  } finally {
+    active = before;
+  }
+}
+
 /** The fill alone if it clears, else the lightest step of `scale` whose stack on it clears. */
-function firstStack(fill: RGB, scale: readonly string[], prefix: "black" | "white", ok: (c: RGB) => boolean): LayerStep | null {
+export function firstStack(fill: RGB, scale: readonly string[], prefix: "black" | "white", ok: (c: RGB) => boolean): LayerStep | null {
   if (ok(fill)) return "none";
   for (let i = 0; i < scale.length; i++) if (ok(layOver(asReadBack(scale[i]!), fill))) return `${prefix}-a${i + 1}`;
   return null;

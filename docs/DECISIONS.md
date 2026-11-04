@@ -457,14 +457,19 @@ Phase 4 publishes it unchanged.
 
 **Tags.** `COLOUR`, `ACCESSIBILITY`. **Ruled.** 2026-11-04.
 
-**The helper layers the named accents carry are searched, for any fill, by the rule each was picked by, measured as the guards measure, with a small margin above the floors. Fed the 27 named accents' own colours, the searches reproduce `theme.css` on 267 of 270 rows, and pick one step heavier on the other three, each listed with its reason.**
+**The helper layers the named accents carry are searched, for any fill, by the rule each was picked by, measured as the guards measure, with a small margin above the floors. Fed the 27 named accents' own colours, every one of the eleven searches reproduces `theme.css`, except where the margin alone makes it heavier, or where the theme gives every colour one blanket step. The brand analysis now carries every layer for a seed.**
 
-**What you see.** Nothing changes on screen. `src/palette/helperLayers.ts` exports five searches. None is wired into the brand analysis or the page yet.
+**What you see.** Nothing changes on screen. `src/palette/helperLayers.ts` and `src/palette/markLayers.ts` export eleven searches, and `analyseBrand` returns every layer per appearance as `layers`, with `partShades` for any part no layer can make visible. Nothing writes them to the page yet.
 
 - **`ringStack`** ([[focus-ring]]): the lightest black (light) or white (dark) alpha whose stack on the ring's fill clears 3:1 and Lc 30 against the fifteen focus surfaces of [[palette-surface-table]] on all six neutrals.
 - **`scrimStack`**: the same over grey media 0 to 255 under the dark or the light scrim.
 - **`partEdge`** ([[part-fill-edge]], [[status-dot-edges]]): the lightest alpha that clears against the page, the subtle recess, a card and a panel, and a track on each.
 - **`thumbStroke`** ([[textless-part-fills]]).
+- **`markEdge`** ([[mark-on-tint-edge]]): against the today bar's band on the page and on a panel, the Outline rail (`--gray-a6`) on the page, and the chart area on a card.
+- **`dashStack`** ([[drop-target-dash]]): a stack on accent step 7, against the drop tint and the page, the subtle recess, a card and a panel.
+- **`sliderThumbStack`** ([[neutral-part-stacks]]): a black alpha on the thumb's ring in both appearances, so the white thumb reads against its range, its track and the surfaces, by its face or its ring.
+- **`dotEdge`** ([[status-dot-edges]]): for the warning, success and error dots, against the page, the subtle recess, a card and a panel.
+- **`ownShade`**: a part's own colour moved by lightness to the nearest value its layer's search can make visible.
 
 **Measured as the guards measure.** The guards read every translucent token through an 8-bit canvas, which stores the alpha in a byte and the channels premultiplied. `asReadBack` in `surfaces.ts` reproduces that, and the searches read every translucent layer through it, the stack included. The surface functions take it as an option, so 1.2's composition is unchanged by default.
 
@@ -473,12 +478,7 @@ Phase 4 publishes it unchanged.
 - pink on the dark scrim and purple on the light scrim, in both appearances;
 - violet's dark page ring.
 
-In each the theme recorded that step reading just under the floor in the browser. With it the searches pick one step heavier than the theme on 3 rows:
-
-- indigo on the light scrim, in both appearances, which reads 3.045:1 at `--black-a5` in the model;
-- blue's dark page ring, Lc 30.39 at `--white-a4`.
-
-Purple and indigo on the light scrim read 3.039 and 3.045 in the model, and 2.99 and 3.00 in the browser. Violet and blue on the dark ring read Lc 30.34 and Lc 30.39. Those pairs sit inside the guards' own rounding, so no model separates them, and the margin is set so a search never picks a step a guard would fail. The parity story lists the three heavier rows by name, and fails if one stops differing.
+In each the theme recorded that step reading just under the floor in the browser. With it the searches pick a heavier step than the theme on 32 of the 594 rows, 26 of them the light warning dot on an amber warning (`--black-a5` at 3.04:1 in the ruling). Purple and indigo on the light scrim read 3.039 and 3.045 in the model, and 2.99 and 3.00 in the browser. Violet and blue on the dark ring read Lc 30.34 and Lc 30.39. Those pairs sit inside the guards' own rounding, so no model separates them, and the margin is set so a search never picks a step a guard would fail. The parity story does not list the heavier rows: it proves, for each one, that the same search with no margin (`withoutMargin`) picks exactly the theme's step, and it allows at most 40.
 
 **The thumb stroke, and Jason's answer K.**
 
@@ -490,12 +490,20 @@ Purple and indigo on the light scrim read 3.039 and 3.045 in the model, and 2.99
 
 **Yellow's light part edge,** which the census left open, matches `theme.css` (`--black-a6`) under these searches.
 
+**The light Slider thumb.** `theme.css` gives every light colour `--black-a5`, set by amber's light range. Per colour, 22 accents need only `--black-a1`, and the parity story accepts the lighter step only where the thumb then reads against its range and its track on every surface of every neutral, measured with the guards' own arithmetic. A generated brand takes its own colour's step.
+
+**The gray accent** follows the neutral, so the parity story searches it per neutral and keeps the heaviest step.
+
+**In the brand analysis.** The ring stacks sit on the button's fill, the adjusted shade where question 2 moved it ([[generated-button-fill]]). The part edge, thumb stroke, mark edge and Slider thumb sit on step 9, and the dash on step 7. The dots sit on the status families' fills: their step 9, and the ruled error fill. The status tints come from `SCALE_ALPHA_3` in `collisionTable.ts`, each candidate scale's alpha step 3 in both appearances, which the parity story re-reads off the theme. Across 162 seeds over the hue, lightness and chroma grid, no search came back empty, so no seed took a part's own shade. The census found the same. The own-shade path is held by a unit test.
+
+**Timing.** `_internal/Brand analysis timing` → OneSeedUnderAFrame runs the full analysis for five seeds, nine times each after three warm-up runs. It holds each median under 16 ms in the browser. Measured: 1.3 to 3.4 ms.
+
 **Guarded by:**
 
-- **`_internal/Helper layer parity` → EveryLayerMatchesTheTheme**, in `src/foundations/_helper-layer-parity.stories.tsx`. It feeds each search each named accent's rendered colours in both appearances, and holds the step it picks to the colour `theme.css` paints for that accent (270 rows). The only exception is the listed heavier rows. It also holds the black and white alpha scales to Radix's tokens. It went red with the margin removed (8 rows).
+- **`_internal/Helper layer parity` → EveryLayerMatchesTheTheme**, in `src/foundations/_helper-layer-parity.stories.tsx`. It feeds each of the eleven searches each named accent's rendered colours in both appearances, and holds the step it picks to the colour `theme.css` paints for that accent (594 rows). The only exceptions are the two proved classes above. It also holds the black and white alpha scales, the Outline rail and the status alpha-3 table to Radix's tokens. It went red with the margin removed (7 of 594 rows).
 - **`helperLayers.logic.test.ts`** holds the read-back and the searches' shape.
 
-**Not covered here.** These searches are not yet wired into the brand analysis: that needs each candidate status family's alpha step 3 in both appearances, which the surface table does not hold. The mark edge, the slider thumb stack, the drop dash, the status-dot edges, a part's own shade, and the 16 ms timing story come next.
+**Not covered here.** Writing the layers to the page, which a later change does, and the verdict wording, which comes with the assessment.
 
 **Changed from.** Nothing. The layers existed only as `theme.css` values for the named accents.
 

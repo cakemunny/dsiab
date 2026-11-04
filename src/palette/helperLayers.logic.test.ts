@@ -41,3 +41,18 @@ describe("the searches", () => {
     expect(thumbStroke(solid, alpha, { r: 0x3b, g: 0x82, b: 0xf6 })).toBe("accent-a4");
   });
 });
+
+describe("a part's own shade", () => {
+  it("moves the fill by lightness to the nearest that reads, darker first on a tie", async () => {
+    const { ownShade } = await import("./markLayers");
+    const dark = (c: { r: number; g: number; b: number }) => c.r + c.g + c.b < 300;
+    const shade = ownShade({ r: 0x88, g: 0x99, b: 0xaa }, dark);
+    expect(shade?.direction).toBe("darker");
+    const back = parseColour(shade!.fill);
+    expect(back.r + back.g + back.b).toBeLessThan(300);
+  });
+  it("returns null when nothing reads", async () => {
+    const { ownShade } = await import("./markLayers");
+    expect(ownShade({ r: 128, g: 128, b: 128 }, () => false)).toBeNull();
+  });
+});
