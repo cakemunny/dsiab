@@ -55,8 +55,15 @@ export interface ListboxNavigation {
   highlightedIndex: number;
   setHighlightedIndex: Dispatch<SetStateAction<number>>;
   /** Highlights a row under the pointer. It never scrolls the list: a hover that scrolled a clipped row
-   *  into view would put the next row under a resting pointer, and that hover would scroll again. */
+   *  into view would put the next row under a resting pointer, and that hover would scroll again. It acts only
+   *  after `notePointerMove` since the last `notePointerIdle`, so a row that slides under a RESTING pointer (a
+   *  keyboard scroll, a list that opens or re-renders beneath it) cannot take the highlight from the keyboard. */
   highlightFromPointer: (index: number) => void;
+  /** The pointer really moved over the list: call it from a `mousemove`. Arms `highlightFromPointer`. */
+  notePointerMove: () => void;
+  /** A key was pressed: call it at the top of every keydown. Disarms `highlightFromPointer` until the pointer
+   *  moves again. */
+  notePointerIdle: () => void;
   /** True when the current highlight came from the pointer, so a caller's own scroll effect can skip it. */
   isPointerHighlight: () => boolean;
   getItemId: (index: number) => string;
@@ -92,7 +99,17 @@ export function useListboxNavigation({
     pointerHighlightRef.current = false;
     setIndex(next);
   }, []);
+  // A browser fires mouseover on whatever slides under a resting pointer, with no mousemove. Only a real move
+  // since the last key press arms the pointer, so a keyboard scroll never hands the highlight to it.
+  const pointerMovedRef = useRef(false);
+  const notePointerMove = useCallback(() => {
+    pointerMovedRef.current = true;
+  }, []);
+  const notePointerIdle = useCallback(() => {
+    pointerMovedRef.current = false;
+  }, []);
   const highlightFromPointer = useCallback((index: number) => {
+    if (!pointerMovedRef.current) return;
     pointerHighlightRef.current = true;
     setIndex(index);
   }, []);
@@ -161,6 +178,8 @@ export function useListboxNavigation({
     highlightedIndex,
     setHighlightedIndex,
     highlightFromPointer,
+    notePointerMove,
+    notePointerIdle,
     isPointerHighlight,
     getItemId,
     activeDescendant,
