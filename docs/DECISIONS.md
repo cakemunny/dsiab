@@ -490,7 +490,7 @@ In each the theme recorded that step reading just under the floor in the browser
 
 **Yellow's light part edge,** which the census left open, matches `theme.css` (`--black-a6`) under these searches.
 
-**The light Slider thumb.** `theme.css` gives every light colour `--black-a5`, set by amber's light range. Per colour, 22 accents need only `--black-a1`, and the parity story accepts the lighter step only where the thumb then reads against its range and its track on every surface of every neutral, measured with the guards' own arithmetic. A generated brand takes its own colour's step.
+**The Slider thumb.** `theme.css` gives every light colour `--black-a5`, set by amber's light range. The search reads the ring as the guard draws it: 1px outside the thumb, so over the neighbour it is held against, the range, the track on each surface, and each surface. It picks the theme's step on every named accent in both appearances. A generated brand takes its own colour's step. (Corrected 2026-11-13 by [seeded-sweep-lane](#seeded-sweep-lane). The first search laid the ring over the range only, so over a pale track it read darker than it paints. It picked `--black-a1` for 22 light accents, and the parity story accepted that by the same arithmetic.)
 
 **The gray accent** follows the neutral, so the parity story searches it per neutral and keeps the heaviest step.
 
@@ -500,7 +500,7 @@ In each the theme recorded that step reading just under the floor in the browser
 
 **Guarded by:**
 
-- **`_internal/Helper layer parity` → EveryLayerMatchesTheTheme**, in `src/foundations/_helper-layer-parity.stories.tsx`. It feeds each of the eleven searches each named accent's rendered colours in both appearances, and holds the step it picks to the colour `theme.css` paints for that accent (594 rows). The only exceptions are the two proved classes above. It also holds the black and white alpha scales, the Outline rail and the status alpha-3 table to Radix's tokens. It went red with the margin removed (7 of 594 rows).
+- **`_internal/Helper layer parity` → EveryLayerMatchesTheTheme**, in `src/foundations/_helper-layer-parity.stories.tsx`. It feeds each of the eleven searches each named accent's rendered colours in both appearances, and holds the step it picks to the colour `theme.css` paints for that accent (594 rows). The only exception is the margin class above. It also holds the black and white alpha scales, the Outline rail and the status alpha-3 table to Radix's tokens. It went red with the margin removed (7 of 594 rows).
 - **`helperLayers.logic.test.ts`** holds the read-back and the searches' shape.
 
 **Not covered here.** Writing the layers to the page, which a later change does, and the verdict wording, which comes with the assessment.
@@ -604,11 +604,61 @@ Both are what the ruled searches return, and the searches are held to `theme.css
   - On each theme root it holds every routed role to the value the writer wrote (456 rows), and `--accent-solid` to the assessment's fill.
   - It went red with the ring-stack line removed from the new `theme.css` block: 16 rows.
 
-Whether each layer then clears its surfaces on a generated brand is the generated-colour sweeps' question, which a later change adds.
+Whether each layer then clears its surfaces on a generated brand is [seeded-sweep-lane](#seeded-sweep-lane)'s question.
 
 **Changed from.** A seeded brand took the base value of every table: no ring stack, no part edge, transparent dot edges, the base Slider-thumb stack and thumb stroke, the seed under its WCAG-chosen pole as the button, and its error family's step 9 as the destructive fill. [text-on-solid-fill-contrast](#text-on-solid-fill-contrast), [part-fill-edge](#part-fill-edge), [focus-ring](#focus-ring), [neutral-part-stacks](#neutral-part-stacks) and [status-dot-edges](#status-dot-edges) each recorded their part of that as a gap.
 
-**Status.** Ruled 2026-11-04. No later ruling amends it.
+**Status.** Ruled 2026-11-04. [seeded-sweep-lane](#seeded-sweep-lane) amends it on 2026-11-13: the writer also writes the filled button's hover overlay and the APCA mode's status-family inks.
+
+### seeded-sweep-lane
+
+**Tags.** `ACCESSIBILITY`, `COLOUR`. **Ruled.** 2026-11-13.
+
+**Every colour sweep that loops over the 27 named accents also sweeps a lane of eight seeded brands, with the seed's generated values written as `Provider` writes them. Each seed must read back as the seed and as the writer's filled button, or the sweep fails. The lane found three defects, and this change fixes them.**
+
+**What you see.** Under a seeded brand whose filled button takes the dark ink:
+
+- **The button's hover** lightens the fill under `--white-a4` in place of darkening it under `--black-a2`. `#ff8c00`'s hover rose from Lc 50.6 to the Lc 60 that question 2 measured it at. `#fff59d`'s label no longer drops from 14.60 to 11.61:1 on hover.
+- **Under `contrast="apca"`, in light,** a status family the generator moved to orange takes the white ink, as the named accents' shifted warning does. `#fff59d`'s warning, which moves to orange, now reads white there.
+- **The Slider thumb** in light takes `--black-a5`, or `--black-a6` on `#ff6b5e` and `#ff8c00`, in place of a step too light to see. `#0b1a3a`'s thumb read 1.77:1 by its ring against its track, under 3:1.
+
+A named accent paints exactly what it painted before. No expectation of a named-accent sweep changed.
+
+**The lane,** `SEEDED_LANE` in `src/foundations/_seededLane.ts`: `#fff59d`, `#0b1a3a`, `#3b82f6`, `#ff6b5e`, `#ff8c00`, `#6e56cf`, `#c8102e` and `#00a86b`. These are the census's examples: a pale colour and a very dark one, two that move darker, one that moves lighter and less saturated, two that pass as typed, and a green that moves lighter.
+
+- **`withColour(probe, colour)`** writes a seed's values on the probe, then the attribute. **`paintColour`** and **`assertColourInForce`** split those steps for a sweep that builds a fresh theme per colour, so no transition starts.
+- The values go on the probe, not the page root. Each probe therefore resolves the status-family references under its own appearance, and the root-level defect [seeded-brand-writer](#seeded-brand-writer) records is not what the lane measures.
+- **The reverse arm.** Once applied, a seed must read back as the seed on `--accent-9` and as one of the writer's button fills on `--accent-solid`. Otherwise the lane throws `REVERSE`, naming the seed, because every reading of it would be measuring the base values.
+
+**The sweeps that carry it:**
+
+- `Foundations/Colors` → Swatches: the WCAG and collision matrix and the APCA polarity check. A seed's expected families are the generator's choice. A brand-to-family collision is allowed only for a family the collision search reports it cannot clear, [seeded-brand-collisions](#seeded-brand-collisions)'s accepted default.
+- `_internal/Non-text contrast`: Census, PartsWithoutText, FocusRingOnParts, MarksAndDashesOnTint, GreyAndWhiteParts and DotsEdgesAndSelectedRows, and the high-contrast arm of ColourPropAndHighContrast. Its `color` arm stays on the named accents, because Radix's `color` prop takes a name and never a seed.
+- `_internal/Focus`: RingTokensResolve, FocusRingContrast, ScrimRingContrast and EveryRingIsTheStackedAccent.
+- `_internal/Seeded brand text`: the soft pairings it already held, and now the outline Button's label on the surface, at 4.5:1 at rest in both appearances, for its 14 seeds.
+
+Each sweep's reading count includes the lane, so a lane that renders nothing fails.
+
+**One named-accent rule is inverted for a seed.** A named accent whose button is deepened paints its parts from the deepened fill in light ([textless-part-fills](#textless-part-fills)). A seeded brand keeps the typed colour on every part and adjusts the filled button alone, by Jason's answers 2 and D in the custom-accent plan. PartsWithoutText therefore holds a seed's parts to the seed, in both appearances.
+
+**The three defects.**
+
+1. **The hover overlay.** `semantic.css` keys the white overlay on amber, lime, mint, sky and yellow by name, so a seed with the dark ink took the black one. Question 2 measures the dark ink under the white overlay. The writer now writes `--ds-brand-hover` per appearance, and `semantic.css` routes it for `ds-custom`.
+2. **The APCA mode's status inks.** `contrast.css` flips the shifted warning for gold, yellow, amber and lime by name. The writer now writes `--ds-brand-apca-<family>-contrast`, the ink with the higher Lc on each chosen family's light step 9, and `contrast.css` routes all four for `ds-custom` in light.
+3. **The Slider-thumb search** laid the ring over the range only. The guard lays it over each neighbour it reads the thumb against, and over a pale track the first model read far darker than the paint. `sliderThumbStack` now reads it as the guard does. On the named accents it reproduces the theme's step in both appearances, so the parity story's lighter-Slider class is gone. [generated-helper-layers](#generated-helper-layers) records the correction.
+
+**Guarded by** the sweeps above, run in both lanes.
+
+- With the seeded ring-stack line removed from `theme.css`, `_internal/Focus` failed four plays, `#0b1a3a`'s dark ring reading 1.01 to 1.50:1.
+- With the seeded `--accent-solid` line removed, the Colors lane threw `REVERSE` on `#3b82f6`.
+- Before the fixes, Swatches named the hover and APCA rows above, GreyAndWhiteParts 240 Slider-thumb rows, and ColourPropAndHighContrast 30.
+- `customBrand.logic.test.ts` holds the hover overlay to the button's ink on every acceptance seed, and `#fff59d`'s APCA warning ink.
+
+**Not covered.** The lane's values are written on each probe, so the root-level status-family defect stays recorded, not swept. The guidelines do not yet name which generated colours the sweeps cover: the documentation change of the custom-accent plan does that.
+
+**Changed from.** The colour sweeps covered the 27 named accents only, so nothing measured what the writer paints for a seed.
+
+**Status.** Ruled 2026-11-13. No later ruling amends it.
 
 ### component-registry
 

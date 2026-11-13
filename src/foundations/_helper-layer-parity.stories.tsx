@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Box } from "@radix-ui/themes";
-import { themeRoot, cssVarColour, withAccent, flatten, contrastRatio, ALL_ACCENTS, FOCUS_RING, type RGBA } from "./_assert";
-import { apcaContrast } from "./apca";
+import { themeRoot, cssVarColour, withAccent, ALL_ACCENTS, FOCUS_RING, type RGBA } from "./_assert";
 import { BLACK_A, WHITE_A, partEdge, ringStack, scrimStack, thumbStroke, withoutMargin, type LayerStep } from "../palette/helperLayers";
 import { parseColor, NEUTRALS } from "./_assert";
 import { RAIL, dashStack, dotEdge, markEdge, sliderThumbStack } from "../palette/markLayers";
@@ -29,19 +28,17 @@ import type { TintSteps } from "../palette/surfaces";
    A step is compared by the colour it paints, read through the guards' own
    rasteriser, so "none" matches a transparent token. 594 rows.
 
-   TWO KINDS OF DIFFERENCE ARE ALLOWED, AND EACH IS PROVED, NOT LISTED.
-   1. HEAVIER BY THE MARGIN. The searches hold a margin above the floors
+   ONE KIND OF DIFFERENCE IS ALLOWED, AND IT IS PROVED, NOT LISTED.
+   HEAVIER BY THE MARGIN. The searches hold a margin above the floors
       (`LAYER_MARGIN`), because a few of the theme's steps were decided within
       0.01 of the floor, inside the guards' own canvas rounding: purple's
       light-scrim step reads 2.99 and indigo's 3.00 in the browser, and no model
       can split them. A search may pick a heavier step than the theme only where
       the same search with no margin (`withoutMargin`) picks exactly the theme's
       step, so the margin alone is the reason. At most 40 rows may do this.
-   2. THE LIGHT SLIDER THUMB. The theme gives every light colour one step,
-      `--black-a5`, set by amber's light range. Per colour most need less. A
-      lighter step stands only where the thumb then reads against its range and
-      its track on every surface of every neutral, measured with the guards' own
-      arithmetic ([[neutral-part-stacks]]).
+   The Slider thumb has no class of its own: its search reads the ring over each
+   neighbour, as `_internal/Non-text contrast` → GreyAndWhiteParts does, and so
+   picks the theme's step on every colour.
    The gray accent's colours follow the neutral, so its step is the heaviest
    over the six. */
 
@@ -88,30 +85,6 @@ function heavier(a: LayerStep | null, b: LayerStep | null): LayerStep | null {
   const ia = alphaIndex(a), ib = alphaIndex(b);
   if (ia === null || ib === null) return a === b ? a : null;
   return ia >= ib ? a : b;
-}
-
-/** Whether the Slider thumb with `step` on its ring reads against its range and its track on every
- *  surface of every neutral, measured with the guards' own arithmetic: its white face or its ring
- *  at 3:1 and Lc 30 ([[neutral-part-stacks]]). */
-function sliderReads(probe: HTMLElement, step: LayerStep, range: RGBA): boolean {
-  const ring = flatten(stepColour(probe, step), flatten(cssVarColour(probe, "--black-a4"), range));
-  const white = { r: 255, g: 255, b: 255, a: 1 };
-  const reads = (n: RGBA) => [white, ring].some((c) => contrastRatio(c, n) >= FOCUS_RING.min && apcaContrast(c, n) >= FOCUS_RING.minLc);
-  const before = probe.getAttribute("data-gray-color");
-  try {
-    for (const neutral of NEUTRALS) {
-      probe.setAttribute("data-gray-color", neutral);
-      const track = cssVarColour(probe, "--gray-a3");
-      for (const surface of ["--ds-bg-base", "--ds-bg-subtle", "--ds-bg-raised", "--ds-bg-overlay"]) {
-        const under = cssVarColour(probe, surface);
-        const opaque = under.a < 1 ? flatten(under, cssVarColour(probe, "--ds-bg-base")) : under;
-        if (!reads(flatten(track, opaque))) return false;
-      }
-    }
-    return reads(range);
-  } finally {
-    if (before) probe.setAttribute("data-gray-color", before);
-  }
 }
 
 type Layer = { name: string; token: string; run: (probe: HTMLElement, appearance: "light" | "dark") => LayerStep | null };
@@ -173,7 +146,6 @@ export const EveryLayerMatchesTheTheme: Story = {
     const root = themeRoot(canvasElement);
     const rows: string[] = [];
     const heavierRows: string[] = [];
-    const lighterSlider: string[] = [];
     let readCount = 0;
     for (const appearance of ["light", "dark"] as const) {
       const probe = probeFor(root, appearance);
@@ -193,12 +165,6 @@ export const EveryLayerMatchesTheTheme: Story = {
               const si = alphaIndex(step), bi = bare === null ? null : alphaIndex(bare);
               if (bare !== null && samePaint(stepColour(probe, bare), theme) && si !== null && bi !== null && si > bi) {
                 heavierRows.push(`${key}: ${bare} to ${step}`);
-                continue;
-              }
-              // The light Slider thumb takes one step on every colour in the theme, set by amber. A lighter
-              // step for one colour stands if it reads as the guard measures it.
-              if (layer.name === "slider thumb stack" && appearance === "light" && sliderReads(probe, step, cssVarColour(probe, "--accent-track"))) {
-                lighterSlider.push(`${accent}: ${step}`);
                 continue;
               }
               rows.push(`${key}: search ${step}${bare && bare !== step ? ` (${bare} with no margin)` : ""}, theme ${rgba(theme)}`);
@@ -243,10 +209,10 @@ export const EveryLayerMatchesTheTheme: Story = {
     if (rows.length) {
       throw new Error(
         `${rows.length} of ${want} layers differ from the theme ([[generated-helper-layers]]):\n${rows.join("\n")}` +
-          `\n\nheavier by the margin (${heavierRows.length}):\n${heavierRows.join("\n")}\n\nlighter light Slider thumbs that read (${lighterSlider.length}): ${lighterSlider.join(", ")}`,
+          `\n\nheavier by the margin (${heavierRows.length}):\n${heavierRows.join("\n")}`,
       );
     }
-    // Bounds, so a drift that makes the allowed classes swallow the table cannot pass quietly.
+    // A bound, so a drift that makes the allowed class swallow the table cannot pass quietly.
     if (heavierRows.length > 40) throw new Error(`${heavierRows.length} rows went heavier by the margin, more than the 40 this story allows:\n${heavierRows.join("\n")}`);
   },
 };

@@ -82,6 +82,7 @@
   /* The filled button and the helper layers ([[seeded-brand-writer]]). theme.css maps them. */
   --ds-custom-solid: var(--ds-brand-solid);
   --ds-custom-on-solid: var(--ds-brand-on-solid);
+  --ds-custom-hover: var(--ds-brand-hover);
   --ds-custom-ring-stack: var(--ds-brand-ring-stack);
   --ds-custom-ring-stack-scrim: var(--ds-brand-ring-stack-scrim);
   --ds-custom-ring-stack-scrim-light: var(--ds-brand-ring-stack-scrim-light);
@@ -131,6 +132,7 @@
   --ds-custom-track: var(--ds-brand-dark-track);
   --ds-custom-solid: var(--ds-brand-dark-solid);
   --ds-custom-on-solid: var(--ds-brand-dark-on-solid);
+  --ds-custom-hover: var(--ds-brand-dark-hover);
   --ds-custom-ring-stack: var(--ds-brand-dark-ring-stack);
   --ds-custom-ring-stack-scrim: var(--ds-brand-dark-ring-stack-scrim);
   --ds-custom-ring-stack-scrim-light: var(--ds-brand-dark-ring-stack-scrim-light);

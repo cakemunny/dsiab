@@ -10,8 +10,9 @@ import { generateBrand, type Appearance, type BrandScale } from "../palette/gene
 import { BLACK_A, WHITE_A, type LayerStep } from "../palette/helperLayers";
 import { parseSeed, type ParseResult } from "../palette/parseSeed";
 import type { RGB } from "../palette/oklch";
-import { LIGHT_TARGET_SCALES, DARK_ON_SOLID, type SemFamily } from "../palette/collisionTable";
-import { INKS } from "../palette/surfaces";
+import { apcaLc } from "../palette/apca";
+import { LIGHT_TARGET_SCALES, DARK_ON_SOLID, SCALE_STEP_9, type SemFamily } from "../palette/collisionTable";
+import { INKS, parseColour, type InkName } from "../palette/surfaces";
 
 /** The attribute value the static block in `tokens/custom-brand.css` keys on. */
 export const CUSTOM_ACCENT = "ds-custom";
@@ -86,6 +87,10 @@ const PER_APPEARANCE: Record<string, (s: Source) => string> = {
   // the ink question 2 chose ([[generated-button-fill]]).
   solid: (s) => s.analysis.button.fill,
   "on-solid": (s) => INKS[s.analysis.button.label.ink],
+  // The hover overlay question 2 measured the button under: `--black-a2` under the white label and
+  // `--white-a4` under the dark one, so the overlay lightens the fill away from a dark label, as
+  // semantic.css does for the named accents with a dark label.
+  hover: (s) => (s.analysis.button.label.ink === "white" ? BLACK_A[1]! : WHITE_A[3]!),
   ...Object.fromEntries((Object.entries(LAYER_KEYS) as [LayerName, string][]).map(([layer, key]) => [
     key, (s: Source) => paint(s.analysis.layers[layer] ?? heaviest(layer, s.appearance), s.scale),
   ])),
@@ -99,7 +104,19 @@ const SHARED: Record<string, (a: BrandAnalysis) => string> = {
   // The APCA contrast mode's glyph ink on step 9. `contrast.css` reads it in light only, as it
   // overrides every named accent's glyph ink in light only.
   "--ds-brand-apca-contrast": (a) => INKS[a.light.glyphInk],
+  // The APCA mode's ink on each status family's step 9, the higher Lc of the two, as `contrast.css`
+  // flips the shifted warning for the named accents. Light only, for the same reason.
+  ...Object.fromEntries(SEM_FAMILIES.map((f) => [`--ds-brand-apca-${f}-contrast`, (a: BrandAnalysis) => INKS[apcaInk(a.statusFamilies[f]!)]])),
 };
+
+/** The ink with the higher APCA Lc on a scale's light step 9. */
+function apcaInk(scale: string): InkName {
+  const nine = SCALE_STEP_9[scale];
+  if (!nine) throw new Error(`customBrand: no step 9 recorded for the scale ${scale}`);
+  const bg = parseColour(nine);
+  const lc = (ink: InkName) => { const c = parseColour(INKS[ink]); return Math.abs(apcaLc([c.r, c.g, c.b], [bg.r, bg.g, bg.b])); };
+  return lc("white") >= lc("nearBlack") ? "white" : "nearBlack";
+}
 
 const PREFIX: Record<Appearance, string> = { light: "--ds-brand", dark: "--ds-brand-dark" };
 
