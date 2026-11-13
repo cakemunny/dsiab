@@ -62,4 +62,9 @@
 .radix-themes[data-contrast="apca"]:not(.dark)[data-accent-color="ds-custom"],
 .radix-themes[data-contrast="apca"]:not(.dark) .radix-themes[data-accent-color="ds-custom"] {
   --accent-contrast: var(--ds-brand-apca-contrast);
+  /* And each status family's ink on its step 9, wherever the generator moved the family. */
+  --error-contrast: var(--ds-brand-apca-error-contrast);
+  --warning-contrast: var(--ds-brand-apca-warning-contrast);
+  --success-contrast: var(--ds-brand-apca-success-contrast);
+  --info-contrast: var(--ds-brand-apca-info-contrast);
 }

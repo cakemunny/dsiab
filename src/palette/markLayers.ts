@@ -81,22 +81,27 @@ export function dashStack(step7: RGB, appearance: Appearance, accentA3: string):
 }
 
 /** [[neutral-part-stacks]]'s stack on the Slider thumb's ring. The thumb is white; its ring is
- *  the stack over `--black-a4` over `range`, a black alpha in both appearances, because a white
- *  stack cannot separate a white thumb from a light range. The track is the neutral's alpha
- *  step 3 on each surface. The thumb reads against a neighbour when its face or its ring clears it. */
+ *  the stack over Radix's `--black-a4` hairline, a black alpha in both appearances, because a
+ *  white stack cannot separate a white thumb from a light range. The ring is 1px outside the
+ *  thumb, so it lies over the neighbour it is read against, as the guard
+ *  (`_internal/Non-text contrast` → GreyAndWhiteParts) flattens it: the range, the track (the
+ *  neutral's alpha step 3 on each surface) and each surface. The thumb reads against a neighbour
+ *  when its face or its ring clears it. */
 export function sliderThumbStack(range: RGB, appearance: Appearance): LayerStep | null {
   const neighbours = NEUTRALS.flatMap((neutral) => {
     const s = fourSurfaces(neutral, appearance);
     const a3 = asReadBack(NEUTRAL_STEPS[neutral][appearance].a3);
-    return [range, ...[s.page, s.subtle, s.card, s.panel].map((x) => layOver(a3, x))];
+    const four = [s.page, s.subtle, s.card, s.panel];
+    return [range, ...four.map((x) => layOver(a3, x)), ...four];
   });
-  const faceReads = (n: RGB) => clears(WHITE, n);
-  if (neighbours.every(faceReads)) return "none";
-  const base = layOver(asReadBack(BLACK_A[3]!), range);
-  for (let i = 0; i < BLACK_A.length; i++) {
-    const ring = layOver(asReadBack(BLACK_A[i]!), base);
-    if (neighbours.every((n) => faceReads(n) || clears(ring, n))) return `black-a${i + 1}`;
-  }
+  const hairline = asReadBack(BLACK_A[3]!);
+  const reads = (stack: string | null) => neighbours.every((n) => {
+    if (clears(WHITE, n)) return true;
+    const ring = layOver(hairline, n);
+    return clears(stack ? layOver(asReadBack(stack), ring) : ring, n);
+  });
+  if (reads(null)) return "none";
+  for (let i = 0; i < BLACK_A.length; i++) if (reads(BLACK_A[i]!)) return `black-a${i + 1}`;
   return null;
 }
 

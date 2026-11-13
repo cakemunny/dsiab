@@ -30,8 +30,8 @@ import { ResizeHandle } from "./ResizeHandle";
 import { useResizable } from "../../hooks/useResizable";
 import { SizeContext, type UISize } from "../../theme/SizeContext";
 import { apcaContrast } from "../../foundations/apca";
+import { SWEEP_COLOURS, withColour } from "../../foundations/_seededLane";
 import {
-  ALL_ACCENTS,
   FOCUS_RING,
   FOCUS_SURFACES,
   NEUTRALS,
@@ -46,7 +46,6 @@ import {
   surfaceColour,
   themeRoot,
   tokenRing,
-  withAccent,
   type DrawnRing,
   type RGBA,
 } from "../../foundations/_assert";
@@ -106,8 +105,8 @@ export const RingTokensResolve: Story = {
         if (getComputedStyle(probe).getPropertyValue("--ds-stroke-focus-hairline").trim() !== "") {
           wrong.push(`${appearance}: --ds-stroke-focus-hairline still resolves; [[focus-ring]] deleted it`);
         }
-        for (const accent of ALL_ACCENTS) {
-          const restore = withAccent(probe, accent);
+        for (const accent of SWEEP_COLOURS) {
+          const restore = withColour(probe, accent);
           try {
             for (const neutral of NEUTRALS) {
               probe.setAttribute("data-gray-color", neutral);
@@ -133,7 +132,7 @@ export const RingTokensResolve: Story = {
         probe.remove();
       }
     }
-    if (cells !== 2 * ALL_ACCENTS.length * NEUTRALS.length) throw new Error(`read ${cells} cells, expected ${2 * ALL_ACCENTS.length * NEUTRALS.length}`);
+    if (cells !== 2 * SWEEP_COLOURS.length * NEUTRALS.length) throw new Error(`read ${cells} cells, expected ${2 * SWEEP_COLOURS.length * NEUTRALS.length}`);
     if (wrong.length) throw new Error(`the focus ring tokens are wrong ([[focus-ring]]):\n  ${wrong.join("\n  ")}`);
   },
 };
@@ -155,8 +154,8 @@ export const FocusRingContrast: Story = {
     for (const appearance of ["light", "dark"] as const) {
       const probe = themeProbe(root, appearance);
       try {
-        for (const accent of ALL_ACCENTS) {
-          const restore = withAccent(probe, accent);
+        for (const accent of SWEEP_COLOURS) {
+          const restore = withColour(probe, accent);
           try {
             for (const neutral of NEUTRALS) {
               probe.setAttribute("data-gray-color", neutral);
@@ -179,7 +178,7 @@ export const FocusRingContrast: Story = {
         probe.remove();
       }
     }
-    const expected = 2 * ALL_ACCENTS.length * NEUTRALS.length * FOCUS_SURFACES.length;
+    const expected = 2 * SWEEP_COLOURS.length * NEUTRALS.length * FOCUS_SURFACES.length;
     if (cells !== expected) throw new Error(`measured ${cells} cells, expected ${expected}`);
     if (!sRGB) {
       console.info("[Focus] P3 display — ring contrast assert enforced headless/CI only.");
@@ -229,8 +228,8 @@ export const ScrimRingContrast: Story = {
       for (const appearance of ["light", "dark"] as const) {
         probe.classList.remove("light", "light-theme", "dark", "dark-theme");
         probe.classList.add(appearance);
-        for (const accent of ALL_ACCENTS) {
-          const restore = withAccent(probe, accent);
+        for (const accent of SWEEP_COLOURS) {
+          const restore = withColour(probe, accent);
           try {
             for (const tint of ["dark", "light"] as const) {
               const where = `${appearance}/${accent} on the ${tint} scrim`;
@@ -278,7 +277,7 @@ export const ScrimRingContrast: Story = {
       probe.remove();
     }
 
-    if (cells !== 2 * ALL_ACCENTS.length * 2) throw new Error(`swept ${cells} cells, expected ${2 * ALL_ACCENTS.length * 2}`);
+    if (cells !== 2 * SWEEP_COLOURS.length * 2) throw new Error(`swept ${cells} cells, expected ${2 * SWEEP_COLOURS.length * 2}`);
     if (wrongRing.length) throw new Error(`the focus ring on a scrim is not the [[focus-ring]] ring:\n  ${wrongRing.sort().join("\n  ")}`);
     if (!sRGB) {
       console.info("[Focus] P3 display — scrim ring assert enforced headless/CI only.");
@@ -834,16 +833,17 @@ export const EveryRingIsTheStackedAccent: Story = {
     let read = 0;
     try {
       for (const appearance of ["light", "dark"] as const) {
-        for (const accent of ALL_ACCENTS) {
+        for (const accent of SWEEP_COLOURS) {
           host.replaceChildren();
           const theme = document.createElement("div");
           for (const a of Array.from(root.attributes)) {
             if (a.name !== "class" && a.name !== "style") theme.setAttribute(a.name, a.value);
           }
           theme.className = `radix-themes ${appearance}`;
-          theme.setAttribute("data-accent-color", accent);
           theme.appendChild(specimen.cloneNode(true));
           host.appendChild(theme);
+          // A named accent or a seed, written as Provider writes it; the element is discarded each pass.
+          withColour(theme, accent);
           // The Select row probe is its own theme root (Radix renders the class onto the panel), so it
           // takes every attribute the theme carries, as Radix's portal does: the accent, the appearance
           // and the neutral, which the gray accent's fill is pinned by ([[text-on-solid-fill-contrast]]).
@@ -893,7 +893,7 @@ export const EveryRingIsTheStackedAccent: Story = {
     } finally {
       host.remove();
     }
-    const expected = 2 * ALL_ACCENTS.length * RING_FAMILIES.length;
+    const expected = 2 * SWEEP_COLOURS.length * RING_FAMILIES.length;
     if (wrong.length) throw new Error(`a focus ring is not the [[focus-ring]] ring as drawn:\n  ${wrong.join("\n  ")}`);
     if (read !== expected) throw new Error(`read ${read} rings, expected ${expected}`);
     if (!sRGB) {

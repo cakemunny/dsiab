@@ -24,6 +24,10 @@ import { CUSTOM_ACCENT, customBrandProperties } from "./customBrand";
    and press are read off the tokens Radix's soft rule paints, because a clone
    cannot be hovered.
 
+   An outline Button paints the same label on the surface itself, with no fill
+   under it. The play holds it at 4.5:1 at rest in both appearances, the
+   outline pairing of the generated-colour sweeps ([[seeded-brand-writer]]).
+
    The seeds are the custom-accent census samples plus the one that was
    reported: #1a5fb4 read 4.28:1 in dark before the generator measured its text
    step as it paints. */
@@ -53,6 +57,7 @@ function Specimen() {
     <Flex gap="3" align="center" data-part="specimen">
       <Badge data-part="badge">Draft</Badge>
       <RadixButton variant="soft" size="1" data-part="soft-button">Edit</RadixButton>
+      <RadixButton variant="outline" size="1" data-part="outline-button">Share</RadixButton>
     </Flex>
   );
 }
@@ -98,6 +103,18 @@ export const SoftLabelsAsPainted: Story = {
               const at = `[${seed} ${appearance} ${neutral} ${surfaceName}]`;
               const under = flatten(resolveColor(surface, surfaceVar), resolveColor(theme, "--ds-bg-base"));
               const label = resolveColor(theme, "--accent-a11");
+              // The outline Button paints the label on the surface itself, with no fill under it.
+              {
+                const el = surface.querySelector<HTMLElement>('[data-part="outline-button"]');
+                if (!el) throw new Error(`${at} outline-button: the clone holds no such part`);
+                const painted = getComputedStyle(el);
+                if (!same(parseColor(painted.color), label) || parseColor(painted.backgroundColor).a > 0.01) {
+                  throw new Error(`${at} outline-button: paints ${painted.color} on ${painted.backgroundColor}, not --accent-a11 on the surface`);
+                }
+                const ratio = contrastRatio(label, under);
+                read++;
+                if (ratio < FLOOR) fails.push(`${at} outline-button rest: ${ratio.toFixed(2)}:1`);
+              }
               for (const part of ["badge", "soft-button"] as const) {
                 const el = surface.querySelector<HTMLElement>(`[data-part="${part}"]`);
                 if (!el) throw new Error(`${at} ${part}: the clone holds no such part`);
@@ -124,9 +141,9 @@ export const SoftLabelsAsPainted: Story = {
       host.remove();
     }
 
-    // 14 seeds x 6 neutrals x 2 surfaces x (light: 2 parts at rest; dark: the Badge at rest
-    // and the Button in three states).
-    const want = SEEDS.length * NEUTRALS.length * SURFACES.length * (2 + 4);
+    // 14 seeds x 6 neutrals x 2 surfaces x (light: 2 soft parts at rest; dark: the Badge at rest
+    // and the soft Button in three states; and the outline Button at rest in each).
+    const want = SEEDS.length * NEUTRALS.length * SURFACES.length * (2 + 4 + 2);
     if (read !== want) throw new Error(`read ${read} labels, expected ${want}`);
     if (fails.length) {
       throw new Error(`${fails.length} soft labels under ${FLOOR}:1 ([[seeded-soft-text-as-painted]]):\n${fails.slice(0, 40).join("\n")}`);

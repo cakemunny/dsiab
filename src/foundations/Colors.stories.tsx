@@ -5,12 +5,13 @@ import semanticCss from "../tokens/semantic.css?raw";
 import themeCss from "../tokens/theme.css?raw";
 import { Contrast } from "../theme/Contrast";
 import {
-  ALL_ACCENTS, ALL_DS_ROLES, DS_ROLES, EXEMPT, ON_FILL, ON_TOKENS, SEMANTIC_DEFAULT,
+  ALL_DS_ROLES, DS_ROLES, EXEMPT, ON_FILL, ON_TOKENS, SEMANTIC_DEFAULT,
   TEXT_ON_BG, assertNoEmpty, assertPairing, deltaEOK, expectedScales, hueDistance, luminance,
-  oklab, oklchHue, resolve, resolveColor, themeRoot, tooClose, withAccent,
+  oklab, oklchHue, resolve, resolveColor, themeRoot, tooClose,
 } from "./_assert";
 import type { SemFamily } from "./_assert";
 import { apcaBestForeground } from "./apca";
+import { SWEEP_COLOURS, isSeed, seededFamilies, seededUnseparated, withColour } from "./_seededLane";
 import { HexThemeKey, HexValue, Mono, Page, PageHeader, Section, SWATCH_GRID, TokenRow } from "../components/ui/_storyKit";
 
 // How each family's swatch previews its token (see Specimen).
@@ -487,10 +488,15 @@ function colourMatrixFails(root: HTMLElement, checkContrast = true): string[] {
 
   const families = Object.keys(SEMANTIC_FILL) as SemFamily[];
   const fails: string[] = [];
-  for (const accent of ALL_ACCENTS) {
-    const restore = withAccent(root, accent);
+  for (const accent of SWEEP_COLOURS) {
+    const restore = withColour(root, accent);
     try {
-      const scales = expectedScales(accent);
+      // A seed's families are the generator's one choice ([[seeded-brand-writer]]); a named accent's
+      // are the collision table's.
+      const scales = isSeed(accent) ? seededFamilies(accent) : expectedScales(accent);
+      // The families the collision search reports it cannot clear for this seed, the degraded default
+      // [[seeded-brand-collisions]] accepts. Empty for every named accent.
+      const unseparated: string[] = isSeed(accent) ? seededUnseparated(accent) : [];
       // Drift guard: live --<family>-9 must resolve to the scale the table predicts.
       for (const fam of families) {
         if (hueDistance(oklchHue(root, `var(--${fam}-9)`), oklchHue(root, `var(--${scales[fam]}-9)`)) > 1) {
@@ -508,7 +514,7 @@ function colourMatrixFails(root: HTMLElement, checkContrast = true): string[] {
       const semLabs = Object.fromEntries(families.map((f) => [f, oklab(root, `var(--${f}-9)`)])) as Record<SemFamily, [number, number, number]>;
       if (accent !== "gray") {
         for (const fam of families) {
-          if (tooClose(brandLab, brandHue, semLabs[fam], sem[fam])) {
+          if (tooClose(brandLab, brandHue, semLabs[fam], sem[fam]) && !unseparated.includes(fam)) {
             fails.push(`[${accent}] brand vs ${fam} too close: ΔE-OK ${deltaEOK(brandLab, semLabs[fam]).toFixed(3)} & hue ${hueDistance(brandHue, sem[fam]).toFixed(1)}deg (via ${scales[fam]})`);
           }
         }
@@ -555,8 +561,8 @@ function apcaForegroundFails(root: HTMLElement): string[] {
   const prev = root.getAttribute("data-contrast");
   root.setAttribute("data-contrast", "apca");
   try {
-    for (const accent of ALL_ACCENTS) {
-      const restore = withAccent(root, accent);
+    for (const accent of SWEEP_COLOURS) {
+      const restore = withColour(root, accent);
       try {
         for (const [fillVar, fgVar] of APCA_ON_SOLID) {
           const want = apcaBestForeground(resolveColor(root, fillVar)); // APCA's polarity

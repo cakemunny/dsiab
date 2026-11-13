@@ -124,4 +124,26 @@ describe("the acceptance values", () => {
     expect(p["--ds-brand-solid"]).toBe("#6e56cf");
     expect(["#ce2c31", "#ca244d", "#8a2119"]).toContain(p["--ds-brand-error-solid"]);
   });
+
+  // Found by the generated-colour sweeps: question 2 measures the hover under the overlay that
+  // follows the ink, and the theme keyed that overlay on the named accents alone.
+  it("the hover overlay follows the button's ink: black-a2 under white, white-a4 under the dark ink", () => {
+    expect(props("#3b82f6")["--ds-brand-hover"]).toBe(B(2));
+    expect(props("#fff59d")["--ds-brand-hover"]).toBe(W(4));
+    expect(props("#ff8c00")["--ds-brand-dark-hover"]).toBe(W(4));
+    for (const seed of ACCEPTANCE) {
+      const p = props(seed);
+      for (const prefix of ["--ds-brand", "--ds-brand-dark"]) {
+        expect(p[`${prefix}-hover`]).toBe(p[`${prefix}-on-solid`] === "#ffffff" ? B(2) : W(4));
+      }
+    }
+  });
+
+  it("under the APCA mode, a status family moved to orange takes white, as the named accents' shifted warning does", () => {
+    const p = props("#fff59d");
+    expect(p["--ds-brand-warning-9"]).toBe("var(--orange-9)");
+    expect(p["--ds-brand-apca-warning-contrast"]).toBe("#ffffff");
+    expect(p["--ds-brand-warning-contrast"]).toBe("#21201c");
+    expect(props("#3b82f6")["--ds-brand-apca-warning-contrast"]).toBe("#21201c");
+  });
 });

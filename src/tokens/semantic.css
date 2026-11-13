@@ -209,6 +209,13 @@
   --ds-fill-accent-hover: var(--white-a4);
 }
 
+/* A seeded brand: the overlay its generator measured the filled button under, black under a white
+   label and white under a dark one ([[seeded-brand-writer]]). The theme root alone, since a part
+   cannot take a seed as its own colour. */
+.radix-themes:where([data-accent-color="ds-custom"]) {
+  --ds-fill-accent-hover: var(--ds-custom-hover);
+}
+
 /* === MUTABLE: only what must differ by mode ============================== */
 /* Light leans on shadow for elevation; dark raises surfaces with lighter bg. */
 /* BOTH selector shapes — see [[dark-override-selectors]]. The second covers `appearance="inherit"`,

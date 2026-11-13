@@ -5,11 +5,12 @@ import { Plus } from "@phosphor-icons/react";
 import type { DateRange } from "../../dates/dateTypes";
 import { plainDateAddDays, plainDateToday, plainDateToISO } from "../../dates/plainDate";
 import {
-  themeRoot, assertNoEmpty, resolveColor, parseColor, flatten, contrastRatio, withAccent, ALL_ACCENTS,
+  themeRoot, assertNoEmpty, resolveColor, parseColor, flatten, contrastRatio, ALL_ACCENTS,
   FOCUS_RING, FOCUS_SURFACES, NEUTRALS, CARD_PICKER_CARRIERS, SOLID_TEXT_MIN, checkDrawnRing, readDrawnRing, surfaceColour,
   type RGBA,
 } from "../../foundations/_assert";
 import { APCA_LC, apcaContrast } from "../../foundations/apca";
+import { SWEEP_COLOURS, assertColourInForce, isSeed, paintColour, withColour } from "../../foundations/_seededLane";
 import { SizeContext } from "../../theme/SizeContext";
 import { Screen as AnalyticsDashboard } from "../../scenarios/AnalyticsDashboard.stories";
 import { Avatar } from "./Avatar";
@@ -139,8 +140,8 @@ export const Census: Story = {
     try {
       for (const appearance of ["light", "dark"] as const) {
         probe.classList.toggle("dark", appearance === "dark");
-        for (const accent of ALL_ACCENTS) {
-          const restore = withAccent(probe, accent);
+        for (const accent of SWEEP_COLOURS) {
+          const restore = withColour(probe, accent);
           try {
             const page = resolveColor(probe, "--ds-bg-base");
             for (const p of CANDIDATES) {
@@ -409,7 +410,7 @@ export const PartsWithoutText: Story = {
     let read = 0;
     try {
       for (const appearance of ["light", "dark"] as const) {
-        for (const accent of ALL_ACCENTS) {
+        for (const accent of SWEEP_COLOURS) {
           // A fresh theme for every combination. Re-pointing one theme in place starts the thumb's and
           // the track's transitions, and a computed read mid-transition reports the colour it left.
           host.replaceChildren();
@@ -418,12 +419,13 @@ export const PartsWithoutText: Story = {
             if (a.name !== "class" && a.name !== "style") theme.setAttribute(a.name, a.value);
           }
           theme.className = `radix-themes ${appearance}`;
-          theme.setAttribute("data-accent-color", accent);
+          paintColour(theme, accent);
           theme.appendChild(specimen.cloneNode(true));
           const chart = chartCard.cloneNode(true) as HTMLElement;
           chart.setAttribute("data-part", "chart");
           theme.appendChild(chart);
           host.appendChild(theme);
+          assertColourInForce(theme, accent);
 
           const at = `[${appearance} ${accent}]`;
           const page = resolveColor(theme, "--ds-bg-base");
@@ -524,7 +526,15 @@ export const PartsWithoutText: Story = {
           for (const p of [...parts.filter((q) => q.paints === "indicator"), { part: "CheckboxCards box", colour: cardBox }]) {
             if (!same(p.colour, indicator)) fails.push(`${at} ${p.part} paints ${hex(p.colour)} and the Checkbox paints ${hex(indicator)}: two shades of one colour ([[textless-part-fills]])`);
           }
-          if (appearance === "light") {
+          if (isSeed(accent)) {
+            // A seeded brand keeps the typed colour on every part, in both appearances, and only the
+            // filled button takes the adjusted shade (Jason's answers 2 and D, [[seeded-brand-writer]]):
+            // the inverse of the named accents' rule below.
+            const seed = parseColor(accent);
+            for (const p of parts) {
+              if (!same(p.colour, seed)) fails.push(`${at} ${p.part} paints ${hex(p.colour)}, not the seed. A seeded brand paints its parts in the colour as typed ([[seeded-brand-writer]])`);
+            }
+          } else if (appearance === "light") {
             const textFill = resolveColor(theme, "--ds-fill-accent");
             if (!same(textFill, resolveColor(theme, "--accent-9"))) {
               for (const p of parts) {
@@ -537,7 +547,7 @@ export const PartsWithoutText: Story = {
     } finally {
       host.remove();
     }
-    const want = 2 * ALL_ACCENTS.length * PARTS_PER_THEME;
+    const want = 2 * SWEEP_COLOURS.length * PARTS_PER_THEME;
     if (read !== want) throw new Error(`expected ${want} part readings, read ${read}`);
     if (fails.length) throw new Error(`Parts without text, ${fails.length} failures:\n  ${fails.join("\n  ")}`);
   },
@@ -816,7 +826,7 @@ function placeInFrame(host: HTMLElement, root: HTMLElement, frame: ColourPropFra
       for (const a of Array.from(root.attributes)) {
         if (a.name !== "class" && a.name !== "style") el.setAttribute(a.name, a.value);
       }
-      el.setAttribute("data-accent-color", accent);
+      paintColour(el, accent);
       el.setAttribute("data-gray-color", neutral);
       theme = el;
     }
@@ -826,6 +836,7 @@ function placeInFrame(host: HTMLElement, root: HTMLElement, frame: ColourPropFra
   }
   if (!theme) throw new Error(`the frame "${frame.name}" holds no theme`);
   parent.appendChild(content);
+  assertColourInForce(theme, accent);
   return theme;
 }
 
@@ -900,7 +911,7 @@ export const ColourPropAndHighContrast: Story = {
         }
         // The high contrast sweep.
         for (const frame of COLOUR_PROP_FRAMES.slice(0, 2)) {
-          for (const accent of ALL_ACCENTS) {
+          for (const accent of SWEEP_COLOURS) {
             const at = `[${frame.appearance} ${accent} ${neutral}, highContrast]`;
             holdOwnColourParts(readOwnColourParts(placeInFrame(host, root, frame, accent, neutral, contrasted.cloneNode(true) as HTMLElement), at), at, sRGB, fails);
             read += COLOUR_PROP_PARTS;
@@ -910,7 +921,7 @@ export const ColourPropAndHighContrast: Story = {
     } finally {
       host.remove();
     }
-    const want = NEUTRALS.length * (COLOUR_PROP_FRAMES.length * COLOUR_PROP_COLOURS.length + 2 * ALL_ACCENTS.length) * COLOUR_PROP_PARTS;
+    const want = NEUTRALS.length * (COLOUR_PROP_FRAMES.length * COLOUR_PROP_COLOURS.length + 2 * SWEEP_COLOURS.length) * COLOUR_PROP_PARTS;
     if (fails.length) throw new Error(`Parts given a colour or high contrast, ${fails.length} failures:\n  ${fails.slice(0, 80).join("\n  ")}`);
     if (read !== want) throw new Error(`expected ${want} readings, read ${read}`);
   },
@@ -1096,7 +1107,7 @@ export const FocusRingOnParts: Story = {
     let cardsRead = 0;
     try {
       for (const appearance of ["light", "dark"] as const) {
-        for (const accent of ALL_ACCENTS) {
+        for (const accent of SWEEP_COLOURS) {
           // A fresh theme for every combination, for PartsWithoutText's reason: a theme re-pointed in
           // place starts transitions, and a read mid-transition reports the colour it left.
           host.replaceChildren();
@@ -1105,9 +1116,10 @@ export const FocusRingOnParts: Story = {
             if (a.name !== "class" && a.name !== "style") theme.setAttribute(a.name, a.value);
           }
           theme.className = `radix-themes ${appearance}`;
-          theme.setAttribute("data-accent-color", accent);
+          paintColour(theme, accent);
           theme.appendChild(specimen.cloneNode(true));
           host.appendChild(theme);
+          assertColourInForce(theme, accent);
           // [[card-picker-focus-width]] reads every card at rest before any part takes focus.
           const page = resolveColor(theme, "--ds-bg-base");
           const rest = new Map<string, RGBA[]>();
@@ -1185,8 +1197,8 @@ export const FocusRingOnParts: Story = {
     } finally {
       host.remove();
     }
-    const want = 2 * ALL_ACCENTS.length * FOCUS_PARTS.length;
-    const wantCards = sRGB ? 2 * ALL_ACCENTS.length * Object.keys(CARD_PICKER_CARDS).length : 0;
+    const want = 2 * SWEEP_COLOURS.length * FOCUS_PARTS.length;
+    const wantCards = sRGB ? 2 * SWEEP_COLOURS.length * Object.keys(CARD_PICKER_CARDS).length : 0;
     if (fails.length) throw new Error(`The focus ring on the parts, ${fails.length} failures:\n  ${fails.join("\n  ")}`);
     if (read !== want) throw new Error(`expected ${want} ring readings, read ${read}`);
     if (cardsRead !== wantCards) throw new Error(`expected ${wantCards} card readings ([[card-picker-focus-width]]), read ${cardsRead}`);
@@ -1303,7 +1315,7 @@ export const MarksAndDashesOnTint: Story = {
     let read = 0;
     try {
       for (const appearance of ["light", "dark"] as const) {
-        for (const accent of ALL_ACCENTS) {
+        for (const accent of SWEEP_COLOURS) {
           for (const neutral of NEUTRALS) {
             // A fresh theme for every combination, for PartsWithoutText's reason.
             host.replaceChildren();
@@ -1312,7 +1324,7 @@ export const MarksAndDashesOnTint: Story = {
               if (a.name !== "class" && a.name !== "style") theme.setAttribute(a.name, a.value);
             }
             theme.className = `radix-themes ${appearance}`;
-            theme.setAttribute("data-accent-color", accent);
+            paintColour(theme, accent);
             theme.setAttribute("data-gray-color", neutral);
             theme.style.background = "var(--ds-bg-base)";
             theme.appendChild(specimen.cloneNode(true));
@@ -1320,6 +1332,7 @@ export const MarksAndDashesOnTint: Story = {
             chart.setAttribute("data-part", "chart");
             theme.appendChild(chart);
             host.appendChild(theme);
+            assertColourInForce(theme, accent);
 
             const at = `[${appearance} ${accent} ${neutral}]`;
             const find = <E extends Element = HTMLElement>(part: string, selector: string): E => {
@@ -1410,7 +1423,7 @@ export const MarksAndDashesOnTint: Story = {
     } finally {
       host.remove();
     }
-    const want = 2 * ALL_ACCENTS.length * NEUTRALS.length * TINT_PARTS;
+    const want = 2 * SWEEP_COLOURS.length * NEUTRALS.length * TINT_PARTS;
     if (fails.length) throw new Error(`Marks and dashes on a tint, ${fails.length} failures:\n  ${fails.slice(0, 80).join("\n  ")}`);
     if (read !== want) throw new Error(`expected ${want} readings, read ${read}`);
   },
@@ -1520,7 +1533,7 @@ export const GreyAndWhiteParts: Story = {
     let read = 0;
     try {
       for (const appearance of ["light", "dark"] as const) {
-        for (const accent of ALL_ACCENTS) {
+        for (const accent of SWEEP_COLOURS) {
           for (const neutral of NEUTRALS) {
             // A fresh theme for every combination, for PartsWithoutText's reason.
             host.replaceChildren();
@@ -1529,11 +1542,12 @@ export const GreyAndWhiteParts: Story = {
               if (a.name !== "class" && a.name !== "style") theme.setAttribute(a.name, a.value);
             }
             theme.className = `radix-themes ${appearance}`;
-            theme.setAttribute("data-accent-color", accent);
+            paintColour(theme, accent);
             theme.setAttribute("data-gray-color", neutral);
             theme.style.background = "var(--ds-bg-base)";
             theme.appendChild(specimen.cloneNode(true));
             host.appendChild(theme);
+            assertColourInForce(theme, accent);
 
             const at = `[${appearance} ${accent} ${neutral}]`;
             const find = (part: string, selector: string): HTMLElement => {
@@ -1621,7 +1635,7 @@ export const GreyAndWhiteParts: Story = {
     } finally {
       host.remove();
     }
-    const want = 2 * ALL_ACCENTS.length * NEUTRALS.length * GREY_PARTS;
+    const want = 2 * SWEEP_COLOURS.length * NEUTRALS.length * GREY_PARTS;
     if (fails.length) throw new Error(`Grey and white parts, ${fails.length} failures:\n  ${fails.slice(0, 80).join("\n  ")}`);
     if (read !== want) throw new Error(`expected ${want} readings, read ${read}`);
   },
@@ -1700,7 +1714,7 @@ export const DotsEdgesAndSelectedRows: Story = {
     let read = 0;
     try {
       for (const appearance of ["light", "dark"] as const) {
-        for (const accent of ALL_ACCENTS) {
+        for (const accent of SWEEP_COLOURS) {
           for (const neutral of NEUTRALS) {
             // A fresh theme for every combination, for PartsWithoutText's reason.
             host.replaceChildren();
@@ -1709,7 +1723,7 @@ export const DotsEdgesAndSelectedRows: Story = {
               if (a.name !== "class" && a.name !== "style") theme.setAttribute(a.name, a.value);
             }
             theme.className = `radix-themes ${appearance}`;
-            theme.setAttribute("data-accent-color", accent);
+            paintColour(theme, accent);
             theme.setAttribute("data-gray-color", neutral);
             theme.style.background = "var(--ds-bg-base)";
             theme.appendChild(dotsSpecimen.cloneNode(true));
@@ -1718,6 +1732,7 @@ export const DotsEdgesAndSelectedRows: Story = {
             chart.setAttribute("data-part", "chart");
             theme.appendChild(chart);
             host.appendChild(theme);
+            assertColourInForce(theme, accent);
 
             const at = `[${appearance} ${accent} ${neutral}]`;
             const find = <E extends Element = HTMLElement>(part: string, selector: string): E => {
@@ -1807,7 +1822,7 @@ export const DotsEdgesAndSelectedRows: Story = {
     } finally {
       host.remove();
     }
-    const want = 2 * ALL_ACCENTS.length * NEUTRALS.length * STATUS_DOT_PARTS;
+    const want = 2 * SWEEP_COLOURS.length * NEUTRALS.length * STATUS_DOT_PARTS;
     if (fails.length) throw new Error(`Dots, edges and selected rows, ${fails.length} failures:\n  ${fails.slice(0, 80).join("\n  ")}`);
     if (read !== want) throw new Error(`expected ${want} readings, read ${read}`);
   },
