@@ -19,7 +19,7 @@ export const STORY_CATEGORIES: Record<string, string[]> = {
   Action: ["Button", "IconButton", "ButtonGroup", "ToggleButton", "ToggleButtonGroup", "DropdownMenu", "ContextMenu", "MoreMenu", "Toolbar", "DragHandle"],
   Chat: ["ChatLayout", "ChatMessageList", "ChatMessage", "ChatMessageMetadata", "ChatSystemMessage", "ChatToolCalls", "ChatComposer"],
   Choice: ["Checkbox", "CheckboxGroup", "CheckboxCards", "RadioGroup", "RadioCards", "SegmentedControl", "Slider", "Switch", "Select", "MultiSelect"],
-  Container: ["AspectRatio", "Card", "Carousel", "ClickableCard", "Collapsible", "Grid", "Overlay", "ScrollArea", "Section", "Tabs"],
+  Container: ["AspectRatio", "Box", "Card", "Carousel", "ClickableCard", "Collapsible", "Flex", "Grid", "Overlay", "ScrollArea", "Section", "Tabs"],
   Content: ["Avatar", "AvatarGroup", "Blockquote", "Citation", "Code", "DataList", "Kbd", "Link", "Thumbnail", "Timestamp", "Token", "VisuallyHidden"],
   "Date & Time": ["Calendar", "DateInput", "DateRangeInput", "DateTimeInput", "TimeInput"],
   "Feedback & Status": ["Badge", "Callout", "EmptyState", "Progress", "Skeleton", "Spinner", "StatusDot", "Toast", "Tooltip"],

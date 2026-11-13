@@ -48,8 +48,16 @@ exist?
 
 - `status: "ported"`: import it from the package, and do not rebuild it.
 - `status: "out-of-scope"`: deliberately not ported, and the entry's `note` says why.
-- **Absent from the registry**: do not improvise a `Components/*` equivalent. Use the raw Radix Themes
-  component under the GUIDELINES conventions, or surface the gap.
+- **Absent from the registry**: do not improvise a `Components/*` equivalent, and do not reach past the
+  system to `@radix-ui/themes`. Surface the gap: a Radix part with no decision to make ships as a
+  documented re-export with its own entry, the way `Box`, `Flex` and `Grid` do, and anything else is a
+  proposal.
+
+**Code built on the system uses the system's layer** ([[system-layout-layers]]). Stories, the story kit,
+the test lane and the scenario pages import components from `src/components/ui`, layout from the `Box`,
+`Flex` and `Grid` modules, and a theme root from `src/theme/ThemeRoot.tsx`, never from
+`@radix-ui/themes`. Only the modules that wrap Radix import it. `raw-radix.node-check.ts` holds the rule,
+with the files that broke it on 2026-11-13 grandfathered and counted, the same way the line caps below are.
 
 The package ships a projection of this file as `dsiab/registry.json`, built by
 `scripts/dist-registry.mjs`. It differs in five ways:

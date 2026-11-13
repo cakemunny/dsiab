@@ -210,6 +210,7 @@ const INTERNAL_MODULES: Readonly<Record<string, string>> = {
   "theme/customBrand": "the brand-seed pipeline that Provider calls.",
   "theme/detectAndWarn": "the one-time development warnings that components and Provider call.",
   "theme/typefaces": "the typeface stacks that Provider writes.",
+  "theme/ThemeRoot": "the system's internal route to Radix's Theme, for portalled panels and test clones ([[system-layout-layers]]). Consumers use Provider.",
 
   // src/utils. Pure helpers, each called by the component or hook named.
   "utils/computeVisibleCount": "the visible-count maths of useOverflow, and useOverflow is its only caller.",
