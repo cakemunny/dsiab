@@ -184,6 +184,7 @@ const INTERNAL_MODULES: Readonly<Record<string, string>> = {
   // src/palette. The brand-colour maths behind customBrand and Provider.
   "palette/apca": "the runtime APCA calculation ([[apca-runtime-port]]). It ships inside the assessment and is never published under its own name.",
   "palette/assessment": "the brand assessment and its words ([[brand-assessment]]). It publishes in the custom-accent work's Phase 4, with its interface unchanged.",
+  "palette/storedSeed": "the one write of a brand colour that the docs controls share ([[brand-colour-setting]]). Docs-only: the package route takes the colour as typed.",
   "palette/brandAnalysis": "the generator's measured answer for a seed ([[generated-button-fill]]). The assessment publishes its shape later.",
   "palette/buttonFill": "question 2 and the filled-button shade search ([[generated-button-fill]]).",
   "palette/collision": "the brand and status collision check that customBrand runs.",
