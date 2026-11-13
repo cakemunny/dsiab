@@ -16,7 +16,7 @@
      3. RADIX GAP-FILLERS — a CURATED subset of the names `@radix-ui/themes`
         exports that this system does not wrap. Radix publishes 103 names; this
         system wraps 57 of them and leaves 46 unwrapped. The 46 were ruled one at
-        a time: 30 ship as Radix's OWN binding — 20 named in section 3 below, 10
+        a time: 30 ship as Radix's OWN binding — 16 named in section 3 below, 14
         through a registered component whose module is a bare re-export — and 16
         do not ship at all. Adding a name to section 3 is a DECISION about what
         this system endorses, not a convenience.
@@ -31,8 +31,8 @@
      radix-names            103   every name `@radix-ui/themes` exports
      wrapped                 57   the binding a consumer gets is this system's own
      kept                    30   the binding is Radix's own, re-exported on purpose
-       in-section-3          20   named one by one in section 3 below
-       through-a-component   10   a registered module whose body is one re-export
+       in-section-3          16   named one by one in section 3 below
+       through-a-component   14   a registered module whose body is one re-export
      dropped                 16   not exported at all; the reasons close this file
 
    CORRECTED 2026-08-05 — this block previously read 67 wrapped / 36 unwrapped.
@@ -129,6 +129,8 @@ export {
   type BadgeTone,
   Blockquote,
   type BlockquoteProps,
+  Box,
+  type BoxProps,
   BreadcrumbContext,
   type BreadcrumbContextValue,
   BreadcrumbItem,
@@ -231,6 +233,8 @@ export {
   type EmptyStateProps,
   FileInput,
   type FileInputProps,
+  Flex,
+  type FlexProps,
   FormLayout,
   type FormLayoutDirection,
   type FormLayoutProps,
@@ -453,14 +457,10 @@ export {
    them locally would be the drift. Everything that DOES carry a decision is
    wrapped in section 2 and must be taken from there. */
 export {
-  // Layout. `Grid`, `Section` and `AspectRatio` ship through section 2 — as Radix's own
-  // binding, not as wrappers (see the KEPT block below); these four are the rest.
-  Box,
-  type BoxProps,
+  // Layout. `Box`, `Flex`, `Grid`, `Section` and `AspectRatio` ship through section 2 — as
+  // Radix's own binding, not as wrappers (see the KEPT block below); these two are the rest.
   Container,
   type ContainerProps,
-  Flex,
-  type FlexProps,
   Inset,
   type InsetProps,
   // Inline text. `Text`, `Heading`, `Code` and `Blockquote` are wrapped; these three are the rest.
@@ -482,7 +482,7 @@ export {
   type AccessibleIconProps,
 } from "@radix-ui/themes";
 
-/* KEPT THROUGH SECTION 2 — the other 10 of the 30 that keep. Each is a registered
+/* KEPT THROUGH SECTION 2 — the other 14 of the 30 that keep. Each is a registered
    component whose module is a single line, `export { … } from "@radix-ui/themes"`:
    it earns a registry entry, a story and a docs page, but the binding a consumer
    imports is Radix's own, so it is a KEEP and not a wrapper. Section 2's list is
@@ -491,6 +491,10 @@ export {
 
      AspectRatio,             Layout only. No paint, no role, no size lane.
        AspectRatioProps
+     Box, BoxProps            One container: padding and margin on the `--space` scale.
+                              Moved from section 3 on 2026-11-13 ([[system-layout-layers]]),
+                              so the system's own code imports it from a module, not Radix.
+     Flex, FlexProps          One axis; `gap` rides the `--space` scale. Moved with Box.
      Grid, GridProps          Pure layout; `gap` rides the `--space` scale.
      Section, SectionProps    Vertical padding passed through untouched.
      Skeleton,                Sizes itself to the children it wraps; reuses Radix's

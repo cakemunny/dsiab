@@ -12,6 +12,7 @@ export { Avatar, type AvatarProps, type AvatarStatus } from "./Avatar";
 export { AvatarGroup, type AvatarGroupProps } from "./AvatarGroup";
 export { Badge, type BadgeProps, type BadgeTone } from "./Badge";
 export { Blockquote, type BlockquoteProps } from "./Blockquote";
+export { Box, type BoxProps } from "./Box";
 export {
   BreadcrumbContext,
   type BreadcrumbContextValue,
@@ -121,6 +122,7 @@ export { DropdownMenu, type DropdownMenuItemProps } from "./DropdownMenu";
 export { EmptyState, type EmptyStateProps } from "./EmptyState";
 export { useOptionalFieldControl } from "./Field";
 export { FileInput, type FileInputProps } from "./FileInput";
+export { Flex, type FlexProps } from "./Flex";
 export {
   FormLayout,
   type FormLayoutDirection,

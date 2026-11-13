@@ -159,8 +159,10 @@ const NOT_YET_COVERED: string[] = [
   "TopNavMegaMenuItem", "TopNavMenu",
   // Rendered on scenario pages, but imported from Radix or the story kit rather than from the
   // system's own wrapper. The tag is there and the component is not, which is the exact defect the
-  // import check below exists to catch.
-  "Grid", "Section",
+  // import check below exists to catch. Box and Flex joined on 2026-11-13, when they became registry
+  // entries ([[system-layout-layers]]); the scenarios move onto the system's own layer in the change
+  // that follows, which this anti-rot list then forces it to record.
+  "Grid", "Section", "Box", "Flex",
 ];
 
 const registry: Entry[] = JSON.parse(readFileSync(REGISTRY, "utf8"));

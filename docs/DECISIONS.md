@@ -4747,10 +4747,49 @@ Double-click toggles between 1x and 2x. While zoomed, a drag, the keypad in the 
 
 - [card-variants](#card-variants) replaces Radix's `surface`, `classic` and `ghost` card skins with `outlined`, `elevated` and `filled`.
 - [focus-ring](#focus-ring) replaces the neutral focus hairline on the ClickableCard box with the accent focus ring, drawn 2px inside the card edge.
+- [system-layout-layers](#system-layout-layers) adds Box and Flex to the documented re-exports, each with its own entry and docs pages.
 
 **Evidence.** The entry before the rewrite of 2026-10-01:
 
 > **Surfaces & pass-through wraps — Card / ClickableCard / ScrollArea + Grid / Section / AspectRatio / VisuallyHidden (2026-07-23).** **Card** rides the container lane ([standard-dialog](#standard-dialog), small→2), reusing the surface/classic/ghost skins. **ClickableCard** layers the stretched-link pattern on Card: an overlay link wrapping the heading text carries an `::after` covering the whole card (`.rt-ds-clickable-card` in components.css) — a pointer click anywhere navigates, with a SINGLE tab stop and one accessible name (heading, name-from-content); the link routes through `useLinkComponent()` ([link-and-link-provider](#link-and-link-provider)); hover = `--ds-fill-hover`, focus = the neutral focus hairline drawn on the CARD box (the link's own ring suppressed); nested interactives opt above the overlay (the exported `interactiveLayer`); NAMED CONSTRAINT — the overlay eats text selection, so it is navigation-only. **ScrollArea** — its scrollbar rides the CONTROL lane, a **documented deviation** from the container surface it lives on: ScrollArea's `size` range is 1–3, so the container lane's `large→4` is out of range. **The deviation's real reason (corrected 2026-07-27):** an out-of-range enum is NOT dropped — `extractProps` (`@radix-ui/themes/dist/esm/helpers/extract-props.js`) substitutes the prop's own `default`, which for ScrollArea is `"1"`, so a container-lane `large` would silently render the **thinnest** scrollbar, the exact opposite of what it asked for. **Pass-through wraps** (Grid, Section, AspectRatio, VisuallyHidden) ship as documented **re-exports** (nothing to override — pure layout / a11y plumbing, no paint, no size lane; Section's `size` is a vertical-padding scale passed through untouched). **Their docs pages are NOT stubs (corrected 2026-07-27):** all four ship the full spine — History (Decisions + Changelog), Usage, Props — each Usage carrying worked specimens, a live Tokens spec, a Props reference, and a do/don't **pair** — roughly 360 (Grid) to 650 (VisuallyHidden) lines apiece. The pages earn the length because a pass-through wrap's whole documentation value is *when to reach for it* — which is prose and specimens, since there is no paint to document. LITE spines.
+
+### system-layout-layers
+
+**Tags.** `COMPONENTS`, `CONTRIBUTING`. **Ruled.** 2026-11-13.
+
+**Everything built on the system uses the layer the system defines. Stories, the story kit, the test lane and the scenario pages import components from the system's modules, lay out with its `Box`, `Flex` and `Grid`, and re-establish a theme root through `src/theme/ThemeRoot.tsx`. Only the modules that wrap Radix import `@radix-ui/themes`.**
+
+**Why.** This is a design system. A page or a test that reaches past it to Radix skips the size lane, the roles and the guards the wrapper carries, and nothing on the page shows it. Jason's words on 2026-11-13: "why is there raw radix anything. this is a design system. it should all be using the layers we've defined in it otherwise what's the point". At the ruling, 188 files built on the system imported Radix directly, 184 of them stories. `Text`, `Code` and `Grid` were imported raw in about a hundred files each, though the system publishes all three. `Box` and `Flex` had no module of their own.
+
+**What changes.**
+
+- **Box and Flex are registered components**, documented re-exports with their own docs pages, as [surface-wraps](#surface-wraps) rules for Grid. They are pure layout: no paint, no size lane, and spacing on the `--space` scale. They already shipped from `src/index.ts` section 3 as Radix's own binding. They now ship through their modules instead, so the system's own code has one to import, and the census in `src/index.ts` moves two names from section 3 to the kept-through-a-component block.
+- **`src/theme/ThemeRoot.tsx`** is the system's internal route to Radix's `Theme` and `useThemeContext`. A portalled panel and a test clone need a theme root, and `Theme` stays unpublished, so a consumer still uses `Provider`. The barrel guard lists the module as internal.
+- **`AGENTS.md` no longer sends a contributor to the raw Radix component** when the registry lacks one. The gap is surfaced: a Radix part with no decision to make ships as a documented re-export with its entry, and anything else is a proposal.
+- **The migration keeps every page as it renders.** A raw `Text` or `Code` that set no size inherited its parent's. The system's takes the size lane, so a migrated one with no size passes `size="inherit"` (Jason, 2026-11-13: keep pages identical). Moving a page onto the lane is its own change.
+
+**The layers, decided by path.**
+
+- **Implementation:** every non-story file in `src/` whose name does not start with an underscore, outside `src/foundations` and `src/scenarios`. These wrap Radix, so importing it is their job.
+- **Built on it:** every `*.stories.tsx`, every underscored module, the test lane and the scenario pages.
+
+A type-only import is not an import of Radix's code.
+
+**Prior art.** Atlassian's primitives are token-backed Box, Flex, Stack and Inline, with a warning that a generic Box gets over-used. Primer deprecated its styleable Box for Stack. Both make layout a primitive the system owns, with spacing on a scale and no paint, which is the shape adopted here. `REFERENCES.md` records what was taken and rejected from each.
+
+**Guarded by** `src/foundations/raw-radix.node-check.ts`:
+
+- a file built on the system that imports raw Radix fails;
+- the 188 files that broke the rule at the ruling are listed and counted, and a listed file that no longer imports Radix fails as stale, so the list only shrinks;
+- its reverse arm holds the detector to an import, a re-export, a type-only import and a quoted string.
+
+It went red on a probe story that imported `Box` from Radix.
+
+**Not covered here.** Moving the 188 files, which the changes that follow do. And the wrappers' own composition: a wrapper module that builds on another part through raw Radix, for example `Field` with Radix's `Text` and `Flex`, is implementation and outside this guard. Whether wrappers should compose each other is a separate question.
+
+**Changed from.** `AGENTS.md` sent a missing part to the raw Radix component, and Box and Flex shipped only as section-3 names with no module.
+
+**Status.** Ruled 2026-11-13. No later ruling amends it.
 
 ### content-typography
 

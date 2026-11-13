@@ -714,6 +714,38 @@
     "note": "documented re-export ([[surface-wraps]]); the announce-only pattern (clipped 1px, kept in the a11y tree); no paint/roles/size lane; passive play asserts present-but-clipped"
   },
   {
+    "name": "Box",
+    "module": "Box",
+    "exports": [
+      "Box",
+      "BoxProps"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix Box",
+    "storyPath": "src/components/ui/Box.stories.tsx",
+    "note": "documented re-export ([[surface-wraps]], [[system-layout-layers]]) \u2014 pure layout, no paint/roles/size lane; padding and margin on the --space scale",
+    "priorArt": "Atlassian @atlaskit/primitives 22.7.1, read from the published package (constellation/box/usage.mdx, flex/examples.mdx, dist/types/components/box.d.ts and flex.d.ts; https://atlassian.design/components/primitives/overview/): Box and Flex are primitives powered by design tokens, Flex 'exclusively supports token-backed gap properties', and the docs warn that a generic Box 'can be over-used' where Inline, Stack or Pressable say more. ADOPTED: layout primitives owned by the system, with spacing on the shared scale, and the do/don't that sends arranging children to Flex or Grid. REJECTED: Atlassian's own token props for background and its restricted element list, because this system paints through --ds-* roles in the parts and Radix already restricts `as` to div and span; Primer @primer/react 38.45.0, read from the published package (CHANGELOG #5763 'Mark Box and its props as deprecated', dist/Stack/Stack.d.ts; https://github.com/primer/react/pull/5763): Primer deprecated its styleable Box and moved layout onto Stack, a gap, direction, align, wrap and padding API on a named scale. ADOPTED: the reading that a layout primitive should carry layout props on a scale and no paint. REJECTED: renaming to Stack and a second, named gap scale, because Radix's Flex and Box already take the --space steps every component here is spaced with; Radix Themes 3.3 Box and Flex (https://www.radix-ui.com/themes/docs/components/box, https://www.radix-ui.com/themes/docs/components/flex): ADOPTED as the substrate, surfaced as a documented re-export like Grid ([[surface-wraps]])."
+  },
+  {
+    "name": "Flex",
+    "module": "Flex",
+    "exports": [
+      "Flex",
+      "FlexProps"
+    ],
+    "status": "ported",
+    "wave": 1,
+    "tier": "lite",
+    "controlBox": "exempt",
+    "buildingBlock": "Radix Flex",
+    "storyPath": "src/components/ui/Flex.stories.tsx",
+    "note": "documented re-export ([[surface-wraps]], [[system-layout-layers]]) \u2014 pure layout, no paint/roles/size lane; gap on the --space scale",
+    "priorArt": "Atlassian @atlaskit/primitives 22.7.1, read from the published package (constellation/box/usage.mdx, flex/examples.mdx, dist/types/components/box.d.ts and flex.d.ts; https://atlassian.design/components/primitives/overview/): Box and Flex are primitives powered by design tokens, Flex 'exclusively supports token-backed gap properties', and the docs warn that a generic Box 'can be over-used' where Inline, Stack or Pressable say more. ADOPTED: layout primitives owned by the system, with spacing on the shared scale, and the do/don't that sends arranging children to Flex or Grid. REJECTED: Atlassian's own token props for background and its restricted element list, because this system paints through --ds-* roles in the parts and Radix already restricts `as` to div and span; Primer @primer/react 38.45.0, read from the published package (CHANGELOG #5763 'Mark Box and its props as deprecated', dist/Stack/Stack.d.ts; https://github.com/primer/react/pull/5763): Primer deprecated its styleable Box and moved layout onto Stack, a gap, direction, align, wrap and padding API on a named scale. ADOPTED: the reading that a layout primitive should carry layout props on a scale and no paint. REJECTED: renaming to Stack and a second, named gap scale, because Radix's Flex and Box already take the --space steps every component here is spaced with; Radix Themes 3.3 Box and Flex (https://www.radix-ui.com/themes/docs/components/box, https://www.radix-ui.com/themes/docs/components/flex): ADOPTED as the substrate, surfaced as a documented re-export like Grid ([[surface-wraps]])."
+  },
+  {
     "name": "Grid",
     "module": "Grid",
     "exports": [

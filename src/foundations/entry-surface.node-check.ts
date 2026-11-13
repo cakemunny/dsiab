@@ -62,10 +62,10 @@ const REGISTERED: Record<string, readonly string[]> = {
   ],
   "3. radix gap-fillers": [
     "AccessibleIcon", "AccessibleIconProps",
-    "Box", "BoxProps",
+    // Box and Flex left this list on 2026-11-13, when they became registry entries published by the
+    // barrel ([[system-layout-layers]]).
     "Container", "ContainerProps",
     "Em", "EmProps",
-    "Flex", "FlexProps",
     "Inset", "InsetProps",
     "Quote", "QuoteProps",
     "Reset", "ResetProps",

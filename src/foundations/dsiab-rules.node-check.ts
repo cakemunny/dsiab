@@ -154,7 +154,7 @@ describe("radix-duplicate", () => {
   });
 
   it("GREEN: passthroughs, type imports, a string that only quotes an import, and the package's own source", () => {
-    expect(facts.passthrough).toEqual(["AspectRatio", "Grid", "Section", "Skeleton", "VisuallyHidden"]);
+    expect(facts.passthrough).toEqual(["AspectRatio", "Box", "Flex", "Grid", "Section", "Skeleton", "VisuallyHidden"]);
     expect(rules("a.tsx", 'import { Grid, Section, Skeleton } from "@radix-ui/themes";\n')).toEqual([]);
     expect(rules("a.tsx", 'import type { ButtonProps } from "@radix-ui/themes";\n')).toEqual([]);
     expect(rules("a.tsx", 'say(\'import { Button } from "@radix-ui/themes"\');\n')).toEqual([]);

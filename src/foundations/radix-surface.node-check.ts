@@ -14,7 +14,7 @@
               system's own — a component that resolves the size tier, paints from
               `--ds-*`, wires the Field shell. 57 names today.
      KEPT     the name is exported here and the binding is RADIX'S OWN, deliberately:
-              20 named one by one in section 3 of src/index.ts, 10 through a registered
+              16 named one by one in section 3 of src/index.ts, 14 through a registered
               component whose module is a single `export { … } from "@radix-ui/themes"`.
               30 names today.
      DROPPED  the name is not exported at all, on the record, with a reason. 16 today.
@@ -94,7 +94,7 @@ const ENTRY = rel(ENTRY_PATH);
  * place to forget. What is recorded here is only that the name was ruled on.
  *
  * The reasons live beside the names in src/index.ts — section 3's grouping comments for
- * the twenty, and the "KEPT THROUGH SECTION 2" block for the ten. Arm D checks the ten
+ * the sixteen, and the "KEPT THROUGH SECTION 2" block for the fourteen. Arm D checks the fourteen
  * are really written there.
  */
 const KEEP = [
