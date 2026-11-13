@@ -50,6 +50,18 @@ function Harness() {
 }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/** Replace the field's text and press Enter, with the keyboard alone. `userEvent.type` clicks with
+ *  the real pointer before it types, and the pointer stays where it lands: two pointer-sensitive
+ *  stories (a hovered danger Button, a hover-and-Escape Overlay) failed in CI while this story
+ *  moved it. The field needs only focus and keys, so it uses only those. */
+async function typeAndApply(input: HTMLInputElement, text: string): Promise<void> {
+  input.focus();
+  input.select();
+  await userEvent.keyboard("{Backspace}");
+  await userEvent.keyboard(text);
+  await userEvent.keyboard("{Enter}");
+}
 async function settle(): Promise<void> { await sleep(50); }
 
 export const FieldFollowsTheSetting: Story = {
@@ -70,9 +82,7 @@ export const FieldFollowsTheSetting: Story = {
     const oklch = "oklch(0.6 0.15 250)";
     const want = storedSeed(oklch);
     if (!want.ok) fail(`${oklch} is not a colour the parser accepts`);
-    await userEvent.clear(input);
-    await userEvent.type(input, oklch);
-    await userEvent.keyboard("{Enter}");
+    await typeAndApply(input, oklch);
     await settle();
     if (store.get() !== (want.ok ? want.hex : "")) fail(`applying ${oklch} stored "${store.get()}", not ${want.ok ? want.hex : ""}`);
     if (input.value !== oklch) fail(`after its own apply the field reads "${input.value}", not the text typed`);
@@ -94,9 +104,7 @@ export const FieldFollowsTheSetting: Story = {
     const rgba = "rgba(1, 2, 3, 1)";
     const refused = parseSeed(rgba);
     if (refused.ok) fail(`${rgba} is accepted by the parser, so this arm tests nothing`);
-    await userEvent.clear(input);
-    await userEvent.type(input, rgba);
-    await userEvent.keyboard("{Enter}");
+    await typeAndApply(input, rgba);
     await settle();
     if (store.get() !== before) fail(`${rgba} changed the setting to "${store.get()}"`);
     const shown = canvasElement.textContent ?? "";
@@ -118,7 +126,8 @@ export const FieldFollowsTheSetting: Story = {
     await settle();
     const clear = Array.from(canvasElement.querySelectorAll("button")).find((b) => b.textContent === "Clear");
     if (!clear) fail("with a colour applied the field offers no Clear button");
-    await userEvent.click(clear!);
+    // A DOM click, not the real pointer: see `typeAndApply`.
+    clear!.click();
     await settle();
     if (store.get() !== "" || input.value !== "") fail(`Clear left the setting "${store.get()}" and the field "${input.value}"`);
   },
