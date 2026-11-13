@@ -592,9 +592,9 @@
   --error-a7: var(--ds-brand-error-a7);   --error-a8: var(--ds-brand-error-a8);   --error-a9: var(--ds-brand-error-a9);
   --error-a10: var(--ds-brand-error-a10);   --error-a11: var(--ds-brand-error-a11);   --error-a12: var(--ds-brand-error-a12);
   --error-contrast: var(--ds-brand-error-contrast);
-  /* A seeded brand's error scale is chosen at runtime and carries no pin yet, so
-     the fill stays its own step 9 and follows the shift rather than the red pin. */
-  --error-solid: var(--error-9);
+  /* The ruled fill of the error family the generator chose for the seed, the same
+     pin the named accents carry ([[seeded-brand-writer]]). */
+  --error-solid: var(--ds-brand-error-solid);
 
   --warning-1: var(--ds-brand-warning-1);   --warning-2: var(--ds-brand-warning-2);   --warning-3: var(--ds-brand-warning-3);
   --warning-4: var(--ds-brand-warning-4);   --warning-5: var(--ds-brand-warning-5);   --warning-6: var(--ds-brand-warning-6);
@@ -1206,4 +1206,33 @@
 .radix-themes:where(.dark, .dark-theme):is([data-accent-color="gold"], [data-accent-color="yellow"], [data-accent-color="amber"], [data-accent-color="orange"], [data-accent-color="tomato"], [data-accent-color="red"], [data-accent-color="ruby"], [data-accent-color="crimson"], [data-accent-color="pink"], [data-accent-color="lime"]),
 :is(.dark, .dark-theme) .radix-themes:where(:not(.light, .light-theme)):is([data-accent-color="gold"], [data-accent-color="yellow"], [data-accent-color="amber"], [data-accent-color="orange"], [data-accent-color="tomato"], [data-accent-color="red"], [data-accent-color="ruby"], [data-accent-color="crimson"], [data-accent-color="pink"], [data-accent-color="lime"]) {
   --error-dot-edge: var(--white-a6);
+}
+
+/* -------------------------------------------------------------------------------------
+   SEEDED BRAND: THE FILLED BUTTON AND THE HELPER LAYERS ([[seeded-brand-writer]])
+   The tables above name each accent, so a seeded brand matched none of them and took
+   every base value: no ring stack, no part edge, the seed itself under the button's label
+   wherever question 2 failed on it. The generator now searches each of those for the seed
+   ([[generated-button-fill]], [[generated-helper-layers]]), `theme/customBrand.ts` writes
+   the result for both appearances, and `custom-brand.css` puts the live appearance's
+   values in `--ds-custom-*`. This block only routes them.
+
+   It sits last and at (0,2,0), so it wins over the base arms, (0,1,0), and over the dark
+   Slider-thumb base, (0,2,0), by source order. It names the theme root alone: a part given
+   its own colour inside a seeded theme takes that colour's row in the tables above.
+   ------------------------------------------------------------------------------------- */
+.radix-themes[data-accent-color="ds-custom"] {
+  --accent-solid: var(--ds-custom-solid);
+  --on-accent: var(--ds-custom-on-solid);
+  --accent-ring-stack: var(--ds-custom-ring-stack);
+  --accent-ring-stack-scrim: var(--ds-custom-ring-stack-scrim);
+  --accent-ring-stack-scrim-light: var(--ds-custom-ring-stack-scrim-light);
+  --accent-part-edge: var(--ds-custom-part-edge);
+  --accent-thumb-stroke: var(--ds-custom-thumb-stroke);
+  --accent-mark-edge: var(--ds-custom-mark-edge);
+  --accent-dash-stack: var(--ds-custom-dash-stack);
+  --accent-slider-thumb-stack: var(--ds-custom-slider-thumb-stack);
+  --warning-dot-edge: var(--ds-custom-warning-dot-edge);
+  --success-dot-edge: var(--ds-custom-success-dot-edge);
+  --error-dot-edge: var(--ds-custom-error-dot-edge);
 }
