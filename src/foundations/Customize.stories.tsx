@@ -144,7 +144,9 @@ function BrandInput({ globals, updateGlobals }: GlobalsProps) {
 
   return (
     <Flex gap="3" align="end" wrap="wrap">
-      <Box style={{ flex: "1 1 300px", minWidth: 260 }}>
+      {/* Sized to what it collects, a colour value such as an oklch() string, not to the page: it
+          does not grow, and it shrinks on a narrow screen. */}
+      <Box style={{ flex: "0 1 320px", minWidth: 0 }}>
         <TextField
           label="Brand colour"
           value={input}
@@ -295,6 +297,18 @@ function CustomizePage({ globals, updateGlobals }: GlobalsProps) {
         lead="Paste a solid colour. It applies to the whole system and survives navigation, so you can browse any component page wearing it. Clear it to fall back to the toolbar’s named accent."
       >
         <BrandInput globals={globals} updateGlobals={updateGlobals} />
+        <Caption>
+          Your colour is applied as typed to every part: checkboxes, switches, tabs, sliders, links
+          and tints. Filled buttons and focus rings are the one exception. Where neither white nor
+          near-black text reaches 4.5:1 and APCA Lc 60 on your colour, at rest, on hover and when
+          pressed, they use a darker or lighter shade of it, and the rest of the system keeps the
+          colour you typed. The shade moves only in lightness, in the direction that keeps more of
+          your colour’s saturation, and to the nearer of the two when both keep about the
+          same. Where the screen cannot show your hue at that lightness at full saturation, the
+          shade is less saturated. A very pale or very dark colour keeps its exact
+          value everywhere, and a thin edge and a stacked focus ring keep its parts visible on
+          every surface.
+        </Caption>
       </Section>
 
       <Section

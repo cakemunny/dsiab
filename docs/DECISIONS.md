@@ -605,6 +605,11 @@ Both are what the ruled searches return, and the searches are held to `theme.css
   - It went red with the ring-stack line removed from the new `theme.css` block: 16 rows.
 
 Whether each layer then clears its surfaces on a generated brand is [seeded-sweep-lane](#seeded-sweep-lane)'s question.
+- **`_internal/Seeded brand acceptance`**, in `src/theme/_seeded-brand-acceptance.stories.tsx`, added 2026-11-13.
+  - **NamedExamples** mounts a seeded `Provider` with a real filled and destructive `Button` in light, dark and an inherited dark. It holds the custom-accent plan's table as literals: `#fff59d`'s button under `#21201c` with `--black-a7` ring and part edge and `--black-a9` on the light scrim; its dark thumb stroke at step 7; `#3b82f6`'s indicator at the seed and its button and ring base at `#2b72e5` under white; `#0b1a3a`'s dark button and indicator at the seed under white with `--white-a7` ring and part edge; `#6e56cf`'s button at the seed. It also holds the assessment reporting `#fff59d`'s dark steps 11 and 12 as one colour.
+  - **DestructiveLabel** holds the destructive Button on five seeds at its family's ruled fill, with its label at 4.5:1 and Lc 60 at rest, on hover in the browser, and under Radix's press filter as the generator models it.
+
+**Where it is documented.** The Customize page's caption under the brand colour field, and the "A brand colour of your own" paragraph in §10 of `GUIDELINES.md`, say when the filled button and focus ring take another shade, which direction it moves and why, as Jason's answer 3 asks.
 
 **Changed from.** A seeded brand took the base value of every table: no ring stack, no part edge, transparent dot edges, the base Slider-thumb stack and thumb stroke, the seed under its WCAG-chosen pole as the button, and its error family's step 9 as the destructive fill. [text-on-solid-fill-contrast](#text-on-solid-fill-contrast), [part-fill-edge](#part-fill-edge), [focus-ring](#focus-ring), [neutral-part-stacks](#neutral-part-stacks) and [status-dot-edges](#status-dot-edges) each recorded their part of that as a gap.
 

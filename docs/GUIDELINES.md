@@ -346,14 +346,22 @@ The system is one small set of variables with everything else derived from them.
 | Prop | Default | What it moves |
 | --- | --- | --- |
 | `appearance` | `light` | Light or dark. Every token carries both; nothing is authored per mode at the call site. |
-| `accentColor` | `iris` | The brand scale — Radix's 26, plus the system's `oxblood` preset. Colliding semantic families shift away from it automatically (§2). |
+| `accentColor` | `iris` | The brand scale — Radix's 26, plus the system's `oxblood` preset, or `{ seed }`, a scale generated from any solid colour (below). Colliding semantic families shift away from it automatically (§2). |
 | `grayColor` | `auto` | The neutral. `auto` pairs it to the accent. |
 | `radius` | `medium` | The corner ladder every surface and control derives from. |
 | `uiSize` | `small` | The density tier — `small` / `medium` / `large`. Picks the size **step** each of the six lanes renders at: control and text share a step (1 / 2 / 3), a heading inside chrome sits one above them (2 / 3 / 4), a page heading rides higher (5 / 6 / 7), a display figure higher still (7 / 8 / 9), and surfaces sit one above the control lane (2 / 3 / 4). It does not touch `scaling`. |
-| `contrast` | `wcag` | `wcag` or `apca`, written to `data-contrast` on the theme root. It changes one thing only: the label on a solid warning fill on the gold, amber, yellow and lime brands in the light appearance, where one ink cannot clear both WCAG 4.5:1 and APCA Lc 60 in the warning's own orange ([[apca-contrast-mode]]). |
+| `contrast` | `wcag` | `wcag` or `apca`, written to `data-contrast` on the theme root. For a named accent it changes one thing only: the label on a solid warning fill on the gold, amber, yellow and lime brands in the light appearance, where one ink cannot clear both WCAG 4.5:1 and APCA Lc 60 in the warning's own orange ([[apca-contrast-mode]]). Under `{ seed }` it also takes the glyph ink and the status-family inks the generator measured by APCA, in light ([[seeded-sweep-lane]]). |
 | `typefaces` | unset | Heading, body and code faces. A roster name uses a face the package ships, and `{ stack }` takes any CSS font stack and loads nothing for it. Unset writes nothing, so the defaults hold: Inter, and Menlo for code. An unset heading follows the body face. |
 | `buttonOrder` | `primary-first` | Which end of a cluster the solid action anchors, and the alignment derived from that anchor. |
 | `scaling` | `100%` | `90%` – `110%`. Multiplies the space, font-size and line-height scales at once, so the whole system — control boxes included — grows or shrinks together. |
+
+**A brand colour of your own — `accentColor={{ seed }}`.** The system generates a twelve-step scale for both appearances from one solid colour, and applies the colour as typed to every part: checkboxes, switches, tabs, sliders, links and tints. Filled buttons and focus rings are the one exception, by the rule the named accents follow ([[generated-button-fill]]). Where neither white nor `#21201c` reaches WCAG 4.5:1 and APCA Lc 60 on the colour at rest, on hover and under the press filter, they take a shade of it that does:
+
+- The shade moves in OKLCH lightness alone, at the colour's own hue.
+- It goes in the direction that keeps more of the colour's chroma. Where both directions keep about the same, it takes the nearer lightness, and on a tie the darker.
+- Where sRGB cannot show the hue at that lightness at full chroma, the shade loses chroma rather than hue, and the system calls it less saturated.
+
+A very pale or very dark colour keeps its exact value on the button too, and a thin edge and a stacked focus ring keep its parts visible on every surface ([[seeded-brand-writer]]).
 
 **What you set — the token layer.** Two sanctioned seams, both "declare it after the system sheet, at matching-or-higher specificity, scoped to `.radix-themes` or tighter":
 - **A semantic family** — `--error-*` / `--warning-*` / `--success-*` / `--info-*`. Overriding one family moves only that family; the rest keep the automatic collision shift (§2).
