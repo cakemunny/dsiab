@@ -15,7 +15,9 @@ import { parseColor, resolveColor, themeRoot } from "./_assert";
      - the setting changes elsewhere, and the field shows the stored hex;
      - oklch text applied in the field leaves hex in the setting and the oklch on screen;
      - an `rgba(..., 1)` value shows the parser's refusal on the field, and writes nothing;
-     - a clear from outside empties the field, and the field's own Clear clears the setting.
+     - a clear from outside empties the field, and the field's own Clear clears the setting;
+     - Clear sits beside the input box, its centre on the box's centre, with helper text or an
+       error under the box.
 
    SettingPaintsTheDocs and NamedAccentReturns set the shared setting directly, as a story
    global, and read the theme root the docs decorator renders: a stored seed paints the
@@ -75,6 +77,17 @@ export const FieldFollowsTheSetting: Story = {
     if (store.get() !== (want.ok ? want.hex : "")) fail(`applying ${oklch} stored "${store.get()}", not ${want.ok ? want.hex : ""}`);
     if (input.value !== oklch) fail(`after its own apply the field reads "${input.value}", not the text typed`);
 
+    // Clear sits beside the input box: its centre is the box's centre, whatever is under the box.
+    const aligned = (when: string) => {
+      const clearButton = Array.from(canvasElement.querySelectorAll("button")).find((b) => b.textContent === "Clear");
+      const box = canvasElement.querySelector<HTMLElement>(".rt-TextFieldRoot");
+      if (!clearButton || !box) fail(`${when}: no Clear button or no input box to align`);
+      const a = clearButton!.getBoundingClientRect(), b = box!.getBoundingClientRect();
+      const off = Math.abs((a.top + a.bottom) / 2 - (b.top + b.bottom) / 2);
+      if (off > 1) fail(`${when}: the Clear button's centre sits ${off.toFixed(1)}px from the input box's centre`);
+    };
+    aligned("with a colour applied");
+
     // 3. A refused colour: the parser's reason on the field, and the setting untouched.
     const before = store.get();
     const rgba = "rgba(1, 2, 3, 1)";
@@ -88,6 +101,7 @@ export const FieldFollowsTheSetting: Story = {
     const shown = canvasElement.textContent ?? "";
     if (!refused.ok && !shown.includes(refused.reason)) fail(`the field does not show the parser's reason for ${rgba}: "${refused.reason}"`);
     if (input.getAttribute("aria-invalid") !== "true") fail(`the field is not marked invalid for ${rgba}`);
+    aligned("with a refusal under the field");
 
     // 4. A clear from outside empties the field.
     store.set("#00a86b");

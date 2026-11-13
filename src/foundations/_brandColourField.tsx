@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Box, Button, Flex } from "@radix-ui/themes";
 import { TextField } from "../components/ui/TextField";
 import { storedSeed } from "../palette/storedSeed";
@@ -51,11 +51,33 @@ export function BrandColourField({ value, onChange }: BrandColourFieldProps) {
   // An empty field is the cleared state, not a refusal.
   const parsed = input.trim() === "" ? null : storedSeed(input);
 
+  // Clear sits beside the input box, not beside the whole field. The label above the box grows
+  // with the size tier and with `scaling`, so the button's offset is measured, not typed: its
+  // centre goes to the centre of the input box, and it follows when the field resizes.
+  const fieldBox = useRef<HTMLDivElement>(null);
+  const clearButton = useRef<HTMLButtonElement>(null);
+  const [clearTop, setClearTop] = useState(0);
+  useLayoutEffect(() => {
+    const box = fieldBox.current;
+    if (!box) return;
+    const measure = () => {
+      const control = box.querySelector<HTMLElement>(".rt-TextFieldRoot");
+      const button = clearButton.current;
+      if (!control) return;
+      const buttonHeight = button ? button.offsetHeight : control.offsetHeight;
+      setClearTop(control.offsetTop + (control.offsetHeight - buttonHeight) / 2);
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(box);
+    return () => observer.disconnect();
+  }, [value]);
+
   return (
-    <Flex gap="3" align="end" wrap="wrap">
+    <Flex gap="3" align="start" wrap="wrap">
       {/* Sized to what it collects, a colour value such as an oklch() string, not to the page: it
           does not grow, and it shrinks on a narrow screen. */}
-      <Box style={{ flex: "0 1 320px", minWidth: 0 }}>
+      <Box ref={fieldBox} style={{ flex: "0 1 320px", minWidth: 0, position: "relative" }}>
         <TextField
           label="Brand colour"
           value={input}
@@ -80,7 +102,7 @@ export function BrandColourField({ value, onChange }: BrandColourFieldProps) {
           }
         />
       </Box>
-      {value && <Button variant="soft" onClick={clear}>Clear</Button>}
+      {value && <Button ref={clearButton} variant="soft" onClick={clear} style={{ marginTop: clearTop }}>Clear</Button>}
     </Flex>
   );
 }

@@ -678,6 +678,7 @@ Each sweep's reading count includes the lane, so a lane that renders nothing fai
 - A colour set anywhere else, from a shared link or a reload, shows in the field as the stored hex. The docs toolbar of the custom-accent plan will be another such place.
 - With no colour applied, the field is empty, with `#ff6b5e` as its placeholder, and shows no refusal. It used to refill itself with `#ff6b5e`.
 - "Reset to iris" is now "Clear", the word the toolbar will use. A clear from either control empties the field.
+- Clear sits beside the input box, centred on it, rather than at the bottom of the helper text or the error under the box. The offset is measured from the rendered box, so it holds at every size tier and under `scaling`.
 
 **The write.** `storedSeed(input)` in `src/palette/storedSeed.ts` returns `{ ok: true, hex }` or the parser's own `{ ok: false, reason }`. It lives in the palette folder, so the docs toolbar can import it without pulling in the theme folder or the system's stylesheet. It is docs-only: a consumer's `Provider` takes the colour as typed, and the barrel guard lists the module as internal.
 
@@ -689,9 +690,10 @@ Each sweep's reading count includes the lane, so a lane that renders nothing fai
   - an outside change shows the hex;
   - an applied `oklch()` stores its hex and keeps the text;
   - `rgba(1, 2, 3, 1)` shows the parser's reason, marks the field invalid and writes nothing;
-  - a clear from outside empties the field, and the field's own Clear clears the setting.
+  - a clear from outside empties the field, and the field's own Clear clears the setting;
+  - Clear's centre is the input box's centre, with helper text and with an error under the box.
 
-  It went red with the field's follow step removed.
+  It went red with the field's follow step removed, and with the measured offset removed (20px off).
 - **SettingPaintsTheDocs** and **NamedAccentReturns** set the global on the story itself and read the docs theme root: `ds-custom` with the seed on `--accent-9`, and the named `tomato` with no seed.
 
 `src/palette/storedSeed.logic.test.ts` holds the hex for each accepted syntax, and the parser's reason for each refusal.
