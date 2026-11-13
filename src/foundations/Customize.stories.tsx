@@ -144,7 +144,9 @@ function BrandInput({ globals, updateGlobals }: GlobalsProps) {
 
   return (
     <Flex gap="3" align="end" wrap="wrap">
-      <Box style={{ flex: "1 1 300px", minWidth: 260 }}>
+      {/* Sized to what it collects, a colour value such as an oklch() string, not to the page: it
+          does not grow, and it shrinks on a narrow screen. */}
+      <Box style={{ flex: "0 1 320px", minWidth: 0 }}>
         <TextField
           label="Brand colour"
           value={input}
