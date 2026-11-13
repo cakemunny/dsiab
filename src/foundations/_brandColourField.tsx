@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Box, Button, Flex } from "@radix-ui/themes";
+import { Box, Flex } from "@radix-ui/themes";
+import { Button } from "../components/ui/Button";
 import { TextField } from "../components/ui/TextField";
 import { storedSeed } from "../palette/storedSeed";
 
@@ -51,9 +52,11 @@ export function BrandColourField({ value, onChange }: BrandColourFieldProps) {
   // An empty field is the cleared state, not a refusal.
   const parsed = input.trim() === "" ? null : storedSeed(input);
 
-  // Clear sits beside the input box, not beside the whole field. The label above the box grows
-  // with the size tier and with `scaling`, so the button's offset is measured, not typed: its
-  // centre goes to the centre of the input box, and it follows when the field resizes.
+  // Clear is the system Button, a secondary action, so it takes the control step the input takes
+  // and the pair is one height on every tier. It sits beside the input box, not beside the whole
+  // field. The label above the box grows with the size tier and with `scaling`, so the button's
+  // offset is measured, not typed: its centre goes to the centre of the input box, and it follows
+  // when the field resizes.
   const fieldBox = useRef<HTMLDivElement>(null);
   const clearButton = useRef<HTMLButtonElement>(null);
   const [clearTop, setClearTop] = useState(0);
@@ -102,7 +105,7 @@ export function BrandColourField({ value, onChange }: BrandColourFieldProps) {
           }
         />
       </Box>
-      {value && <Button ref={clearButton} variant="soft" onClick={clear} style={{ marginTop: clearTop }}>Clear</Button>}
+      {value && <Button ref={clearButton} priority="secondary" onClick={clear} style={{ marginTop: clearTop }}>Clear</Button>}
     </Flex>
   );
 }

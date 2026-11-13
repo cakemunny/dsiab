@@ -16,8 +16,8 @@ import { parseColor, resolveColor, themeRoot } from "./_assert";
      - oklch text applied in the field leaves hex in the setting and the oklch on screen;
      - an `rgba(..., 1)` value shows the parser's refusal on the field, and writes nothing;
      - a clear from outside empties the field, and the field's own Clear clears the setting;
-     - Clear sits beside the input box, its centre on the box's centre, with helper text or an
-       error under the box.
+     - Clear sits beside the input box at the box's height, its centre on the box's centre, with
+       helper text or an error under the box.
 
    SettingPaintsTheDocs and NamedAccentReturns set the shared setting directly, as a story
    global, and read the theme root the docs decorator renders: a stored seed paints the
@@ -85,6 +85,7 @@ export const FieldFollowsTheSetting: Story = {
       const a = clearButton!.getBoundingClientRect(), b = box!.getBoundingClientRect();
       const off = Math.abs((a.top + a.bottom) / 2 - (b.top + b.bottom) / 2);
       if (off > 1) fail(`${when}: the Clear button's centre sits ${off.toFixed(1)}px from the input box's centre`);
+      if (Math.abs(a.height - b.height) > 1) fail(`${when}: the Clear button is ${a.height.toFixed(1)}px tall and the input box ${b.height.toFixed(1)}px`);
     };
     aligned("with a colour applied");
 
