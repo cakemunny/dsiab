@@ -87,9 +87,9 @@ shaped the token layer or a policy rather than any one component.
 | [Nord, Resizable handle](https://nordhealth.design/components/resizable-handle) | [[dragging-movement-gaps]]. READ: arrows step the size, Shift with an arrow takes a larger step, Home and End reach the bounds and Enter toggles a collapsible panel, the same key model as `useResizable`. The documentation shows no pointer route that avoids the drag. ADOPTED: the Shift step as the size of one click, so a click and a key press move the divider the same way. |
 | [Atlassian, Page layout examples](https://atlassian.design/components/page-layout/examples) | [[dragging-movement-gaps]]. READ: the left sidebar resizes with a mouse or a keyboard and collapses or expands with a mouse or a keyboard, through a labelled grab area and a resize button. The page names no single-pointer route to a width. |
 
-## Colour and contrast ([[oxblood-preset]], [[brand-status-collision-gate]])
+## Colour and contrast ([[oxblood-preset]], [[brand-status-collision-gate]], [[generated-button-fill]])
 
-Not every source informs a component. These two informed the token layer, so they are attached to
+Not every source informs a component. These informed the token layer, so they are attached to
 the rulings they shaped rather than to a registry entry.
 
 | Source | What it informed |
@@ -97,6 +97,8 @@ the rulings they shaped rather than to a registry entry.
 | [APCA](https://github.com/Myndex/apca-w3) | ADOPTED: the perceptual contrast model behind the on-solid ink decisions and the white-flip set ([[oxblood-preset]], [[brand-status-collision-gate]]). |
 | [Radix colour generator](https://github.com/radix-ui/website/blob/main/components/generate-radix-colors.tsx) | ADOPTED: the scale-generation approach a custom brand seed is fitted to ([[brand-status-collision-gate]]). |
 | [Björn Ottosson, A perceptual color space for image processing](https://bottosson.github.io/posts/oklab/) | [[brand-status-collision-gate]]. ADOPTED: Oklab as the space of the collision gate, its hue angle for the hue test and the straight-line distance in it as the perceptual difference (ΔE-OK). ADOPTED: the linear sRGB to Oklab matrices the post publishes, stated in the system's own palette code rather than imported. |
+| [Material colour utilities, scheme generation](https://github.com/material-foundation/material-color-utilities/blob/main/concepts/scheme_generation.md) | [[generated-button-fill]]. READ on 2026-11-02: one seed gives tonal palettes in which hue and chroma stay fixed and only tone moves, and a fidelity scheme keeps the seed's exact appearance in one role while global tone limits still win. Its documentation concedes that a mid-tone fill reaches only about 4.5:1 with white. ADOPTED: tone as the one axis a correction moves, with chroma kept where the gamut allows; the split between the seed as the brand mark on every part and a corrected tone only where text sits on it; and saying plainly when a target cannot be reached. REJECTED: its role names and its secondary and tertiary palettes, because the system has one accent, and its WCAG-only contrast. |
+| [Adobe Leonardo](https://github.com/adobe/leonardo) | [[generated-button-fill]]. READ on 2026-11-02, the README only, because the source tree did not load: it generates swatches that reach target contrast ratios against a background. ADOPTED: a search on lightness toward a target, which is what the adjusted-shade search does. REJECTED: taking it as a dependency, because its behaviour when a target is out of reach is undocumented and it targets WCAG only. |
 
 ## Governance and process ([[governance-model]])
 
