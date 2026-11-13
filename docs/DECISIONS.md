@@ -665,6 +665,45 @@ Each sweep's reading count includes the lane, so a lane that renders nothing fai
 
 **Status.** Ruled 2026-11-13. No later ruling amends it.
 
+### brand-colour-setting
+
+**Tags.** `COLOUR`, `DOCUMENTATION`. **Ruled.** 2026-11-13.
+
+**The docs store a brand colour in one place, the `brandSeed` global, always as six-digit hex, through one write that every docs control shares. The Customize page's field follows that setting, and its reset is Clear.**
+
+**What you see.** On the Customize page, under "What your own brand looks like":
+
+- An `oklch()` or modern `rgb()` colour now survives a reload and a shared link. The field used to store the text as typed, and Storybook 10.4's URL check drops those values, so such a colour applied and then vanished.
+- The field shows your typed text after you apply it, so `oklch(0.6 0.15 250)` stays on screen while the setting holds its hex.
+- A colour set anywhere else, from a shared link or a reload, shows in the field as the stored hex. The docs toolbar of the custom-accent plan will be another such place.
+- With no colour applied, the field is empty, with `#ff6b5e` as its placeholder, and shows no refusal. It used to refill itself with `#ff6b5e`.
+- "Reset to iris" is now "Clear", the word the toolbar will use. A clear from either control empties the field.
+- Clear is the system `Button` at `priority="secondary"`, the input's height on every tier. It sits beside the input box, centred on it, rather than at the bottom of the helper text or the error under the box. The offset is measured from the rendered box, so it holds at every size tier and under `scaling`.
+
+**The write.** `storedSeed(input)` in `src/palette/storedSeed.ts` returns `{ ok: true, hex }` or the parser's own `{ ok: false, reason }`. It lives in the palette folder, so the docs toolbar can import it without pulling in the theme folder or the system's stylesheet. It is docs-only: a consumer's `Provider` takes the colour as typed, and the barrel guard lists the module as internal.
+
+**Following the setting.** `BrandColourField`, in `src/foundations/_brandColourField.tsx`, remembers the value it last wrote. A setting equal to that value is its own apply, so it keeps the typed text. Any other value came from outside, so it shows that value, or empties for `""`.
+
+**Guarded by** `_internal/Brand colour setting`, in `src/foundations/_brand-colour-field.stories.tsx`:
+
+- **FieldFollowsTheSetting** drives the field through a store standing in for the global. It holds four rules:
+  - an outside change shows the hex;
+  - an applied `oklch()` stores its hex and keeps the text;
+  - `rgba(1, 2, 3, 1)` shows the parser's reason, marks the field invalid and writes nothing;
+  - a clear from outside empties the field, and the field's own Clear clears the setting;
+  - Clear is the input box's height and its centre is the box's centre, with helper text and with an error under the box.
+
+  It went red with the field's follow step removed, with the measured offset removed (20px off), and with a raw Radix button in place of the system one (32px beside a 24px box).
+- **SettingPaintsTheDocs** and **NamedAccentReturns** set the global on the story itself and read the docs theme root: `ds-custom` with the seed on `--accent-9`, and the named `tomato` with no seed.
+
+`src/palette/storedSeed.logic.test.ts` holds the hex for each accepted syntax, and the parser's reason for each refusal.
+
+**Not covered here.** The docs toolbar field, its manager-side check and the verdict on the Customize page, which the plan's 3.2 and 3.3 add.
+
+**Changed from.** The field wrote the trimmed text to the global and reset to a filled-in `#ff6b5e`.
+
+**Status.** Ruled 2026-11-13. No later ruling amends it.
+
 ### component-registry
 
 **Tags.** `CONTRIBUTING`, `COMPONENTS`. **Ruled.** 2026-07-08.

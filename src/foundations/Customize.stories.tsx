@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useGlobals } from "storybook/preview-api";
-import { useMemo, useState } from "react";
-import { Box, Flex, Text, Button, Card } from "@radix-ui/themes";
+import { Box, Flex, Text, Card } from "@radix-ui/themes";
 import {
   Page, PageHeader, Section, Caption, Muted, Mono, TokenRow, PropTable, type PropDef,
 } from "../components/ui/_storyKit";
@@ -10,8 +9,7 @@ import {
 // a raw `color="amber"` Radix callout paints amber-11 on amber-a3, which measures
 // 4.17:1 in light mode and fails the 4.5 floor axe enforces.
 import { Callout } from "../components/ui/Callout";
-import { TextField } from "../components/ui/TextField";
-import { parseSeed } from "../palette/parseSeed";
+import { BrandColourField } from "./_brandColourField";
 import { ROSTER, INCUMBENTS } from "../theme/typefaces";
 
 /* =============================================================================
@@ -113,7 +111,7 @@ const PROPS: PropDef[] = [
     type: `"wcag" | "apca"`,
     def: `"wcag"`,
     source: "Provider",
-    desc: <>The model foregrounds are chosen against, the audited ratio or APCA perceptual. It changes one thing only: the label on a solid warning fill on the gold, amber, yellow and lime brands, where one ink cannot clear both standards in the warning's own orange ([[apca-contrast-mode]]). Every other colour paints the same in both modes.</>,
+    desc: <>The model foregrounds are chosen against, the audited ratio or APCA perceptual. For a named accent it changes one thing only: the label on a solid warning fill on the gold, amber, yellow and lime brands, where one ink cannot clear both standards in the warning's own orange ([[apca-contrast-mode]]). Under a brand colour of your own it also takes the glyph and status inks the generator chose by APCA, in light ([[seeded-sweep-lane]]).</>,
   },
   {
     name: "buttonOrder",
@@ -126,55 +124,10 @@ const PROPS: PropDef[] = [
 
 /* --- the brand input, writing the GLOBAL ----------------------------------- */
 
-/** What the field offers before anything is applied — and what it returns to on
- *  clear. Not `""`: `parseSeed` refuses an empty string, so an empty reset would
- *  paint a validation error on a field the reader had just deliberately cleared. */
-const DEFAULT_SEED = "#ff6b5e";
-
+/* The field and its rules live in `_brandColourField.tsx` ([[brand-colour-setting]]); this page
+   hands it the shared setting. */
 function BrandInput({ globals, updateGlobals }: GlobalsProps) {
-  const active = String(globals.brandSeed ?? "");
-  const [input, setInput] = useState(active || DEFAULT_SEED);
-  const parsed = useMemo(() => parseSeed(input), [input]);
-
-  const apply = () => { if (parsed.ok) updateGlobals({ brandSeed: input.trim() }); };
-  // Reset the FIELD as well as the global. Clearing only the global left the
-  // input still showing a colour the system was no longer wearing — a control
-  // asserting a state that is not in effect.
-  const clear = () => { setInput(DEFAULT_SEED); updateGlobals({ brandSeed: "" }); };
-
-  return (
-    <Flex gap="3" align="end" wrap="wrap">
-      {/* Sized to what it collects, a colour value such as an oklch() string, not to the page: it
-          does not grow, and it shrinks on a narrow screen. */}
-      <Box style={{ flex: "0 1 320px", minWidth: 0 }}>
-        <TextField
-          label="Brand colour"
-          value={input}
-          onChange={(e) => setInput(e.currentTarget.value)}
-          onBlur={apply}
-          onKeyDown={(e) => { if (e.key === "Enter") apply(); }}
-          onPaste={(e) => {
-            const text = e.clipboardData?.getData("text");
-            if (!text) return;
-            e.preventDefault();
-            const next = text.trim();
-            setInput(next);
-            // Parse the PASTED text directly. `parsed` is memoized on the previous
-            // input and has not seen this value yet, so trusting it would push an
-            // unvalidated seed into the global and re-skin the system from junk.
-            if (parseSeed(next).ok) updateGlobals({ brandSeed: next });
-          }}
-          validation={!parsed.ok ? { tone: "error", message: parsed.reason } : undefined}
-          description={
-            active
-              ? "Applied system-wide. Browse any page — the system is wearing it."
-              : "A solid colour. Press Enter, leave the field, or paste to apply."
-          }
-        />
-      </Box>
-      {active && <Button variant="soft" onClick={clear}>Reset to {String(globals.accent ?? "iris")}</Button>}
-    </Flex>
-  );
+  return <BrandColourField value={String(globals.brandSeed ?? "")} onChange={(next) => updateGlobals({ brandSeed: next })} />;
 }
 
 /* --- the roster, grouped BY SLOT ------------------------------------------- */

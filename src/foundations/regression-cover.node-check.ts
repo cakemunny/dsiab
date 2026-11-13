@@ -91,6 +91,7 @@ const ERA_START = "2026-09-18";
  *  the check that can go red for it. A bare "covered elsewhere" would be worth nothing: the point
  *  of the attribution is that a reader can open the named file and find the assertion. */
 const COVERED_BY: Record<string, string> = {
+  "brand-colour-setting": "src/foundations/_brand-colour-field.stories.tsx — FieldFollowsTheSetting holds the Clear button's centre on the input box's centre within 1px, with helper text and with an error under the box, and went red 20px off with the offset removed",
   "resize-handle-seam": "src/components/ui/Layout.stories.tsx — the ResizeHandle IS the seam, asserted beside [[seam-ownership]]'s arm on the same boundary",
   "component-shadowing": "src/foundations/component-shadow.node-check.ts — the shadow itself is the defect, and that guard went red on this exact line before the fix landed",
   "side-nav-section-divider": "src/components/ui/SideNav.stories.tsx — the divided Section is a rendered story state with its own play assertion",
